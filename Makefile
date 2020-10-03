@@ -1,6 +1,6 @@
 -include .env
 
-UID?=1000 # Change this in your .env file if you're not UID 1001
+UID            ?=1000 # Change this in your .env file if you're not UID 1001
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=1gb
@@ -17,7 +17,8 @@ TIDYHTML_TAG   ?=5.6.0
 
 PKG_CONFIG_PATH ?=/src/lib/lib/pkgconfig
 
-DOCKER_ENV=UID=${UID}docker-compose -p phpwasm run --rm \
+DOCKER_ENV=docker-compose -p phpwasm run --rm \
+	-e UID=${UID} \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
@@ -99,8 +100,7 @@ third_party/libxml2:
 ########### Build the objects. ###########
 
 third_party/php7.4-src/configure: third_party/php7.4-src/ext/vrzno/vrzno.c source/sqlite3.c
-# 	${DOCKER_RUN_IN_PHP} ./buildconf --force
-	${DOCKER_RUN_IN_PHP} bash -c "emconfigure ./configure \
+	${DOCKER_RUN_IN_PHP} bash -c "./buildconf && emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--enable-embed=static \
 		--with-layout=GNU  \
