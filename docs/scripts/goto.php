@@ -24,4 +24,4 @@ if(!$x)
 }
 
 c:
-echo 'Bar';
+echo 'Baz';

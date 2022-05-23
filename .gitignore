@@ -3,6 +3,11 @@
 /php*.wat
 /php*.wasm.map
 /php*.data
+docs-source/app/assets/php*.js
+docs-source/app/assets/php*.wasm
+docs-source/app/assets/php*.wat
+docs-source/app/assets/php*.wasm.map
+docs-source/app/assets/php*.data
 /Php*.js
 /*.js
 /node_modules

@@ -6,11 +6,11 @@
 (function() {
 	global $persist;
 
-	fwrite(fopen('php://stdout', 'w'), "output\n");
+	fwrite(fopen('php://stdout', 'w'), "standard output!\n");
 	fwrite(fopen('php://stdout', 'w'), sprintf(
-		"Ran %d times!\n", $persist++
+		"Ran %d times!\n", ++$persist
 	));
-	fwrite(fopen('php://stderr', 'w'), 'error');
+	fwrite(fopen('php://stderr', 'w'), 'standard error!');
 
 	return 'return value';
 })();

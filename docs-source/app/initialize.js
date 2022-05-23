@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		{
 			return;
 		}
-		fetch(`/scripts/${demo.value}`)
+		fetch(`/php-wasm/scripts/${demo.value}`)
 		.then(r => r.text())
 		.then(php => {
 

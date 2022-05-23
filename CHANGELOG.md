@@ -2,6 +2,14 @@
 
 Changes
 
+## 0.0.5 - Alignment
+
+* Ensuring npm & github have matching tags
+* Ensuring Drupal re-builds correctly with no nested duplicate directory
+* Removing some extraneous files from example application
+* Separating php-web-drupal from php-web for real this time
+* Publishing php-web-drupal to npm
+
 ## 0.0.4 - Revisiting
 
 * Separated Drupal from standard php-web to save bandwidth

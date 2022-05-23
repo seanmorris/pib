@@ -1,6 +1,6 @@
 -include .env
 
-SHELL=bash -euo pipefail
+SHELL=bash -euxo pipefail
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=1024MB
@@ -82,8 +82,9 @@ third_party/drupal-7.59/README.txt:
 	@ ${DOCKER_RUN} cp -r extras/drowser-files/.ht.sqlite third_party/drupal-7.59/sites/default/files/.ht.sqlite
 	@ ${DOCKER_RUN} cp -r extras/drowser-files/* third_party/drupal-7.59/sites/default/files
 	@ ${DOCKER_RUN} cp -r extras/drowser-logo.png third_party/drupal-7.59/sites/default/logo.png
-	@ ${DOCKER_RUN} mkdir -p third_party/php7.4-src/preload/
-	@ ${DOCKER_RUN} cp -r third_party/drupal-7.59 third_party/drupal-7.59 third_party/php7.4-src/preload/
+	@ ${DOCKER_RUN} rm -rf third_party/php7.4-src/preload/drupal-7.59
+	@ ${DOCKER_RUN} mkdir -p third_party/php7.4-src/preload
+	@ ${DOCKER_RUN} cp -r third_party/drupal-7.59 third_party/php7.4-src/preload/
 
 # third_party/libicu-src:
 # 	@ ${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-src \
@@ -235,8 +236,10 @@ php-webview.wasm: lib/libphp7.a lib/pib_eval.o source/pib_eval.c
 
 clean:
 	@ ${DOCKER_RUN} rm -fv  *.js *.wasm *.data
-	@ ${DOCKER_RUN} rm -fv  build/* lib/*
+	@ ${DOCKER_RUN} rm -rfv build/*
+	@ ${DOCKER_RUN} rm -rfv lib/*
 	@ ${DOCKER_RUN} rm -rfv third_party/php7.4-src
+	@ ${DOCKER_RUN} rm -rfv third_party/drupal-7.59
 	@ ${DOCKER_RUN} rm -rfv third_party/libxml2
 	@ ${DOCKER_RUN} rm -rfv third_party/libicu-src
 	@ ${DOCKER_RUN} rm -rfv third_party/sqlite3.33-src
