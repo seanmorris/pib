@@ -11,8 +11,6 @@ export class PhpBase extends EventTarget
 
 		const FLAGS = {};
 
-		this.returnValue = -1;
-
 		this.onerror  = function () {};
 		this.onoutput = function () {};
 		this.onready  = function () {};
