@@ -1,0 +1,33 @@
+<script src="./build/php-web.js"></script>
+<script>
+  const NUM = 'number'
+  const STR = 'string'
+
+  Module({
+    onAbort(reason) {
+      console.error(`WASM aborted: ${reason}`)
+    },
+    print(data) {
+      if (data) {
+        console.log('stdout: ', data)
+      }
+    },
+    printErr(data) {
+      if (data) {
+        console.log('stderr: ', data)
+      }
+    },
+  })
+  .then(({ccall, FS, IDBFS}) => {
+      ccall('pib_init', NUM, [STR], []);
+
+    const phpVersion = ccall('pib_exec', STR, [STR], ['phpversion();']);
+
+    console.log('test', phpVersion)
+
+    const tt = ccall('pib_exec', STR, [STR], ['phpinfo();']);
+
+    console.log('test', tt)
+  })
+
+</script>

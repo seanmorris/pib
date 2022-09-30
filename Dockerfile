@@ -1,4 +1,4 @@
-FROM emscripten/emsdk:2.0.10
+FROM emscripten/emsdk:3.1.22
 RUN apt-get update && \
 	apt-get --no-install-recommends -y install \
 		build-essential \
