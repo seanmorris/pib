@@ -13,6 +13,7 @@ path.match(/\/$/) || window.location.replace(
 <script src = "//ajaxorg.github.io/ace-builds/src-min/ace.js"></script>
 <script>require('initialize');</script>
 </head>
+
 <script type = "text/php">
 <?php
 $window   = new \Vrzno;
@@ -21,7 +22,7 @@ $document = $window->document;
 $h1 = $document->querySelector('h1');
 
 $h1->addEventListener('click', function(){
-	vrzno_run('alert', ['lmao!']);
+	vrzno_run('alert', ['This alert was generated from PHP.' . PHP_EOL . 'View source > CTRL+F > "<script type = "text/php">"']);
 
 	$h1->style;
 });

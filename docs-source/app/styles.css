@@ -149,6 +149,7 @@ div.column .scroller {
 	height: 100%;
 	overflow-y: auto;
 	overflow-x: auto;
+	font-size: 0.9rem;
 }
 
 div.panel {
@@ -284,4 +285,8 @@ iframe {
 
 input[type=file] {
 	display: none;
+}
+
+.header select {
+	font-size: 1rem;
 }

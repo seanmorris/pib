@@ -249,6 +249,8 @@ clean:
 	@ ${DOCKER_RUN} rm -rfv third_party/libxml2
 	@ ${DOCKER_RUN} rm -rfv third_party/libicu-src
 	@ ${DOCKER_RUN} rm -rfv third_party/sqlite3.33-src
+	@ ${DOCKER_RUN} rm -rfv dist/*
+	@ ${DOCKER_RUN} rm -rfv docs/php-*.js docs/php-*.wasm
 
 show-ports:
 	@ ${DOCKER_RUN} emcc --show-ports

@@ -9,13 +9,13 @@ if(!$x)
 	goto b;
 }
 
-echo 'Foo';
+echo '2. Foo' . PHP_EOL;
 
 goto c;
 
 b:
 
-echo 'Bar';
+echo '1. Bar' . PHP_EOL;
 
 if(!$x)
 {
@@ -24,4 +24,4 @@ if(!$x)
 }
 
 c:
-echo 'Baz';
+echo '3. Baz' . PHP_EOL;
