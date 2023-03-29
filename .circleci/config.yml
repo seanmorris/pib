@@ -22,5 +22,5 @@ jobs:
       - run: sudo update-ca-certificates
       - run: docker system prune -af
       - run: make image
-      - run: make -j1
+      - run: make -j1 OPTIMIZE=O0
 
