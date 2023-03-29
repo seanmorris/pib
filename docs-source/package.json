@@ -8,7 +8,9 @@
 	"scripts": {
 		"postinstall": "cp -rfv node_modules/php-wasm/php-web-drupal.* app/assets/"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"process": "^0.11.10"
+	},
 	"devDependencies": {
 		"@babel/cli": "^7.21.0",
 		"@babel/core": "^7.21.0",

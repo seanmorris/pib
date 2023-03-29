@@ -1,6 +1,6 @@
 "use strict";
 
-import { process } from 'process/browser';
+// import { process } from 'process/browser';
 
 self.addEventListener('install', event => {
 	console.log('Install');

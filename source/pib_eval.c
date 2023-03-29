@@ -6,7 +6,7 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 
-#include "../php7.4-src/ext/vrzno/php_vrzno.h"
+#include "../php8.2-src/ext/vrzno/php_vrzno.h"
 
 #include "sqlite3.h"
 #include "sqlite3.c"

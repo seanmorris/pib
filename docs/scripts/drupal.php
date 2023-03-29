@@ -14,7 +14,7 @@ set_error_handler(function(...$args) use($stdErr, &$errors){
 	fwrite($stdErr, print_r($args,1));
 });
 
-$docroot = '/preload/drupal-7.59';
+$docroot = '/preload/drupal-7.95';
 $path    = '/';
 $script  = 'index.php';
 
