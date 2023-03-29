@@ -883,11 +883,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+
 });
 
 require.register("___globals___", function(exports, require, module) {
   
 });})();require('___globals___');
 
-
-//# sourceMappingURL=app.js.map
