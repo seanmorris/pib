@@ -2,6 +2,18 @@
 
 Changes
 
+## 0.0.6 - Remodermizing
+
+* Updating PHP to 8.2.4
+* Updating SQLite to 3.41
+* Updating Drupal to 7.95
+
+* Correcting hiccups in the build process
+
+## 0.0.6 - Ease
+
+* Correcting hiccups in the build process
+
 ## 0.0.5 - Alignment
 
 * Ensuring npm & github have matching tags
