@@ -8,8 +8,10 @@ $db->query('CREATE TABLE IF NOT EXISTS people (
 );');
 
 for($i = 0; $i < 10; $i++) {
-	$insert = $db->prepare('INSERT INTO people (name) VALUES(:name)');
-	$insert->bindParam(':name', str_repeat(chr($i+64), 10), SQLITE3_TEXT);
+	$weirdName = str_repeat(chr($i+64), 10);
+	$insert    = $db->prepare('INSERT INTO people (name) VALUES(:name)');
+
+	$insert->bindParam(':name', $weirdName, SQLITE3_TEXT);
 
 	$insert->execute();
 }
