@@ -7,8 +7,11 @@ $db->query('CREATE TABLE IF NOT EXISTS people (
 );');
 
 for($i = 0; $i < 100; $i++) {
-	$insert = $db->prepare('INSERT INTO people (name) VALUES(:name)');
-	$insert->bindValue(':name', str_repeat(chr($i+64), 10), SQLITE3_TEXT);
+
+	$weirdName = str_repeat(chr($i+64), 10);
+	$insert    = $db->prepare('INSERT INTO people (name) VALUES(:name)');
+
+	$insert->bindValue(':name', $weirdName, SQLITE3_TEXT);
 
 	$insert->execute();
 }
