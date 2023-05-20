@@ -1,4 +1,4 @@
-import { PhpBase } from './PhpBase';
+import { PhpBase } from './PhpBase.js';
 
 const PhpBinary = require('./php-worker');
 

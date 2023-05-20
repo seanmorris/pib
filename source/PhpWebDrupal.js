@@ -1,4 +1,4 @@
-import { PhpBase } from './PhpBase';
+import { PhpBase } from './PhpBase.js';
 
 const PhpBinary = require('./php-web-drupal');
 
@@ -10,7 +10,7 @@ export class PhpWebDrupal extends PhpBase
 	}
 }
 
-if(window && document)
+if(globalThis.document)
 {
 	const php = new PhpWebDrupal;
 
