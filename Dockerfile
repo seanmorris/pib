@@ -50,7 +50,7 @@ FROM php_src AS php-wasm
 ARG WASM_ENVIRONMENT=web
 ARG ASSERTIONS=0
 ARG OPTIMIZE=-O2
-ARG PRE_JS=
+# ARG PRE_JS=
 ARG INITIAL_MEMORY=256mb
 COPY ./source /src/source
 COPY --from=libxml /src/libxml2/build/ /src/usr
@@ -116,7 +116,7 @@ RUN mkdir /build && emcc $OPTIMIZE \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
-	--pre-js=$PRE_JS \
+	# --pre-js=$PRE_JS \
 	-s LZ4=1                  \
 	-s EXPORT_ES6=1 \
 	-s EXPORT_NAME=createPhpModule \
