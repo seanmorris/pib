@@ -53,7 +53,6 @@ ARG OPTIMIZE=-O2
 ARG PRE_JS=
 ARG INITIAL_MEMORY=256mb
 COPY ./source /src/source
-COPY ./public /public
 COPY --from=libxml /src/libxml2/build/ /src/usr
 COPY --from=sqlite /src/sqlite/sqlite3.o /src/usr/lib/
 COPY --from=sqlite /src/sqlite/sqlite3.h /src/usr/include/sqlite3/
