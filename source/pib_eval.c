@@ -8,14 +8,7 @@
 
 int main() { return 0; }
 
-int EMSCRIPTEN_KEEPALIVE pib_init()
-{
-	putenv("USE_ZEND_ALLOC=0");
-
-	return php_embed_init(0, NULL);
-}
-
-void pib_finally()
+void phpw_flush()
 {
 	fflush(stdout);
 	fprintf(stdout, "\n");
@@ -24,8 +17,9 @@ void pib_finally()
 	fprintf(stderr, "\n");
 }
 
-char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
+char *EMSCRIPTEN_KEEPALIVE phpw_exec(char *code)
 {
+	php_embed_init(0, NULL);
 	char *retVal = NULL;
 
 	zend_try
@@ -37,59 +31,51 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 		convert_to_string(&retZv);
 
 		retVal = Z_STRVAL(retZv);
-	}
-	zend_catch
-	{
-	}
+	} zend_catch {
+	} zend_end_try();
 
-	zend_end_try();
-
-	pib_finally();
+	phpw_flush();
+	php_embed_shutdown();
 
 	return retVal;
 }
 
-int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
+void EMSCRIPTEN_KEEPALIVE phpw_run(char *code)
 {
-	int retVal = 255; // Unknown error.
-
+	php_embed_init(0, NULL);
 	zend_try
 	{
-		retVal = zend_eval_string(code, NULL, "php-wasm run script");
-
+		zend_eval_string(code, NULL, "php-wasm run script");
 		if(EG(exception))
 		{
 			zend_exception_error(EG(exception), E_ERROR);
-			retVal = 2;
 		}
-	}
-	zend_catch
-	{
-		retVal = 1; // Code died.
-	}
+		// 	retVal = 2;
+		// }
+	} zend_catch {
+		/* int exit_status = EG(exit_status); */
+	} zend_end_try();
 
-	zend_end_try();
-
-	pib_finally();
-
-	return retVal;
+	phpw_flush();
+	php_embed_shutdown();
 }
 
-char *pib_tokenize(char *code)
+void phpw(char *file)
 {
-	// tokenize_parse(zval zend_string)
+	php_embed_init(0, NULL);
 
-	return "";
-}
+	zend_first_try {
+		zend_file_handle file_handle;
+		zend_stream_init_filename(&file_handle, file);
 
-void EMSCRIPTEN_KEEPALIVE pib_destroy()
-{
-	return php_embed_shutdown();
-}
+		if (php_execute_script(&file_handle) == FAILURE) {
+			php_printf("Failed to execute PHP script.\n");
+		}
+		zend_destroy_file_handle(&file_handle);
+	} zend_catch {
+    /* int exit_status = EG(exit_status); */
+	} zend_end_try();
 
-int EMSCRIPTEN_KEEPALIVE pib_refresh()
-{
-	pib_destroy();
-
-	return pib_init();
+	phpw_flush();
+	php_embed_shutdown();
 }

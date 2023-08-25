@@ -52,7 +52,6 @@ ARG ASSERTIONS=0
 ARG OPTIMIZE=-O2
 # ARG PRE_JS=
 ARG INITIAL_MEMORY=256mb
-COPY ./source /src/source
 COPY --from=libxml /src/libxml2/build/ /src/usr
 COPY --from=sqlite /src/sqlite/sqlite3.o /src/usr/lib/
 COPY --from=sqlite /src/sqlite/sqlite3.h /src/usr/include/sqlite3/
@@ -93,6 +92,7 @@ RUN ./buildconf --force \
 RUN emmake make -j8
 # PHP7 outputs a libphp7 whereas php8 a libphp
 RUN bash -c '[[ -f .libs/libphp7.la   ]] && mv .libs/libphp7.la .libs/libphp.la && mv .libs/libphp7.a .libs/libphp.a && mv .libs/libphp7.lai .libs/libphp.lai || exit 0'
+COPY ./source /src/source
 RUN emcc $OPTIMIZE \
 		-I .     \
 		-I Zend  \
@@ -105,7 +105,7 @@ RUN emcc $OPTIMIZE \
 RUN mkdir /build && emcc $OPTIMIZE \
 	-o /build/php-$WASM_ENVIRONMENT.mjs \
 	--llvm-lto 2                     \
-	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string"]' \
+	-s EXPORTED_FUNCTIONS='["_phpw", "_phpw_flush", "_phpw_exec", "_phpw_run", "_php_embed_init", "_php_embed_shutdown", "_zend_eval_string"]' \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "FS"]' \
 	-s ENVIRONMENT=$WASM_ENVIRONMENT    \
 	-s FORCE_FILESYSTEM=1            \
@@ -116,7 +116,6 @@ RUN mkdir /build && emcc $OPTIMIZE \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
-	# --pre-js=$PRE_JS \
 	-s LZ4=1                  \
 	-s EXPORT_ES6=1 \
 	-s EXPORT_NAME=createPhpModule \
