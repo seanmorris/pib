@@ -40,7 +40,7 @@ WORKDIR /src/sqlite
 RUN emcc -Oz -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DISABLE_LFS -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_NORMALIZE -c sqlite3.c -o sqlite3.o
 
 FROM build_tool as php_src
-ARG PHP_BRANCH=PHP-8.2.5 
+ARG PHP_BRANCH=PHP-8.2.5
 RUN git clone https://github.com/php/php-src.git php-src \
 		--branch $PHP_BRANCH \
 		--single-branch \
@@ -50,8 +50,10 @@ FROM php_src AS php-wasm
 ARG WASM_ENVIRONMENT=web
 ARG ASSERTIONS=0
 ARG OPTIMIZE=-O2
+ARG PRE_JS=
 ARG INITIAL_MEMORY=256mb
 COPY ./source /src/source
+COPY ./public /public
 COPY --from=libxml /src/libxml2/build/ /src/usr
 COPY --from=sqlite /src/sqlite/sqlite3.o /src/usr/lib/
 COPY --from=sqlite /src/sqlite/sqlite3.h /src/usr/include/sqlite3/
@@ -89,7 +91,7 @@ RUN ./buildconf --force \
 		--enable-pdo       \
 		--with-pdo-sqlite  \
 		--with-sqlite3
-RUN emmake make -j8 
+RUN emmake make -j8
 # PHP7 outputs a libphp7 whereas php8 a libphp
 RUN bash -c '[[ -f .libs/libphp7.la   ]] && mv .libs/libphp7.la .libs/libphp.la && mv .libs/libphp7.a .libs/libphp.a && mv .libs/libphp7.lai .libs/libphp.lai || exit 0'
 RUN emcc $OPTIMIZE \
@@ -100,7 +102,7 @@ RUN emcc $OPTIMIZE \
 		-c \
 		/src/source/pib_eval.c \
 		-o /src/pib_eval.o \
-		-s ERROR_ON_UNDEFINED_SYMBOLS=0 
+		-s ERROR_ON_UNDEFINED_SYMBOLS=0
 RUN mkdir /build && emcc $OPTIMIZE \
 	-o /build/php-$WASM_ENVIRONMENT.mjs \
 	--llvm-lto 2                     \
@@ -115,6 +117,10 @@ RUN mkdir /build && emcc $OPTIMIZE \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
+	--pre-js=$PRE_JS \
 	-s LZ4=1                  \
+	-s EXPORT_ES6=1 \
+	-s EXPORT_NAME=createPhpModule \
+	# -s DECLARE_ASM_MODULE_EXPORTS=0 \
 	-lidbfs.js                       \
 		/src/pib_eval.o /src/usr/lib/sqlite3.o .libs/libphp.a /src/usr/lib/libxml2.a
