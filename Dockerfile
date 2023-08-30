@@ -40,7 +40,7 @@ WORKDIR /src/sqlite
 RUN emcc -Oz -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DISABLE_LFS -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_NORMALIZE -c sqlite3.c -o sqlite3.o
 
 FROM build_tool as php_src
-ARG PHP_BRANCH=PHP-8.2.5
+ARG PHP_BRANCH=PHP-8.2.9
 RUN git clone https://github.com/php/php-src.git php-src \
 		--branch $PHP_BRANCH \
 		--single-branch \
@@ -99,13 +99,13 @@ RUN emcc $OPTIMIZE \
 		-I main  \
 		-I TSRM/ \
 		-c \
-		/src/source/pib_eval.c \
-		-o /src/pib_eval.o \
+		/src/source/phpw.c \
+		-o /src/phpw.o \
 		-s ERROR_ON_UNDEFINED_SYMBOLS=0
 RUN mkdir /build && emcc $OPTIMIZE \
 	-o /build/php-$WASM_ENVIRONMENT.mjs \
 	--llvm-lto 2                     \
-	-s EXPORTED_FUNCTIONS='["_phpw", "_phpw_flush", "_phpw_exec", "_phpw_run", "_php_embed_init", "_php_embed_shutdown", "_zend_eval_string"]' \
+	-s EXPORTED_FUNCTIONS='["_phpw", "_phpw_flush", "_phpw_exec", "_phpw_run", "_chdir", "_setenv", "_php_embed_init", "_php_embed_shutdown", "_zend_eval_string"]' \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "FS"]' \
 	-s ENVIRONMENT=$WASM_ENVIRONMENT    \
 	-s FORCE_FILESYSTEM=1            \
@@ -121,4 +121,4 @@ RUN mkdir /build && emcc $OPTIMIZE \
 	-s EXPORT_NAME=createPhpModule \
 	# -s DECLARE_ASM_MODULE_EXPORTS=0 \
 	-lidbfs.js                       \
-		/src/pib_eval.o /src/usr/lib/sqlite3.o .libs/libphp.a /src/usr/lib/libxml2.a
+		/src/phpw.o /src/usr/lib/sqlite3.o .libs/libphp.a /src/usr/lib/libxml2.a
