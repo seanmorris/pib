@@ -17,3 +17,5 @@ jobs:
           context: .
           push: false
           tags: soyuka/php-wasm:latest
+          cache-from: type=registry,ref=soyuka/php-wasm:latest
+          cache-to: type=inline
