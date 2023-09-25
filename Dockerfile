@@ -40,7 +40,7 @@ WORKDIR /src/sqlite
 RUN emcc -Oz -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DISABLE_LFS -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_NORMALIZE -c sqlite3.c -o sqlite3.o
 
 FROM build_tool as php_src
-ARG PHP_BRANCH=PHP-8.2.9
+ARG PHP_BRANCH=PHP-8.2.10
 RUN git clone https://github.com/php/php-src.git php-src \
 		--branch $PHP_BRANCH \
 		--single-branch \
@@ -49,7 +49,8 @@ RUN git clone https://github.com/php/php-src.git php-src \
 FROM php_src AS php-wasm
 ARG WASM_ENVIRONMENT=web
 ARG ASSERTIONS=0
-ARG OPTIMIZE=-O2
+ARG OPTIMIZE=-O1
+# TODO: find a way to keep this, it can't be empty if defined...
 # ARG PRE_JS=
 ARG INITIAL_MEMORY=256mb
 COPY --from=libxml /src/libxml2/build/ /src/usr
@@ -59,8 +60,7 @@ ENV LIBXML_LIBS "-L/src/usr/lib"
 ENV LIBXML_CFLAGS "-I/src/usr/include/libxml2"
 ENV SQLITE_CFLAGS "-I/src/usr/include/sqlite3"
 ENV SQLITE_LIBS "-L/src/usr/lib"
-WORKDIR /src/php-src
-RUN ./buildconf --force \
+RUN cd /src/php-src && ./buildconf --force \
     && emconfigure ./configure \
 		--enable-embed=static \
 		--with-layout=GNU  \
@@ -89,11 +89,11 @@ RUN ./buildconf --force \
 		--enable-pdo       \
 		--with-pdo-sqlite  \
 		--with-sqlite3
-RUN emmake make -j8
+RUN cd /src/php-src && emmake make -j8
 # PHP7 outputs a libphp7 whereas php8 a libphp
-RUN bash -c '[[ -f .libs/libphp7.la   ]] && mv .libs/libphp7.la .libs/libphp.la && mv .libs/libphp7.a .libs/libphp.a && mv .libs/libphp7.lai .libs/libphp.lai || exit 0'
+RUN cd /src/php-src && bash -c '[[ -f .libs/libphp7.la ]] && mv .libs/libphp7.la .libs/libphp.la && mv .libs/libphp7.a .libs/libphp.a && mv .libs/libphp7.lai .libs/libphp.lai || exit 0'
 COPY ./source /src/source
-RUN emcc $OPTIMIZE \
+RUN cd /src/php-src && emcc $OPTIMIZE \
 		-I .     \
 		-I Zend  \
 		-I main  \
@@ -102,7 +102,7 @@ RUN emcc $OPTIMIZE \
 		/src/source/phpw.c \
 		-o /src/phpw.o \
 		-s ERROR_ON_UNDEFINED_SYMBOLS=0
-RUN mkdir /build && emcc $OPTIMIZE \
+RUN mkdir /build && cd /src/php-src && emcc $OPTIMIZE \
 	-o /build/php-$WASM_ENVIRONMENT.mjs \
 	--llvm-lto 2                     \
 	-s EXPORTED_FUNCTIONS='["_phpw", "_phpw_flush", "_phpw_exec", "_phpw_run", "_chdir", "_setenv", "_php_embed_init", "_php_embed_shutdown", "_zend_eval_string"]' \
@@ -122,3 +122,4 @@ RUN mkdir /build && emcc $OPTIMIZE \
 	# -s DECLARE_ASM_MODULE_EXPORTS=0 \
 	-lidbfs.js                       \
 		/src/phpw.o /src/usr/lib/sqlite3.o .libs/libphp.a /src/usr/lib/libxml2.a
+RUN rm -r /src/*

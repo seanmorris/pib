@@ -1,0 +1,43 @@
+<iframe id="output" width="100%" height="50%" frameBorder="0"></iframe>
+<script type="module">
+	import phpBinary from "./php-web.mjs";
+
+	async function main() {
+		const output = document.getElementById('output')
+		const buffer = [];
+		const {ccall, FS} = await phpBinary({
+			print(data) {
+				buffer.push(data);
+			}
+		})
+
+		console.log(ccall("phpw_exec", "string", ["string"], ["phpversion();"]));
+
+		window.FS = FS;
+		window.run = () => {
+			// Note that `/src` is the path we used when preloading!
+			ccall("phpw", null, ["string"], ["/src/index.php"]);
+			output.contentWindow.document.body.innerHTML = buffer.join('');
+			buffer.length = 0;
+		}
+
+		run();
+	}
+
+	main();
+</script>
+<div id="monaco" style="min-height: 100px"></div>
+<script type="module">
+	import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/+esm';
+	const editor = monaco.editor.create(document.getElementById('monaco'));
+	// FS is documented at https://emscripten.org/docs/api_reference/Filesystem-API.html
+	// everything is synchronous
+	const model = editor.getModel();
+	model.setLanguage('php');
+	model.setValue(window.FS.readFile('/src/index.php', {encoding: 'utf8'}).toString());
+	model.onDidChangeContent((v) => {
+		window.FS.unlink('/src/index.php')
+		window.FS.writeFile('/src/index.php', model.getValue());
+		window.run();
+	});
+</script>
