@@ -58,7 +58,7 @@ jobs:
           mkdir -p public/ dist/
           docker cp php-wasm:/build/php-web.mjs ./dist
           docker cp php-wasm:/build/php-web.wasm ./public
-          docker run -v $(pwd)/src:/src -v $(pwd)/public:/public -v $(pwd)/dist:/dist php-wasm python3 /emsdk/upstream/emscripten/tools/file_packager.py /public/php-web.data --use-preload-cache --lz4 --preload "/src" --js-output=/dist/php-web.data.js --no-node --exclude '*/.*' --export-name=createPhpModule
+          docker run -v $(pwd)/src:/src -v $(pwd)/public:/public -v $(pwd)/dist:/dist docker.io/soyuka/php-wasm:latest python3 /emsdk/upstream/emscripten/tools/file_packager.py /public/php-web.data --use-preload-cache --lz4 --preload "/src" --js-output=/dist/php-web.data.js --no-node --exclude '*/.*' --export-name=createPhpModule
           sed '/--pre-js/r dist/php-web.data.js' dist/php-web.mjs > public/php-web.mjs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
