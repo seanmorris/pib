@@ -8,11 +8,10 @@ services:
     build:
       context: ./
       dockerfile: emscripten-builder.dockerfile
-      args:
-        PHP_BRANCH: ${PHP_BRANCH:-PHP-7.4}
     environment:
       EMCC_CORES: 8
       ENVIRONMENT: ${ENVIRONMENT:-web}
     volumes:
       - ./:/src
+      - /tmp/emsdk-cache:/emsdk/upstream/emscripten/cache/
     command: [bash]

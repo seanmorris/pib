@@ -117,7 +117,6 @@
 
 (function() {
 var global = typeof window === 'undefined' ? this : window;
-var process;
 var __makeRelativeRequire = function(require, mappings, pref) {
   var none = {};
   var tryReq = function(name, pref) {
@@ -157,7 +156,7 @@ module.exports = "<?php\nini_set('session.save_path', '/home/web_user');\nsessio
 module.exports = "<?php\nini_set('session.save_path', '/home/web_user');\nsession_id('fake-cookie');\nsession_start();\n\n$stdErr = fopen('php://stderr', 'w');\n$errors = [];\n\nfwrite($stdErr, json_encode(['session' => $_SESSION]) . \"\\n\");\n\nregister_shutdown_function(function() use($stdErr){\n\tfwrite($stdErr, json_encode(['session_id' => session_id()]) . \"\\n\");\n\tfwrite($stdErr, json_encode(['headers'=>headers_list()]) . \"\\n\");\n\tfwrite($stdErr, json_encode(['errors' => error_get_last()]) . \"\\n\");\n\tfwrite($stdErr, json_encode(['session' => $_SESSION]) . \"\\n\");\n});\n\nset_error_handler(function(...$args) use($stdErr, &$errors){\n\tfwrite($stdErr, json_encode($args, JSON_PRETTY_PRINT) . \"\\n\" );\n});\n\n$request = (object) json_decode(\n\t'${ JSON.stringify({path, method, _GET, _POST}) }'\n\t, JSON_OBJECT_AS_ARRAY\n);\n\nparse_str(substr($request->_GET, 1), $_GET);\n\n$_POST = $request->_POST;\n\n$origin  = 'http://localhost:3333';\n$docroot = '/preload/drupal-7.59';\n$script  = 'index.php';\n\n$path = $request->path;\n$path = preg_replace('/^\\\\/php-wasm/', '', $path);\n\n$_SERVER['REQUEST_URI']     = $path;\n$_SERVER['REMOTE_ADDR']     = '127.0.0.1';\n$_SERVER['SERVER_NAME']     = $origin;\n$_SERVER['SERVER_PORT']     = 3333;\n$_SERVER['REQUEST_METHOD']  = $request->method;\n$_SERVER['SCRIPT_FILENAME'] = $docroot . '/' . $script;\n$_SERVER['SCRIPT_NAME']     = $docroot . '/' . $script;\n$_SERVER['PHP_SELF']        = $docroot . '/' . $script;\n$_SERVER['DOCUMENT_ROOT']   = '/';\n$_SERVER['HTTPS']           = '';\n\nchdir($docroot);\n\ndefine('DRUPAL_ROOT', getcwd());\n\nrequire_once DRUPAL_ROOT . '/includes/bootstrap.inc';\ndrupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);\n\n$uid     = 1;\n$user    = user_load($uid);\n$account = array('uid' => $user->uid);\nuser_login_submit(array(), $account);\n\n$itemPath = $path;\n$itemPath = preg_replace('/^\\\\/preload/', '', $itemPath);\n$itemPath = preg_replace('/^\\\\/drupal-7.59/', '', $itemPath);\n$itemPath = preg_replace('/^\\\\//', '', $itemPath);\n\nif($itemPath && (substr($itemPath, 0, 4) !== 'node' || substr($itemPath, -4) === 'edit'))\n{\n    $router_item = menu_get_item($itemPath);\n    $router_item['access_callback'] = true;\n    $router_item['access'] = true;\n\n    if ($router_item['include_file']) {\n      require_once DRUPAL_ROOT . '/' . $router_item['include_file'];\n    }\n\n    $page_callback_result = call_user_func_array($router_item['page_callback'], unserialize($router_item['page_arguments']));\n\n    drupal_deliver_page($page_callback_result);\n}\nelse\n{\n    menu_execute_active_handler();\n}\n"
 });
 
-;require.alias("process/browser.js", "process");process = require('process');require.register("___globals___", function(exports, require, module) {
+;require.register("___globals___", function(exports, require, module) {
   
 });})();require('___globals___');
 

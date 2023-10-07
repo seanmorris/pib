@@ -22,7 +22,6 @@ diff --git a/third_party/php7.4-src/ext/pdo/config.m4 b/third_party/php7.4-src/e
    PHP_ADD_MAKEFILE_FRAGMENT
  fi
 diff --git a/third_party/php7.4-src/ext/pdo_sqlite/config.m4 b/third_party/php7.4-src/ext/pdo_sqlite/config.m4
-index fbb3d05c..42a8fd47 100644
 --- a/third_party/php7.4-src/ext/pdo_sqlite/config.m4
 +++ b/third_party/php7.4-src/ext/pdo_sqlite/config.m4
 @@ -10,25 +10,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
@@ -67,7 +66,6 @@ diff --git a/third_party/php7.4-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/ph
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
 diff --git a/third_party/php7.4-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php7.4-src/ext/pdo_sqlite/sqlite_driver.c
-index 83ea2d60..7265bfc7 100644
 --- a/third_party/php7.4-src/ext/pdo_sqlite/sqlite_driver.c
 +++ b/third_party/php7.4-src/ext/pdo_sqlite/sqlite_driver.c
 @@ -23,8 +23,8 @@

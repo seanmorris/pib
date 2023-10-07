@@ -8,18 +8,20 @@
 	"scripts": {
 		"postinstall": "cp -rfv node_modules/php-wasm/php-web-drupal.* app/assets/"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"process": "^0.11.10"
+	},
 	"devDependencies": {
-		"@babel/cli": "^7.8.4",
-		"@babel/core": "^7.8.7",
-		"@babel/preset-env": "^7.0.0",
+		"@babel/cli": "^7.21.0",
+		"@babel/core": "^7.21.0",
+		"@babel/preset-env": "^7.20.2",
 		"auto-reload-brunch": "^2.7.1",
 		"babel-brunch": "^7.0.1",
 		"babel-minify": "^0.5.1",
 		"babel-preset-es2015": "^6.24.1",
-		"brunch": "^3.0.0",
+		"brunch": "^4.0.2",
 		"clean-css-brunch": "^3.0.0",
-		"php-wasm": "^0.0.5",
+		"php-wasm": "^0.0.6",
 		"raw-brunch": "^1.0.2"
 	}
 }
