@@ -12,7 +12,7 @@ OPTIMIZE       ?=-O3
 RELEASE_SUFFIX ?=
 
 PHP_VERSION    ?=8.2
-PHP_BRANCH     ?=php-8.2.4
+PHP_BRANCH     ?=php-8.2.11
 PHP_AR         ?=libphp
 
 # PHP_VERSION    ?=7.4
@@ -322,6 +322,9 @@ pull-image:
 
 push-image:
 	@ docker-compose push
+
+demo: js php-web-drupal.wasm
+	cd docs-source && brunch b -p
 
 ########### NOPS ###########
 third_party/php${PHP_VERSION}-src/**.c:
