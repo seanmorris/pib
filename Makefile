@@ -23,6 +23,7 @@ VRZNO_BRANCH   ?=DomAccess8.2
 ICU_TAG        ?=release-67-1
 LIBXML2_TAG    ?=v2.9.10
 TIDYHTML_TAG   ?=5.6.0
+ICONV_TAG      ?=v1.17
 SQLITE_VERSION ?=3410200
 SQLITE_DIR     ?=sqlite3.41-src
 
@@ -42,8 +43,8 @@ DOCKER_ENV_SIDE=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
-	-e EMCC_CORES=`nproc` \
-	-e CFLAGS="-I/root/lib/include" \
+	-e EMCC_CORES=`nproc`                 \
+	-e CFLAGS=" -I/root/lib/include " \
 	-e EMCC_FLAGS=" -sSIDE_MODULE=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 "
 
 DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
@@ -52,6 +53,7 @@ DOCKER_RUN_IN_ICU4C  =${DOCKER_ENV} -w /src/third_party/libicu-src/icu4c/source/
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
 DOCKER_RUN_IN_TIDY   =${DOCKER_ENV_SIDE} -w /src/third_party/tidy-html5/ emscripten-builder
 DOCKER_RUN_IN_ICU    =${DOCKER_ENV_SIDE} -w /src/third_party/libicu-src/icu4c/source emscripten-builder
+DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: web all clean show-ports image js hooks push-image pull-image
@@ -132,6 +134,17 @@ third_party/libicu-src/.gitignore:
 		--single-branch     \
 		--depth 1;
 
+third_party/libiconv-1.17/README:
+	wget https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz
+	mkdir third_party/libiconv
+	tar -xvzf libiconv-1.17.tar.gz -C third_party
+	rm libiconv-1.17.tar.gz
+
+	# @ ${DOCKER_RUN} git clone https://github.com/roboticslibrary/libiconv.git third_party \
+	# 	--branch ${ICONV_TAG} \
+	# 	--single-branch     \
+	# 	--depth 1;
+
 ########### Build the objects. ###########
 
 third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libicudata.a
@@ -168,6 +181,7 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 		--enable-xml       \
 		--enable-simplexml \
 		--with-gd          \
+		--with-iconv=/src/lib \
 		--with-tidy=/src/lib \
 		--enable-intl      \
 		--disable-fiber-asm
@@ -211,6 +225,13 @@ lib/lib/libicudata.a: third_party/libicu-src/.gitignore
 	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
 	${DOCKER_RUN_IN_ICU} emmake make clean install
 
+lib/lib/libiconv.a: third_party/libiconv-1.17/README
+	@ echo -e "\e[33mBuilding LibIconv"
+	${DOCKER_RUN_IN_ICONV} autoconf
+	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-shared=no --enable-static=yes
+	${DOCKER_RUN_IN_ICONV} emmake make
+	${DOCKER_RUN_IN_ICONV} emmake make install
+
 ########### Build the final files. ###########
 
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
@@ -229,10 +250,13 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s INVOKE_RUN=0                  \
 	-s MAIN_MODULE                   \
 	-s USE_ZLIB=1                    \
-	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
+	-s USE_LIBPNG=1                  \
+	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a /src/lib/lib/libiconv.a
+
+DEPENDENCIES=lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libicudata.a lib/lib/libiconv.a source/**.c source/**.h
 
 php-web-drupal.wasm: ENVIRONMENT=web-drupal
-php-web-drupal.wasm: lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libicudata.a source/**.c source/**.h third_party/drupal-7.95/README.txt
+php-web-drupal.wasm: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
 	@ echo -e "\e[33mBuilding PHP for web (drupal)"
 	@ ${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -241,7 +265,7 @@ php-web-drupal.wasm: lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libicudata.a source/
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
 php-web.wasm: ENVIRONMENT=web
-php-web.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h
+php-web.wasm: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for web"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -323,8 +347,9 @@ pull-image:
 push-image:
 	@ docker-compose push
 
-demo: js php-web-drupal.wasm
+demo:php-web-drupal.wasm
 	cd docs-source && brunch b -p
+	make js
 
 ########### NOPS ###########
 third_party/php${PHP_VERSION}-src/**.c:
