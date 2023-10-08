@@ -37,10 +37,20 @@ DOCKER_ENV=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e EMCC_CORES=`nproc`                 \
 	-e EMCC_ALLOW_FASTCOMP=1
 
+DOCKER_ENV_SIDE=USERID=${UID} docker-compose -p phpwasm run --rm \
+	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
+	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
+	-e ENVIRONMENT=${ENVIRONMENT}         \
+	-e PHP_BRANCH=${PHP_BRANCH}           \
+	-e EMCC_CORES=`nproc` \
+	-e CFLAGS="-I/root/lib/include" \
+	-e EMCC_FLAGS=" -sSIDE_MODULE=1 "
+
 DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 DOCKER_RUN_IN_ICU4C  =${DOCKER_ENV} -w /src/third_party/libicu-src/icu4c/source/ emscripten-builder
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
+DOCKER_RUN_IN_TIDY   =${DOCKER_ENV_SIDE} -w /src/third_party/tidy-html5/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: web all clean show-ports image js hooks push-image pull-image
@@ -113,15 +123,17 @@ third_party/libxml2/.gitignore:
 # 		--single-branch     \
 # 		--depth 1;
 
-# third_party/tidy-html5:
-# 	@ ${DOCKER_RUN} git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
-# 		--branch ${TIDYHTML_TAG} \
-# 		--single-branch     \
-# 		--depth 1;
+third_party/tidy-html5/.gitignore:
+	git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
+		--branch ${TIDYHTML_TAG} \
+		--single-branch     \
+		--depth 1;
+	cd third_party/tidy-html5 && \
+	git apply --no-index ../../patch/tidy-html.patch
 
 ########### Build the objects. ###########
 
-third_party/php${PHP_VERSION}-src/configure: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la
+third_party/php${PHP_VERSION}-src/configure: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la lib/lib/libtidy.a
 	@ echo -e "\e[33mBuilding PHP object files"
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} bash -c "emconfigure ./configure \
@@ -154,16 +166,18 @@ third_party/php${PHP_VERSION}-src/configure: third_party/php${PHP_VERSION}-src/e
 		--enable-xml       \
 		--enable-simplexml \
 		--with-gd          \
+		--with-tidy=/src/lib \
 		--disable-fiber-asm \
 	"
 
 lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configure third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
 	@ echo -e "\e[33mBuilding PHP symbol files"
 	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types'
-	@ ${DOCKER_RUN} cp -v third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
+	@ ${DOCKER_RUN} cp -v \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
 
 lib/pib_eval.o: lib/${PHP_AR}.a source/pib_eval.c
-	@ echo -e "\e[33mRun pkgconfig"
 	${DOCKER_RUN_IN_PHP} emcc -c ${OPTIMIZE} \
 		-I .     \
 		-I Zend  \
@@ -179,6 +193,15 @@ lib/lib/libxml2.la: third_party/libxml2/.gitignore
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
 	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` | ${TIMER}
 	${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
+
+lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
+	@ echo -e "\e[33mBuilding LibTidy"
+	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
+		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/"; \
+	${DOCKER_RUN_IN_TIDY} emmake make
+	${DOCKER_RUN_IN_TIDY} emmake make install
 
 ########### Build the final files. ###########
 
@@ -260,11 +283,13 @@ clean:
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* docs/php-*.js docs/php-*.wasm \
 		/src/lib/pib_eval.o /src/lib/${PHP_AR}.a \
 		# /src/lib/lib/libxml2.a
+php-clean:
+	@ ${DOCKER_RUN} rm -fv third_party/php${PHP_VERSION}-src/configure
 
 deep-clean:
 	@ ${DOCKER_RUN} rm -fv  *.js *.wasm *.data
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* third_party/php${PHP_VERSION}-src \
-		third_party/drupal-7.95 third_party/libxml2 \
+		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} \
 		dist/* docs/php-*.js docs/php-*.wasm \
 		sqlite-*.* \

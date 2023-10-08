@@ -14,3 +14,6 @@ indent_size              = 2
 end_of_line              = lf
 charset                  = utf-8
 
+[.patch]
+trim_trailing_whitespace = false
+insert_final_newline     = false

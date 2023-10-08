@@ -146,3 +146,15 @@ diff --git a/third_party/php8.2-src/Zend/zend_atomic.h b/third_party/php8.2-src/
 +#if 0
  #define	HAVE_C11_ATOMICS 1
  #elif ZEND_GCC_PREREQ(4, 7)
+diff --git a/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h b/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h
+--- a/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h
++++ b/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h
+@@ -17,7 +17,7 @@
+ #ifndef PHP_PDO_SQLITE_H
+ #define PHP_PDO_SQLITE_H
+
+-extern zend_module_entry pdo_sqlite_module_entry;
++zend_module_entry pdo_sqlite_module_entry;
+ #define phpext_pdo_sqlite_ptr &pdo_sqlite_module_entry
+
+ #include "php_version.h"
