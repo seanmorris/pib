@@ -37,10 +37,21 @@ DOCKER_ENV=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e EMCC_CORES=`nproc`                 \
 	-e EMCC_ALLOW_FASTCOMP=1
 
+DOCKER_ENV_SIDE=USERID=${UID} docker-compose -p phpwasm run --rm \
+	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
+	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
+	-e ENVIRONMENT=${ENVIRONMENT}         \
+	-e PHP_BRANCH=${PHP_BRANCH}           \
+	-e EMCC_CORES=`nproc` \
+	-e CFLAGS="-I/root/lib/include" \
+	-e EMCC_FLAGS=" -sSIDE_MODULE=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 "
+
 DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 DOCKER_RUN_IN_ICU4C  =${DOCKER_ENV} -w /src/third_party/libicu-src/icu4c/source/ emscripten-builder
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
+DOCKER_RUN_IN_TIDY   =${DOCKER_ENV_SIDE} -w /src/third_party/tidy-html5/ emscripten-builder
+DOCKER_RUN_IN_ICU    =${DOCKER_ENV_SIDE} -w /src/third_party/libicu-src/icu4c/source emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: web all clean show-ports image js hooks push-image pull-image
@@ -107,24 +118,27 @@ third_party/libxml2/.gitignore:
 		--single-branch     \
 		--depth 1;
 
-# third_party/libicu-src:
-# 	@ ${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-src \
-# 		--branch ${ICU_TAG} \
-# 		--single-branch     \
-# 		--depth 1;
+third_party/tidy-html5/.gitignore:
+	git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
+		--branch ${TIDYHTML_TAG} \
+		--single-branch     \
+		--depth 1;
+	cd third_party/tidy-html5 && \
+	git apply --no-index ../../patch/tidy-html.patch
 
-# third_party/tidy-html5:
-# 	@ ${DOCKER_RUN} git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
-# 		--branch ${TIDYHTML_TAG} \
-# 		--single-branch     \
-# 		--depth 1;
+third_party/libicu-src/.gitignore:
+	@ ${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-src \
+		--branch ${ICU_TAG} \
+		--single-branch     \
+		--depth 1;
 
 ########### Build the objects. ###########
 
-third_party/php${PHP_VERSION}-src/configure: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la
+third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libicudata.a
 	@ echo -e "\e[33mBuilding PHP object files"
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
-	${DOCKER_RUN_IN_PHP} bash -c "emconfigure ./configure \
+	${DOCKER_RUN_IN_PHP} emconfigure pkg-config --list-all
+	${DOCKER_RUN_IN_PHP} emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--enable-embed=static \
 		--with-layout=GNU  \
@@ -154,24 +168,27 @@ third_party/php${PHP_VERSION}-src/configure: third_party/php${PHP_VERSION}-src/e
 		--enable-xml       \
 		--enable-simplexml \
 		--with-gd          \
-		--disable-fiber-asm \
-	"
+		--with-tidy=/src/lib \
+		--enable-intl      \
+		--disable-fiber-asm
+	touch third_party/php${PHP_VERSION}-src/configured
 
-lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configure third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
+lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
 	@ echo -e "\e[33mBuilding PHP symbol files"
 	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types'
-	@ ${DOCKER_RUN} cp -v third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
+	@ ${DOCKER_RUN} cp -v \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
 
-lib/pib_eval.o: lib/${PHP_AR}.a source/pib_eval.c
-	@ echo -e "\e[33mRun pkgconfig"
+lib/pib_eval.o: lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.la
 	${DOCKER_RUN_IN_PHP} emcc -c ${OPTIMIZE} \
 		-I .     \
 		-I Zend  \
 		-I main  \
 		-I TSRM/ \
 		-I /src/third_party/libxml2 \
-		/src/source/pib_eval.c \
 		-o /src/lib/pib_eval.o \
+		/src/source/pib_eval.c
 
 lib/lib/libxml2.la: third_party/libxml2/.gitignore
 	@ echo -e "\e[33mBuilding LibXML2"
@@ -179,6 +196,20 @@ lib/lib/libxml2.la: third_party/libxml2/.gitignore
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
 	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` | ${TIMER}
 	${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
+
+lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
+	@ echo -e "\e[33mBuilding LibTidy"
+	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
+		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/"; \
+	${DOCKER_RUN_IN_TIDY} emmake make
+	${DOCKER_RUN_IN_TIDY} emmake make install
+
+lib/lib/libicudata.a: third_party/libicu-src/.gitignore
+	@ echo -e "\e[33mBuilding LibIcu"
+	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
+	${DOCKER_RUN_IN_ICU} emmake make clean install
 
 ########### Build the final files. ###########
 
@@ -196,11 +227,12 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s EXPORT_NAME="'PHP'"           \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
+	-s MAIN_MODULE                   \
 	-s USE_ZLIB=1                    \
-	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a
+	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
 php-web-drupal.wasm: ENVIRONMENT=web-drupal
-php-web-drupal.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h third_party/drupal-7.95/README.txt
+php-web-drupal.wasm: lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libicudata.a source/**.c source/**.h third_party/drupal-7.95/README.txt
 	@ echo -e "\e[33mBuilding PHP for web (drupal)"
 	@ ${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -260,11 +292,13 @@ clean:
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* docs/php-*.js docs/php-*.wasm \
 		/src/lib/pib_eval.o /src/lib/${PHP_AR}.a \
 		# /src/lib/lib/libxml2.a
+php-clean:
+	@ ${DOCKER_RUN} rm -fv third_party/php${PHP_VERSION}-src/configure
 
 deep-clean:
 	@ ${DOCKER_RUN} rm -fv  *.js *.wasm *.data
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* third_party/php${PHP_VERSION}-src \
-		third_party/drupal-7.95 third_party/libxml2 \
+		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} \
 		dist/* docs/php-*.js docs/php-*.wasm \
 		sqlite-*.* \

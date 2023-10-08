@@ -11,6 +11,7 @@ RUN set -euxo pipefail;\
 		build-essential \
 		automake \
 		libxml2-dev \
+		libicu-dev \
 		autoconf \
 		libtool \
 		pkgconf \
