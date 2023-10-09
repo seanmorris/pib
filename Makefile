@@ -250,7 +250,6 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s INVOKE_RUN=0                  \
 	-s MAIN_MODULE                   \
 	-s USE_ZLIB=1                    \
-	-s USE_LIBPNG=1                  \
 	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a /src/lib/lib/libiconv.a
 
 DEPENDENCIES=lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libicudata.a lib/lib/libiconv.a source/**.c source/**.h
@@ -274,7 +273,7 @@ php-web.wasm: ${DEPENDENCIES}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
 php-worker.wasm: ENVIRONMENT=worker
-php-worker.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h
+php-worker.wasm: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for workers"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -283,7 +282,7 @@ php-worker.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
 php-node.wasm: ENVIRONMENT=node
-php-node.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h
+php-node.wasm: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for node"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -292,7 +291,7 @@ php-node.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
 php-shell.wasm: ENVIRONMENT=shell
-php-shell.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h
+php-shell.wasm: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for shell"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -301,7 +300,7 @@ php-shell.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/**.c source/**.h
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
 php-webview.wasm: ENVIRONMENT=webview
-php-webview.wasm: lib/${PHP_AR}.a lib/pib_eval.o source/pib_eval.c
+php-webview.wasm: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for webview"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
