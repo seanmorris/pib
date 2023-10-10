@@ -31,8 +31,8 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 			: event.request.formData().then((formData)=>{
 				const post = {};
 
-				for (var key of formData.keys()) {
-					post[key] = formData.get(key);
+				for (const [key, value] of formData) {
+					post[key] = value;
 				}
 
 				return post;

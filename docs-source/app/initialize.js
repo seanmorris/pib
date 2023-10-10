@@ -41,15 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const renderAs    = Array.from(document.querySelectorAll('[name=render-as]'));
 
-	openFile.addEventListener('input', event =>{
+	openFile.addEventListener('input', event => {
 
-		const reader = new FileReader();
-
-		reader.onload = (event) => {
-			editor.setValue(event.target.result);
-		};
-
-		reader.readAsText(event.target.files[0]);
+		event.target.files[0].text().then(str => editor.setValue(str));
 
 	});
 
@@ -547,4 +541,3 @@ else
 	});
 
 });
-

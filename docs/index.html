@@ -4,7 +4,7 @@
 <script type="text/javascript">{
 // Allow the page to be served from any directory...
 const path  = location.pathname.replace(/index.html$/, '');
-path.match(/\/$/) || window.location.replace(
+path.match(/\/$/) || location.replace(
 	path+'/'+(location.search||'')
 );
 }</script>
@@ -228,4 +228,3 @@ sso++++++///++//oyyyyhhhyyyyssoo+++syhhhdmNNNNmmmmmmmmdhhyhmNNNmddhhddmmmmmmmmNm
 		</div>
 	</div>
 </body>
-

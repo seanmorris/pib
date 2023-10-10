@@ -1,4 +1,4 @@
-import { UniqueIndex } from './UniqueIndex';
+import { UniqueIndex } from './UniqueIndex.js';
 
 const STR = 'string';
 const NUM = 'number';
@@ -42,7 +42,7 @@ export class PhpBase extends EventTarget
 
 		};
 
-		const phpSettings = (window && window.phpSettings) ? window.phpSettings : {};
+		const phpSettings = globalThis.phpSettings || {};
 
 		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args)).then(php=>{
 
