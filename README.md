@@ -178,5 +178,3 @@ make
 ## php-wasm is a fork of oraoto/PIB...
 
 **[Run PIB](https://seanmorris.github.io/php-wasm/)**
-
-Firefox is recommended for better user experience.
