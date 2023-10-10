@@ -2,7 +2,15 @@
 
 Changes
 
-## 0.0.6 - Remodermizing
+## 0.0.8 - Remodermizing
+
+* Adding ESM Module support!
+* Fixing `<script type = "text/php">` support.
+* Adding support for iconv & html-tidy
+* Updating PHP to 8.2.11
+* Building with Emscripten 3.1.43
+
+## 0.0.7 - Remodermizing
 
 * Updating PHP to 8.2.4
 * Updating SQLite to 3.41

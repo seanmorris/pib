@@ -3,7 +3,7 @@
 	"description": "Run PHP right in the browser.",
 	"repository": "https://github.com/seanmorris/pib",
 	"author": "Oraoto <oraoto@outlook.com>",
-	"version": "0.0.0-esm-preview-5",
+	"version": "0.0.0-esm-preview-12",
 	"license": "Apache-2.0",
 	"dependencies": {},
 	"devDependencies": {
@@ -62,6 +62,7 @@
 		"UniqueIndex.js",
 		"UniqueIndex.mjs",
 		"ZVal.js",
-		"ZVal.mjs"
+		"ZVal.mjs",
+		"php-tags.mjs"
 	]
 }

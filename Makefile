@@ -177,9 +177,6 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
 	@ echo -e "\e[33mBuilding PHP symbol files"
 	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
-	@ ${DOCKER_RUN} cp -v \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
 
 ########### Build the final files. ###########
 
@@ -188,6 +185,7 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
+		--prefix=/src/lib/ \
 		--enable-embed=static \
 		--with-layout=GNU  \
 		--with-libxml      \

@@ -10,62 +10,83 @@ export class PhpWeb extends PhpBase
 	}
 }
 
-if(window && document)
-{
+const runPhpScript = element => {
+
+	const inlineCode = element.innerText.trim();
+
+	if(!inlineCode)
+	{
+		return;
+	}
+
+	const output = document.createElement('div');
+
+	element.parentNode.insertBefore(output, element.nextSibling);
+
+	let buffer = '';
+
 	const php = new PhpWeb;
 
-	const runScriptTag = element => {
-
-		const src = element.getAttribute('src');
-
-		if(src)
-		{
-			fetch(src).then(r => r.text()).then(r => {
-				php.run(r).then(exit=>console.log(exit));
-			});
-
-			return;
-		}
-
-		const inlineCode = element.innerText.trim();
-
-		if(inlineCode)
-		{
-			php.run(inlineCode);
-		}
-
-	};
+	php.addEventListener('output', (event) => buffer += event.detail);
 
 	php.addEventListener('ready', () => {
-		const phpSelector = 'script[type="text/php"]';
+		php.run(inlineCode).then(() => {
+			output.innerHTML = buffer;
+		});
+	});
 
-		const htmlNode = document.body.parentElement;
-		const observer = new MutationObserver((mutations, observer)=>{
-			for(const mutation of mutations)
-			{
-				for(const addedNode of mutation.addedNodes)
-				{
-					if(!addedNode.matches || !addedNode.matches(phpSelector))
-					{
-						continue;
-					}
+	php.addEventListener('error', (event) => {
+			event.detail.forEach(error => {
+			error = error.trim();
+			if(error) console.log(error);
+		})
+	});
+}
 
-					runScriptTag(addedNode);
-				}
+const runPhpScriptTag = element => {
 
-			}
+	const src = element.getAttribute('src');
+
+	if(src)
+	{
+		fetch(src).then(r => r.text()).then(r => {
+			runPhpScript(r).then(exit=>console.log(exit));
 		});
 
-		observer.observe(htmlNode, {childList: true, subtree: true});
+		return;
+	}
 
-		const phpNodes = document.querySelectorAll(phpSelector);
+	return runPhpScript(element);
+};
 
-		for(const phpNode of phpNodes)
+export const runPhpTags = (doc) => {
+
+	const phpSelector = 'script[type="text/php"]';
+
+	const htmlNode = doc.body.parentElement;
+	const observer = new MutationObserver((mutations, observer)=>{
+		for(const mutation of mutations)
 		{
-			const code = phpNode.innerText.trim();
+			for(const addedNode of mutation.addedNodes)
+			{
+				if(!addedNode.matches || !addedNode.matches(phpSelector))
+				{
+					continue;
+				}
 
-			runScriptTag(phpNode);
+				runPhpScriptTag(addedNode.innerText);
+			}
 		}
 	});
 
+	observer.observe(htmlNode, {childList: true, subtree: true});
+
+	const phpNodes = doc.querySelectorAll(phpSelector);
+
+	for(const phpNode of phpNodes)
+	{
+		const code = phpNode.innerText.trim();
+
+		runPhpScriptTag(phpNode);
+	}
 }
