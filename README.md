@@ -80,9 +80,11 @@ Using php-wasm is easy.
 
 ### Automatic
 
-Once the library is included in the page, you can run PHP right from a script tag! The src attribute is also supported for non-inline scripts.
+Use the `php-tags.js` script to run inline PHP:
 
 ```html
+<script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.mjs"></script>
+
 <script type = "text/php">
 	<?php vrzno_run('alert', ['Hello, world!']);
 </script>
