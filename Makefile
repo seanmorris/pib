@@ -136,7 +136,6 @@ third_party/libicu-src/.gitignore:
 
 third_party/libiconv-1.17/README:
 	wget https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz
-	mkdir third_party/libiconv
 	tar -xvzf libiconv-1.17.tar.gz -C third_party
 	rm libiconv-1.17.tar.gz
 
@@ -145,7 +144,6 @@ third_party/libiconv-1.17/README:
 third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libiconv.a # lib/lib/libicudata.a
 	@ echo -e "\e[33mBuilding PHP object files"
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
-	${DOCKER_RUN_IN_PHP} emconfigure pkg-config --list-all
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--enable-embed=static \
@@ -183,13 +181,13 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 
 lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
 	@ echo -e "\e[33mBuilding PHP symbol files"
-	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types'
+	@ ${DOCKER_RUN_IN_PHP} emmake make -B -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
 	@ ${DOCKER_RUN} cp -v \
 		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
 		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
 
 lib/pib_eval.o: lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.la
-	${DOCKER_RUN_IN_PHP} emcc -c ${OPTIMIZE} \
+	${DOCKER_RUN_IN_PHP} emcc -fPIC -c ${OPTIMIZE} \
 		-I .     \
 		-I Zend  \
 		-I main  \
@@ -202,7 +200,7 @@ lib/lib/libxml2.la: third_party/libxml2/.gitignore
 	@ echo -e "\e[33mBuilding LibXML2"
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
-	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` | ${TIMER}
+	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC' | ${TIMER}
 	${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
 
 lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
@@ -210,7 +208,7 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/"; \
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fpic"; \
 	${DOCKER_RUN_IN_TIDY} emmake make
 	${DOCKER_RUN_IN_TIDY} emmake make install
 
@@ -223,7 +221,7 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33mBuilding LibIconv"
 	${DOCKER_RUN_IN_ICONV} autoconf
 	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICONV} emmake make
+	${DOCKER_RUN_IN_ICONV} emmake make -B EMCC_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_ICONV} emmake make install
 
 ########### Build the final files. ###########
@@ -316,12 +314,18 @@ deep-clean:
 	@ ${DOCKER_RUN} rm -fv  *.js *.wasm *.data
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* third_party/php${PHP_VERSION}-src \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
-		third_party/libicu-src third_party/${SQLITE_DIR} \
+		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
 		dist/* docs/php-*.js docs/php-*.wasm \
 		sqlite-*.* \
 
 show-ports:
 	@ ${DOCKER_RUN} emcc --show-ports
+
+show-version:
+	@ ${DOCKER_RUN} source /emsdk_portable/emsdk_env.sh
+
+show-files:
+	@ ${DOCKER_RUN} cat /root/.bashrc
 
 hooks:
 	@ git config core.hooksPath githooks
