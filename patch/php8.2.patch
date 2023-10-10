@@ -146,6 +146,7 @@ diff --git a/third_party/php8.2-src/Zend/zend_atomic.h b/third_party/php8.2-src/
 +#if 0
  #define	HAVE_C11_ATOMICS 1
  #elif ZEND_GCC_PREREQ(4, 7)
+
 diff --git a/third_party/php8.2-src/ext/standard/credits.c b/third_party/php8.2-src/ext/standard/credits.c
 --- a/third_party/php8.2-src/ext/standard/credits.c
 +++ b/third_party/php8.2-src/ext/standard/credits.c
@@ -160,4 +161,3 @@ diff --git a/third_party/php8.2-src/ext/standard/credits.c b/third_party/php8.2-
 +
  	if (flag & PHP_CREDITS_GROUP) {
  		/* Group */
-

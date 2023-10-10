@@ -1,5 +1,4 @@
-FROM trzeci/emscripten:1.39.18-fastcomp
-MAINTAINER Sean Morris <sean@seanmorr.is>
+FROM emscripten/emsdk:3.1.43
 
 SHELL ["/bin/bash", "-c"]
 

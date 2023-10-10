@@ -36,7 +36,6 @@ DOCKER_ENV=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
 	-e EMCC_CORES=`nproc`                 \
-	-e EMCC_ALLOW_FASTCOMP=1
 
 DOCKER_ENV_SIDE=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
@@ -46,6 +45,7 @@ DOCKER_ENV_SIDE=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e EMCC_CORES=`nproc`                 \
 	-e CFLAGS=" -I/root/lib/include " \
 	-e EMCC_FLAGS=" -sSIDE_MODULE=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 "
+
 
 DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
@@ -59,8 +59,8 @@ TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: web all clean show-ports image js hooks push-image pull-image
 
 all: php-web-drupal.wasm php-web.wasm php-webview.wasm php-node.wasm php-shell.wasm php-worker.wasm js
-web-drupal: lib/pib_eval.o php-web-drupal.wasm
-web: lib/pib_eval.o php-web.wasm
+web-drupal: php-web-drupal.wasm
+web: php-web.wasm
 	@ echo "Done!"
 
 ########### Collect & patch the source code. ###########
@@ -141,7 +141,7 @@ third_party/libiconv-1.17/README:
 
 ########### Build the objects. ###########
 
-third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libiconv.a # lib/lib/libicudata.a
+third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a # lib/lib/libicudata.a
 	@ echo -e "\e[33mBuilding PHP object files"
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure \
@@ -177,26 +177,16 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 		--with-iconv=/src/lib \
 		--with-tidy=/src/lib \
 		--disable-fiber-asm
-	touch third_party/php${PHP_VERSION}-src/configured
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configured
 
 lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
 	@ echo -e "\e[33mBuilding PHP symbol files"
-	@ ${DOCKER_RUN_IN_PHP} emmake make -B -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
+	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
 	@ ${DOCKER_RUN} cp -v \
 		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
 		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
 
-lib/pib_eval.o: lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.la
-	${DOCKER_RUN_IN_PHP} emcc -fPIC -c ${OPTIMIZE} \
-		-I .     \
-		-I Zend  \
-		-I main  \
-		-I TSRM/ \
-		-I /src/third_party/libxml2 \
-		-o /src/lib/pib_eval.o \
-		/src/source/pib_eval.c
-
-lib/lib/libxml2.la: third_party/libxml2/.gitignore
+lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33mBuilding LibXML2"
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
@@ -227,10 +217,15 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 ########### Build the final files. ###########
 
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
+	-I .     \
+	-I Zend  \
+	-I main  \
+	-I TSRM/ \
+	-I /src/third_party/libxml2 \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.js \
 	--llvm-lto 2                     \
-	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec" "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string", "_exec_callback", "_del_callback"]' \
-	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
+	-s EXPORTED_FUNCTIONS=_pib_init,_pib_destroy,_pib_run,_pib_exec,_pib_refresh,_main,_php_embed_init,_php_embed_shutdown,_php_embed_shutdown,_zend_eval_string,_exec_callback,_del_callback \
+	-s EXPORTED_RUNTIME_METHODS='"ccall", "UTF8ToString", "lengthBytesUTF8"' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
 	-s MAXIMUM_MEMORY=2048mb         \
 	-s INITIAL_MEMORY=${INITIAL_MEMORY} \
@@ -240,11 +235,11 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s EXPORT_NAME="'PHP'"           \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
-	-s MAIN_MODULE                   \
 	-s USE_ZLIB=1                    \
-	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/lib/libiconv.a # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
+	/src/lib/lib/libiconv.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/${PHP_AR}.a /src/source/pib_eval.c
+# /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
-DEPENDENCIES=lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libiconv.a source/**.c source/**.h # lib/lib/libicudata.a
+DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libiconv.a source/**.c source/**.h lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a# lib/lib/libicudata.a
 
 php-web-drupal.wasm: ENVIRONMENT=web-drupal
 php-web-drupal.wasm: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
