@@ -20,7 +20,7 @@ PHP_AR         ?=libphp
 # PHP_AR         ?=libphp7
 
 VRZNO_BRANCH   ?=DomAccess8.2
-ICU_TAG        ?=release-67-1
+ICU_TAG        ?=release-74-rc
 LIBXML2_TAG    ?=v2.9.10
 TIDYHTML_TAG   ?=5.6.0
 ICONV_TAG      ?=v1.17
@@ -140,14 +140,9 @@ third_party/libiconv-1.17/README:
 	tar -xvzf libiconv-1.17.tar.gz -C third_party
 	rm libiconv-1.17.tar.gz
 
-	# @ ${DOCKER_RUN} git clone https://github.com/roboticslibrary/libiconv.git third_party \
-	# 	--branch ${ICONV_TAG} \
-	# 	--single-branch     \
-	# 	--depth 1;
-
 ########### Build the objects. ###########
 
-third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libicudata.a
+third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libiconv.a # lib/lib/libicudata.a
 	@ echo -e "\e[33mBuilding PHP object files"
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure pkg-config --list-all
@@ -183,7 +178,6 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 		--with-gd          \
 		--with-iconv=/src/lib \
 		--with-tidy=/src/lib \
-		--enable-intl      \
 		--disable-fiber-asm
 	touch third_party/php${PHP_VERSION}-src/configured
 
@@ -220,10 +214,10 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emmake make
 	${DOCKER_RUN_IN_TIDY} emmake make install
 
-lib/lib/libicudata.a: third_party/libicu-src/.gitignore
-	@ echo -e "\e[33mBuilding LibIcu"
-	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICU} emmake make clean install
+# lib/lib/libicudata.a: third_party/libicu-src/.gitignore
+# 	@ echo -e "\e[33mBuilding LibIcu"
+# 	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
+# 	${DOCKER_RUN_IN_ICU} emmake make clean install
 
 lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33mBuilding LibIconv"
@@ -250,9 +244,9 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s INVOKE_RUN=0                  \
 	-s MAIN_MODULE                   \
 	-s USE_ZLIB=1                    \
-	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a /src/lib/lib/libiconv.a
+	/src/lib/pib_eval.o /src/lib/${PHP_AR}.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/lib/libiconv.a # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
-DEPENDENCIES=lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libicudata.a lib/lib/libiconv.a source/**.c source/**.h
+DEPENDENCIES=lib/${PHP_AR}.a lib/pib_eval.o lib/lib/libiconv.a source/**.c source/**.h # lib/lib/libicudata.a
 
 php-web-drupal.wasm: ENVIRONMENT=web-drupal
 php-web-drupal.wasm: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
@@ -347,8 +341,8 @@ push-image:
 	@ docker-compose push
 
 demo:php-web-drupal.wasm
-	cd docs-source && brunch b -p
 	make js
+	cd docs-source && brunch b -p
 
 ########### NOPS ###########
 third_party/php${PHP_VERSION}-src/**.c:
