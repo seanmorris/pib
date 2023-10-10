@@ -61,9 +61,9 @@ DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emsc
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: web all clean show-ports image js hooks push-image pull-image
 
-all: php-web-drupal.js php-web.js php-webview.js php-node.js php-shell.js php-worker.js \
-	php-web-drupal.mjs php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
-	js
+all: cjs mjs js
+cjs: php-web-drupal.js php-web.js php-webview.js php-node.js php-shell.js php-worker.js
+mjs: php-web-drupal.mjs php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs
 web-drupal: php-web-drupal.wasm php-web-drupal.mjs
 web: php-web.wasm php-web.mjs
 	@ echo "Done!"
@@ -371,7 +371,7 @@ show-files:
 hooks:
 	@ git config core.hooksPath githooks
 
-js:
+js: cjs mjs
 	@ echo -e "\e[33mBuilding JS"
 	@ npm install
 	@ npx babel source --out-dir .

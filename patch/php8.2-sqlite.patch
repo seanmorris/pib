@@ -62,6 +62,19 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/ph
  #include "php_pdo_sqlite.h"
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
+diff --git a/ext/pdo_sqlite/php_pdo_sqlite.h b/ext/pdo_sqlite/php_pdo_sqlite.h
+index 1bba9e35..62cf4a5f 100644
+--- a/ext/pdo_sqlite/php_pdo_sqlite.h
++++ b/ext/pdo_sqlite/php_pdo_sqlite.h
+@@ -17,7 +17,7 @@
+ #ifndef PHP_PDO_SQLITE_H
+ #define PHP_PDO_SQLITE_H
+
+-extern zend_module_entry pdo_sqlite_module_entry;
++zend_module_entry pdo_sqlite_module_entry;
+ #define phpext_pdo_sqlite_ptr &pdo_sqlite_module_entry
+
+ #include "php_version.h"
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
 index 83ea2d60..7265bfc7 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
