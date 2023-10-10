@@ -30,6 +30,8 @@ SQLITE_DIR     ?=sqlite3.41-src
 
 PKG_CONFIG_PATH ?=/src/lib/lib/pkgconfig
 
+NPM_PUBLISH_DRY?=--dry-run
+
 DOCKER_ENV=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
@@ -144,19 +146,12 @@ third_party/libiconv-1.17/README:
 
 ########### Build the objects. ###########
 
-lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
-	@ echo -e "\e[33mBuilding PHP symbol files"
-	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
-	@ ${DOCKER_RUN} cp -v \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
-
 lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33mBuilding LibXML2"
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
-	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
-	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC' | ${TIMER}
-	${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
+	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib
+	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC'
+	${DOCKER_RUN_IN_LIBXML} emmake make install
 
 lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	@ echo -e "\e[33mBuilding LibTidy"
@@ -167,10 +162,10 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emmake make -j`nproc`
 	${DOCKER_RUN_IN_TIDY} emmake make install
 
-lib/lib/libicudata.a: third_party/libicu-src/.gitignore
-	@ echo -e "\e[33mBuilding LibIcu"
-	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICU} emmake make clean install
+# lib/lib/libicudata.a: third_party/libicu-src/.gitignore
+# 	@ echo -e "\e[33mBuilding LibIcu"
+# 	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
+# 	${DOCKER_RUN_IN_ICU} emmake make clean install
 
 lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33mBuilding LibIconv"
@@ -179,9 +174,16 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	${DOCKER_RUN_IN_ICONV} emmake make -j`nproc` EMCC_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_ICONV} emmake make install
 
+lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
+	@ echo -e "\e[33mBuilding PHP symbol files"
+	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
+	@ ${DOCKER_RUN} cp -v \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
+
 ########### Build the final files. ###########
 
-third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libicudata.a
+third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a # lib/lib/libicudata.a
 	@ echo -e "\e[33mConfiguring PHP..."
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure \
@@ -239,11 +241,9 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
 	-s USE_ZLIB=1                    \
-	/src/lib/lib/libiconv.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a \
-	/src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a \
-	/src/lib/${PHP_AR}.a /src/source/pib_eval.c
+	/src/lib/lib/libiconv.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/source/pib_eval.c /src/lib/${PHP_AR}.a
 
-DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libiconv.a source/**.c source/**.h lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a lib/lib/libicudata.a
+DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libiconv.a source/**.c source/**.h lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a lib/lib/libtidy.a # lib/lib/libicudata.a
 
 php-web-drupal.js: ENVIRONMENT=web-drupal
 php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
@@ -378,6 +378,7 @@ js:
 	@ find source -name "*.js" | while read JS; \
 		do cp $${JS} $$(basename $${JS%.js}.mjs); \
 		sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $$(basename $${JS%.js}.mjs); \
+		sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $$(basename $${JS%.js}.mjs); \
 	done;
 
 image:
@@ -389,9 +390,12 @@ pull-image:
 push-image:
 	@ docker-compose push
 
-demo:php-web-drupal.wasm
+demo: php-web-drupal.js
 	make js
 	cd docs-source && brunch b -p
+
+publish:
+	npm publish ${NPM_PUBLISH_DRY}
 
 ########### NOPS ###########
 third_party/php${PHP_VERSION}-src/**.c:

@@ -3,7 +3,7 @@
 	"description": "Run PHP right in the browser.",
 	"repository": "https://github.com/seanmorris/pib",
 	"author": "Oraoto <oraoto@outlook.com>",
-	"version": "0.0.7-esm-preview-0",
+	"version": "0.0.0-esm-preview-4",
 	"license": "Apache-2.0",
 	"dependencies": {},
 	"devDependencies": {
@@ -24,6 +24,8 @@
 		}
 	],
 	"files": [
+		"LICENSE",
+		"NOTICE",
 		"Php.js",
 		"Php.mjs",
 		"PhpBase.js",
