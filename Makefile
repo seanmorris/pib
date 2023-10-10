@@ -10,6 +10,7 @@ PRELOAD_ASSETS ?=preload/
 ASSERTIONS     ?=0
 OPTIMIZE       ?=-O3
 RELEASE_SUFFIX ?=
+BUILD_TYPE     ?=js
 
 PHP_VERSION    ?=8.2
 PHP_BRANCH     ?=php-8.2.11
@@ -58,9 +59,11 @@ DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emsc
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: web all clean show-ports image js hooks push-image pull-image
 
-all: php-web-drupal.wasm php-web.wasm php-webview.wasm php-node.wasm php-shell.wasm php-worker.wasm js
-web-drupal: php-web-drupal.wasm
-web: php-web.wasm
+all: php-web-drupal.js php-web.js php-webview.js php-node.js php-shell.js php-worker.js \
+	php-web-drupal.mjs php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
+	js
+web-drupal: php-web-drupal.wasm php-web-drupal.mjs
+web: php-web.wasm php-web.mjs
 	@ echo "Done!"
 
 ########### Collect & patch the source code. ###########
@@ -141,8 +144,45 @@ third_party/libiconv-1.17/README:
 
 ########### Build the objects. ###########
 
-third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a # lib/lib/libicudata.a
-	@ echo -e "\e[33mBuilding PHP object files"
+lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
+	@ echo -e "\e[33mBuilding PHP symbol files"
+	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
+	@ ${DOCKER_RUN} cp -v \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
+
+lib/lib/libxml2.a: third_party/libxml2/.gitignore
+	@ echo -e "\e[33mBuilding LibXML2"
+	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
+	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
+	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC' | ${TIMER}
+	${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
+
+lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
+	@ echo -e "\e[33mBuilding LibTidy"
+	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
+		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fpic"; \
+	${DOCKER_RUN_IN_TIDY} emmake make -j`nproc`
+	${DOCKER_RUN_IN_TIDY} emmake make install
+
+lib/lib/libicudata.a: third_party/libicu-src/.gitignore
+	@ echo -e "\e[33mBuilding LibIcu"
+	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
+	${DOCKER_RUN_IN_ICU} emmake make clean install
+
+lib/lib/libiconv.a: third_party/libiconv-1.17/README
+	@ echo -e "\e[33mBuilding LibIconv"
+	${DOCKER_RUN_IN_ICONV} autoconf
+	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-shared=no --enable-static=yes
+	${DOCKER_RUN_IN_ICONV} emmake make -j`nproc` EMCC_CFLAGS='-fPIC'
+	${DOCKER_RUN_IN_ICONV} emmake make install
+
+########### Build the final files. ###########
+
+third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c source/sqlite3.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libicudata.a
+	@ echo -e "\e[33mConfiguring PHP..."
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
@@ -179,50 +219,13 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 		--disable-fiber-asm
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configured
 
-lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
-	@ echo -e "\e[33mBuilding PHP symbol files"
-	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
-	@ ${DOCKER_RUN} cp -v \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
-
-lib/lib/libxml2.a: third_party/libxml2/.gitignore
-	@ echo -e "\e[33mBuilding LibXML2"
-	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
-	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
-	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC' | ${TIMER}
-	${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
-
-lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
-	@ echo -e "\e[33mBuilding LibTidy"
-	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
-		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fpic"; \
-	${DOCKER_RUN_IN_TIDY} emmake make
-	${DOCKER_RUN_IN_TIDY} emmake make install
-
-# lib/lib/libicudata.a: third_party/libicu-src/.gitignore
-# 	@ echo -e "\e[33mBuilding LibIcu"
-# 	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
-# 	${DOCKER_RUN_IN_ICU} emmake make clean install
-
-lib/lib/libiconv.a: third_party/libiconv-1.17/README
-	@ echo -e "\e[33mBuilding LibIconv"
-	${DOCKER_RUN_IN_ICONV} autoconf
-	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICONV} emmake make -B EMCC_CFLAGS='-fPIC'
-	${DOCKER_RUN_IN_ICONV} emmake make install
-
-########### Build the final files. ###########
-
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-I .     \
 	-I Zend  \
 	-I main  \
 	-I TSRM/ \
 	-I /src/third_party/libxml2 \
-	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.js \
+	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
 	--llvm-lto 2                     \
 	-s EXPORTED_FUNCTIONS=_pib_init,_pib_destroy,_pib_run,_pib_exec,_pib_refresh,_main,_php_embed_init,_php_embed_shutdown,_php_embed_shutdown,_zend_eval_string,_exec_callback,_del_callback \
 	-s EXPORTED_RUNTIME_METHODS='"ccall", "UTF8ToString", "lengthBytesUTF8"' \
@@ -236,13 +239,14 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
 	-s USE_ZLIB=1                    \
-	/src/lib/lib/libiconv.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/lib/${PHP_AR}.a /src/source/pib_eval.c
-# /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
+	/src/lib/lib/libiconv.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a \
+	/src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a \
+	/src/lib/${PHP_AR}.a /src/source/pib_eval.c
 
-DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libiconv.a source/**.c source/**.h lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a# lib/lib/libicudata.a
+DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libiconv.a source/**.c source/**.h lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a lib/lib/libicudata.a
 
-php-web-drupal.wasm: ENVIRONMENT=web-drupal
-php-web-drupal.wasm: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
+php-web-drupal.js: ENVIRONMENT=web-drupal
+php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
 	@ echo -e "\e[33mBuilding PHP for web (drupal)"
 	@ ${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -250,8 +254,14 @@ php-web-drupal.wasm: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-web.wasm: ENVIRONMENT=web
-php-web.wasm: ${DEPENDENCIES}
+php-web-drupal.mjs: BUILD_TYPE=mjs
+php-web-drupal.mjs: ENVIRONMENT=web-drupal
+php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
+	@ ${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
+
+php-web.js: ENVIRONMENT=web
+php-web.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for web"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -259,8 +269,15 @@ php-web.wasm: ${DEPENDENCIES}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-worker.wasm: ENVIRONMENT=worker
-php-worker.wasm: ${DEPENDENCIES}
+php-web.mjs: BUILD_TYPE=mjs
+php-web.mjs: ENVIRONMENT=web
+php-web.mjs: ${DEPENDENCIES}
+	@ ${FINAL_BUILD}
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+
+php-worker.js: ENVIRONMENT=worker
+php-worker.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for workers"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -268,8 +285,15 @@ php-worker.wasm: ${DEPENDENCIES}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-node.wasm: ENVIRONMENT=node
-php-node.wasm: ${DEPENDENCIES}
+php-worker.mjs: BUILD_TYPE=mjs
+php-worker.mjs: ENVIRONMENT=worker
+php-worker.mjs: ${DEPENDENCIES}
+	@ ${FINAL_BUILD}
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+
+php-node.js: ENVIRONMENT=node
+php-node.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for node"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -277,8 +301,16 @@ php-node.wasm: ${DEPENDENCIES}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-shell.wasm: ENVIRONMENT=shell
-php-shell.wasm: ${DEPENDENCIES}
+php-node.mjs: BUILD_TYPE=mjs
+php-node.mjs: ENVIRONMENT=node
+php-node.mjs: ${DEPENDENCIES}
+	@ ${FINAL_BUILD}
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+
+
+php-shell.js: ENVIRONMENT=shell
+php-shell.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for shell"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -286,8 +318,15 @@ php-shell.wasm: ${DEPENDENCIES}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-webview.wasm: ENVIRONMENT=webview
-php-webview.wasm: ${DEPENDENCIES}
+php-shell.mjs: BUILD_TYPE=mjs
+php-shell.mjs: ENVIRONMENT=shell
+php-shell.mjs: ${DEPENDENCIES}
+	@ ${FINAL_BUILD}
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+
+php-webview.js: ENVIRONMENT=webview
+php-webview.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for webview"
 	@ ${FINAL_BUILD}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
@@ -295,10 +334,17 @@ php-webview.wasm: ${DEPENDENCIES}
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
+php-webview.mjs: BUILD_TYPE=mjs
+php-webview.mjs: ENVIRONMENT=webview
+php-webview.mjs: ${DEPENDENCIES}
+	@ ${FINAL_BUILD}
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+
 ########### Clerical stuff. ###########
 
 clean:
-	@ ${DOCKER_RUN} rm -fv  *.js *.wasm *.data
+	@ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* docs/php-*.js docs/php-*.wasm \
 		/src/lib/pib_eval.o /src/lib/${PHP_AR}.a \
 		# /src/lib/lib/libxml2.a
@@ -306,7 +352,7 @@ php-clean:
 	@ ${DOCKER_RUN} rm -fv third_party/php${PHP_VERSION}-src/configure
 
 deep-clean:
-	@ ${DOCKER_RUN} rm -fv  *.js *.wasm *.data
+	@ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* third_party/php${PHP_VERSION}-src \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
@@ -327,8 +373,12 @@ hooks:
 
 js:
 	@ echo -e "\e[33mBuilding JS"
-	@ npm install | ${TIMER}
-	@ npx babel source --out-dir . | ${TIMER}
+	@ npm install
+	@ npx babel source --out-dir .
+	@ find source -name "*.js" | while read JS; \
+		do cp $${JS} $$(basename $${JS%.js}.mjs); \
+		sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $$(basename $${JS%.js}.mjs); \
+	done;
 
 image:
 	@ docker-compose build
