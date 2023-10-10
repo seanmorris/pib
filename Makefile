@@ -80,6 +80,7 @@ third_party/${SQLITE_DIR}/sqlite3.c: patch/sqlite3-wasm.patch
 
 third_party/php${PHP_VERSION}-src/patched: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33mDownloading and patching PHP"
+	@ ${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src
 	@ ${DOCKER_RUN} git clone https://github.com/php/php-src.git third_party/php${PHP_VERSION}-src \
 		--branch ${PHP_BRANCH}   \
 		--single-branch          \
@@ -177,6 +178,10 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c source/sqlite3.c
 	@ echo -e "\e[33mBuilding PHP symbol files"
 	@ ${DOCKER_RUN_IN_PHP} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
+	@ ${DOCKER_RUN} cp -v \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
+		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a \
+		lib/lib/
 
 ########### Build the final files. ###########
 
@@ -185,7 +190,6 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
-		--prefix=/src/lib/ \
 		--enable-embed=static \
 		--with-layout=GNU  \
 		--with-libxml      \
@@ -225,6 +229,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-I main  \
 	-I TSRM/ \
 	-I /src/third_party/libxml2 \
+	-I ext/pdo_sqlite/ \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
 	--llvm-lto 2                     \
 	-s EXPORTED_FUNCTIONS=_pib_init,_pib_destroy,_pib_run,_pib_exec,_pib_refresh,_main,_php_embed_init,_php_embed_shutdown,_php_embed_shutdown,_zend_eval_string,_exec_callback,_del_callback \
@@ -239,7 +244,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
 	-s USE_ZLIB=1                    \
-	/src/lib/lib/libiconv.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/source/pib_eval.c /src/lib/${PHP_AR}.a
+	/src/lib/lib/libiconv.a /src/lib/lib/libxml2.a /src/lib/lib/libtidy.a /src/source/pib_eval.c /src/third_party/php8.2-src/.libs/${PHP_AR}.a
 
 DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libiconv.a source/**.c source/**.h lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a lib/lib/libtidy.a # lib/lib/libicudata.a
 

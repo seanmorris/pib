@@ -1,33 +1,57 @@
+diff --git a/third_party/php8.2-src/Zend/zend_atomic.h b/third_party/php8.2-src/Zend/zend_atomic.h
+index 617cde0e..fe9cba5c 100644
+--- a/third_party/php8.2-src/Zend/zend_atomic.h
++++ b/third_party/php8.2-src/Zend/zend_atomic.h
+@@ -23,7 +23,7 @@
+ 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
+ 
+ /* Builtins are used to avoid library linkage */
+-#if __has_feature(c_atomic)
++#if 0
+ #define	HAVE_C11_ATOMICS 1
+ #elif ZEND_GCC_PREREQ(4, 7)
+ #define	HAVE_GNUC_ATOMICS 1
 diff --git a/third_party/php8.2-src/ext/pdo/config.m4 b/third_party/php8.2-src/ext/pdo/config.m4
+index 9b9a3e36..d93bc714 100644
 --- a/third_party/php8.2-src/ext/pdo/config.m4
 +++ b/third_party/php8.2-src/ext/pdo/config.m4
-@@ -4,15 +4,14 @@ PHP_ARG_ENABLE([pdo],
+@@ -4,15 +4,12 @@ PHP_ARG_ENABLE([pdo],
      [Disable PHP Data Objects support])],
    [yes])
-
+ 
 -if test "$PHP_PDO" != "no"; then
--
--  dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
--  PHP_PDO=yes
 +dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
 +PHP_PDO=yes
-
-+if test "$PHP_PDO" != "no"; then
-+  dnl so we always include the known-good working hack.
-   PHP_NEW_EXTENSION(pdo, pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c, $ext_shared)
-   PHP_ADD_EXTENSION_DEP(pdo, spl, true)
-   PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h php_pdo_error.h])
-
+ 
+-  dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
+-  PHP_PDO=yes
++dnl so we always include the known-good working hack.
++PHP_NEW_EXTENSION(pdo, pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c, $ext_shared)
++PHP_ADD_EXTENSION_DEP(pdo, spl, true)
++PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h php_pdo_error.h])
+ 
+-  PHP_NEW_EXTENSION(pdo, pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c, $ext_shared)
+-  PHP_ADD_EXTENSION_DEP(pdo, spl, true)
+-  PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h php_pdo_error.h])
+-
 -  dnl so we always include the known-good working hack.
-   PHP_ADD_MAKEFILE_FRAGMENT
- fi
+-  PHP_ADD_MAKEFILE_FRAGMENT
+-fi
++PHP_ADD_MAKEFILE_FRAGMENT
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/config.m4 b/third_party/php8.2-src/ext/pdo_sqlite/config.m4
+index 64311eaa..dd850f79 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/config.m4
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/config.m4
-@@ -10,23 +10,6 @@ if test "$PHP_PDO_SQLITE" != "no"; then
-     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-   fi
-
+@@ -4,31 +4,11 @@ PHP_ARG_WITH([pdo-sqlite],
+     [PDO: sqlite 3 support.])],
+   [$PHP_PDO])
+ 
+-if test "$PHP_PDO_SQLITE" != "no"; then
+-
+-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
+-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
+-  fi
+-
 -  PHP_CHECK_PDO_INCLUDES
 -
 -  PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7])
@@ -43,15 +67,24 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/config.m4 b/third_party/php8.
 -  PHP_CHECK_LIBRARY(sqlite3, sqlite3_column_table_name, [
 -    AC_DEFINE(HAVE_SQLITE3_COLUMN_TABLE_NAME, 1, [have sqlite3_column_table_name])
 -  ], [], [$PDO_SQLITE_SHARED_LIBADD])
--
++if test "$PHP_PDO" = "no"; then
++  AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
++fi
+ 
 -  PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
-   PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
-     $ext_shared,,-I$pdo_cv_inc_path)
-
+-  PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
+-    $ext_shared,,-I$pdo_cv_inc_path)
++PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
++  $ext_shared,,-I$pdo_cv_inc_path)
+ 
+-  PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
+-fi
++PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
+index 81761b13..09424231 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
-@@ -23,8 +23,8 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
@@ -62,10 +95,24 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/ph
  #include "php_pdo_sqlite.h"
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
+diff --git a/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h b/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h
+index 1bba9e35..62cf4a5f 100644
+--- a/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h
++++ b/third_party/php8.2-src/ext/pdo_sqlite/php_pdo_sqlite.h
+@@ -17,7 +17,7 @@
+ #ifndef PHP_PDO_SQLITE_H
+ #define PHP_PDO_SQLITE_H
+ 
+-extern zend_module_entry pdo_sqlite_module_entry;
++zend_module_entry pdo_sqlite_module_entry;
+ #define phpext_pdo_sqlite_ptr &pdo_sqlite_module_entry
+ 
+ #include "php_version.h"
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
+index de5170a3..2ea31b62 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
-@@ -23,8 +23,8 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
@@ -77,9 +124,10 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c b/third_party
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c
+index 90de059a..8dc0ad36 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c
-@@ -23,8 +23,8 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
@@ -89,13 +137,14 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c b/third_pa
 +#include "../pdo/php_pdo_driver.h"
  #include "php_pdo_sqlite.h"
  #include "php_pdo_sqlite_int.h"
-
+ 
 diff --git a/third_party/php8.2-src/ext/sqlite3/config0.m4 b/third_party/php8.2-src/ext/sqlite3/config0.m4
+index 2373d13d..b94508f3 100644
 --- a/third_party/php8.2-src/ext/sqlite3/config0.m4
 +++ b/third_party/php8.2-src/ext/sqlite3/config0.m4
 @@ -5,26 +5,6 @@ PHP_ARG_WITH([sqlite3],
    [yes])
-
+ 
  if test $PHP_SQLITE3 != "no"; then
 -  PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7])
 -
@@ -117,42 +166,17 @@ diff --git a/third_party/php8.2-src/ext/sqlite3/config0.m4 b/third_party/php8.2-
 -    [$SQLITE3_SHARED_LIBADD]
 -  )
 -
--  PHP_NEW_EXTENSION(sqlite3, sqlite3.c, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-+  PHP_NEW_EXTENSION(sqlite3, sqlite3.c, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+   PHP_NEW_EXTENSION(sqlite3, sqlite3.c, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
    PHP_SUBST(SQLITE3_SHARED_LIBADD)
  fi
-diff --git a/third_party/php8.2-src/sapi/embed/php_embed.c b/third_party/php8.2-src/sapi/embed/php_embed.c
---- a/third_party/php8.2-src/sapi/embed/php_embed.c
-+++ b/third_party/php8.2-src/sapi/embed/php_embed.c
-@@ -243,8 +243,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
- 		return FAILURE;
- 	}
-
--	SG(headers_sent) = 1;
--	SG(request_info).no_headers = 1;
-+	SG(headers_sent) = 0;
-+	SG(request_info).no_headers = 0;
- 	php_register_variable("PHP_SELF", "-", NULL);
-
- 	return SUCCESS;
-diff --git a/third_party/php8.2-src/Zend/zend_atomic.h b/third_party/php8.2-src/Zend/zend_atomic.h
---- a/third_party/php8.2-src/Zend/zend_atomic.h
-+++ b/third_party/php8.2-src/Zend/zend_atomic.h
-@@ -23,5 +23,5 @@
- 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
-
- /* Builtins are used to avoid library linkage */
--#if __has_feature(c_atomic)
-+#if 0
- #define	HAVE_C11_ATOMICS 1
- #elif ZEND_GCC_PREREQ(4, 7)
 diff --git a/third_party/php8.2-src/ext/standard/credits.c b/third_party/php8.2-src/ext/standard/credits.c
+index 4e8722db..13433301 100644
 --- a/third_party/php8.2-src/ext/standard/credits.c
 +++ b/third_party/php8.2-src/ext/standard/credits.c
 @@ -33,6 +33,11 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
  		PUTS("PHP Credits\n");
  	}
-
+ 
 +	php_info_print_table_start();
 +	php_info_print_table_header(1, "php-wasm");
 +	php_info_print_table_row(1, "Sean Morris & Oraoto");
@@ -160,4 +184,19 @@ diff --git a/third_party/php8.2-src/ext/standard/credits.c b/third_party/php8.2-
 +
  	if (flag & PHP_CREDITS_GROUP) {
  		/* Group */
-
+ 
+diff --git a/third_party/php8.2-src/sapi/embed/php_embed.c b/third_party/php8.2-src/sapi/embed/php_embed.c
+index 4b94bd98..fc44d302 100644
+--- a/third_party/php8.2-src/sapi/embed/php_embed.c
++++ b/third_party/php8.2-src/sapi/embed/php_embed.c
+@@ -243,8 +243,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
+ 		return FAILURE;
+ 	}
+ 
+-	SG(headers_sent) = 1;
+-	SG(request_info).no_headers = 1;
++	SG(headers_sent) = 0;
++	SG(request_info).no_headers = 0;
+ 	php_register_variable("PHP_SELF", "-", NULL);
+ 
+ 	return SUCCESS;
