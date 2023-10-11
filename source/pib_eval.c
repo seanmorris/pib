@@ -8,9 +8,6 @@
 
 #include "../php8.2-src/ext/vrzno/php_vrzno.h"
 
-#include "sqlite3.h"
-#include "sqlite3.c"
-
 int main() { return 0; }
 
 int EMSCRIPTEN_KEEPALIVE pib_init()
