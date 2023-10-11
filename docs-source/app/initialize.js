@@ -127,7 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
 		{
 			return;
 		}
-		fetch(`/php-wasm/scripts/${demo.value}`)
+
+		let scriptPath = '/php-wasm/scripts';
+
+		if(window.location.hostname === 'localhost')
+		{
+			scriptPath = '/scripts';
+		}
+
+		fetch(`${scriptPath}/${demo.value}`)
 		.then(r => r.text())
 		.then(php => {
 

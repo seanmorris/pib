@@ -629,7 +629,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!demo.value) {
       return;
     }
-    fetch("/php-wasm/scripts/".concat(demo.value)).then(function (r) {
+    var scriptPath = '/php-wasm/scripts';
+    if (window.location.hostname === 'localhost') {
+      scriptPath = '/scripts';
+    }
+    fetch("".concat(scriptPath, "/").concat(demo.value)).then(function (r) {
       return r.text();
     }).then(function (php) {
       var firstLine = String(php.split(/\n/).shift());

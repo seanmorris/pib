@@ -387,7 +387,7 @@ show-ports:
 	@ ${DOCKER_RUN} emcc --show-ports
 
 show-version:
-	@ ${DOCKER_RUN} source /emsdk_portable/emsdk_env.sh
+	@ ${DOCKER_RUN}  emcc --version
 
 show-files:
 	@ ${DOCKER_RUN} cat /root/.bashrc
@@ -416,6 +416,8 @@ push-image:
 demo: php-web-drupal.js
 	make js
 	cd docs-source && brunch b -p
+
+NPM_PUBLISH_DRY?=--dry-run
 
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
