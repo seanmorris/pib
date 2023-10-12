@@ -26,6 +26,9 @@ TIDYHTML_TAG   ?=5.6.0
 ICONV_TAG      ?=v1.17
 SQLITE_VERSION ?=3410200
 SQLITE_DIR     ?=sqlite3.41-src
+TIMELIB_BRANCH ?=2018.01
+
+VRZNO_DEV_PATH=third_party/vrzno
 
 PKG_CONFIG_PATH ?=/src/lib/lib/pkgconfig
 
@@ -55,6 +58,7 @@ DOCKER_RUN_IN_SQLITE =${DOCKER_ENV_SIDE} -w /src/third_party/${SQLITE_DIR}/ emsc
 DOCKER_RUN_IN_TIDY   =${DOCKER_ENV_SIDE} -w /src/third_party/tidy-html5/ emscripten-builder
 DOCKER_RUN_IN_ICU    =${DOCKER_ENV_SIDE} -w /src/third_party/libicu-src/icu4c/source emscripten-builder
 DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emscripten-builder
+DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: web all clean show-ports image js hooks push-image pull-image
@@ -68,14 +72,6 @@ web: lib/pib_eval.o php-web.wasm
 
 ########### Collect & patch the source code. ###########
 
-# third_party/${SQLITE_DIR}/sqlite3.c: patch/sqlite3-wasm.patch
-# 	@ echo -e "\e[33mDownloading and patching SQLite"
-# 	@ wget https://sqlite.org/2023/sqlite-amalgamation-${SQLITE_VERSION}.zip
-# 	@ ${DOCKER_RUN} unzip sqlite-amalgamation-${SQLITE_VERSION}.zip
-# 	@ ${DOCKER_RUN} rm -r sqlite-amalgamation-${SQLITE_VERSION}.zip
-# 	@ ${DOCKER_RUN} mv sqlite-amalgamation-${SQLITE_VERSION} third_party/${SQLITE_DIR}
-# 	@ ${DOCKER_RUN} git apply --no-index patch/sqlite3.41-wasm.patch
-
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33mDownloading and patching SQLite"
 	@ wget https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
@@ -83,7 +79,7 @@ third_party/${SQLITE_DIR}/sqlite3.c:
 	@ ${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	@ ${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}
 	@ ${DOCKER_RUN} mv sqlite-autoconf-${SQLITE_VERSION} third_party/${SQLITE_DIR}
-
+	
 third_party/php${PHP_VERSION}-src/patched: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33mDownloading and patching PHP"
 	@ ${DOCKER_RUN} git clone https://github.com/php/php-src.git third_party/php${PHP_VERSION}-src \
@@ -95,19 +91,19 @@ third_party/php${PHP_VERSION}-src/patched: third_party/${SQLITE_DIR}/sqlite3.c
 	@ ${DOCKER_RUN} cp third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/php${PHP_VERSION}-src/preload/Zend
 	@ ${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-# source/sqlite3.c: third_party/${SQLITE_DIR}/sqlite3.c third_party/php${PHP_VERSION}-src/patched
-# 	@ echo -e "\e[33mImporting SQLite"
-# 	@ ${DOCKER_RUN} cp -v third_party/${SQLITE_DIR}/sqlite3.c source/sqlite3.c
-# 	@ ${DOCKER_RUN} cp -v third_party/${SQLITE_DIR}/sqlite3.h source/sqlite3.h
-# 	@ ${DOCKER_RUN} cp -v third_party/${SQLITE_DIR}/sqlite3.h third_party/php${PHP_VERSION}-src/main/sqlite3.h
-# 	@ ${DOCKER_RUN} cp -v third_party/${SQLITE_DIR}/sqlite3.c third_party/php${PHP_VERSION}-src/main/sqlite3.c
-
+# third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/php${PHP_VERSION}-src/patched
 third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33mDownloading and importing VRZNO"
+ifdef VRZNO_DEV_PATH
+	@ echo -e "\e[33mLinking dev VRZNO"
+	@ ${DOCKER_RUN} rm -rfv third_party/php${PHP_VERSION}-src/ext/vrzno
+	@ ${DOCKER_RUN} cp -rfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/vrzno
+else
 	@ ${DOCKER_RUN} git clone https://github.com/seanmorris/vrzno.git third_party/php${PHP_VERSION}-src/ext/vrzno \
 		--branch ${VRZNO_BRANCH} \
 		--single-branch          \
 		--depth 1
+endif
 
 third_party/drupal-7.95/README.txt:
 	@ echo -e "\e[33mDownloading and patching Drupal"
@@ -154,7 +150,7 @@ third_party/libiconv-1.17/README:
 
 lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c
 	@ echo -e "\e[33mBuilding PHP symbol files"
-	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make -B -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types'
+	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types'
 	@ ${DOCKER_RUN} cp -v \
 		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
 		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
@@ -181,24 +177,24 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emmake make
 	${DOCKER_RUN_IN_TIDY} emmake make install
 
-# lib/lib/libicudata.a: third_party/libicu-src/.gitignore
-# 	@ echo -e "\e[33mBuilding LibIcu"
-# 	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
-# 	${DOCKER_RUN_IN_ICU} emmake make clean install
+lib/lib/libicudata.a: third_party/libicu-src/.gitignore
+	@ echo -e "\e[33mBuilding LibIcu"
+	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
+	${DOCKER_RUN_IN_ICU} emmake make clean install
 
 lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33mBuilding LibIconv"
 	${DOCKER_RUN_IN_ICONV} autoconf
-	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --target=wasm32-unknown-emscripten --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICONV} emmake make -B EMCC_CFLAGS='-fPIC'
+	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes
+	${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_ICONV} emmake make install
 
-third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a # lib/lib/libicudata.a
+third_party/php${PHP_VERSION}-src/configured: \
+	third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a lib/lib/libicudata.a
 	@ echo -e "\e[33mBuilding PHP object files"
 	${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
 	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
-		--target=wasm32-unknown-emscripten \
 		--enable-embed=static \
 		--with-layout=GNU  \
 		--with-libxml      \
@@ -226,6 +222,7 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 		--with-gd          \
 		--with-sqlite3     \
 		--enable-pdo       \
+		--enable-intl      \
 		--with-pdo-sqlite=/src/lib \
 		--with-iconv=/src/lib \
 		--with-tidy=/src/lib \
@@ -235,6 +232,7 @@ third_party/php${PHP_VERSION}-src/configured: third_party/php${PHP_VERSION}-src/
 ########### Build the final files. ###########
 
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
+	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string", "_exec_callback", "_del_callback"]' \
 	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
@@ -252,17 +250,18 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
     -I main  \
     -I TSRM/ \
 	-I /src/third_party/libxml2 \
+	-I /src/third_party/${SQLITE_DIR} \
 	-I ext/pdo_sqlite \
+	-I ext/json \
+	-I ext/vrzno \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
 	--llvm-lto 2                     \
 	/src/third_party/php8.2-src/.libs/${PHP_AR}.a \
 	/src/lib/lib/libxml2.a  \
 	/src/lib/lib/libtidy.a  \
 	/src/lib/lib/libiconv.a \
-	/src/lib/lib/libsqlite3.a \
-	ext/pdo_sqlite/pdo_sqlite.c \
-	ext/pdo_sqlite/sqlite_driver.c \
-	ext/pdo_sqlite/sqlite_statement.c \
+	/src/lib/lib/libsqlite3.a ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c \
+	/src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a \
 	/src/source/pib_eval.c
 
 DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libxml2.a lib/lib/libiconv.a lib/lib/libtidy.a lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.la lib/lib/libsqlite3.a
@@ -373,7 +372,8 @@ clean:
 	@ ${DOCKER_RUN_IN_PHP} make clean
 
 php-clean:
-	@ ${DOCKER_RUN} rm -fv third_party/php${PHP_VERSION}-src/configure
+	@ ${DOCKER_RUN} rm -fv third_party/php${PHP_VERSION}-src/configured
+	@ ${DOCKER_RUN_IN_PHP} make clean
 
 deep-clean:
 	@ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data

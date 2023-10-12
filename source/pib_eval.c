@@ -6,7 +6,7 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 
-#include "../php8.2-src/ext/vrzno/php_vrzno.h"
+#include "../vrzno/php_vrzno.h"
 
 int main() { return 0; }
 

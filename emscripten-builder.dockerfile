@@ -5,11 +5,13 @@ SHELL ["/bin/bash", "-c"]
 
 RUN set -euxo pipefail;\
 	apt-get update; \
+	DEBIAN_FRONTEND=noninteractive \
 	apt-get --no-install-recommends -y install \
 		build-essential \
 		libsqlite3-dev \
 		libxml2-dev \
 		libicu-dev \
+		tzdata \
 		automake \
 		autoconf \
 		autogen \
