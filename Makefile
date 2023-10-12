@@ -36,7 +36,7 @@ TIMELIB_BRANCH ?=2018.01
 
 PKG_CONFIG_PATH ?=/src/lib/lib/pkgconfig
 
-DOCKER_ENV=PHP_DIST_DIR="${PHP_DIST_DIR}" docker-compose -p phpwasm run --rm \
+DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose -p phpwasm run --rm \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
@@ -293,8 +293,12 @@ build/php-web-drupal.js: ENVIRONMENT=web-drupal
 build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
 	@ echo -e "\e[33mBuilding PHP for web (drupal)"
 	@ ${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ./docs-source/app/assets
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm ./docs-source/app/assets
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data ./docs-source/app/assets
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ./docs-source/public
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm ./docs-source/public
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data ./docs-source/public
 
 build/php-web-drupal.mjs: BUILD_TYPE=mjs
 build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
@@ -305,29 +309,21 @@ build/php-web.js: ENVIRONMENT=web
 build/php-web.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for web"
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
 build/php-web.mjs: ${DEPENDENCIES}
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 
 build/php-worker.js: ENVIRONMENT=worker
 build/php-worker.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for workers"
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
 build/php-worker.mjs: ${DEPENDENCIES}
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 
 build/php-node.js: ENVIRONMENT=node
 build/php-node.js: ${DEPENDENCIES}
@@ -490,8 +486,7 @@ deep-clean:
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* third_party/php${PHP_VERSION}-src \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
-		dist/* docs/php-*.js docs/php-*.wasm \
-		sqlite-*.* \
+		dist/* sqlite-*
 
 show-ports:
 	@ ${DOCKER_RUN} emcc --show-ports
