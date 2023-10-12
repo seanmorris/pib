@@ -2,12 +2,13 @@ ENV_FILE?=.env
 
 -include ${ENV_FILE}
 
+UID?=$(shell echo $$UID)
+GID?=$(shell echo $$UID)
+
 SHELL=bash -euxo pipefail
 
-UID := $(shell echo $$UID)
-GID := $(shell echo $$UID)
-
-# PHP_DIST_DIR ?=./dist-test
+PHP_DIST_DIR_DEFAULT ?=./dist
+PHP_DIST_DIR ?=${PHP_DIST_DIR_DEFAULT}
 # VRZNO_DEV_PATH=third_party/vrzno
 
 ENVIRONMENT    ?=web
@@ -472,7 +473,7 @@ dist/php-webview.mjs: build/php-webview.mjs
 ########### Clerical stuff. ###########
 
 clean:
-	@ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
+	# @ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* docs/php-*.js docs/php-*.wasm \
 		/src/lib/pib_eval.o /src/lib/${PHP_AR}.a
 	@ ${DOCKER_RUN_IN_PHP} make clean
@@ -482,7 +483,7 @@ php-clean:
 	@ ${DOCKER_RUN_IN_PHP} make clean
 
 deep-clean:
-	@ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
+	# @ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
 	@ ${DOCKER_RUN} rm -rfv build/* lib/* third_party/php${PHP_VERSION}-src \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \

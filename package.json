@@ -5,6 +5,9 @@
 	"author": "Oraoto <oraoto@outlook.com>",
 	"version": "0.0.0-esm-preview-22",
 	"license": "Apache-2.0",
+	"bin": {
+		"php-wasm": "./index.js"
+	},
 	"dependencies": {},
 	"devDependencies": {
 		"@babel/cli": "^7.8.4",
@@ -63,6 +66,7 @@
 		"UniqueIndex.mjs",
 		"ZVal.js",
 		"ZVal.mjs",
-		"php-tags.mjs"
+		"php-tags.mjs",
+		"index.js"
 	]
 }
