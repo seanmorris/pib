@@ -8,7 +8,6 @@
 
 ### v0.0.7 - Remodernizing.
 
-
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
 ## Examples

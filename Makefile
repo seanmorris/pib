@@ -8,7 +8,7 @@ ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=1024MB
 PRELOAD_ASSETS ?=preload/
 ASSERTIONS     ?=0
-OPTIMIZE       ?=-O3
+OPTIMIZE       ?=3
 RELEASE_SUFFIX ?=
 
 PHP_VERSION    ?=8.2
@@ -28,7 +28,7 @@ SQLITE_VERSION ?=3410200
 SQLITE_DIR     ?=sqlite3.41-src
 TIMELIB_BRANCH ?=2018.01
 
-VRZNO_DEV_PATH=third_party/vrzno
+# VRZNO_DEV_PATH=third_party/vrzno
 
 PKG_CONFIG_PATH ?=/src/lib/lib/pkgconfig
 
@@ -74,24 +74,25 @@ web: lib/pib_eval.o php-web.wasm
 
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33mDownloading and patching SQLite"
-	@ wget https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
+	@ wget -q https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	@ ${DOCKER_RUN} tar -xzf sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	@ ${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	@ ${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}
 	@ ${DOCKER_RUN} mv sqlite-autoconf-${SQLITE_VERSION} third_party/${SQLITE_DIR}
 	
-third_party/php${PHP_VERSION}-src/patched: third_party/${SQLITE_DIR}/sqlite3.c
+third_party/php${PHP_VERSION}-src/.gitignore: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33mDownloading and patching PHP"
 	@ ${DOCKER_RUN} git clone https://github.com/php/php-src.git third_party/php${PHP_VERSION}-src \
 		--branch ${PHP_BRANCH}   \
 		--single-branch          \
 		--depth 1
+
+third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gitignore
 	@ ${DOCKER_RUN} git apply --no-index patch/php${PHP_VERSION}.patch
 	@ ${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	@ ${DOCKER_RUN} cp third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/php${PHP_VERSION}-src/preload/Zend
 	@ ${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-# third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/php${PHP_VERSION}-src/patched
 third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33mDownloading and importing VRZNO"
 ifdef VRZNO_DEV_PATH
@@ -107,7 +108,7 @@ endif
 
 third_party/drupal-7.95/README.txt:
 	@ echo -e "\e[33mDownloading and patching Drupal"
-	@ wget https://ftp.drupal.org/files/projects/drupal-7.95.zip
+	@ wget -q https://ftp.drupal.org/files/projects/drupal-7.95.zip
 	@ ${DOCKER_RUN} unzip drupal-7.95.zip
 	@ ${DOCKER_RUN} rm -v drupal-7.95.zip
 	@ ${DOCKER_RUN} mv drupal-7.95 third_party/drupal-7.95
@@ -128,74 +129,67 @@ third_party/libxml2/.gitignore:
 		--depth 1;
 
 third_party/tidy-html5/.gitignore:
-	git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
+	@ ${DOCKER_RUN} git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
 		--branch ${TIDYHTML_TAG} \
 		--single-branch     \
 		--depth 1;
-	cd third_party/tidy-html5 && \
-	git apply --no-index ../../patch/tidy-html.patch
+	@ ${DOCKER_RUN_IN_TIDY} git apply --no-index ../../patch/tidy-html.patch
 
-third_party/libicu-src/.gitignore:
-	@ ${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-src \
-		--branch ${ICU_TAG} \
-		--single-branch     \
-		--depth 1;
+# third_party/libicu-src/.gitignore:
+# 	@ ${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-src \
+# 		--branch ${ICU_TAG} \
+# 		--single-branch     \
+# 		--depth 1;
 
 third_party/libiconv-1.17/README:
-	wget https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz
-	tar -xvzf libiconv-1.17.tar.gz -C third_party
-	rm libiconv-1.17.tar.gz
+	@ ${DOCKER_RUN} wget -q https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz
+	@ ${DOCKER_RUN} tar -xvzf libiconv-1.17.tar.gz -C third_party
+	@ ${DOCKER_RUN} rm libiconv-1.17.tar.gz
 
 ########### Build the objects. ###########
 
-lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/**.c
-	@ echo -e "\e[33mBuilding PHP symbol files"
-	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types'
-	@ ${DOCKER_RUN} cp -v \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.la \
-		third_party/php${PHP_VERSION}-src/.libs/${PHP_AR}.a lib/
-
-lib/lib/libxml2.la: third_party/libxml2/.gitignore
+lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33mBuilding LibXML2"
-	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
-	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
-	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC' | ${TIMER}
-	${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
+	@ ${DOCKER_RUN_IN_LIBXML} ./autogen.sh
+	@ ${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
+	@ ${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}' | ${TIMER}
+	@ ${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
 
 lib/lib/libsqlite3.a: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33mBuilding LibSqlite3"
-	${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
-	${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC' | ${TIMER}
-	${DOCKER_RUN_IN_SQLITE} emmake make install | ${TIMER}
+	@ ${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
+	@ ${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}' | ${TIMER}
+	@ ${DOCKER_RUN_IN_SQLITE} emmake make install | ${TIMER}
 
 lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	@ echo -e "\e[33mBuilding LibTidy"
 	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fpic"; \
-	${DOCKER_RUN_IN_TIDY} emmake make
-	${DOCKER_RUN_IN_TIDY} emmake make install
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fpic"
+	${DOCKER_RUN_IN_TIDY} emmake make;
+	${DOCKER_RUN_IN_TIDY} emmake make install;
 
-lib/lib/libicudata.a: third_party/libicu-src/.gitignore
-	@ echo -e "\e[33mBuilding LibIcu"
-	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICU} emmake make clean install
+# lib/lib/libicudata.a: third_party/libicu-src/.gitignore
+# 	@ echo -e "\e[33mBuilding LibIcu"
+# 	@ ${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
+# 	@ ${DOCKER_RUN_IN_ICU} emmake make clean install
 
 lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33mBuilding LibIconv"
-	${DOCKER_RUN_IN_ICONV} autoconf
-	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC'
-	${DOCKER_RUN_IN_ICONV} emmake make install
+	@ ${DOCKER_RUN_IN_ICONV} autoconf
+	@ ${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes
+	@ ${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC -O${OPTIMIZE}'
+	@ ${DOCKER_RUN_IN_ICONV} emmake make install
 
 third_party/php${PHP_VERSION}-src/configured: \
-	third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c lib/lib/libxml2.la lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a lib/lib/libicudata.a
-	@ echo -e "\e[33mBuilding PHP object files"
-	${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
-	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure \
+	third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a lib/lib/ # libicudata.a
+	@ echo -e "\e[33mConfiguring PHP"
+	@ ${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
+	@ ${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--enable-embed=static \
+		--prefix=/src/lib/ \
 		--with-layout=GNU  \
 		--with-libxml      \
 		--disable-cgi      \
@@ -222,16 +216,20 @@ third_party/php${PHP_VERSION}-src/configured: \
 		--with-gd          \
 		--with-sqlite3     \
 		--enable-pdo       \
-		--enable-intl      \
 		--with-pdo-sqlite=/src/lib \
 		--with-iconv=/src/lib \
 		--with-tidy=/src/lib \
 		--disable-fiber-asm
-	${DOCKER_RUN_IN_PHPSIDE} touch /src/third_party/php${PHP_VERSION}-src/configured
+	@ ${DOCKER_RUN_IN_PHPSIDE} touch /src/third_party/php${PHP_VERSION}-src/configured
+
+lib/lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
+	@ echo -e "\e[33mBuilding PHP"
+	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types'
+	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make install
 
 ########### Build the final files. ###########
 
-FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
+FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string", "_exec_callback", "_del_callback"]' \
 	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
@@ -256,15 +254,16 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-I ext/vrzno \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
 	--llvm-lto 2                     \
-	/src/third_party/php8.2-src/.libs/${PHP_AR}.a \
-	/src/lib/lib/libxml2.a  \
-	/src/lib/lib/libtidy.a  \
-	/src/lib/lib/libiconv.a \
+	/src/lib/lib/${PHP_AR}.a \
+	/src/lib/lib/libxml2.a   \
+	/src/lib/lib/libtidy.a   \
+	/src/lib/lib/libiconv.a  \
 	/src/lib/lib/libsqlite3.a ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c \
-	/src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a \
 	/src/source/pib_eval.c
 
-DEPENDENCIES=lib/${PHP_AR}.a lib/lib/libxml2.a lib/lib/libiconv.a lib/lib/libtidy.a lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.la lib/lib/libsqlite3.a
+# /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
+
+DEPENDENCIES=lib/lib/libxml2.a lib/lib/libiconv.a lib/lib/libtidy.a lib/lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a lib/lib/libsqlite3.a
 BUILD_TYPE ?=js
 
 php-web-drupal.js: ENVIRONMENT=web-drupal
@@ -414,13 +413,13 @@ push-image:
 	@ docker-compose push
 
 demo: php-web-drupal.js
-	make js
-	cd docs-source && brunch b -p
+	@ make js
+	@ cd docs-source && brunch b -p
 
 NPM_PUBLISH_DRY?=--dry-run
 
 publish:
-	npm publish ${NPM_PUBLISH_DRY}
+	@ npm publish ${NPM_PUBLISH_DRY}
 
 ########### NOPS ###########
 third_party/php${PHP_VERSION}-src/**.c:
