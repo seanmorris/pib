@@ -1,4 +1,6 @@
--include .env
+ENV_FILE?=.env
+
+-include ${ENV_FILE}
 
 SHELL=bash -euxo pipefail
 
@@ -7,8 +9,6 @@ GID := $(shell echo $$UID)
 
 # PHP_DIST_DIR ?=./dist-test
 # VRZNO_DEV_PATH=third_party/vrzno
-
-USER_ID?=1000
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=1024MB
@@ -415,7 +415,8 @@ php-webview.mjs: build/php-webview.mjs
 dist/php-web-drupal.js: build/php-web-drupal.js
 	@ ${DOCKER_RUN_USER} cp $^ $@
 	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
-	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} cp $(basename $^).data $(basename $@).data
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm $(basename $@).data
 
 dist/php-web-drupal.mjs: build/php-web-drupal.mjs
 	@ ${DOCKER_RUN_USER} cp $^ $@

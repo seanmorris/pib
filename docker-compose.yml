@@ -11,7 +11,6 @@ services:
     environment:
       EMCC_CORES: 8
       ENVIRONMENT: ${ENVIRONMENT:-web}
-      USER_ID: ${UID:-1000}
     volumes:
       - ./:/src
       - /tmp/emsdk-cache:/emsdk/upstream/emscripten/cache/
