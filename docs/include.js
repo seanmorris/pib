@@ -160,5 +160,3 @@ module.exports = "<?php\nini_set('session.save_path', '/home/web_user');\nsessio
   
 });})();require('___globals___');
 
-
-//# sourceMappingURL=include.js.map

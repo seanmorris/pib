@@ -2,7 +2,13 @@
 
 SHELL=bash -euxo pipefail
 
-USERID?=1000
+UID := $(shell echo $$UID)
+GID := $(shell echo $$UID)
+
+# PHP_DIST_DIR ?=./dist-test
+# VRZNO_DEV_PATH=third_party/vrzno
+
+USER_ID?=1000
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=1024MB
@@ -28,11 +34,9 @@ SQLITE_VERSION ?=3410200
 SQLITE_DIR     ?=sqlite3.41-src
 TIMELIB_BRANCH ?=2018.01
 
-# VRZNO_DEV_PATH=third_party/vrzno
-
 PKG_CONFIG_PATH ?=/src/lib/lib/pkgconfig
 
-DOCKER_ENV=USERID=${UID} docker-compose -p phpwasm run --rm \
+DOCKER_ENV=PHP_DIST_DIR="${PHP_DIST_DIR}" docker-compose -p phpwasm run --rm \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
@@ -40,7 +44,7 @@ DOCKER_ENV=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
 	-e EMCC_CORES=`nproc`
 
-DOCKER_ENV_SIDE=USERID=${UID} docker-compose -p phpwasm run --rm \
+DOCKER_ENV_SIDE=docker-compose -p phpwasm run --rm \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
@@ -50,6 +54,7 @@ DOCKER_ENV_SIDE=USERID=${UID} docker-compose -p phpwasm run --rm \
 	-e EMCC_FLAGS=" -sSIDE_MODULE=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 "
 
 DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
+DOCKER_RUN_USER      =${DOCKER_ENV} -e UID=${UID} -e GID=${GID} emscripten-builder
 DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 DOCKER_RUN_IN_PHPSIDE=${DOCKER_ENV_SIDE} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 DOCKER_RUN_IN_ICU4C  =${DOCKER_ENV} -w /src/third_party/libicu-src/icu4c/source/ emscripten-builder
@@ -61,11 +66,29 @@ DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emsc
 DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
-.PHONY: web all clean show-ports image js hooks push-image pull-image
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image package dist demo
 
-all: cjs mjs js
-cjs: php-web-drupal.js php-web.js php-webview.js php-node.js php-shell.js php-worker.js
-mjs: php-web-drupal.mjs php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs
+MJS=build/php-web-drupal.mjs build/php-web.mjs build/php-webview.mjs build/php-node.mjs build/php-shell.mjs build/php-worker.mjs
+CJS=build/php-web-drupal.js  build/php-web.js  build/php-webview.js  build/php-node.js  build/php-shell.js  build/php-worker.js
+
+all: package js
+cjs: ${CJS}
+mjs: ${MJS}
+js: cjs mjs
+	@ echo -e "\e[33mBuilding JS"
+	@ npx babel source --out-dir .
+	@ find source -name "*.js" | while read JS; \
+		do cp $${JS} $$(basename $${JS%.js}.mjs); \
+		sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $$(basename $${JS%.js}.mjs); \
+		sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $$(basename $${JS%.js}.mjs); \
+	done;
+
+package: php-web-drupal.mjs php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.js \
+         php-web-drupal.js  php-web.js  php-webview.js  php-node.js  php-shell.js php-worker.js
+
+dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-node.mjs dist/php-shell.mjs dist/php-worker.js \
+      dist/php-web-drupal.js  dist/php-web.js  dist/php-webview.js  dist/php-node.js  dist/php-shell.js  dist/php-worker.js
+
 web-drupal: lib/pib_eval.o php-web-drupal.wasm
 web: lib/pib_eval.o php-web.wasm
 	@ echo "Done!"
@@ -152,14 +175,14 @@ lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33mBuilding LibXML2"
 	@ ${DOCKER_RUN_IN_LIBXML} ./autogen.sh
 	@ ${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
-	@ ${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}' | ${TIMER}
-	@ ${DOCKER_RUN_IN_LIBXML} emmake make install | ${TIMER}
+	@ ${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}'
+	@ ${DOCKER_RUN_IN_LIBXML} emmake make install
 
 lib/lib/libsqlite3.a: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33mBuilding LibSqlite3"
-	@ ${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ | ${TIMER}
-	@ ${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}' | ${TIMER}
-	@ ${DOCKER_RUN_IN_SQLITE} emmake make install | ${TIMER}
+	@ ${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
+	@ ${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}'
+	@ ${DOCKER_RUN_IN_SQLITE} emmake make install
 
 lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	@ echo -e "\e[33mBuilding LibTidy"
@@ -183,7 +206,7 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ ${DOCKER_RUN_IN_ICONV} emmake make install
 
 third_party/php${PHP_VERSION}-src/configured: \
-	third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a lib/lib/ # libicudata.a
+	third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a # libicudata.a
 	@ echo -e "\e[33mConfiguring PHP"
 	@ ${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
 	@ ${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure \
@@ -266,101 +289,188 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 DEPENDENCIES=lib/lib/libxml2.a lib/lib/libiconv.a lib/lib/libtidy.a lib/lib/${PHP_AR}.a source/pib_eval.c lib/lib/libxml2.a lib/lib/libsqlite3.a
 BUILD_TYPE ?=js
 
-php-web-drupal.js: ENVIRONMENT=web-drupal
-php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
+build/php-web-drupal.js: ENVIRONMENT=web-drupal
+build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
 	@ echo -e "\e[33mBuilding PHP for web (drupal)"
 	@ ${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-web-drupal.mjs: BUILD_TYPE=mjs
-php-web-drupal.mjs: ENVIRONMENT=web-drupal
-php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
+build/php-web-drupal.mjs: BUILD_TYPE=mjs
+build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
+build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
 	@ ${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
 
-php-web.js: ENVIRONMENT=web
-php-web.js: ${DEPENDENCIES}
+build/php-web.js: ENVIRONMENT=web
+build/php-web.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for web"
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-web.mjs: BUILD_TYPE=mjs
-php-web.mjs: ENVIRONMENT=web
-php-web.mjs: ${DEPENDENCIES}
+build/php-web.mjs: BUILD_TYPE=mjs
+build/php-web.mjs: ENVIRONMENT=web
+build/php-web.mjs: ${DEPENDENCIES}
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 
-php-worker.js: ENVIRONMENT=worker
-php-worker.js: ${DEPENDENCIES}
+build/php-worker.js: ENVIRONMENT=worker
+build/php-worker.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for workers"
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
 	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-worker.mjs: BUILD_TYPE=mjs
-php-worker.mjs: ENVIRONMENT=worker
-php-worker.mjs: ${DEPENDENCIES}
+build/php-worker.mjs: BUILD_TYPE=mjs
+build/php-worker.mjs: ENVIRONMENT=worker
+build/php-worker.mjs: ${DEPENDENCIES}
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
+	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
 
-php-node.js: ENVIRONMENT=node
-php-node.js: ${DEPENDENCIES}
+build/php-node.js: ENVIRONMENT=node
+build/php-node.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for node"
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-node.mjs: BUILD_TYPE=mjs
-php-node.mjs: ENVIRONMENT=node
-php-node.mjs: ${DEPENDENCIES}
+build/php-node.mjs: BUILD_TYPE=mjs
+build/php-node.mjs: ENVIRONMENT=node
+build/php-node.mjs: ${DEPENDENCIES}
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
 
-php-shell.js: ENVIRONMENT=shell
-php-shell.js: ${DEPENDENCIES}
+build/php-shell.js: ENVIRONMENT=shell
+build/php-shell.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for shell"
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-shell.mjs: BUILD_TYPE=mjs
-php-shell.mjs: ENVIRONMENT=shell
-php-shell.mjs: ${DEPENDENCIES}
+build/php-shell.mjs: BUILD_TYPE=mjs
+build/php-shell.mjs: ENVIRONMENT=shell
+build/php-shell.mjs: ${DEPENDENCIES}
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-webview.js: ENVIRONMENT=webview
-php-webview.js: ${DEPENDENCIES}
+build/php-webview.js: ENVIRONMENT=webview
+build/php-webview.js: ${DEPENDENCIES}
 	@ echo -e "\e[33mBuilding PHP for webview"
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/app/assets
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./docs-source/public
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
 
-php-webview.mjs: BUILD_TYPE=mjs
-php-webview.mjs: ENVIRONMENT=webview
-php-webview.mjs: ${DEPENDENCIES}
+build/php-webview.mjs: BUILD_TYPE=mjs
+build/php-webview.mjs: ENVIRONMENT=webview
+build/php-webview.mjs: ${DEPENDENCIES}
 	@ ${FINAL_BUILD}
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./
-	@ ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.* ./dist
+
+########## Package files ###########
+
+php-web-drupal.js: build/php-web-drupal.js
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-web-drupal.mjs: build/php-web-drupal.mjs
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-web.js: build/php-web.js
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-web.mjs: build/php-web.mjs
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-worker.js: build/php-worker.js
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-worker.mjs: build/php-worker.mjs
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-node.js: build/php-node.js
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-node.mjs: build/php-node.mjs
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-shell.js: build/php-shell.js
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-shell.mjs: build/php-shell.mjs
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-webview.js: build/php-node.js
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+php-webview.mjs: build/php-webview.mjs
+	cp $^ $@
+	cp $(basename $^).wasm $(basename $@).wasm
+
+########## Dist files ###########
+
+dist/php-web-drupal.js: build/php-web-drupal.js
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-web-drupal.mjs: build/php-web-drupal.mjs
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-web.js: build/php-web.js
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-web.mjs: build/php-web.mjs
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-worker.js: build/php-worker.js
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-worker.mjs: build/php-worker.mjs
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-node.js: build/php-node.js
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-node.mjs: build/php-node.mjs
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-shell.js: build/php-shell.js
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-shell.mjs: build/php-shell.mjs
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-webview.js: build/php-node.js
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
+
+dist/php-webview.mjs: build/php-webview.mjs
+	@ ${DOCKER_RUN_USER} cp $^ $@
+	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	@ ${DOCKER_RUN_USER} chown ${UID}:${GID} $@ $(basename $@).wasm
 
 ########### Clerical stuff. ###########
 
@@ -394,15 +504,6 @@ show-files:
 hooks:
 	@ git config core.hooksPath githooks
 
-js:
-	@ echo -e "\e[33mBuilding JS"
-	@ npx babel source --out-dir .
-	@ find source -name "*.js" | while read JS; \
-		do cp $${JS} $$(basename $${JS%.js}.mjs); \
-		sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $$(basename $${JS%.js}.mjs); \
-		sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $$(basename $${JS%.js}.mjs); \
-	done;
-
 image:
 	@ docker-compose build
 
@@ -420,9 +521,3 @@ NPM_PUBLISH_DRY?=--dry-run
 
 publish:
 	@ npm publish ${NPM_PUBLISH_DRY}
-
-########### NOPS ###########
-third_party/php${PHP_VERSION}-src/**.c:
-third_party/php${PHP_VERSION}-src/**.h:
-source/**.c:
-source/**.h:

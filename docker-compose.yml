@@ -4,6 +4,7 @@ services:
 
   emscripten-builder:
     image: seanmorris/php-emscripten-builder
+    user: "${UID:-0}:${GID:-0}"
     build:
       context: ./
       dockerfile: emscripten-builder.dockerfile
@@ -15,4 +16,5 @@ services:
       - ./:/src
       - /tmp/emsdk-cache:/emsdk/upstream/emscripten/cache/
       - ./.cache:/emsdk_portable/.data/cache/asmjs/
+      - ${PHP_DIST_DIR:-./dist}:/src/dist
     command: [bash]
