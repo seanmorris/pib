@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-
+<title>php-wasm</title>
 <script type="text/javascript">{
 // Allow the page to be served from any directory...
 const path  = location.pathname.replace(/index.html$/, '');
@@ -13,42 +13,6 @@ path.match(/\/$/) || window.location.replace(
 <script src = "//ajaxorg.github.io/ace-builds/src-min/ace.js"></script>
 <script>require('initialize');</script>
 </head>
-
-<script type = "text/php">
-<?php
-$window   = new \Vrzno;
-$document = $window->document;
-
-$h1 = $document->querySelector('h1');
-
-$h1->addEventListener('click', function(){
-	vrzno_run('alert', ['This alert was generated from PHP.' . PHP_EOL . 'View source > CTRL+F > "<script type = "text/php">"']);
-
-	$h1->style;
-});
-
-// $console  = $window->console;
-// $openFile = $document->getElementById('.openFile');
-// $input    = $document->querySelector('.input  textarea');
-
-// openFile.addEventListener('input', event =>{
-
-// 	const reader = new FileReader();
-
-// 	reader.onload = (event) => {
-// 		editor.setValue(event.target.result);
-// 	};
-
-// 	reader.readAsText(event.target.files[0]);
-
-// });
-
-
-// $input = $document->querySelector('.input  textarea');
-
-// $console->log('$console->log in PHP!');
-
-?></script>
 
 <!--
 sssooo+++++++///////++++//:----:::::///////:::::::///+ossssssyyyhdddddmmmmNNmo`````````````````````-
@@ -102,7 +66,7 @@ yssooooo+oydddyhyhhyyyyysyhyhhyhhyyhssshdNNNMMMMNNNNMNNNmdhmmNNMNmmddmmNNNNNNNNM
 sso+++++++++oyhdddddyhhhyyhhdddhho++oyhdmNNNMMMNNNNNNNNmdhhmNNNNNmhddmmNNNmNNNNNNNmddddmmmmNNNNNNNmh
 sso++++++///++//oyyyyhhhyyyyssoo+++syhhhdmNNNNmmmmmmmmdhhyhmNNNmddhhddmmmmmmmmNmNmmdhhhdddmmmmNNmmdy
 -->
-<title>php-wasm</title>
+
 <body>
 	<div class = "row header toolbar">
 		<div class = "cols">

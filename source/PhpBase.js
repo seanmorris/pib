@@ -17,6 +17,7 @@ export class PhpBase extends EventTarget
 
 		const callbacks = new UniqueIndex;
 		const targets   = new UniqueIndex;
+		const zvals     = new Map;
 
 		const defaults  = {
 
@@ -39,7 +40,6 @@ export class PhpBase extends EventTarget
 				this.onerror(event);
 				this.dispatchEvent(event);
 			}
-
 		};
 
 		const phpSettings = (window && window.phpSettings) ? window.phpSettings : {};

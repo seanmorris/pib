@@ -7,7 +7,7 @@ _GID:=$(shell echo $$UID)
 UID?=${_UID}
 GID?=${_GID}
 
-SHELL=bash -euxo pipefail
+SHELL=bash -euo pipefail
 
 PHP_DIST_DIR_DEFAULT ?=./dist
 PHP_DIST_DIR ?=${PHP_DIST_DIR_DEFAULT}
@@ -77,8 +77,10 @@ CJS=build/php-web-drupal.js  build/php-web.js  build/php-webview.js  build/php-n
 all: package js
 cjs: ${CJS}
 mjs: ${MJS}
-js: cjs mjs
+js: cjs mjs scripts
 	@ echo -e "\e[33;4mBuilding JS\e[0m"
+
+scripts:
 	npx babel source --out-dir .
 	find source -name "*.js" | while read JS; do \
 		cp $${JS} $$(basename $${JS%.js}.mjs); \
@@ -122,19 +124,22 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 ifdef VRZNO_DEV_PATH
 third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/vrzno.c
 	@ echo -e "\e[33;Importing VRZNO\e[0m"
-	@ cp -rfv ${VRZNO_DEV_PATH} third_party/
-	@ ${DOCKER_RUN} touch third_party/vrzno/vrzno.c
+	@ cp -prfv ${VRZNO_DEV_PATH} third_party/
+	${DOCKER_RUN} touch third_party/vrzno/vrzno.c
 else
 third_party/vrzno/vrzno.c:
 	@ echo -e "\e[33;4mDownloading and importing VRZNO\e[0m"
-	@ ${DOCKER_RUN} git clone https://github.com/seanmorris/vrzno.git third_party/vrzno \
+	${DOCKER_RUN} git clone https://github.com/seanmorris/vrzno.git third_party/vrzno \
 		--branch ${VRZNO_BRANCH} \
 		--single-branch          \
 		--depth 1
 endif
 
 third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c
-	@ ${DOCKER_RUN} cp -rfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
+	${DOCKER_RUN} cp -prfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
+
+third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: third_party/vrzno/vrzno.c
+	${DOCKER_RUN} cp -prfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
 
 third_party/drupal-7.95/README.txt:
 	@ echo -e "\e[33;4mDownloading and patching Drupal\e[0m"
@@ -153,7 +158,7 @@ third_party/drupal-7.95/README.txt:
 
 third_party/libxml2/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibXML2\e[0m"
-	${DOCKER_RUN} env GIT_SSL_NO_VERIFY=true git clone https://gitlab.gnome.org/GNOME/libxml2.git third_party/libxml2 \
+	${DOCKER_RUN} git clone https://gitlab.gnome.org/GNOME/libxml2.git third_party/libxml2 \
 		--branch ${LIBXML2_TAG} \
 		--single-branch     \
 		--depth 1;
@@ -182,13 +187,13 @@ lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33;4mBuilding LibXML2\e[0m"
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
-	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}'
+	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_LIBXML} emmake make install
 
 lib/lib/libsqlite3.a: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33;4mBuilding LibSqlite3\e[0m"
 	${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
-	${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE}'
+	${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_SQLITE} emmake make install
 
 lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
@@ -196,7 +201,7 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE}"
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC"
 	${DOCKER_RUN_IN_TIDY} emmake make;
 	${DOCKER_RUN_IN_TIDY} emmake make install;
 
@@ -209,10 +214,11 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33;4mBuilding LibIconv\e[0m"
 	${DOCKER_RUN_IN_ICONV} autoconf
 	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC -O${OPTIMIZE}'
+	${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_ICONV} emmake make install
 
 third_party/php${PHP_VERSION}-src/configured: \
+third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4 \
 third_party/php${PHP_VERSION}-src/patched \
 lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a # libicudata.a
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
@@ -255,20 +261,24 @@ lib/lib/libxml2.a lib/lib/libtidy.a lib/lib/libiconv.a lib/lib/libsqlite3.a # li
 
 lib/lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 	@ echo -e "\e[33;4mBuilding PHP\e[0m"
-	@ ${DOCKER_RUN_IN_PHPSIDE} rm -rf third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.o third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.lo
-	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make clean
-	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -O${OPTIMIZE}'
+	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
 	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make install
 
 ########### Build the final files. ###########
 
-FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -g4 \
+ASYNCIFY_IMPORTS='["zval_ptr_dtor","zend_call_function","exec_callback"]'
+
+
+FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string", "_exec_callback", "_del_callback"]' \
 	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
 	-s MAXIMUM_MEMORY=2048mb         \
 	-s INITIAL_MEMORY=${INITIAL_MEMORY} \
+	-s ASYNCIFY=1 \
+	-s ASYNCIFY_IGNORE_INDIRECT=1 \
+	-s ASYNCIFY_IMPORTS=${ASYNCIFY_IMPORTS} \
 	-s ALLOW_MEMORY_GROWTH=1         \
 	-s ASSERTIONS=${ASSERTIONS}      \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
@@ -286,11 +296,10 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -g4 \
 	-I ext/json \
 	-I ext/vrzno \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
-	--llvm-lto 2                     \
-	/src/lib/lib/${PHP_AR}.a \
 	/src/lib/lib/libxml2.a   \
 	/src/lib/lib/libtidy.a   \
-	/src/lib/lib/libiconv.a /src/lib/lib/libcharset.a \
+	/src/lib/lib/libiconv.a \
+	/src/lib/lib/${PHP_AR}.a \
 	/src/lib/lib/libsqlite3.a ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c \
 	/src/source/pib_eval.c
 
@@ -304,24 +313,6 @@ build/php-web-drupal.js: ENVIRONMENT=web-drupal
 build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
-
-docs-source/app/assets/php-web-drupal.js: ENVIRONMENT=web-drupal
-docs-source/app/assets/php-web-drupal.js: build/php-web-drupal.js
-	${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ./docs-source/app/assets;
-	${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm ./docs-source/app/assets;
-	${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data ./docs-source/app/assets;
-	
-	# ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ./docs-source/app/assets;
-	# ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm ./docs-source/app/assets;
-	# ${DOCKER_RUN} cp -v build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data ./docs-source/public;
-	
-	# ${DOCKER_RUN} chown ${UID}:${GID} \
-	# 	./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
-	# 	./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm \
-	# 	./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
-	# 	./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
-	# 	./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm \
-	# 	./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data
 
 build/php-web-drupal.mjs: BUILD_TYPE=mjs
 build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
@@ -479,6 +470,26 @@ dist/php-webview.mjs: build/php-webview.mjs
 	@ ${DOCKER_RUN_USER} cp $^ $@
 	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
 
+############# Demo files ##############
+
+docs-source/app/assets/php-web-drupal.wasm: ENVIRONMENT=web-drupal
+docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
+	${DOCKER_RUN} cp -v \
+		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm \
+		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
+		./docs-source/app/assets;
+
+	${DOCKER_RUN} cp -v \
+		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm \
+		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
+		./docs-source/public;
+	
+	${DOCKER_RUN} chown ${UID}:${GID} \
+		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm \
+		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
+		./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm \
+		./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data;
+
 ########### Clerical stuff. ###########
 
 clean:
@@ -519,7 +530,7 @@ pull-image:
 push-image:
 	@ docker-compose pull
 
-demo: docs-source/app/assets/php-web-drupal.js js
+demo: php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm
 
 NPM_PUBLISH_DRY?=--dry-run
 
