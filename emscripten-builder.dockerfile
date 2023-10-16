@@ -25,4 +25,5 @@ RUN set -euxo pipefail;\
 		re2c \
 		gdb \
 		git \
+		sed \
 		pv

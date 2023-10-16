@@ -99,8 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			code = code.replace(/\?>\s*/, '');
 		}
 
-		console.log(code, persistBox.checked);
-
 		php[func](code).then(ret=>{
 
 			status.innerText = 'php-wasm ready!';
