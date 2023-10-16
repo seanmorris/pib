@@ -1,12 +1,19 @@
-# PIB: PHP in Browser (and Node.js) aka php-wasm
+# php-wasm 
 
-
-![php-wasm](https://img.shields.io/npm/v/php-wasm?color=609&label=PIB%2Fphp-wasm&style=for-the-badge)
+![php-wasm](https://img.shields.io/npm/v/php-wasm?color=609&label=php-wasm&style=for-the-badge)
 [![Apache-2.0 Licence Badge](https://img.shields.io/npm/l/cv3-inject?logo=apache&color=338800&style=for-the-badge)](https://github.com/seanmorris/php-wasm/blob/master/LICENSE)
 
 [![CircleCI](https://img.shields.io/circleci/build/github/seanmorris/php-wasm?logo=circleci&logoColor=white&style=for-the-badge&token=b52ac489d3c2d170963021c81ecd422b7536f41c)](https://circleci.com/gh/seanmorris/php-wasm/) ![Size](https://img.shields.io/github/languages/code-size/seanmorris/php-wasm?logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAQAAACFzfR7AAABF0lEQVQoFQXBQWvOAQDA4ef/7o29YWtqKU7ExWE5OIvm4LKcnXwD7aQ0N/kAczO1i1KOO0xJvQojaTm4KbJabnJysLSf5wFAa603CUB322yOAAitVT86BTTQ1+oJDYDQcv+qFRr3vC1ooYPqDkHoYgfVKmnSfhG62t/qBkHn2q8ekjRpryB0v/rZ2eh4r6tpY5pp3Gx7RTONoJfVLnpQfekYtNG0832rRj3tEaT31bOxQ5wc/oATrnnniEMfXfaZDFrAoEk71XajNN9OVVW7HYVeVZ9AF/pd3YPm267qbYs0tF597wygpaquQ7Nt9QLoVlWXCEK3q1oCCF2p6iYBpKGN6kNzATrdr2qVAACa9rgRQKPetAnAf1jX/qSkN8aIAAAAAElFTkSuQmCC&style=for-the-badge)
 
-### v0.0.7 - Remodernizing.
+### v0.0.8 - Preparing for Liftoff.
+
+* Adding ESM & CDN Module support!
+* Fixing `<script type = "text/php">` support.
+* In-place builds.
+* Conditional builds.
+* Adding support for iconv & html-tidy
+* Updating PHP to 8.2.11
+* Building with Emscripten 3.1.43
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -14,6 +21,7 @@
 
 + [Hello, World](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250Aecho%2520%2522Hello%252C%2520World%21%2522%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text)
 + [phpinfo()](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522html%2522%257D%250Aphpinfo%28%29%253B%250A&autorun=1&persist=0&single-expression=0&render-as=html)
++ [Javascript Callbacks](https://seanmorris.github.io/php-wasm?render-as=text&autorun=1&persist=1&single-expression=0&code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Atrue%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524setup%2520%253D%2520%2524setup%2520%253F%253F%2520false%253B%250A%2524x%2520%253D%2520%2524x%2520%253F%253F%25200%253B%250A%250Avar_dump%28%2524x%29%253B%250A%250Aif%28%21%2524setup%29%250A%257B%250A%2520%2520%2520%2520%2524window%2520%253D%2520new%2520Vrzno%253B%250A%250A%2520%2520%2520%2520%2524f%2520%253D%2520%2524window-%253EphpFuncA%2520%253D%2520function%28%29%2520use%28%2526%2524x%252C%2520%2524window%29%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520%2524window-%253Ealert%28%27RAN%2520A%21%2520%27%2520.%2520%2524x%252B%252B%29%253B%250A%2520%2520%2520%2520%257D%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520%2524g%2520%253D%2520%2524window-%253EphpFuncB%2520%253D%2520function%28%29%2520use%28%2526%2524x%252C%2520%2524window%29%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520echo%2520%27%2524x%2520is%2520now%2520%27%2520.%2520%28%252B%252B%2524x%29%2520.%2520PHP_EOL%253B%250A%2520%2520%2520%2520%257D%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520%2524setup%2520%253D%2520true%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520echo%2520%2522Initialized.%255Cn%2522%253B%250A%257D%250A%250A%2524window-%253EphpFuncA%28%29%253B%250A%252F%252F%2520%2524window-%253EphpFuncB%28%29%253B%250A%250A%252F%252F%2520vrzno_eval%28%27window.phpFuncA%28%29%27%29%253B%250Avrzno_eval%28%27window.phpFuncB%28%29%27%29%253B%250A)
 + [Persistent Memory](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Atrue%252C%2520%2522single-expression%2522%253A%2520true%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%252F%252F%2520run%2520this%2520over%2520and%2520over%2520again%250A%2524c%2520%253D%25201%2520%252B%2520%28%2524c%2520%253F%253F%2520-1%29%253B%250A%250Aprint%2520%2524c%253B%250A&autorun=1&persist=1&single-expression=1&render-as=text)
 + [Access The DOM](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524oldTitle%2520%253D%2520NULL%253B%250A%2524newTitle%2520%253D%2520%27Changed%2540%27%2520.%2520date%28%27h%253Ai%253As%27%29%253B%250A%250A%252F%252F%2520Grab%2520the%2520current%2520title%250A%2524oldTitle%2520%253D%2520vrzno_eval%28%27document.title%27%29%253B%250A%250A%252F%252F%2520Change%2520the%2520document%2520title%250A%2524newTitle%2520%253D%2520vrzno_eval%28%27document.title%2520%253D%2520%2522%27%2520.%2520%2524newTitle%2520.%2520%27%2522%27%2520%29%253B%250A%250Aprintf%28%250A%2509%27Title%2520changed%2520from%2520%2522%2525s%2522%2520to%2520%2522%2525s%2522.%27%250A%2509%252C%2520%2524oldTitle%250A%2509%252C%2520%2524newTitle%250A%29%253B%250A%250A%250A%252F%252F%2520Show%2520an%2520alert%250Avrzno_run%28%27alert%27%252C%2520%255B%27Hello%252C%2520World%21%27%255D%29%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text)
 + [goto](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524x%2520%253D%2520false%253B%250A%250Aa%253A%250A%250Aif%28%21%2524x%29%250A%257B%250A%2509goto%2520b%253B%250A%257D%250A%250Aecho%2520%272.%2520Foo%27%2520.%2520PHP_EOL%253B%250A%250Agoto%2520c%253B%250A%250Ab%253A%250A%250Aecho%2520%271.%2520Bar%27%2520.%2520PHP_EOL%253B%250A%250Aif%28%21%2524x%29%250A%257B%250A%2509%2524x%2520%253D%2520true%253B%250A%2509goto%2520a%253B%250A%257D%250A%250Ac%253A%250Aecho%2520%273.%2520Baz%27%2520.%2520PHP_EOL%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text)
@@ -31,10 +39,22 @@
 
 ### Inline PHP
 
-Include the `php-tags.js` script from Unpkg:
+Include the `php-tags.js` script from a CDN:
+
+#### JSDelivr
 
 ```html
+<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+```
+
+#### Unpkg
+```html
 <script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.mjs"></script>
+```
+
+#### esm.sh
+```html
+<script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.mjs"></script>
 ```
 
 And run some PHP right in the page!
@@ -45,7 +65,7 @@ And run some PHP right in the page!
 </script>
 ```
 
-## Getting Started
+## Install & Use
 
 Install with npm:
 
@@ -53,7 +73,36 @@ Install with npm:
 $ npm install php-wasm
 ```
 
-## Static Assets:
+Include the module in your preferred format:
+
+### Common JS
+
+```javascript
+const { PhpWeb } = require('php-wasm/PhpWeb.js');
+const php = new PhpWeb;
+```
+
+### ES6
+
+```javascript
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+const php = new PhpWeb;
+```
+
+#### From a CDN:
+
+***Note: This does not require npm.***
+
+```javascript
+const PhpWeb = (await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs')).PhpWeb;
+const php = new PhpWeb;
+```
+
+#### Pre-Packaged Static Assets:
+
+***You won't need to use this if you build in-place or use a CDN.***
+
+The php-wasm package comes with pre-build binaries out of the box so you can get started quickly.
 
 You'll need to add the following `postinstall` script entry to your package.json to ensure the static assets are available to your web application. Make sure to replace `public/` with the path to your public document root if necessary.
 
@@ -73,41 +122,18 @@ If you're using a more advanced bundler, use the vendor's documentation to learn
 ./node_modules/php-wasm/php-web.*
 ```
 
-## Usage
+### Running PHP & Taking Output
 
-Using php-wasm is easy.
-
-### Automatic
-
-Use the `php-tags.js` script to run inline PHP:
-
-```html
-<script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.mjs"></script>
-
-<script type = "text/php">
-	<?php vrzno_run('alert', ['Hello, world!']);
-</script>
-```
-
-### Manual
-
-First, grab an instance of the object:
+Add your output listeners:
 
 ```javascript
-const PHP = require('php-wasm/PhpWeb').PhpWeb;
-const php = new PHP;
-```
-
-or, in es6:
-
-```javascript
-import { PhpWeb as PHP } from 'php-wasm/PhpWeb';
-const php = new PHP;
-```
-Then, add an output listener:
-
-```javascript
+// Listen to STDOUT
 php.addEventListener('output', (event) => {
+	console.log(event.detail);
+});
+
+// Listen to STDERR
+php.addEventListener('error', (event) => {
 	console.log(event.detail);
 });
 ```
@@ -127,8 +153,92 @@ php.addEventListener('ready', () => {
 		// retVal contains the return code.
 	});
 });
-
 ```
+
+### Building in-place
+
+To use the the in-place builder, first install php-wasm globally:
+
+```sh
+$ npm install -g php-wasm
+```
+
+#### Build for web
+
+Then navigate to the directory you want the files to be built in, and run `php-wasm build`
+
+```sh
+$ cd ~/my-project
+$ php-wasm build
+# php-wasm build web
+#  "web" is the default here
+```
+
+#### Build for node
+
+```sh
+$ cd ~/my-project
+$ php-wasm build node
+```
+
+This will build the following files in the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
+
+```sh
+# php-wasm build web
+PhpWeb.js       # require this module in your scripts
+php-web.js      # internal interface between WASM and javscript
+php-web.wasm    # binary php-wasm
+
+# php-wasm build node
+PhpNode.js      # require this module in your scripts
+php-node.js     # internal interface between WASM and javscript
+php-node.wasm   # binary php-wasm
+
+# php-wasm build web mjs
+PhpWeb.mjs      # import this module in your scripts
+php-web.mjs     # internal interface between WASM and javscript
+php-web.wasm    # Binary php-wasm
+
+# php-wasm build node mjs
+PhpNode.mjs     # import this module in your scripts
+php-node.mjs    # internal interface between WASM and javscript
+php-node.wasm   # binary php-wasm
+```
+
+#### .php-wasm-rc
+
+You can also create a `.php-wasm-rc` file in this directory to customize the build.
+
+```make
+# Build to a directory other than the current one (absolute path)
+PHP_DIST_DIR=~/my-project/public
+
+# Space separated list of files/directories (absolute paths)
+# to be included under the /preload directory in the final build.
+PRELOAD_ASSETS=~/my-project/php-scripts ~/other-dir/example.php
+
+# Build with assertions enabled
+ASSERTIONS=0
+
+# Select the optimization level
+OPTIMIZATION=3
+
+# Build with libXML
+WITH_LIBXML=1
+
+# Build with Tidy
+WITH_TIDY=1
+
+# Build with Iconv
+WITH_ICONV=1
+
+# Build with SQLite
+WITH_SQLITE=1
+
+# Build with VRZNO
+WITH_VRZNO=1
+```
+
 ### Persistent Memory
 
 So long as `php.refresh()` is not called from Javascript, the instance will maintain its own persistent memory.
@@ -140,40 +250,14 @@ print ++$x;
 
 ```
 
-See the example in action [here](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%250A%252F%252F%2520Run%2520this%2520over%2520and%2520over%2520again...%250Aprint%2520%252B%252B%2524x%253B&persist=1)
+## php-wasm started as a fork of oraoto/PIB...
 
-### Accessing the DOM
+https://github.com/oraoto/pib
 
-The DOM may be accessed via the [VRZNO](https://github.com/seanmorris/vrzno) php extension. This is specially  for the browser allowing PHP to access Javascript via a C api. It comes preinstalled with php-wasm.
+## Licensed under the Apache License, Version 2.0
 
-See the example in action [here](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%250A%250A%2524oldTitle%2520%253D%2520NULL%253B%250A%2524newTitle%2520%253D%2520%27Changed%2540%27%2520.%2520date%28%27h%253Ai%253As%27%29%253B%250A%250A%252F%252F%2520Grab%2520the%2520current%2520title%250A%2524oldTitle%2520%253D%2520vrzno_eval%28%27document.title%27%29%253B%250A%250A%252F%252F%2520Change%2520the%2520document%2520title%250A%2524newTitle%2520%253D%2520vrzno_eval%28%27document.title%2520%253D%2520%2522%27%2520.%2520%2524newTitle%2520.%2520%27%2522%27%2520%29%253B%250A%250Aprintf%28%250A%2520%2520%2520%2520%27Title%2520changed%2520from%2520%2522%2525s%2522%2520to%2520%2522%2525s%2522.%27%250A%2520%2520%2520%2520%252C%2520%2524oldTitle%250A%2520%2520%2520%2520%252C%2520%2524newTitle%250A%29%253B%250A%250A%250A%252F%252F%2520Show%2520an%2520alert%250Avrzno_run%28%27alert%27%252C%2520%255B%27Hello%252C%2520World%21%27%255D%29%253B)
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
-```php
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-// Show an alert with vrzno_run. Note the second param is an array of args.
-vrzno_run('alert', ['Hello, World!']);
-
-$oldTitle = NULL;
-$newTitle = 'Changed@' . date('h:i:s');
-
-// Grab the current title.
-$oldTitle = vrzno_eval('document.title');
-
-// Change the document title.
-vrzno_eval('document.title = "' . $newTitle . '"' );
-
-```
-
-## Building From Source
-
-### Using Docker
-
-The quickest way to build PIB is by using Make & Docker. Simply issue the `make` command after checking out the repo, and it will build.
-
-```
-make
-```
-
-## php-wasm is a fork of oraoto/PIB...
-
-**[Run PIB](https://seanmorris.github.io/php-wasm/)**
+http://www.apache.org/licenses/LICENSE-2.0

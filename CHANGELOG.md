@@ -2,10 +2,12 @@
 
 Changes
 
-## 0.0.8 - Remodermizing
+## 0.0.8 - Preparing for Liftoff
 
-* Adding ESM Module support!
+* Adding ESM & CDN Module support!
 * Fixing `<script type = "text/php">` support.
+* In-place builds.
+* Conditional builds.
 * Adding support for iconv & html-tidy
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43

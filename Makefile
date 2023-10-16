@@ -21,7 +21,6 @@ PHP_DIST_DIR ?=${PHP_DIST_DIR_DEFAULT}
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=2048MB
-PRELOAD_ASSETS ?=preload/
 ASSERTIONS     ?=0
 OPTIMIZE       ?=3
 RELEASE_SUFFIX ?=
@@ -74,7 +73,7 @@ DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emsc
 DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image package dist demo
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image package dist demo scripts third_party/preload
 
 MJS=build/php-web-drupal.mjs build/php-web.mjs build/php-webview.mjs build/php-node.mjs build/php-shell.mjs build/php-worker.mjs
 CJS=build/php-web-drupal.js  build/php-web.js  build/php-webview.js  build/php-node.js  build/php-shell.js  build/php-worker.js
@@ -103,23 +102,20 @@ web-drupal: lib/pib_eval.o php-web-drupal.wasm
 web: lib/pib_eval.o php-web.wasm
 	echo "Done!"
 
+PRELOAD_ASSETS?=third_party/php${PHP_VERSION}-src/Zend/bench.php
+PHP_CONFIGURE_DEPS=
+DEPENDENCIES=
+ORDER_ONLY=
+CONFIGURE_FLAGS=
+EXTRA_FLAGS=
+ARCHIVES=
+
 ########### Collect & patch the source code. ###########
 
 third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gitignore
 	${DOCKER_RUN} git apply --no-index patch/php${PHP_VERSION}.patch
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
-	${DOCKER_RUN} cp third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
-
-ifeq (${WITH_SQLITE}, 1)
-third_party/${SQLITE_DIR}/sqlite3.c:
-	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
-	wget -q https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
-	${DOCKER_RUN} tar -xzf sqlite-autoconf-${SQLITE_VERSION}.tar.gz
-	${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
-	${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}
-	${DOCKER_RUN} mv sqlite-autoconf-${SQLITE_VERSION} third_party/${SQLITE_DIR}
-endif
 
 ifdef VRZNO_DEV_PATH
 third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/vrzno.c
@@ -135,6 +131,29 @@ third_party/vrzno/vrzno.c:
 		--depth 1
 endif
 
+ifdef PRELOAD_ASSETS
+DEPENDENCIES+=
+ORDER_ONLY+= third_party/preload
+EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
+endif
+
+third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
+	${DOCKER_RUN} rm -rf /src/third_party/preload/*;
+ifdef PRELOAD_ASSETS
+	mkdir -p third_party/preload
+	cp -prfv ${PRELOAD_ASSETS} third_party/preload/
+endif
+
+ifeq (${WITH_SQLITE}, 1)
+third_party/${SQLITE_DIR}/sqlite3.c:
+	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
+	wget -q https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
+	${DOCKER_RUN} tar -xzf sqlite-autoconf-${SQLITE_VERSION}.tar.gz
+	${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
+	${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}
+	${DOCKER_RUN} mv sqlite-autoconf-${SQLITE_VERSION} third_party/${SQLITE_DIR}
+endif
+
 ifeq (${WITH_VRZNO}, 1)
 third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
 	${DOCKER_RUN} cp -prfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
@@ -142,6 +161,8 @@ third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c t
 third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
 	${DOCKER_RUN} cp -prfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
 endif
+
+third_party/drupal-7.95: third_party/drupal-7.95/README.txt
 
 third_party/drupal-7.95/README.txt:
 	@ echo -e "\e[33;4mDownloading and patching Drupal\e[0m"
@@ -154,9 +175,6 @@ third_party/drupal-7.95/README.txt:
 	${DOCKER_RUN} cp -r extras/drowser-files/.ht.sqlite third_party/drupal-7.95/sites/default/files/.ht.sqlite
 	${DOCKER_RUN} cp -r extras/drowser-files/* third_party/drupal-7.95/sites/default/files
 	${DOCKER_RUN} cp -r extras/drowser-logo.png third_party/drupal-7.95/sites/default/logo.png
-	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/preload/drupal-7.95
-	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload
-	${DOCKER_RUN} cp -r third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/preload/
 
 ifeq (${WITH_LIBXML}, 1)
 third_party/libxml2/.gitignore:
@@ -249,10 +267,6 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	${DOCKER_RUN_IN_ICONV} emmake make install
 endif
 
-PHP_CONFIGURE_DEPS=
-CONFIGURE_FLAGS=
-ARCHIVES=
-
 ifeq (${WITH_LIBXML}, 1)
 ARCHIVES+= lib/lib/libxml2.a
 CONFIGURE_FLAGS+= \
@@ -328,8 +342,8 @@ endif
 
 lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
 	@ echo -e "\e[33;4mBuilding PHP\e[0m"
-	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
-	@ ${DOCKER_RUN_IN_PHPSIDE} emmake make install
+	${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
+	${DOCKER_RUN_IN_PHPSIDE} emmake make install
 
 ########### Build the final files. ###########
 
@@ -341,7 +355,7 @@ ifeq (${WITH_SQLITE}, 1)
 EXTRA_FILES+= ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c
 endif
 
-FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -gsource-map \
+FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string", "_exec_callback", "_del_callback"]' \
 	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
@@ -367,6 +381,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -gsource-map \
 	-I ext/pdo_sqlite \
 	-I ext/json \
 	-I ext/vrzno \
+	${EXTRA_FLAGS} \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
 	$(addprefix /src/,${ARCHIVES}) \
 	/src/lib/lib/${PHP_AR}.a \
@@ -374,68 +389,71 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -gsource-map \
 
 # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
-DEPENDENCIES=${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c
+DEPENDENCIES+=${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c
 BUILD_TYPE ?=js
 
 build/php-web-drupal.js: ENVIRONMENT=web-drupal
-build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
+build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
+build/php-web-drupal.js: EXTRA_FLAGS= --preload-file /src/third_party/preload@/preload
+build/php-web-drupal.js: ${DEPENDENCIES} | ${ORDER_ONLY} third_party/drupal-7.95
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
-	${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
+	${FINAL_BUILD} -s ENVIRONMENT=web
 
 build/php-web-drupal.mjs: BUILD_TYPE=mjs
 build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
-build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt
-	${FINAL_BUILD} --preload-file ${PRELOAD_ASSETS} -s ENVIRONMENT=web
+build/php-web-drupal.js: EXTRA_FLAGS= --preload-file /src/third_party/preload@/preload
+build/php-web-drupal.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	${FINAL_BUILD} -s ENVIRONMENT=web
 
 build/php-web.js: ENVIRONMENT=web
-build/php-web.js: ${DEPENDENCIES}
+build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web\e[0m"
-	@ ${FINAL_BUILD}
+	${FINAL_BUILD}
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
-build/php-web.mjs: ${DEPENDENCIES}
-	@ ${FINAL_BUILD}
+build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	${FINAL_BUILD}
 
 build/php-worker.js: ENVIRONMENT=worker
-build/php-worker.js: ${DEPENDENCIES}
+build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for workers\e[0m"
-	@ ${FINAL_BUILD}
+	${FINAL_BUILD}
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
-build/php-worker.mjs: ${DEPENDENCIES}
-	@ ${FINAL_BUILD}
+build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	${FINAL_BUILD}
 
 build/php-node.js: ENVIRONMENT=node
-build/php-node.js: ${DEPENDENCIES}
+build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for node\e[0m"
-	@ ${FINAL_BUILD}
+	${FINAL_BUILD}
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
-build/php-node.mjs: ${DEPENDENCIES}
-	@ ${FINAL_BUILD}
+build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	${FINAL_BUILD}
 
 build/php-shell.js: ENVIRONMENT=shell
-build/php-shell.js: ${DEPENDENCIES}
+build/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33mBuilding PHP for shell\e[0m"
-	@ ${FINAL_BUILD}
+	${FINAL_BUILD}
 
 build/php-shell.mjs: BUILD_TYPE=mjs
 build/php-shell.mjs: ENVIRONMENT=shell
-build/php-shell.mjs: ${DEPENDENCIES}
-	@ ${FINAL_BUILD}
+build/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	${FINAL_BUILD}
 
 build/php-webview.js: ENVIRONMENT=webview
-build/php-webview.js: ${DEPENDENCIES}
+build/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33mBuilding PHP for webview\e[0m"
-	@ ${FINAL_BUILD}
+	${FINAL_BUILD}
 
 build/php-webview.mjs: BUILD_TYPE=mjs
 build/php-webview.mjs: ENVIRONMENT=webview
-build/php-webview.mjs: ${DEPENDENCIES}
-	@ ${FINAL_BUILD}
+build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	${FINAL_BUILD}
 
 ########## Package files ###########
 
@@ -487,56 +505,186 @@ php-webview.mjs: build/php-webview.mjs
 	cp $^ $@
 	cp $(basename $^).wasm $(basename $@).wasm
 
+UniqueIndex.js: source/UniqueIndex.js
+	npx babel $< --out-dir .
+
+PhpBase.js: source/PhpBase.js UniqueIndex.js
+	npx babel $< --out-dir .
+
+PhpWebDrupal.js: source/PhpWebDrupal.js PhpBase.js
+	npx babel $< --out-dir .
+
+PhpWeb.js: source/PhpWeb.js PhpBase.js
+	npx babel $< --out-dir .
+
+PhpNode.js: source/PhpNode.js PhpBase.js
+	npx babel $< --out-dir .
+
+PhpShell.js: source/PhpShell.js PhpBase.js
+	npx babel $< --out-dir .
+
+PhpWorker.js: source/PhpWorker.js PhpBase.js
+	npx babel $< --out-dir .
+
+PhpWebview.js: source/PhpWebview.js PhpBase.js
+	npx babel $< --out-dir .
+
+
+PhpBase.mjs: source/PhpBase.js
+	cp $< $@;
+	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
+
+PhpWebDrupal.mjs: source/PhpWebDrupal.js
+	cp $< $@;
+	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
+
+PhpWeb.mjs: source/PhpWeb.js
+	cp $< $@;
+	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
+
+PhpNode.mjs: source/PhpNode.js
+	cp $< $@;
+	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
+
+PhpShell.mjs: source/PhpShell.js
+	cp $< $@;
+	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
+
+PhpWorker.mjs: source/PhpWorker.js
+	cp $< $@;
+	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
+
+PhpWebview.mjs: source/PhpWebview.js
+	cp $< $@;
+	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
+
+php-tags.js: source/php-tags.js
+	cp $< $@;
+
 ########## Dist files ###########
 
+dist/PhpBase.js: PhpBase.js dist/UniqueIndex.js
+	${DOCKER_RUN_USER} cp $< $@
+
+dist/PhpBase.mjs: PhpBase.mjs dist/UniqueIndex.mjs
+	${DOCKER_RUN_USER} cp $< $@
+
+dist/UniqueIndex.js: UniqueIndex.js
+	${DOCKER_RUN_USER} cp $< $@
+
+dist/UniqueIndex.mjs: UniqueIndex.mjs
+	${DOCKER_RUN_USER} cp $< $@
+
+
 dist/php-web-drupal.js: build/php-web-drupal.js
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
-	@ ${DOCKER_RUN_USER} cp $(basename $^).data $(basename $@).data
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
 
 dist/php-web-drupal.mjs: build/php-web-drupal.mjs
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+
+dist/PhpWebDrupal.js: PhpWebDrupal.js dist/php-web-drupal.js dist/PhpBase.js
+	${DOCKER_RUN_USER} cp $< $@
+
+dist/PhpWebDrupal.mjs: PhpWebDrupal.mjs dist/php-web-drupal.mjs dist/PhpBase.mjs
+	${DOCKER_RUN_USER} cp $< $@
+
 
 dist/php-web.js: build/php-web.js
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
 
 dist/php-web.mjs: build/php-web.mjs
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+
+dist/PhpWeb.js: PhpWeb.js dist/php-web.js dist/php-web.js dist/PhpBase.js
+	${DOCKER_RUN_USER} cp $< $@
+	
+dist/PhpWeb.mjs: PhpWeb.mjs dist/php-web.js dist/php-web.mjs dist/PhpBase.mjs
+	${DOCKER_RUN_USER} cp $< $@
+
 
 dist/php-worker.js: build/php-worker.js
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
 
 dist/php-worker.mjs: build/php-worker.mjs
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+
+dist/PhpWorker.js: PhpWorker.js dist/php-worker.js dist/PhpBase.js
+	${DOCKER_RUN_USER} cp $< $@
+	
+dist/PhpWorker.mjs: PhpWorker.mjs dist/php-worker.mjs dist/PhpBase.js
+	${DOCKER_RUN_USER} cp $< $@
+
 
 dist/php-node.js: build/php-node.js
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
 
 dist/php-node.mjs: build/php-node.mjs
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+
+dist/PhpNode.js: PhpNode.js dist/php-node.js dist/PhpBase.js
+	${DOCKER_RUN_USER} cp $< $@
+	
+dist/PhpNode.mjs: PhpNode.mjs dist/php-node.mjs dist/PhpBase.mjs
+	${DOCKER_RUN_USER} cp $< $@
+
 
 dist/php-shell.js: build/php-shell.js
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
 
 dist/php-shell.mjs: build/php-shell.mjs
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
 
-dist/php-webview.js: build/php-node.js
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+dist/PhpShell.js: PhpShell.js dist/php-shell.js dist/PhpBase.js
+	${DOCKER_RUN_USER} cp $< $@
+	
+dist/PhpShell.mjs: PhpShell.js dist/php-shell.mjs dist/PhpBase.mjs
+	${DOCKER_RUN_USER} cp $< $@
+
+
+dist/php-webview.js: build/php-webview.js
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
 
 dist/php-webview.mjs: build/php-webview.mjs
-	@ ${DOCKER_RUN_USER} cp $^ $@
-	@ ${DOCKER_RUN_USER} cp $(basename $^).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
+	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+
+dist/PhpWebview.js: PhpWebview.js dist/php-webview.js dist/PhpBase.js
+	${DOCKER_RUN_USER} cp $< $@
+	
+dist/PhpWebview.mjs: PhpWebview.js dist/php-webview.mjs dist/PhpBase.mjs
+	${DOCKER_RUN_USER} cp $< $@
+
 
 ############# Demo files ##############
 
@@ -562,8 +710,8 @@ docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
 
 clean:
 	# @ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
-	@ ${DOCKER_RUN} rm -rf /src/lib/lib/${PHP_AR}.* /src/lib/lib/php /src/lib/include/php
-	@ ${DOCKER_RUN_IN_PHP} make clean
+	${DOCKER_RUN} rm -rf /src/lib/lib/${PHP_AR}.* /src/lib/lib/php /src/lib/include/php
+	${DOCKER_RUN_IN_PHP} make clean
 
 php-clean:
 	${DOCKER_RUN_IN_PHP} rm -fv configured
@@ -571,37 +719,38 @@ php-clean:
 
 deep-clean:
 	# @ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
-	@ ${DOCKER_RUN} rm -rfv \
+	${DOCKER_RUN} rm -rfv \
 		third_party/php${PHP_VERSION}-src lib/* build/* \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
+		third_party/vrzno third_party/preload \
 		dist/* sqlite-*
 
 show-ports:
-	@ ${DOCKER_RUN} emcc --show-ports
+	${DOCKER_RUN} emcc --show-ports
 
 show-version:
-	@ ${DOCKER_RUN} emcc --show-version
+	${DOCKER_RUN} emcc --show-version
 
 show-files:
-	@ ${DOCKER_RUN} emcc --show-files
+	${DOCKER_RUN} emcc --show-files
 
 hooks:
-	@ git config core.hooksPath githooks
+	git config core.hooksPath githooks
 
 image:
-	@ docker-compose build
+	docker-compose build
 
 pull-image:
-	@ docker-compose push
+	docker-compose push
 
 push-image:
-	@ docker-compose pull
+	docker-compose pull
 
-demo: php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm
+demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm
 
 NPM_PUBLISH_DRY?=--dry-run
 
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
-	@ npm publish ${NPM_PUBLISH_DRY}
+	npm publish ${NPM_PUBLISH_DRY}

@@ -6,7 +6,7 @@
 	"version": "0.0.0-esm-preview-22",
 	"license": "Apache-2.0",
 	"bin": {
-		"php-wasm": "./index.js"
+		"php-wasm": "./bin/php-wasm.js"
 	},
 	"dependencies": {},
 	"devDependencies": {

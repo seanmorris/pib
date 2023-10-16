@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const errorBuffer = [];
 
 	php.addEventListener('error', (event) => {
-		const content = event.detail.join(" ");
+		const content = event.detail.join('');
 		try{
 			const headers = JSON.parse(content);
 
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			errorBuffer.push(line);
 
 			setTimeout(()=>{
-				const chunk = errorBuffer.join('');
+				const chunk = errorBuffer.join('\n');
 
 				if(!errorBuffer || !chunk)
 				{

@@ -3,6 +3,15 @@ import { UniqueIndex } from './UniqueIndex';
 const STR = 'string';
 const NUM = 'number';
 
+const _Event = globalThis.CustomEvent ?? class extends globalThis.Event
+{
+	constructor(name, options = {})
+	{
+		super(name, options)
+		this.detail = options.detail;
+	}
+};
+
 export class PhpBase extends EventTarget
 {
 	constructor(PhpBinary, args = {})
@@ -24,7 +33,7 @@ export class PhpBase extends EventTarget
 			callbacks, targets,
 
 			postRun:  () => {
-				const event = new CustomEvent('ready');
+				const event = new _Event('ready');
 				this.onready(event);
 				this.dispatchEvent(event);
 			},
@@ -42,7 +51,7 @@ export class PhpBase extends EventTarget
 			}
 		};
 
-		const phpSettings = (window && window.phpSettings) ? window.phpSettings : {};
+		const phpSettings = globalThis.phpSettings ?? {};
 
 		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args)).then(php=>{
 
