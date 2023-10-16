@@ -11,6 +11,7 @@
 * Fixing `<script type = "text/php">` support.
 * In-place builds.
 * Conditional builds.
+* Customizable preload files
 * Adding support for iconv & html-tidy
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
@@ -41,6 +42,21 @@
 
 Include the `php-tags.js` script from a CDN:
 
+```html
+<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+```
+And run some PHP right in the page!
+
+```html
+<script type = "text/php">
+<?php phpinfo();
+</script>
+```
+
+Thats it!
+
+Any NPM-enabled CDN will work:
+
 #### JSDelivr
 
 ```html
@@ -55,14 +71,6 @@ Include the `php-tags.js` script from a CDN:
 #### esm.sh
 ```html
 <script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.mjs"></script>
-```
-
-And run some PHP right in the page!
-
-```html
-<script type = "text/php">
-<?php phpinfo();
-</script>
 ```
 
 ## Install & Use
@@ -94,7 +102,7 @@ const php = new PhpWeb;
 ***Note: This does not require npm.***
 
 ```javascript
-const PhpWeb = (await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs')).PhpWeb;
+const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
 const php = new PhpWeb;
 ```
 
