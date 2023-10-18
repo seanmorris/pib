@@ -25,7 +25,7 @@ const build = (flags, envName = 'web', buildType = 'js') => {
 
 	const subprocess = child_process.spawn(`make`, options, {
 		stdio: [ 'inherit', 'inherit', 'inherit' ],
-		cwd: __dirname,
+		cwd: __dirname + '/..',
 	});
 };
 
@@ -120,7 +120,7 @@ const argsToFlags = args => {
 		}
 
 		flags[arg.substr(offset, index - offset)] = arg.substr(1 + index);
-		
+
 		return
 	}))
 

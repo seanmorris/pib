@@ -24,13 +24,22 @@ export class PhpBase extends EventTarget
 		this.onoutput = function () {};
 		this.onready  = function () {};
 
+		Object.defineProperty(this, 'encoder', {value: new TextEncoder()});
+		Object.defineProperty(this, 'buffers', {value: {stdin: [], /*stdout: [], stderr: []*/} });
+
+		Object.freeze(this.buffers);
+
 		const callbacks = new UniqueIndex;
 		const targets   = new UniqueIndex;
 		const zvals     = new Map;
 
 		const defaults  = {
 
-			callbacks, targets,
+			stdin: (...x) => {
+				const char = this.buffers.stdin.shift() ?? null;
+				console.log(char);
+				return char;
+			},
 
 			postRun:  () => {
 				const event = new _Event('ready');
@@ -65,6 +74,16 @@ export class PhpBase extends EventTarget
 			return php;
 
 		}).catch(error => console.error(error));
+	}
+
+	inputString(byteString)
+	{
+		this.inputBytes(this.encoder.encode(byteString));
+	}
+
+	inputBytes(bytes)
+	{
+		this.buffers.stdin.push(...bytes);
 	}
 
 	run(phpCode)

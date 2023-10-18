@@ -6,7 +6,9 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 
+#ifdef WITH_VRZNO
 #include "../vrzno/php_vrzno.h"
+#endif
 
 int main() { return 0; }
 
@@ -96,6 +98,7 @@ int EMSCRIPTEN_KEEPALIVE pib_refresh()
 	return pib_init();
 }
 
+#ifdef WITH_VRZNO
 int EMSCRIPTEN_KEEPALIVE exec_callback(zend_function *fptr)
 {
 	int retVal = vrzno_exec_callback(fptr);
@@ -109,3 +112,4 @@ int EMSCRIPTEN_KEEPALIVE del_callback(zend_function *fptr)
 {
 	return vrzno_del_callback(fptr);
 }
+#endif

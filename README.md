@@ -1,4 +1,4 @@
-# php-wasm 
+# php-wasm
 
 ![php-wasm](https://img.shields.io/npm/v/php-wasm?color=609&label=php-wasm&style=for-the-badge)
 [![Apache-2.0 Licence Badge](https://img.shields.io/npm/l/cv3-inject?logo=apache&color=338800&style=for-the-badge)](https://github.com/seanmorris/php-wasm/blob/master/LICENSE)
@@ -53,7 +53,20 @@ And run some PHP right in the page!
 </script>
 ```
 
-Thats it!
+Inline php can use standard input, output and error with `data-` attributes. Just set the value of the attribute to a selector that will match that tag.
+
+```html
+<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+
+<script id = "input" type = "text/plain">Hello, world!</script>
+
+<script type = "text/php" data-stdin = "#input" data-stdout = "#output" data-stderr = "#error">
+	<?php echo file_get_contents('php://stdin');
+</script>
+
+<div id = "output"></div>
+<div id = "error"></div>
+```
 
 Any NPM-enabled CDN will work:
 

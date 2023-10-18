@@ -1,12 +1,14 @@
+#!/usr/bin/env make
+
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
 WITH_LIBXML?=1
-WITH_TIDY?=1
-WITH_ICONV?=1
-WITH_ICU?=0
+WITH_TIDY  ?=1
+WITH_ICONV ?=1
+WITH_ICU   ?=0
 WITH_SQLITE?=1
-WITH_VRZNO?=1
+WITH_VRZNO ?=1
 
 _UID:=$(shell echo $$UID)
 _GID:=$(shell echo $$UID)
@@ -17,7 +19,6 @@ SHELL=bash -euo pipefail
 
 PHP_DIST_DIR_DEFAULT ?=./dist
 PHP_DIST_DIR ?=${PHP_DIST_DIR_DEFAULT}
-# VRZNO_DEV_PATH=~/projects/vrzno
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=2048MB
@@ -29,19 +30,7 @@ PHP_VERSION    ?=8.2
 PHP_BRANCH     ?=php-8.2.11
 PHP_AR         ?=libphp
 
-# PHP_VERSION    ?=7.4
-# PHP_BRANCH     ?=php-7.4.20
-# PHP_AR         ?=libphp7
-
-VRZNO_BRANCH   ?=DomAccess8.2
-ICU_TAG        ?=release-74-rc
-LIBXML2_TAG    ?=v2.9.10
-TIDYHTML_TAG   ?=5.6.0
-ICONV_TAG      ?=v1.17
-SQLITE_VERSION ?=3410200
-SQLITE_DIR     ?=sqlite3.41-src
-
-PKG_CONFIG_PATH?=/src/lib/lib/pkgconfig
+PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose -p phpwasm run --rm \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
@@ -106,9 +95,19 @@ PRELOAD_ASSETS?=third_party/php${PHP_VERSION}-src/Zend/bench.php
 PHP_CONFIGURE_DEPS=
 DEPENDENCIES=
 ORDER_ONLY=
+EXTRA_FILES=/src/source/pib_eval.c
 CONFIGURE_FLAGS=
 EXTRA_FLAGS=
+PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
+
+include make/iconv.mak make/icu.mak make/libxml.mak make/sqlite.mak make/tidy.mak make/vrzno.mak
+
+ifdef PRELOAD_ASSETS
+DEPENDENCIES+=
+ORDER_ONLY+= third_party/preload
+EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
+endif
 
 ########### Collect & patch the source code. ###########
 
@@ -117,49 +116,11 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-ifdef VRZNO_DEV_PATH
-third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/vrzno.c
-	@ echo -e "\e[33;Importing VRZNO\e[0m"
-	@ cp -prfv ${VRZNO_DEV_PATH} third_party/
-	${DOCKER_RUN} touch third_party/vrzno/vrzno.c
-else
-third_party/vrzno/vrzno.c:
-	@ echo -e "\e[33;4mDownloading and importing VRZNO\e[0m"
-	${DOCKER_RUN} git clone https://github.com/seanmorris/vrzno.git third_party/vrzno \
-		--branch ${VRZNO_BRANCH} \
-		--single-branch          \
-		--depth 1
-endif
-
-ifdef PRELOAD_ASSETS
-DEPENDENCIES+=
-ORDER_ONLY+= third_party/preload
-EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
-endif
-
 third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-	${DOCKER_RUN} rm -rf /src/third_party/preload/*;
+	@ ${DOCKER_RUN} rm -rf /src/third_party/preload
 ifdef PRELOAD_ASSETS
-	mkdir -p third_party/preload
-	cp -prfv ${PRELOAD_ASSETS} third_party/preload/
-endif
-
-ifeq (${WITH_SQLITE}, 1)
-third_party/${SQLITE_DIR}/sqlite3.c:
-	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
-	wget -q https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
-	${DOCKER_RUN} tar -xzf sqlite-autoconf-${SQLITE_VERSION}.tar.gz
-	${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
-	${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}
-	${DOCKER_RUN} mv sqlite-autoconf-${SQLITE_VERSION} third_party/${SQLITE_DIR}
-endif
-
-ifeq (${WITH_VRZNO}, 1)
-third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
-	${DOCKER_RUN} cp -prfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
-
-third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
-	${DOCKER_RUN} cp -prfv third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
+	@ mkdir -p third_party/preload
+	@ cp -prf ${PRELOAD_ASSETS} third_party/preload/
 endif
 
 third_party/drupal-7.95: third_party/drupal-7.95/README.txt
@@ -176,42 +137,6 @@ third_party/drupal-7.95/README.txt:
 	${DOCKER_RUN} cp -r extras/drowser-files/* third_party/drupal-7.95/sites/default/files
 	${DOCKER_RUN} cp -r extras/drowser-logo.png third_party/drupal-7.95/sites/default/logo.png
 
-ifeq (${WITH_LIBXML}, 1)
-third_party/libxml2/.gitignore:
-	@ echo -e "\e[33;4mDownloading LibXML2\e[0m"
-	${DOCKER_RUN} git clone https://gitlab.gnome.org/GNOME/libxml2.git third_party/libxml2 \
-		--branch ${LIBXML2_TAG} \
-		--single-branch     \
-		--depth 1;
-endif
-
-ifeq (${WITH_TIDY}, 1)
-ifeq (${WITH_LIBXML}, 1)
-third_party/tidy-html5/.gitignore:
-	${DOCKER_RUN} git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
-		--branch ${TIDYHTML_TAG} \
-		--single-branch     \
-		--depth 1;
-	${DOCKER_RUN_IN_TIDY} git apply --no-index ../../patch/tidy-html.patch
-else
-$(error TIDY REQUIRES LIBXML. PLEASE CHECK YOUR .env FILE.)
-endif
-endif
-
-ifeq (${WITH_ICU}, 1)
-third_party/libicu-src/.gitignore:
-	${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-src \
-		--branch ${ICU_TAG} \
-		--single-branch     \
-		--depth 1;
-endif
-
-ifeq (${WITH_ICONV}, 1)
-third_party/libiconv-1.17/README:
-	${DOCKER_RUN} wget -q https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz
-	${DOCKER_RUN} tar -xvzf libiconv-1.17.tar.gz -C third_party
-	${DOCKER_RUN} rm libiconv-1.17.tar.gz
-endif
 
 third_party/php${PHP_VERSION}-src/.gitignore:
 	@ echo -e "\e[33;4mDownloading and patching PHP\e[0m"
@@ -221,88 +146,6 @@ third_party/php${PHP_VERSION}-src/.gitignore:
 		--depth 1
 
 ########### Build the objects. ###########
-
-ifeq (${WITH_LIBXML}, 1)
-lib/lib/libxml2.a: third_party/libxml2/.gitignore
-	@ echo -e "\e[33;4mBuilding LibXML2\e[0m"
-	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
-	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
-	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC'
-	${DOCKER_RUN_IN_LIBXML} emmake make install
-endif
-
-
-ifeq (${WITH_SQLITE}, 1)
-lib/lib/libsqlite3.a: third_party/${SQLITE_DIR}/sqlite3.c
-	@ echo -e "\e[33;4mBuilding LibSqlite3\e[0m"
-	${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
-	${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC'
-	${DOCKER_RUN_IN_SQLITE} emmake make install
-endif
-
-ifeq (${WITH_TIDY}, 1)
-lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
-	@ echo -e "\e[33;4mBuilding LibTidy\e[0m"
-	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
-		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC"
-	${DOCKER_RUN_IN_TIDY} emmake make;
-	${DOCKER_RUN_IN_TIDY} emmake make install;
-endif
-
-ifeq (${WITH_ICU}, 1)
-lib/lib/libicudata.a: third_party/libicu-src/.gitignore
-	@ echo -e "\e[33;4mBuilding LibIcu\e[0m"
-	${DOCKER_RUN_IN_ICU} emconfigure ./configure --prefix=/src/lib/ --enable-icu-config --enable-extras=no --enable-tools=no --enable-samples=no --enable-tests=no --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICU} emmake make clean install
-endif
-
-ifeq (${WITH_ICONV}, 1)
-lib/lib/libiconv.a: third_party/libiconv-1.17/README
-	@ echo -e "\e[33;4mBuilding LibIconv\e[0m"
-	${DOCKER_RUN_IN_ICONV} autoconf
-	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes
-	${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC'
-	${DOCKER_RUN_IN_ICONV} emmake make install
-endif
-
-ifeq (${WITH_LIBXML}, 1)
-ARCHIVES+= lib/lib/libxml2.a
-CONFIGURE_FLAGS+= \
-	--with-libxml \
-	--enable-xml  \
-	--enable-dom  \
-	--enable-simplexml
-endif
-
-ifeq (${WITH_ICONV}, 1)
-ARCHIVES+= lib/lib/libiconv.a
-CONFIGURE_FLAGS+= --with-iconv=/src/lib
-endif
-
-ifeq (${WITH_ICU}, 1)
-CONFIGURE_FLAGS+= --with-icu=/src/lib
-ARCHIVES+=
-endif
-
-ifeq (${WITH_SQLITE}, 1)
-ARCHIVES+= lib/lib/libsqlite3.a
-CONFIGURE_FLAGS+=  \
-	--with-sqlite3 \
-	--enable-pdo   \
-	--with-pdo-sqlite=/src/lib
-endif
-
-ifeq (${WITH_TIDY}, 1)
-ARCHIVES+= lib/lib/libtidy.a
-CONFIGURE_FLAGS+= --with-tidy=/src/lib
-endif
-
-ifeq (${WITH_VRZNO}, 1)
-PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
-CONFIGURE_FLAGS+= --enable-vrzno
-endif
 
 third_party/php${PHP_VERSION}-src/configured: ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched ${ARCHIVES}
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
@@ -334,12 +177,6 @@ third_party/php${PHP_VERSION}-src/configured: ${PHP_CONFIGURE_DEPS} third_party/
 		${CONFIGURE_FLAGS}
 	${DOCKER_RUN_IN_PHPSIDE} touch /src/third_party/php${PHP_VERSION}-src/configured
 
-PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
-
-ifeq (${WITH_VRZNO}, 1)
-PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
-endif
-
 lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
 	@ echo -e "\e[33;4mBuilding PHP\e[0m"
 	${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
@@ -348,12 +185,6 @@ lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
 ########### Build the final files. ###########
 
 ASYNCIFY_IMPORTS='["zval_ptr_dtor","zend_call_function","exec_callback"]'
-
-EXTRA_FILES=/src/source/pib_eval.c
-
-ifeq (${WITH_SQLITE}, 1)
-EXTRA_FILES+= ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c
-endif
 
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
@@ -368,6 +199,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-s ALLOW_MEMORY_GROWTH=1         \
 	-s ASSERTIONS=${ASSERTIONS}      \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
+	-s FORCE_FILESYSTEM              \
 	-s EXPORT_NAME="'PHP'"           \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
@@ -572,118 +404,152 @@ php-tags.js: source/php-tags.js
 
 dist/PhpBase.js: PhpBase.js dist/UniqueIndex.js
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
-dist/PhpBase.mjs: PhpBase.mjs dist/UniqueIndex.mjs
+dist/PhpBase.mjs: PhpBase.mjs dist/UniqueIndex.mjs dist/php-tags.mjs
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/UniqueIndex.js: UniqueIndex.js
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/UniqueIndex.mjs: UniqueIndex.mjs
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
+dist/php-tags.mjs: source/php-tags.mjs
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/php-web-drupal.js: build/php-web-drupal.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@ $(basename $@).wasm
+	${DOCKER_RUN} chown ${UID}:${GID} $@ $(basename $@).data
+	${DOCKER_RUN} chown ${UID}:${GID} $@ $(basename $@).data || true
 
 dist/php-web-drupal.mjs: build/php-web-drupal.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/PhpWebDrupal.js: PhpWebDrupal.js dist/php-web-drupal.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/PhpWebDrupal.mjs: PhpWebDrupal.mjs dist/php-web-drupal.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 
 dist/php-web.js: build/php-web.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/php-web.mjs: build/php-web.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/PhpWeb.js: PhpWeb.js dist/php-web.js dist/php-web.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	
-dist/PhpWeb.mjs: PhpWeb.mjs dist/php-web.js dist/php-web.mjs dist/PhpBase.mjs
+	${DOCKER_RUN} chown ${UID}:${GID} $@
+
+dist/PhpWeb.mjs: PhpWeb.mjs dist/php-web.mjs dist/php-web.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 
 dist/php-worker.js: build/php-worker.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/php-worker.mjs: build/php-worker.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/PhpWorker.js: PhpWorker.js dist/php-worker.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	
+	${DOCKER_RUN} chown ${UID}:${GID} $@
+
 dist/PhpWorker.mjs: PhpWorker.mjs dist/php-worker.mjs dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 
 dist/php-node.js: build/php-node.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/php-node.mjs: build/php-node.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/PhpNode.js: PhpNode.js dist/php-node.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	
+	${DOCKER_RUN} chown ${UID}:${GID} $@
+
 dist/PhpNode.mjs: PhpNode.mjs dist/php-node.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 
 dist/php-shell.js: build/php-shell.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/php-shell.mjs: build/php-shell.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/PhpShell.js: PhpShell.js dist/php-shell.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	
+	${DOCKER_RUN} chown ${UID}:${GID} $@
+
 dist/PhpShell.mjs: PhpShell.js dist/php-shell.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 
 dist/php-webview.js: build/php-webview.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/php-webview.mjs: build/php-webview.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 dist/PhpWebview.js: PhpWebview.js dist/php-webview.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	
+	${DOCKER_RUN} chown ${UID}:${GID} $@
+
 dist/PhpWebview.mjs: PhpWebview.js dist/php-webview.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown ${UID}:${GID} $@
 
 
 ############# Demo files ##############
@@ -699,7 +565,7 @@ docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
 		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
 		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
 		./docs-source/public;
-	
+
 	${DOCKER_RUN} chown ${UID}:${GID} \
 		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
 		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \

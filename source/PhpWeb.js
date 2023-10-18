@@ -19,27 +19,49 @@ const runPhpScript = element => {
 		return;
 	}
 
-	const output = document.createElement('div');
+	const tags = {stdout: null, stderr: null};
 
-	element.parentNode.insertBefore(output, element.nextSibling);
+	if(element.hasAttribute('data-stdout'))
+	{
+		tags.stdout = document.querySelector(element.getAttribute('data-stdout'));
+	}
+	else
+	{
+		tags.stdout = document.createElement('div');
 
-	let buffer = '';
+		element.parentNode.insertBefore(tags.output, element.nextSibling);
+	}
+
+	if(element.hasAttribute('data-stderr'))
+	{
+		tags.stderr = document.querySelector(element.getAttribute('data-stderr'));
+	}
+
+	if(element.hasAttribute('data-stdin'))
+	{
+		tags.stdin = document.querySelector(element.getAttribute('data-stdin'));
+	}
+
+	tags.stdin && php.inputString(tags.stdin.innerText);
+
+	let stdout = '';
+	let stderr = '';
 
 	const php = new PhpWeb;
 
-	php.addEventListener('output', (event) => buffer += event.detail);
+	const outListener = event => stdout += event.detail;
+	const errListener = event => stderr += event.detail;
+
+	php.addEventListener('output', outListener);
+	php.addEventListener('error',  errListener);
 
 	php.addEventListener('ready', () => {
-		php.run(inlineCode).then(() => {
-			output.innerHTML = buffer;
+		php.run(inlineCode).finally(() => {
+			tags.stdout && (tags.stdout.innerHTML = stdout);
+			tags.stderr && (tags.stderr.innerHTML = stderr);
+			php.removeEventListener('output', outListener);
+			php.removeEventListener('error',  errListener);
 		});
-	});
-
-	php.addEventListener('error', (event) => {
-			event.detail.forEach(error => {
-			error = error.trim();
-			if(error) console.log(error);
-		})
 	});
 }
 
@@ -59,27 +81,10 @@ const runPhpScriptTag = element => {
 	return runPhpScript(element);
 };
 
+const phpSelector = 'script[type="text/php"]';
+
 export const runPhpTags = (doc) => {
 
-	const phpSelector = 'script[type="text/php"]';
-
-	const htmlNode = doc.body.parentElement;
-	const observer = new MutationObserver((mutations, observer)=>{
-		for(const mutation of mutations)
-		{
-			for(const addedNode of mutation.addedNodes)
-			{
-				if(!addedNode.matches || !addedNode.matches(phpSelector))
-				{
-					continue;
-				}
-
-				runPhpScriptTag(addedNode.innerText);
-			}
-		}
-	});
-
-	observer.observe(htmlNode, {childList: true, subtree: true});
 
 	const phpNodes = doc.querySelectorAll(phpSelector);
 
@@ -90,3 +95,20 @@ export const runPhpTags = (doc) => {
 		runPhpScriptTag(phpNode);
 	}
 }
+
+const observer = new MutationObserver((mutations, observer) => {
+	for(const mutation of mutations)
+	{
+		for(const addedNode of mutation.addedNodes)
+		{
+			if(!addedNode.matches || !addedNode.matches(phpSelector))
+			{
+				continue;
+			}
+
+			runPhpScriptTag(addedNode);
+		}
+	}
+});
+
+observer.observe(document.body.parentElement, {childList: true, subtree: true});

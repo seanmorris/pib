@@ -3,7 +3,7 @@
 	"description": "Run PHP right in the browser.",
 	"repository": "https://github.com/seanmorris/pib",
 	"author": "Oraoto <oraoto@outlook.com>",
-	"version": "0.0.0-esm-preview-22",
+	"version": "0.0.0-esm-preview-23",
 	"license": "Apache-2.0",
 	"bin": {
 		"php-wasm": "./bin/php-wasm.js"
@@ -67,6 +67,6 @@
 		"ZVal.js",
 		"ZVal.mjs",
 		"php-tags.mjs",
-		"index.js"
+		"bin/php-wasm.js"
 	]
 }

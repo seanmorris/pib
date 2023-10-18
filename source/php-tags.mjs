@@ -1,1 +1,1 @@
-import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs').then(({runPhpTags}) => runPhpTags(document));
+import('./PhpWeb.mjs').then(({runPhpTags}) => runPhpTags(document));
