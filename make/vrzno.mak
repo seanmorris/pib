@@ -4,6 +4,10 @@ ifeq (${WITH_VRZNO}, 1)
 
 VRZNO_BRANCH ?=DomAccess8.2
 EXTRA_FLAGS+= -D WITH_VRZNO=1
+PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
+CONFIGURE_FLAGS+= --enable-vrzno
+PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
+EXPORTED_FUNCTIONS+=, "_exec_callback", "_del_callback"
 # VRZNO_DEV_PATH?=
 
 ifdef VRZNO_DEV_PATH
@@ -19,11 +23,6 @@ third_party/vrzno/vrzno.c:
 		--single-branch          \
 		--depth 1
 endif
-
-
-PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
-CONFIGURE_FLAGS+= --enable-vrzno
-PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 
 third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
 	@ ${DOCKER_RUN} cp -prf third_party/vrzno third_party/php${PHP_VERSION}-src/ext/

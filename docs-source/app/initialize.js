@@ -41,6 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const renderAs    = Array.from(document.querySelectorAll('[name=render-as]'));
 
+	const outputBuffer = [];
+	const errorBuffer = [];
+	let outputTimer;
+	let errorTimer;
+
 	openFile.addEventListener('input', event =>{
 
 		const reader = new FileReader();
@@ -354,15 +359,18 @@ else
 		}
 	});
 
-	const outputBuffer = [];
-
 	php.addEventListener('output', (event) => {
-		const row = document.createElement('div');
 		const content = event.detail.join('');
 
 		outputBuffer.push(content);
 
-		setTimeout(()=>{
+		if(outputTimer)
+		{
+			clearTimeout(outputTimer);
+			outputTimer = null;
+		}
+
+		outputTimer = setTimeout(()=>{
 			let chunk = outputBuffer.join('');
 
 			if(!outputBuffer || !chunk)
@@ -380,16 +388,14 @@ else
 			stdout.append(node);
 			stdoutFrame.srcdoc += chunk;
 
-			while(outputBuffer.pop()){};
-		}, 500);
+			outputBuffer.splice(0);
+		}, 50);
 
 	});
 
-	const errorBuffer = [];
-
 	php.addEventListener('error', (event) => {
-		console.log(event.detail);
 		const content = event.detail.join('');
+
 		try{
 			const headers = JSON.parse(content);
 
@@ -430,8 +436,15 @@ else
 
 		errorBuffer.push(content);
 
-		setTimeout(()=>{
-			const chunk = errorBuffer.join('\n');
+		if(errorTimer)
+		{
+			clearTimeout(errorTimer);
+			errorTimer = null;
+		}
+
+		errorTimer = setTimeout(()=>{
+			errorTimer = null;
+			const chunk = errorBuffer.join('');
 
 			if(!errorBuffer || !chunk)
 			{
@@ -443,8 +456,8 @@ else
 			stderr.append(node);
 			stderrFrame.srcdoc += chunk;
 
-			while(errorBuffer.pop()){};
-		}, 500);
+			errorBuffer.splice(0);
+		}, 50);
 
 	});
 

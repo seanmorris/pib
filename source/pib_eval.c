@@ -21,11 +21,11 @@ int EMSCRIPTEN_KEEPALIVE pib_init()
 
 void pib_finally()
 {
-	fflush(stdout);
-	fprintf(stdout, "\n");
+	// fflush(stdout);
+	// fprintf(stdout, "\n");
 
-	fflush(stderr);
-	fprintf(stderr, "\n");
+	// fflush(stderr);
+	// fprintf(stderr, "\n");
 }
 
 char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)

@@ -1,4 +1,4 @@
-<?php // {"autorun":true, "persist":false, "single-expression": true, "render-as": "text"}
+<?php // {"autorun":true, "persist":true, "single-expression": true, "render-as": "text"}
 
 // Only "single" expressions can return strings directly
 // So wrap the commands in an IFFE.

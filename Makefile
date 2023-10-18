@@ -84,7 +84,7 @@ scripts:
 package: php-web-drupal.mjs php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.js \
          php-web-drupal.js  php-web.js  php-webview.js  php-node.js  php-shell.js php-worker.js
 
-dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-node.mjs dist/php-shell.mjs dist/php-worker.js \
+dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-node.mjs dist/php-shell.mjs dist/php-worker.mjs \
       dist/php-web-drupal.js  dist/php-web.js  dist/php-webview.js  dist/php-node.js  dist/php-shell.js  dist/php-worker.js
 
 web-drupal: lib/pib_eval.o php-web-drupal.wasm
@@ -100,6 +100,7 @@ CONFIGURE_FLAGS=
 EXTRA_FLAGS=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
+EXPORTED_FUNCTIONS="_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string"
 
 include make/iconv.mak make/icu.mak make/libxml.mak make/sqlite.mak make/tidy.mak make/vrzno.mak
 
@@ -188,7 +189,7 @@ ASYNCIFY_IMPORTS='["zval_ptr_dtor","zend_call_function","exec_callback"]'
 
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
-	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string", "_exec_callback", "_del_callback"]' \
+	-s EXPORTED_FUNCTIONS='[${EXPORTED_FUNCTIONS}]' \
 	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
 	-s MAXIMUM_MEMORY=2048mb         \
@@ -224,16 +225,16 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 DEPENDENCIES+=${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c
 BUILD_TYPE ?=js
 
-build/php-web-drupal.js: ENVIRONMENT=web-drupal
 build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-build/php-web-drupal.js: EXTRA_FLAGS= --preload-file /src/third_party/preload@/preload
+build/php-web-drupal.js: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
+build/php-web-drupal.js: ENVIRONMENT=web-drupal
 build/php-web-drupal.js: ${DEPENDENCIES} | ${ORDER_ONLY} third_party/drupal-7.95
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${FINAL_BUILD} -s ENVIRONMENT=web
 
-build/php-web-drupal.mjs: BUILD_TYPE=mjs
 build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
-build/php-web-drupal.js: EXTRA_FLAGS= --preload-file /src/third_party/preload@/preload
+build/php-web-drupal.mjs: BUILD_TYPE=mjs
+build/php-web-drupal.js: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	${FINAL_BUILD} -s ENVIRONMENT=web
 
@@ -292,10 +293,12 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 php-web-drupal.js: build/php-web-drupal.js
 	cp $^ $@
 	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).data $(basename $@).data
 
 php-web-drupal.mjs: build/php-web-drupal.mjs
 	cp $^ $@
 	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).data $(basename $@).data
 
 php-web.js: build/php-web.js
 	cp $^ $@
@@ -337,10 +340,7 @@ php-webview.mjs: build/php-webview.mjs
 	cp $^ $@
 	cp $(basename $^).wasm $(basename $@).wasm
 
-UniqueIndex.js: source/UniqueIndex.js
-	npx babel $< --out-dir .
-
-PhpBase.js: source/PhpBase.js UniqueIndex.js
+PhpBase.js: source/PhpBase.js
 	npx babel $< --out-dir .
 
 PhpWebDrupal.js: source/PhpWebDrupal.js PhpBase.js
@@ -387,7 +387,7 @@ PhpShell.mjs: source/PhpShell.js
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
-PhpWorker.mjs: source/PhpWorker.js
+PhpWorker.mjs: source/PhpWorker.mjs
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
@@ -402,19 +402,11 @@ php-tags.js: source/php-tags.js
 
 ########## Dist files ###########
 
-dist/PhpBase.js: PhpBase.js dist/UniqueIndex.js
+dist/PhpBase.js: PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN} chown ${UID}:${GID} $@
 
-dist/PhpBase.mjs: PhpBase.mjs dist/UniqueIndex.mjs dist/php-tags.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
-
-dist/UniqueIndex.js: UniqueIndex.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
-
-dist/UniqueIndex.mjs: UniqueIndex.mjs
+dist/PhpBase.mjs: PhpBase.mjs dist/php-tags.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN} chown ${UID}:${GID} $@
 
@@ -618,5 +610,4 @@ demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wa
 NPM_PUBLISH_DRY?=--dry-run
 
 publish:
-	npm publish ${NPM_PUBLISH_DRY}
 	npm publish ${NPM_PUBLISH_DRY}

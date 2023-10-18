@@ -5,10 +5,13 @@ Changes
 ## 0.0.8 - Preparing for Liftoff
 
 * Adding ESM & CDN Module support!
+* Adding stdin
+* Buffering stdout/stderr in javascript
 * Fixing `<script type = "text/php">` support.
+* Adding fetch support for `src` on above.
+* Adding support for iconv & html-tidy
 * In-place builds.
 * Conditional builds.
-* Adding support for iconv & html-tidy
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
 

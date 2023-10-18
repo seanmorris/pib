@@ -10,16 +10,9 @@ export class PhpWeb extends PhpBase
 	}
 }
 
-const runPhpScript = element => {
+const runPhpScriptTag = element => {
 
-	const inlineCode = element.innerText.trim();
-
-	if(!inlineCode)
-	{
-		return;
-	}
-
-	const tags = {stdout: null, stderr: null};
+	const tags = {stdin: null, stdout: null, stderr: null};
 
 	if(element.hasAttribute('data-stdout'))
 	{
@@ -42,49 +35,83 @@ const runPhpScript = element => {
 		tags.stdin = document.querySelector(element.getAttribute('data-stdin'));
 	}
 
-	tags.stdin && php.inputString(tags.stdin.innerText);
-
 	let stdout = '';
 	let stderr = '';
 
-	const php = new PhpWeb;
+	let getCode = Promise.resolve(element.innerText);
 
-	const outListener = event => stdout += event.detail;
-	const errListener = event => stderr += event.detail;
+	if(element.hasAttribute('src'))
+	{
+		getCode = fetch(element.getAttribute('src')).then(response => response.text());
+	}
 
-	php.addEventListener('output', outListener);
-	php.addEventListener('error',  errListener);
+	let getInput = Promise.resolve('');
 
-	php.addEventListener('ready', () => {
-		php.run(inlineCode).finally(() => {
-			tags.stdout && (tags.stdout.innerHTML = stdout);
-			tags.stderr && (tags.stderr.innerHTML = stderr);
-			php.removeEventListener('output', outListener);
-			php.removeEventListener('error',  errListener);
+	if(tags.stdin)
+	{
+		getInput = Promise.resolve(tags.stdin.innerText);
+
+		if(tags.stdin.hasAttribute('src'))
+		{
+			getInput = fetch(tags.stdin.getAttribute('src')).then(response => response.text());
+		}
+	}
+
+	const getAll = Promise.all([getCode, getInput]);
+
+
+	getAll.then(([code, input,]) => {
+		const php = new PhpWeb;
+
+		php.inputString(input);
+
+		const outListener = event => stdout += event.detail;
+		const errListener = event => stderr += event.detail;
+
+		php.addEventListener('output', outListener);
+		php.addEventListener('error',  errListener);
+
+		php.addEventListener('ready', () => {
+			php.run(code)
+			.then(exitCode => console.log(exitCode))
+			.catch(error => console.warn(error))
+			.finally(() => {
+				php.flush();
+				tags.stdout && (tags.stdout.innerHTML = stdout);
+				tags.stderr && (tags.stderr.innerHTML = stderr);
+				php.removeEventListener('output', outListener);
+				php.removeEventListener('error',  errListener);
+			});
 		});
+
+		// const observer = new MutationObserver((mutations, observer) => {
+		// 	for(const mutation of mutations)
+		// 	{
+		// 		for(const addedNode of mutation.addedNodes)
+		// 		{
+		// 			console.log(addedNode);
+		// 			// php.inputString(addedNode);
+		// 			// php.run(code)
+		// 			// .then(exitCode => console.log(exitCode))
+		// 			// .catch(error => console.warn(error))
+		// 			// .finally(() => {
+		// 			// 	php.flush();
+		// 			// 	tags.stdout && (tags.stdout.innerHTML = stdout);
+		// 			// 	tags.stderr && (tags.stderr.innerHTML = stderr);
+		// 			// 	php.removeEventListener('output', outListener);
+		// 			// 	php.removeEventListener('error',  errListener);
+		// 			// });
+		// 		}
+		// 	}
+		// });
+
+		// observer.observe(element, {childList: true, subtree: true});
 	});
 }
 
-const runPhpScriptTag = element => {
-
-	const src = element.getAttribute('src');
-
-	if(src)
-	{
-		fetch(src).then(r => r.text()).then(r => {
-			runPhpScript(r).then(exit=>console.log(exit));
-		});
-
-		return;
-	}
-
-	return runPhpScript(element);
-};
-
-const phpSelector = 'script[type="text/php"]';
+const phpSelector = 'script[type="text/php"],[data-is-php]';
 
 export const runPhpTags = (doc) => {
-
 
 	const phpNodes = doc.querySelectorAll(phpSelector);
 
@@ -94,21 +121,22 @@ export const runPhpTags = (doc) => {
 
 		runPhpScriptTag(phpNode);
 	}
+
+	const observer = new MutationObserver((mutations, observer) => {
+		for(const mutation of mutations)
+		{
+			for(const addedNode of mutation.addedNodes)
+			{
+				if(!addedNode.matches || !addedNode.matches(phpSelector))
+				{
+					continue;
+				}
+
+				runPhpScriptTag(addedNode);
+			}
+		}
+	});
+
+	observer.observe(document.body.parentElement, {childList: true, subtree: true});
 }
 
-const observer = new MutationObserver((mutations, observer) => {
-	for(const mutation of mutations)
-	{
-		for(const addedNode of mutation.addedNodes)
-		{
-			if(!addedNode.matches || !addedNode.matches(phpSelector))
-			{
-				continue;
-			}
-
-			runPhpScriptTag(addedNode);
-		}
-	}
-});
-
-observer.observe(document.body.parentElement, {childList: true, subtree: true});

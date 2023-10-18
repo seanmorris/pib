@@ -1,16 +1,5 @@
-import { UniqueIndex } from './UniqueIndex';
-
 const STR = 'string';
 const NUM = 'number';
-
-const _Event = globalThis.CustomEvent ?? class extends globalThis.Event
-{
-	constructor(name, options = {})
-	{
-		super(name, options)
-		this.detail = options.detail;
-	}
-};
 
 export class PhpBase extends EventTarget
 {
@@ -25,7 +14,12 @@ export class PhpBase extends EventTarget
 		this.onready  = function () {};
 
 		Object.defineProperty(this, 'encoder', {value: new TextEncoder()});
-		Object.defineProperty(this, 'buffers', {value: {stdin: [], /*stdout: [], stderr: []*/} });
+
+		Object.defineProperty(this, 'buffers', {value: {
+			stdin: [],
+			stdout: new EventBuffer(this, 'output', -1),
+			stderr: new EventBuffer(this, 'error',  -1),
+		} });
 
 		Object.freeze(this.buffers);
 
@@ -35,29 +29,17 @@ export class PhpBase extends EventTarget
 
 		const defaults  = {
 
-			stdin: (...x) => {
-				const char = this.buffers.stdin.shift() ?? null;
-				console.log(char);
-				return char;
-			},
+			callbacks, targets, zvals,
+
+			stdin:  () => this.buffers.stdin.shift() ?? null,
+			stdout: byte => this.buffers.stdout.push(byte),
+			stderr: byte => this.buffers.stderr.push(byte),
 
 			postRun:  () => {
 				const event = new _Event('ready');
 				this.onready(event);
 				this.dispatchEvent(event);
 			},
-
-			print: (...chunks) =>{
-				const event = new CustomEvent('output', {detail: chunks.map(c=>c+"\n")});
-				this.onoutput(event);
-				this.dispatchEvent(event);
-			},
-
-			printErr: (...chunks) => {
-				const event = new CustomEvent('error', {detail: chunks.map(c=>c+"\n")});
-				this.onerror(event);
-				this.dispatchEvent(event);
-			}
 		};
 
 		const phpSettings = globalThis.phpSettings ?? {};
@@ -78,12 +60,18 @@ export class PhpBase extends EventTarget
 
 	inputString(byteString)
 	{
-		this.inputBytes(this.encoder.encode(byteString));
+		this.input(this.encoder.encode(byteString));
 	}
 
-	inputBytes(bytes)
+	input(items)
 	{
-		this.buffers.stdin.push(...bytes);
+		this.buffers.stdin.push(...items);
+	}
+
+	flush()
+	{
+		this.buffers.stdout.flush();
+		this.buffers.stderr.flush();
 	}
 
 	run(phpCode)
@@ -93,7 +81,8 @@ export class PhpBase extends EventTarget
 			, NUM
 			, [STR]
 			, [`?>${phpCode}`]
-		));
+		))
+		.finally(() => this.flush());
 	}
 
 	exec(phpCode)
@@ -103,7 +92,8 @@ export class PhpBase extends EventTarget
 			, STR
 			, [STR]
 			, [phpCode]
-		));
+		))
+		.finally(() => this.flush());
 	}
 
 	refresh()
@@ -118,5 +108,150 @@ export class PhpBase extends EventTarget
 		call.catch(error => console.error(error));
 
 		return call;
+	}
+}
+
+const _Event = globalThis.CustomEvent ?? class extends globalThis.Event
+{
+	constructor(name, options = {})
+	{
+		super(name, options)
+		this.detail = options.detail;
+	}
+};
+
+class EventBuffer
+{
+	constructor(target, eventType, maxLength)
+	{
+		Object.defineProperty(this, 'target',    {value: target});
+		Object.defineProperty(this, 'buffer',    {value: []});
+		Object.defineProperty(this, 'eventType', {value: eventType});
+		Object.defineProperty(this, 'maxLength', {value: maxLength});
+		Object.defineProperty(this, 'decoder',   {value: new TextDecoder()});
+	}
+
+	push(...items)
+	{
+		this.buffer.push(...items);
+
+		const end = this.buffer.length - 1;
+
+		if(this.maxLength === -1 && this.buffer[end] === 10)
+		{
+			this.flush();
+		}
+
+		if(this.maxLength >= 0 && this.buffer.length >= this.maxLength)
+		{
+			this.flush();
+		}
+	}
+
+	flush()
+	{
+		if(!this.buffer.length)
+		{
+			return;
+		}
+
+		const event = new CustomEvent(this.eventType, {
+			detail: [this.decoder.decode(new Uint8Array(this.buffer))]
+		});
+
+		if(this.target['on' + this.eventType])
+		{
+			if(this.target['on' + this.eventType](event) === false)
+			{
+				return;
+			}
+		}
+
+		if(!this.target.dispatchEvent(event))
+		{
+			return;
+		}
+
+		this.buffer.splice(0);
+	}
+}
+
+class UniqueIndex
+{
+	constructor()
+	{
+		this.byInteger = new Map();
+		this.byObject  = new Map();
+
+		let id = 0;
+
+		Object.defineProperty(this, 'add', {
+			configurable: false
+			, writable:   false
+			, value: (callback) => {
+
+				if(this.byObject.has(callback))
+				{
+					const id = this.byObject.get(callback);
+
+					return id;
+				}
+
+				const newid = ++id;
+
+				this.byObject.set(callback, newid);
+				this.byInteger.set(newid, callback);
+
+				return newid;
+			}
+		});
+
+		Object.defineProperty(this, 'has', {
+			configurable: false
+			, writable:   false
+			, value: (callback) => {
+				if(this.byObject.has(callback))
+				{
+					return this.byObject.get(callback);
+				}
+			}
+		});
+
+		Object.defineProperty(this, 'get', {
+			configurable: false
+			, writable:   false
+			, value: (id) => {
+				if(this.byInteger.has(id))
+				{
+					return this.byInteger.get(id);
+				}
+			}
+		});
+
+		Object.defineProperty(this, 'getId', {
+			configurable: false
+			, writable:   false
+			, value: (callback) => {
+				if(this.byObject.has(callback))
+				{
+					return this.byObject.get(callback);
+				}
+			}
+		});
+
+		Object.defineProperty(this, 'remove', {
+			configurable: false
+			, writable:   false
+			, value: (id) => {
+
+				const callback = this.byInteger.get(id);
+
+				if(callback)
+				{
+					this.byObject.delete(callback)
+					this.byInteger.delete(id)
+				}
+			}
+		});
 	}
 }

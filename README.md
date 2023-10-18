@@ -8,11 +8,13 @@
 ### v0.0.8 - Preparing for Liftoff.
 
 * Adding ESM & CDN Module support!
+* Adding stdin
+* Buffering stdout/stderr in javascript
 * Fixing `<script type = "text/php">` support.
+* Adding fetch support for `src` on above.
+* Adding support for iconv & html-tidy
 * In-place builds.
 * Conditional builds.
-* Customizable preload files
-* Adding support for iconv & html-tidy
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
 
@@ -68,23 +70,41 @@ Inline php can use standard input, output and error with `data-` attributes. Jus
 <div id = "error"></div>
 ```
 
+The `src` attribute can be used on `<script type = "text/php">` tags, as well as their input elements. For example:
+
+```html
+<html>
+    <head>
+        <script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+        <script id = "input" src = "/test-input.json" type = "text/json"></script>
+        <script type = "text/php" src = "/test.php" data-stdin = "#input" data-stdout = "#output" data-stderr = "#error"></script>
+    </head>
+    <body>
+        <div id = "output"></div>
+        <div id = "error"></div>
+    </body>
+</html>
+```
+
+#### CDN
+
 Any NPM-enabled CDN will work:
 
-#### JSDelivr
+##### JSDelivr
 
 ```html
 <script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 ```
 
-#### Unpkg
+##### Unpkg
 ```html
 <script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.mjs"></script>
 ```
-
-#### esm.sh
+<!--
+##### esm.sh
 ```html
 <script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.mjs"></script>
-```
+``` -->
 
 ## Install & Use
 
@@ -103,7 +123,7 @@ const { PhpWeb } = require('php-wasm/PhpWeb.js');
 const php = new PhpWeb;
 ```
 
-### ES6
+### ESM
 
 ```javascript
 import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
@@ -159,6 +179,12 @@ php.addEventListener('error', (event) => {
 });
 ```
 
+Provide some input data on STDIN if you need to:
+
+```javascript
+php.inputString('This is a string of data provided on STDIN.');
+```
+
 Be sure to wait until your WASM is fully loaded, then run some PHP:
 
 ```javascript
@@ -202,6 +228,15 @@ $ cd ~/my-project
 $ php-wasm build node
 ```
 
+#### ESM Modules:
+
+Build ESM modules with:
+
+```sh
+$ php-wasm build web mjs
+$ php-wasm build node mjs
+```
+
 This will build the following files in the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
 
 ```sh
@@ -226,6 +261,12 @@ php-node.mjs    # internal interface between WASM and javscript
 php-node.wasm   # binary php-wasm
 ```
 
+### Packaging files
+
+Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
+
+These files will be available under `/preload` in the final package.
+
 #### .php-wasm-rc
 
 You can also create a `.php-wasm-rc` file in this directory to customize the build.
@@ -237,6 +278,9 @@ PHP_DIST_DIR=~/my-project/public
 # Space separated list of files/directories (absolute paths)
 # to be included under the /preload directory in the final build.
 PRELOAD_ASSETS=~/my-project/php-scripts ~/other-dir/example.php
+
+# Memory to start the instance with, before growth
+INITIAL_MEMORY=2048MB
 
 # Build with assertions enabled
 ASSERTIONS=0

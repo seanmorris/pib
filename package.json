@@ -8,7 +8,6 @@
 	"bin": {
 		"php-wasm": "./bin/php-wasm.js"
 	},
-	"dependencies": {},
 	"devDependencies": {
 		"@babel/cli": "^7.8.4",
 		"@babel/core": "^7.8.7",
@@ -44,6 +43,7 @@
 		"PhpWebDrupal.js",
 		"PhpWebDrupal.mjs",
 		"PhpWorker.js",
+		"PhpWorker.mjs",
 		"php-web.js",
 		"php-web.mjs",
 		"php-web.wasm",
@@ -58,6 +58,7 @@
 		"php-node.mjs",
 		"php-node.wasm",
 		"php-shell.js",
+		"php-shell.mjs",
 		"php-shell.wasm",
 		"php-webview.js",
 		"php-webview.mjs",
