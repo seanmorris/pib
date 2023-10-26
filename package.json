@@ -3,16 +3,23 @@
 	"description": "Run PHP right in the browser.",
 	"repository": "https://github.com/seanmorris/pib",
 	"author": "Oraoto <oraoto@outlook.com>",
-	"version": "0.0.0-esm-preview-23",
+	"version": "0.0.0-esm-preview-26",
 	"license": "Apache-2.0",
 	"bin": {
 		"php-wasm": "./bin/php-wasm.js"
 	},
-	"devDependencies": {
+	"dependencies": {
+		"php-wasm-iconv": "^0.0.0",
+		"php-wasm-libxml": "^0.0.0",
+		"php-wasm-sqlite": "^0.0.0",
+		"php-wasm-tidy": "^0.0.0-a",
+		"vrzno": "^0.0.0",
 		"@babel/cli": "^7.8.4",
 		"@babel/core": "^7.8.7",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",
 		"@babel/preset-env": "^7.0.0"
+	},
+	"devDependencies": {
 	},
 	"contributors": [
 		{

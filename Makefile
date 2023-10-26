@@ -10,6 +10,12 @@ WITH_ICU   ?=0
 WITH_SQLITE?=1
 WITH_VRZNO ?=1
 
+BUILD_WEB?=1
+BUILD_NODE?=1
+BUILD_SHELL?=1
+BUILD_WORKER?=1
+BUILD_WEBVIEW?=1
+
 _UID:=$(shell echo $$UID)
 _GID:=$(shell echo $$UID)
 UID?=${_UID}
@@ -21,9 +27,10 @@ PHP_DIST_DIR_DEFAULT ?=./dist
 PHP_DIST_DIR ?=${PHP_DIST_DIR_DEFAULT}
 
 ENVIRONMENT    ?=web
-INITIAL_MEMORY ?=2048MB
-ASSERTIONS     ?=0
-OPTIMIZE       ?=3
+INITIAL_MEMORY ?=3072MB
+ASSERTIONS     ?=1
+SYMBOLS        ?=3
+OPTIMIZE       ?=2
 RELEASE_SUFFIX ?=
 
 PHP_VERSION    ?=8.2
@@ -62,36 +69,24 @@ DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emsc
 DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image package dist demo scripts third_party/preload
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo scripts third_party/preload php-tags.mjs
 
-MJS=build/php-web-drupal.mjs build/php-web.mjs build/php-webview.mjs build/php-node.mjs build/php-shell.mjs build/php-worker.mjs
-CJS=build/php-web-drupal.js  build/php-web.js  build/php-webview.js  build/php-node.js  build/php-shell.js  build/php-worker.js
+MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs
+CJS=php-web.js  php-webview.js  php-node.js  php-shell.js  php-worker.js
 
-all: package js
+all: ${MJS} ${CJS} php-tags.mjs
 cjs: ${CJS}
 mjs: ${MJS}
-js: cjs mjs scripts
-	@ echo -e "\e[33;4mBuilding JS\e[0m"
-
-scripts:
-	npx babel source --out-dir .
-	find source -name "*.js" | while read JS; do \
-		cp $${JS} $$(basename $${JS%.js}.mjs); \
-		sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $$(basename $${JS%.js}.mjs); \
-		sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $$(basename $${JS%.js}.mjs); \
-	done;
-
-package: php-web-drupal.mjs php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.js \
-         php-web-drupal.js  php-web.js  php-webview.js  php-node.js  php-shell.js php-worker.js
 
 dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-node.mjs dist/php-shell.mjs dist/php-worker.mjs \
-      dist/php-web-drupal.js  dist/php-web.js  dist/php-webview.js  dist/php-node.js  dist/php-shell.js  dist/php-worker.js
+      dist/php-web-drupal.js  dist/php-web.js  dist/php-webview.js  dist/php-node.js  dist/php-shell.js  dist/php-worker.js \
+	  dist/php-tags.mjs
 
-web-drupal: lib/pib_eval.o php-web-drupal.wasm
+web-drupal: php-web-drupal.wasm
 web: lib/pib_eval.o php-web.wasm
 	echo "Done!"
 
-PRELOAD_ASSETS?=third_party/php${PHP_VERSION}-src/Zend/bench.php
+PRELOAD_ASSETS?=
 PHP_CONFIGURE_DEPS=
 DEPENDENCIES=
 ORDER_ONLY=
@@ -102,11 +97,15 @@ PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${P
 ARCHIVES=
 EXPORTED_FUNCTIONS="_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string"
 
-include make/iconv.mak make/icu.mak make/libxml.mak make/sqlite.mak make/tidy.mak make/vrzno.mak
+# include make/iconv.mak make/icu.mak make/libxml.mak make/sqlite.mak make/tidy.mak make/vrzno.mak
+
+# SUBSOFILES?=
+# SUBSOFILES+=$(addsuffix /*.so,$(shell npm ls -p))
+-include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ifdef PRELOAD_ASSETS
 DEPENDENCIES+=
-ORDER_ONLY+= third_party/preload
+ORDER_ONLY+=third_party/preload
 EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 endif
 
@@ -117,8 +116,8 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-	@ ${DOCKER_RUN} rm -rf /src/third_party/preload
+third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/php${PHP_VERSION}-src/Zend/bench.php
+	${DOCKER_RUN} rm -rf /src/third_party/preload
 ifdef PRELOAD_ASSETS
 	@ mkdir -p third_party/preload
 	@ cp -prf ${PRELOAD_ASSETS} third_party/preload/
@@ -137,7 +136,11 @@ third_party/drupal-7.95/README.txt:
 	${DOCKER_RUN} cp -r extras/drowser-files/.ht.sqlite third_party/drupal-7.95/sites/default/files/.ht.sqlite
 	${DOCKER_RUN} cp -r extras/drowser-files/* third_party/drupal-7.95/sites/default/files
 	${DOCKER_RUN} cp -r extras/drowser-logo.png third_party/drupal-7.95/sites/default/logo.png
+	cp -prf third_party/drupal-7.95 third_party/preload/
 
+third_party/preload/bench.php: third_party/php${PHP_VERSION}-src/.gitignore
+	mkdir -p third_party/preload/
+	cp third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload/
 
 third_party/php${PHP_VERSION}-src/.gitignore:
 	@ echo -e "\e[33;4mDownloading and patching PHP\e[0m"
@@ -185,18 +188,13 @@ lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
 
 ########### Build the final files. ###########
 
-ASYNCIFY_IMPORTS='["zval_ptr_dtor","zend_call_function","exec_callback"]'
-
-FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
+FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -g${SYMBOLS} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='[${EXPORTED_FUNCTIONS}]' \
 	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
-	-s MAXIMUM_MEMORY=2048mb         \
 	-s INITIAL_MEMORY=${INITIAL_MEMORY} \
-	-s ASYNCIFY=1 \
-	-s ASYNCIFY_IGNORE_INDIRECT=1 \
-	-s ASYNCIFY_IMPORTS=${ASYNCIFY_IMPORTS} \
+	-s MAXIMUM_MEMORY=4096mb         \
 	-s ALLOW_MEMORY_GROWTH=1         \
 	-s ASSERTIONS=${ASSERTIONS}      \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
@@ -222,71 +220,96 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 
 # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
-DEPENDENCIES+=${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c
+DEPENDENCIES+=${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c third_party/preload/bench.php
 BUILD_TYPE ?=js
 
-build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
+build/php-web-drupal.js: BUILD_TYPE=js
+build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.js: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.js: ENVIRONMENT=web-drupal
-build/php-web-drupal.js: ${DEPENDENCIES} | ${ORDER_ONLY} third_party/drupal-7.95
+build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${FINAL_BUILD} -s ENVIRONMENT=web
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
-build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
 build/php-web-drupal.mjs: BUILD_TYPE=mjs
-build/php-web-drupal.js: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
-build/php-web-drupal.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+build/php-web-drupal.mjs: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
+build/php-web-drupal.mjs: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
+build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
+build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95 | ${ORDER_ONLY}
+	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${FINAL_BUILD} -s ENVIRONMENT=web
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
+build/php-web.js: BUILD_TYPE=js
 build/php-web.js: ENVIRONMENT=web
 build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
 build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	@ echo -e "\e[33;4mBuilding PHP for web\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
+build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
 build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for workers\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
 build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	@ echo -e "\e[33;4mBuilding PHP for workers\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
+build/php-node.js: BUILD_TYPE=js
 build/php-node.js: ENVIRONMENT=node
 build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for node\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
 build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	@ echo -e "\e[33;4mBuilding PHP for node\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
+build/php-shell.js: BUILD_TYPE=js
 build/php-shell.js: ENVIRONMENT=shell
 build/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
-	@ echo -e "\e[33mBuilding PHP for shell\e[0m"
+	@ echo -e "\e[33;4mBuilding PHP for shell\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-shell.mjs: BUILD_TYPE=mjs
 build/php-shell.mjs: ENVIRONMENT=shell
 build/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	@ echo -e "\e[33;4mBuilding PHP for shell\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
+build/php-webview.js: BUILD_TYPE=js
 build/php-webview.js: ENVIRONMENT=webview
 build/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
-	@ echo -e "\e[33mBuilding PHP for webview\e[0m"
+	@ echo -e "\e[33;4mBuilding PHP for shell\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-webview.mjs: BUILD_TYPE=mjs
 build/php-webview.mjs: ENVIRONMENT=webview
 build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
+	@ echo -e "\e[33;4mBuilding PHP for webview\e[0m"
 	${FINAL_BUILD}
+	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 ########## Package files ###########
 
@@ -332,7 +355,7 @@ php-shell.mjs: build/php-shell.mjs
 	cp $^ $@
 	cp $(basename $^).wasm $(basename $@).wasm
 
-php-webview.js: build/php-node.js
+php-webview.js: build/php-webview.js
 	cp $^ $@
 	cp $(basename $^).wasm $(basename $@).wasm
 
@@ -397,7 +420,7 @@ PhpWebview.mjs: source/PhpWebview.js
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
-php-tags.js: source/php-tags.js
+php-tags.mjs: source/php-tags.mjs
 	cp $< $@;
 
 ########## Dist files ###########
@@ -548,12 +571,12 @@ dist/PhpWebview.mjs: PhpWebview.js dist/php-webview.mjs dist/PhpBase.mjs
 
 docs-source/app/assets/php-web-drupal.wasm: ENVIRONMENT=web-drupal
 docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
-	${DOCKER_RUN} cp -v \
+	${DOCKER_RUN} cp -rv \
 		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
 		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
 		./docs-source/app/assets;
 
-	${DOCKER_RUN} cp -v \
+	${DOCKER_RUN} cp -rv \
 		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
 		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
 		./docs-source/public;

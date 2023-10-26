@@ -59,7 +59,6 @@ const runPhpScriptTag = element => {
 
 	const getAll = Promise.all([getCode, getInput]);
 
-
 	getAll.then(([code, input,]) => {
 		const php = new PhpWeb;
 
@@ -109,7 +108,7 @@ const runPhpScriptTag = element => {
 	});
 }
 
-const phpSelector = 'script[type="text/php"],[data-is-php]';
+const phpSelector = 'script[type="text/php"]';
 
 export const runPhpTags = (doc) => {
 

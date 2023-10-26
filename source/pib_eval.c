@@ -99,17 +99,20 @@ int EMSCRIPTEN_KEEPALIVE pib_refresh()
 }
 
 #ifdef WITH_VRZNO
-int EMSCRIPTEN_KEEPALIVE exec_callback(zend_function *fptr)
+int EMSCRIPTEN_KEEPALIVE exec_callback(zend_function *fptr, zval *argv, int argc)
 {
-	int retVal = vrzno_exec_callback(fptr);
+	// int retVal = vrzno_exec_callback(fptr, argv, argc);
 
-	fflush(stdout);
+	// fflush(stdout);
 
-	return retVal;
+	// return retVal;
+
+	return NULL;
 }
 
 int EMSCRIPTEN_KEEPALIVE del_callback(zend_function *fptr)
 {
-	return vrzno_del_callback(fptr);
+	// return vrzno_del_callback(fptr);
+	return NULL;
 }
 #endif

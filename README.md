@@ -17,6 +17,7 @@
 * Conditional builds.
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
+* Modularizing dependencies.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 

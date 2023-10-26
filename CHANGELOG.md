@@ -14,6 +14,7 @@ Changes
 * Conditional builds.
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
+* Modularizing dependencies.
 
 ## 0.0.7 - Remodermizing
 
