@@ -55,7 +55,8 @@ body {
 	flex: 1;
 }
 
-.row.toolbar button[data-run] {
+.row.toolbar button[data-run],
+.row.toolbar button[data-refresh] {
 	padding: 0.75em;
 	font-weight: bold;
 	border: 2px solid;
@@ -79,7 +80,8 @@ button[data-run]:not([disabled])::after {
     opacity: 0.5;
 }
 
-.header button[data-run] {
+.header button[data-run],
+.header button[data-refresh] {
 	position: relative;
 	font-weight: bold;
 	font-size: 13pt;
@@ -289,4 +291,19 @@ input[type=file] {
 
 .header select {
 	font-size: 1rem;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	max-width: 15rem;
+}
+
+form label {
+	display: flex;
+	flex-direction: row;
+}
+
+form label > span:first-child{
+	flex:1;
 }

@@ -1,6 +1,5 @@
 import { PhpBase } from './PhpBase';
-
-const PhpBinary = require('./php-worker');
+import PhpBinary from './php-worker';
 
 export class PhpWorker extends PhpBase
 {

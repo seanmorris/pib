@@ -73,6 +73,7 @@ export class PhpBase extends EventTarget
 			, NUM
 			, [STR]
 			, [`?>${phpCode}`]
+			, {async:true}
 		))
 		.finally(() => this.flush());
 	}
@@ -84,6 +85,7 @@ export class PhpBase extends EventTarget
 			, STR
 			, [STR]
 			, [phpCode]
+			, {async:true}
 		))
 		.finally(() => this.flush());
 	}

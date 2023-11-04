@@ -1,6 +1,5 @@
 import { PhpBase } from './PhpBase';
-
-const PhpBinary = require('./php-web-drupal');
+import PhpBinary from './php-web-drupal';
 
 export class PhpWebDrupal extends PhpBase
 {

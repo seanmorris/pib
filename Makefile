@@ -10,6 +10,9 @@ WITH_ICU   ?=0
 WITH_SQLITE?=1
 WITH_VRZNO ?=1
 
+GZIP       ?=0
+BROTLI     ?=0
+
 BUILD_WEB?=1
 BUILD_NODE?=1
 BUILD_SHELL?=1
@@ -27,9 +30,11 @@ PHP_DIST_DIR_DEFAULT ?=./dist
 PHP_DIST_DIR ?=${PHP_DIST_DIR_DEFAULT}
 
 ENVIRONMENT    ?=web
-INITIAL_MEMORY ?=3072MB
+# INITIAL_MEMORY ?=3072MB
+INITIAL_MEMORY ?=64MB
+MAXIMUM_MEMORY ?=4096MB
 ASSERTIONS     ?=1
-SYMBOLS        ?=3
+# SYMBOLS        ?=3
 OPTIMIZE       ?=2
 RELEASE_SUFFIX ?=
 
@@ -62,6 +67,7 @@ DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ e
 DOCKER_RUN_IN_PHPSIDE=${DOCKER_ENV_SIDE} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 DOCKER_RUN_IN_ICU4C  =${DOCKER_ENV} -w /src/third_party/libicu-src/icu4c/source/ emscripten-builder
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
+DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -w /src/third_party/libzip/ emscripten-builder
 DOCKER_RUN_IN_SQLITE =${DOCKER_ENV_SIDE} -w /src/third_party/${SQLITE_DIR}/ emscripten-builder
 DOCKER_RUN_IN_TIDY   =${DOCKER_ENV_SIDE} -w /src/third_party/tidy-html5/ emscripten-builder
 DOCKER_RUN_IN_ICU    =${DOCKER_ENV_SIDE} -w /src/third_party/libicu-src/icu4c/source emscripten-builder
@@ -71,10 +77,13 @@ DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 .PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo scripts third_party/preload php-tags.mjs
 
-MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs
-CJS=php-web.js  php-webview.js  php-node.js  php-shell.js  php-worker.js
+MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
+	PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs
 
-all: ${MJS} ${CJS} php-tags.mjs
+CJS=php-web.js php-webview.js php-node.js php-shell.js php-worker.js \
+	PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js
+
+all: ${MJS} ${CJS} php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs
 cjs: ${CJS}
 mjs: ${MJS}
 
@@ -104,8 +113,8 @@ EXPORTED_FUNCTIONS="_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_r
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ifdef PRELOAD_ASSETS
-DEPENDENCIES+=
-ORDER_ONLY+=third_party/preload
+DEPENDENCIES+=third_party/preload
+ORDER_ONLY+=
 EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 endif
 
@@ -140,7 +149,7 @@ third_party/drupal-7.95/README.txt:
 
 third_party/preload/bench.php: third_party/php${PHP_VERSION}-src/.gitignore
 	mkdir -p third_party/preload/
-	cp third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload/
+	cp -p third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload/
 
 third_party/php${PHP_VERSION}-src/.gitignore:
 	@ echo -e "\e[33;4mDownloading and patching PHP\e[0m"
@@ -151,7 +160,7 @@ third_party/php${PHP_VERSION}-src/.gitignore:
 
 ########### Build the objects. ###########
 
-third_party/php${PHP_VERSION}-src/configured: ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched ${ARCHIVES}
+third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched ${ARCHIVES}
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
 	${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
 	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure \
@@ -188,13 +197,23 @@ lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
 
 ########### Build the final files. ###########
 
-FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -g${SYMBOLS} \
+ifdef INLINING_LIMIT
+${EXTRA_FLAGS}+= -sINLINING_LIMIT${INLINING_LIMIT}
+endif
+
+ifdef SYMBOLS
+ifneq (${SYMBOLS},0)
+${EXTRA_FLAGS}+= -g${SYMBOLS}
+endif
+endif
+
+FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='[${EXPORTED_FUNCTIONS}]' \
 	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
 	-s INITIAL_MEMORY=${INITIAL_MEMORY} \
-	-s MAXIMUM_MEMORY=4096mb         \
+	-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
 	-s ALLOW_MEMORY_GROWTH=1         \
 	-s ASSERTIONS=${ASSERTIONS}      \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
@@ -203,6 +222,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} -g${SYMBOLS} \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
 	-s USE_ZLIB=1                    \
+	-s ASYNCIFY                      \
 	-I .     \
     -I Zend  \
     -I main  \
@@ -224,11 +244,13 @@ DEPENDENCIES+=${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c third_party/prel
 BUILD_TYPE ?=js
 
 build/php-web-drupal.js: BUILD_TYPE=js
-build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/php${PHP_VERSION}-src/Zend/bench.php
+build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.js: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.js: ENVIRONMENT=web-drupal
-build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php | ${ORDER_ONLY}
+build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
+	${DOCKER_RUN} mkdir -p /src/third_party/preload/
+	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
 	${FINAL_BUILD} -s ENVIRONMENT=web
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
@@ -236,8 +258,10 @@ build/php-web-drupal.mjs: BUILD_TYPE=mjs
 build/php-web-drupal.mjs: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.mjs: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
-build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95 | ${ORDER_ONLY}
+build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/preload | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
+	${DOCKER_RUN} mkdir -p /src/third_party/preload/
+	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
 	${FINAL_BUILD} -s ENVIRONMENT=web
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
@@ -315,53 +339,149 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 php-web-drupal.js: build/php-web-drupal.js
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
 	cp $(basename $^).data $(basename $@).data
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-web-drupal.mjs: build/php-web-drupal.mjs
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
 	cp $(basename $^).data $(basename $@).data
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-web.js: build/php-web.js
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-web.mjs: build/php-web.mjs
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-worker.js: build/php-worker.js
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-worker.mjs: build/php-worker.mjs
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-node.js: build/php-node.js
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-node.mjs: build/php-node.mjs
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-shell.js: build/php-shell.js
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-shell.mjs: build/php-shell.mjs
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-webview.js: build/php-webview.js
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 php-webview.mjs: build/php-webview.mjs
 	cp $^ $@
-	cp $(basename $^).wasm $(basename $@).wasm
+	cp $(basename $^).wasm* $(dir $(basename $@))
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	rm -f $(basename $@).wasm.br
+	brotli -9 $(basename $@).wasm
+endif
 
 PhpBase.js: source/PhpBase.js
 	npx babel $< --out-dir .
@@ -388,183 +508,294 @@ PhpWebview.js: source/PhpWebview.js PhpBase.js
 PhpBase.mjs: source/PhpBase.js
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
 PhpWebDrupal.mjs: source/PhpWebDrupal.js
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
 PhpWeb.mjs: source/PhpWeb.js
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
 PhpNode.mjs: source/PhpNode.js
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
 PhpShell.mjs: source/PhpShell.js
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
-PhpWorker.mjs: source/PhpWorker.mjs
+PhpWorker.mjs: source/PhpWorker.js
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
 PhpWebview.mjs: source/PhpWebview.js
 	cp $< $@;
 	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-	sed -i -E "s~\\brequire(\()(['\"])([^'\"]+)\2(\))~(await import\1\2\3.mjs\2\4).default~g" $@;
 
 php-tags.mjs: source/php-tags.mjs
+	cp $< $@;
+
+php-tags.jsdelivr.mjs: source/php-tags.jsdelivr.mjs
+	cp $< $@;
+
+php-tags.unpkg.mjs: source/php-tags.unpkg.mjs
+	cp $< $@;
+
+php-tags.local.mjs: source/php-tags.local.mjs
 	cp $< $@;
 
 ########## Dist files ###########
 
 dist/PhpBase.js: PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
-dist/PhpBase.mjs: PhpBase.mjs dist/php-tags.mjs
+dist/PhpBase.mjs: PhpBase.mjs dist/php-tags.mjs dist/php-tags.local.mjs
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/php-tags.mjs: source/php-tags.mjs
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+
+dist/php-tags.local.mjs: source/php-tags.local.mjs
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/php-web-drupal.js: build/php-web-drupal.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@ $(basename $@).wasm
-	${DOCKER_RUN} chown ${UID}:${GID} $@ $(basename $@).data
-	${DOCKER_RUN} chown ${UID}:${GID} $@ $(basename $@).data || true
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).wasm
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).data
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).data || true
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
 
 dist/php-web-drupal.mjs: build/php-web-drupal.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	rm -f $(basename $@).wasm.gz
+	gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
 
 dist/PhpWebDrupal.js: PhpWebDrupal.js dist/php-web-drupal.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/PhpWebDrupal.mjs: PhpWebDrupal.mjs dist/php-web-drupal.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
 dist/php-web.js: build/php-web.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/php-web.mjs: build/php-web.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
+
 
 dist/PhpWeb.js: PhpWeb.js dist/php-web.js dist/php-web.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/PhpWeb.mjs: PhpWeb.mjs dist/php-web.mjs dist/php-web.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
 dist/php-worker.js: build/php-worker.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/php-worker.mjs: build/php-worker.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/PhpWorker.js: PhpWorker.js dist/php-worker.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/PhpWorker.mjs: PhpWorker.mjs dist/php-worker.mjs dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
 dist/php-node.js: build/php-node.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/php-node.mjs: build/php-node.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/PhpNode.js: PhpNode.js dist/php-node.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/PhpNode.mjs: PhpNode.mjs dist/php-node.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
 dist/php-shell.js: build/php-shell.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/php-shell.mjs: build/php-shell.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/PhpShell.js: PhpShell.js dist/php-shell.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/PhpShell.mjs: PhpShell.js dist/php-shell.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
 dist/php-webview.js: build/php-webview.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/php-webview.mjs: build/php-webview.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+ifeq (${GZIP},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+endif
+ifeq (${BROTLI},1)
+	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+endif
+	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
 dist/PhpWebview.js: PhpWebview.js dist/php-webview.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/PhpWebview.mjs: PhpWebview.js dist/php-webview.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown ${UID}:${GID} $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
 ############# Demo files ##############
@@ -581,7 +812,7 @@ docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
 		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
 		./docs-source/public;
 
-	${DOCKER_RUN} chown ${UID}:${GID} \
+	${DOCKER_RUN} chown $(or $(UID),1000):$(or $(GID),1000) \
 		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
 		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
 		./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
@@ -590,7 +821,7 @@ docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
 ########### Clerical stuff. ###########
 
 clean:
-	# @ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
+	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.br *.wasm.gz *.data
 	${DOCKER_RUN} rm -rf /src/lib/lib/${PHP_AR}.* /src/lib/lib/php /src/lib/include/php
 	${DOCKER_RUN_IN_PHP} make clean
 
@@ -599,12 +830,12 @@ php-clean:
 	${DOCKER_RUN_IN_PHP} make clean
 
 deep-clean:
-	# @ ${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.data
+	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.br *.wasm.gz *.data
 	${DOCKER_RUN} rm -rfv \
 		third_party/php${PHP_VERSION}-src lib/* build/* \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
-		third_party/vrzno third_party/preload \
+		third_party/vrzno third_party/libzip third_party/preload \
 		dist/* sqlite-*
 
 show-ports:

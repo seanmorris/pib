@@ -1,44 +1,41 @@
 <?php // {"autorun":true, "persist":true, "single-expression": false, "render-as": "text"}
-
-$window = $window ?? new Vrzno;
-
+$window = new Vrzno;
 $require = $window->require;
-
+$Form = $require('curvature/form/Form')->Form;
 $View = $require('curvature/base/View')->View;
 
-$view = $View->from('
-	<div style = "display:flex;flex-direction:row;margin:auto;">
+$form = vrzno_new($Form, (object)[
+    'id'   => (object)['type' => 'number'],
+    'name' => (object)['type' => 'text'],
+]);
 
-		<div style = "margin-right:1rem">
-			<p>Counter</p>
-
-			<div style = "display:flex;flex-direction:row;margin:1rem auto;min-width:4rem;">
-				<button cv-on = "click:dec" style = "flex:1">-</button>
-				<button cv-on = "click:inc" style = "flex:1">+</button>
-			</div>
-
-			<div style = "font-size:6rem;">[[foo]]</div>
+$view = $View->from('<div style = "display:flex;flex-direction:row;margin:1rem;">
+	<div style = "margin-right:1rem">
+		<p>Counter</p>
+		<div style = "display:flex;flex-direction:row;margin:1rem auto;min-width:4rem;">
+			<button cv-on = "click:dec" style = "flex:1">-</button>
+			<button cv-on = "click:inc" style = "flex:1">+</button>
 		</div>
-
-		<div style = "margin-right:1rem">
-			<p>Form</p>
-			<p><input cv-bind = "textVal"></p>
-			<p>[[textVal]]</p>
-		</div>
-
+		<div style = "font-size:6rem;">[[counter]]</div>
 	</div>
-');
+	<div style = "margin-right:1rem">
+		<p>Form: [[form]]</p>
+		<p>Serialized: [[serialized]]</p>
+		<p>JSON: [[json]]</p>
+	</div>
+</div>');
 
-$view->args->foo = 0;
-$view->args->textVal = "Change me!";
-
-$view->inc = fn() => $view->args->foo++;
-$view->dec = fn() => $view->args->foo--;
-
-$view->args->bindTo('textVal', function($value = null) {
-	var_dump($value);
+$form->bindTo('json', function($json = NULL) use($view, $form) {
+    $view->args->serialized = serialize($form->args->value);
+    $view->args->json = $json;
 });
 
-$view->render($window->document->body);
+$view->args->counter = 0;
+$view->args->form = $form;
 
-$window->view = $view;
+$view->inc = fn() => $view->args->counter++;
+$view->dec = fn() => $view->args->counter--;
+
+$renderTo = $window->document->body->querySelector('#example');
+$renderTo->innerHTML = '';
+$view->render($renderTo);

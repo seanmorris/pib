@@ -7,6 +7,7 @@ EXTRA_FLAGS+= -D WITH_VRZNO=1
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
 CONFIGURE_FLAGS+= --enable-vrzno
 PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
+
 # VRZNO_DEV_PATH?=
 
 ifdef VRZNO_DEV_PATH

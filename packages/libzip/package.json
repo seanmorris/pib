@@ -1,0 +1,13 @@
+{
+	"name": "php-wasm-libzip",
+	"description": "libzip for phpwasm.",
+	"repository": "https://github.com/seanmorris/php-wasm",
+	"author": "Sean Morris <php-wasm@seanmorr.is>",
+	"version": "0.0.0",
+	"files": [
+		"LICENSE",
+		"NOTICE",
+		"README.md",
+		"static.mak"
+	]
+}

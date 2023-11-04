@@ -1,6 +1,5 @@
 import { PhpBase } from './PhpBase';
-
-const PhpBinary = require('./php-webview');
+import PhpBinary from './php-webview';
 
 export class PhpWebview extends PhpBase
 {

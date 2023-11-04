@@ -5,19 +5,20 @@
 
 [![CircleCI](https://img.shields.io/circleci/build/github/seanmorris/php-wasm?logo=circleci&logoColor=white&style=for-the-badge&token=b52ac489d3c2d170963021c81ecd422b7536f41c)](https://circleci.com/gh/seanmorris/php-wasm/) ![Size](https://img.shields.io/github/languages/code-size/seanmorris/php-wasm?logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAQAAACFzfR7AAABF0lEQVQoFQXBQWvOAQDA4ef/7o29YWtqKU7ExWE5OIvm4LKcnXwD7aQ0N/kAczO1i1KOO0xJvQojaTm4KbJabnJysLSf5wFAa603CUB322yOAAitVT86BTTQ1+oJDYDQcv+qFRr3vC1ooYPqDkHoYgfVKmnSfhG62t/qBkHn2q8ekjRpryB0v/rZ2eh4r6tpY5pp3Gx7RTONoJfVLnpQfekYtNG0832rRj3tEaT31bOxQ5wc/oATrnnniEMfXfaZDFrAoEk71XajNN9OVVW7HYVeVZ9AF/pd3YPm267qbYs0tF597wygpaquQ7Nt9QLoVlWXCEK3q1oCCF2p6iYBpKGN6kNzATrdr2qVAACa9rgRQKPetAnAf1jX/qSkN8aIAAAAAElFTkSuQmCC&style=for-the-badge)
 
-### v0.0.8 - Preparing for Liftoff.
+### v0.0.8 - Preparing for Lift-off
 
 * Adding ESM & CDN Module support!
 * Adding stdin
 * Buffering stdout/stderr in javascript
 * Fixing `<script type = "text/php">` support.
 * Adding fetch support for `src` on above.
-* Adding support for iconv & html-tidy
+* Adding support for libzip, iconv, & html-tidy
 * In-place builds.
 * Conditional builds.
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
 * Modularizing dependencies.
+* Pre-compressing assets.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -38,7 +39,6 @@
 + [Zend/bench.php](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250Ainclude%28%2522%252Fpreload%252FZend%252Fbench.php%2522%29%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text)
 + [Drupal 7](https://seanmorris.github.io/php-wasm/?autorun=1&persist=0&single-expression=0&code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522html%2522%257D%250Aini_set%28%27session.save_path%27%252C%2520%27%252Fhome%252Fweb_user%27%29%253B%250A%250A%2524stdErr%2520%253D%2520fopen%28%27php%253A%252F%252Fstderr%27%252C%2520%27w%27%29%253B%250A%2524errors%2520%253D%2520%255B%255D%253B%250A%250Aregister_shutdown_function%28function%28%29%2520use%28%2524stdErr%252C%2520%2526%2524errors%29%257B%250A%2509fwrite%28%2524stdErr%252C%2520json_encode%28%255B%27session_id%27%2520%253D%253E%2520session_id%28%29%255D%29%2520.%2520%2522%255Cn%2522%29%253B%250A%2509fwrite%28%2524stdErr%252C%2520json_encode%28%255B%27headers%27%253D%253Eheaders_list%28%29%255D%29%2520.%2520%2522%255Cn%2522%29%253B%250A%2509fwrite%28%2524stdErr%252C%2520json_encode%28%255B%27errors%27%2520%253D%253E%2520error_get_last%28%29%255D%29%2520.%2520%2522%255Cn%2522%29%253B%250A%257D%29%253B%250A%250Aset_error_handler%28function%28...%2524args%29%2520use%28%2524stdErr%252C%2520%2526%2524errors%29%257B%250A%2509fwrite%28%2524stdErr%252C%2520print_r%28%2524args%252C1%29%29%253B%250A%257D%29%253B%250A%250A%2524docroot%2520%253D%2520%27%252Fpreload%252Fdrupal-7.95%27%253B%250A%2524path%2520%2520%2520%2520%253D%2520%27%252F%27%253B%250A%2524script%2520%2520%253D%2520%27index.php%27%253B%250A%250A%2524_SERVER%255B%27REQUEST_URI%27%255D%2520%2520%2520%2520%2520%253D%2520%2524docroot%2520.%2520%2524path%253B%250A%2524_SERVER%255B%27REMOTE_ADDR%27%255D%2520%2520%2520%2520%2520%253D%2520%27127.0.0.1%27%253B%250A%2524_SERVER%255B%27SERVER_NAME%27%255D%2520%2520%2520%2520%2520%253D%2520%27localhost%27%253B%250A%2524_SERVER%255B%27SERVER_PORT%27%255D%2520%2520%2520%2520%2520%253D%25203333%253B%250A%2524_SERVER%255B%27REQUEST_METHOD%27%255D%2520%2520%253D%2520%27GET%27%253B%250A%2524_SERVER%255B%27SCRIPT_FILENAME%27%255D%2520%253D%2520%2524docroot%2520.%2520%27%252F%27%2520.%2520%2524script%253B%250A%2524_SERVER%255B%27SCRIPT_NAME%27%255D%2520%2520%2520%2520%2520%253D%2520%2524docroot%2520.%2520%27%252F%27%2520.%2520%2524script%253B%250A%2524_SERVER%255B%27PHP_SELF%27%255D%2520%2520%2520%2520%2520%2520%2520%2520%253D%2520%2524docroot%2520.%2520%27%252F%27%2520.%2520%2524script%253B%250A%250Achdir%28%2524docroot%29%253B%250A%250Aob_start%28%29%253B%250A%250Adefine%28%27DRUPAL_ROOT%27%252C%2520getcwd%28%29%29%253B%250A%250Arequire_once%2520DRUPAL_ROOT%2520.%2520%27%252Fincludes%252Fbootstrap.inc%27%253B%250Adrupal_bootstrap%28DRUPAL_BOOTSTRAP_FULL%29%253B%250A%250A%2524uid%2520%2520%2520%2520%2520%253D%25201%253B%250A%2524user%2520%2520%2520%2520%253D%2520user_load%28%2524uid%29%253B%250A%2524account%2520%253D%2520array%28%27uid%27%2520%253D%253E%2520%2524user-%253Euid%29%253B%250Auser_login_submit%28array%28%29%252C%2520%2524account%29%253B%250A%250A%2524itemPath%2520%253D%2520%2524path%253B%250A%2524itemPath%2520%253D%2520preg_replace%28%27%252F%255E%255C%255C%252Fpreload%252F%27%252C%2520%27%27%252C%2520%2524itemPath%29%253B%250A%2524itemPath%2520%253D%2520preg_replace%28%27%252F%255E%255C%255C%252Fdrupal-7.59%252F%27%252C%2520%27%27%252C%2520%2524itemPath%29%253B%250A%2524itemPath%2520%253D%2520preg_replace%28%27%252F%255E%255C%252F%252F%27%252C%2520%27%27%252C%2520%2524itemPath%29%253B%250A%250Aif%28%2524itemPath%29%250A%257B%250A%250A%2509%2524router_item%2520%253D%2520menu_get_item%28%2524itemPath%29%253B%250A%2509%2524router_item%255B%27access_callback%27%255D%2520%253D%2520true%253B%250A%2509%2524router_item%255B%27access%27%255D%2520%253D%2520true%253B%250A%250A%2509if%2520%28%2524router_item%255B%27include_file%27%255D%29%2520%257B%250A%2509%2520%2520require_once%2520DRUPAL_ROOT%2520.%2520%27%252F%27%2520.%2520%2524router_item%255B%27include_file%27%255D%253B%250A%2509%257D%250A%250A%2509%2524page_callback_result%2520%253D%2520call_user_func_array%28%2524router_item%255B%27page_callback%27%255D%252C%2520unserialize%28%2524router_item%255B%27page_arguments%27%255D%29%29%253B%250A%250A%2509drupal_deliver_page%28%2524page_callback_result%29%253B%250A%257D%250Aelse%250A%257B%250A%2509menu_execute_active_handler%28%29%253B%250A%257D%250A&render-as=html)
 
-
 ## Quickstart
 
 ### Inline PHP
@@ -48,6 +48,7 @@ Include the `php-tags.js` script from a CDN:
 ```html
 <script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 ```
+
 And run some PHP right in the page!
 
 ```html
@@ -98,9 +99,11 @@ Any NPM-enabled CDN will work:
 ```
 
 ##### Unpkg
+
 ```html
 <script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.mjs"></script>
 ```
+
 <!--
 ##### esm.sh
 ```html
@@ -193,6 +196,7 @@ php.addEventListener('ready', () => {
 	php.run('<?php echo "Hello, world!";');
 });
 ```
+
 Get the result code of your script with `then()`:
 
 ```javascript
@@ -207,8 +211,22 @@ php.addEventListener('ready', () => {
 
 To use the the in-place builder, first install php-wasm globally:
 
+***Requires docker, docker-compose & make.***
+
 ```sh
 $ npm install -g php-wasm
+```
+
+Create the build environment (can be run from anywhere):
+
+```sh
+$ php-wasm image
+```
+
+Optionally clean up files from a previous build:
+
+```sh
+$ php-wasm clean
 ```
 
 #### Build for web

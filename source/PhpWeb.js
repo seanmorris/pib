@@ -1,6 +1,5 @@
 import { PhpBase } from './PhpBase';
-
-const PhpBinary = require('./php-web');
+import PhpBinary from './php-web';
 
 export class PhpWeb extends PhpBase
 {
@@ -18,12 +17,6 @@ const runPhpScriptTag = element => {
 	{
 		tags.stdout = document.querySelector(element.getAttribute('data-stdout'));
 	}
-	else
-	{
-		tags.stdout = document.createElement('div');
-
-		element.parentNode.insertBefore(tags.output, element.nextSibling);
-	}
 
 	if(element.hasAttribute('data-stderr'))
 	{
@@ -37,6 +30,7 @@ const runPhpScriptTag = element => {
 
 	let stdout = '';
 	let stderr = '';
+	let ran = false;
 
 	let getCode = Promise.resolve(element.innerText);
 
@@ -64,8 +58,25 @@ const runPhpScriptTag = element => {
 
 		php.inputString(input);
 
-		const outListener = event => stdout += event.detail;
-		const errListener = event => stderr += event.detail;
+		const outListener = event => {
+
+			stdout += event.detail;
+
+			if(ran && tags.stdout)
+			{
+				tags.stdout.innerHTML = stdout;
+			}
+		};
+
+		const errListener = event => {
+
+			stderr += event.detail;
+
+			if(ran && tags.stderr)
+			{
+				tags.stderr.innerHTML = stderr;
+			}
+		};
 
 		php.addEventListener('output', outListener);
 		php.addEventListener('error',  errListener);
@@ -75,11 +86,10 @@ const runPhpScriptTag = element => {
 			.then(exitCode => console.log(exitCode))
 			.catch(error => console.warn(error))
 			.finally(() => {
+				ran = true;
 				php.flush();
 				tags.stdout && (tags.stdout.innerHTML = stdout);
 				tags.stderr && (tags.stderr.innerHTML = stderr);
-				php.removeEventListener('output', outListener);
-				php.removeEventListener('error',  errListener);
 			});
 		});
 

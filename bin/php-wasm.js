@@ -7,6 +7,17 @@ const args = process.argv.slice(2);
 const cwd  = process.cwd();
 const rcFile = cwd + '/.php-wasm-rc';
 
+const image = (flags,) => {
+	const options = ['image'];
+	const subprocess = child_process.spawn(`make`, options, {
+		stdio: [ 'inherit', 'inherit', 'inherit' ],
+		cwd: __dirname + '/..',
+	});
+};
+
+image.info = 'Create the build environment docker image';
+image.help = `Usage: php-wasm image`
+
 const build = (flags, envName = 'web', buildType = 'js') => {
 
 	const envNameCap = String(envName[0]).toUpperCase() + envName.substr(1);
@@ -43,7 +54,7 @@ MODULE_TYPE: [js, mjs]
 const clean = () => {
 	const subprocess = child_process.spawn(`make`, ['deep-clean'], {
 		stdio: [ 'inherit', 'inherit', 'inherit' ],
-		cwd: __dirname,
+		cwd: __dirname + '/..',
 	});
 };
 
@@ -82,13 +93,12 @@ help.help = `Usage: php-wasm help COMMAND
 
 COMMAND - Command to print helptext for.`
 
-
 const commands = {
 	build,
 	clean,
-	help
+	help,
+	image,
 };
-
 
 const command = args.shift() || 'help';
 

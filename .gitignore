@@ -2,6 +2,8 @@
 /php*.mjs
 /php*.wasm
 /php*.wat
+/php-*.wasm.gz
+/php-*.wasm.br
 /php*.wasm.map
 /php*.data
 docs-source/app/assets/php*.js

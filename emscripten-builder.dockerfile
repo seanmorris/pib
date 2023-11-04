@@ -18,9 +18,11 @@ RUN set -euxo pipefail;\
 		libtool \
 		gettext \
 		shtool \
+		brotli \
 		pkgconf \
 		bison \
 		flex \
+		gzip \
 		make \
 		re2c \
 		gdb \

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <head>
 <title>php-wasm</title>
-<script type = "text/javascript" src = "https://unpkg.com/curvature@0.0.68-f/dist/curvature.js"></script>
+<meta name="viewport" content="width=940,user-scalable=no">
+<script type = "text/javascript" src = "https://unpkg.com/curvature@0.0.68-h/dist/curvature.js"></script>
 <script type="text/javascript">{
 // Allow the page to be served from any directory...
 const path  = location.pathname.replace(/index.html$/, '');
@@ -32,9 +33,9 @@ sooo+//+++////::::-.......--:--....````......--:/+ooo+:--::/oshmNNNNNNNNo`      
 sssso++/:/:::::::--.`````.....````````..`.--:////:::--..--:+syhmNNNNNNms`                          .
 ///+++++////:/::::-``````````````..---:-::::://:::-:///++++oshmNNNNmNho.                           .
 +yhh/:+/-:/++/+///:-........```.-://+++/::+yhoosh+-ohhdmmmmmmmmmmNNNy-`-                           .
-syhds/+/+ohmmdhyso/:-.----..``.-:+syhdmy/::oh++oyosyydmNNmmmmmmmmmNN/` `.                          .
+hds/+/++SeanMorris/:-.-.-...``.-:+syhdmy/::oh++oyosyydmNNmmmmmmmmmNN/` `.                          .
 hhhhyhhmmNNNNNNNNmhs+///:-..``-/ydNNNNNNmdyso++/+osyhhhhhhhhdmmmmmNd`                              .
-yyysyyhhdmNNNNMMNNNmhsso+/::-.+hmNNmmmddhyso+/+//+oosssooosssymmmNN+`                              .
+yyysyyhhdmNNNNMMNNNmhsso+/::-.+h-PHP-wasm#so+/+//+oosssooosssymmmNN+`                              .
 ooooossyhdddmNNNNNNmdyyso+++//yyhdmddhhyyso+//+oooooooosssyyhdhmNNm:.`                             .
 ssssssyhhhhdmNmmNNmdhyyssssooshyyyhdddhyso+++++++++oo++oossyhmddNNy`                               .
 ssyyyysssshdddmNNmmdhyyssssoosyyso+ooosyssoo+++/////+++ossyydmmmNN:                                .
@@ -117,19 +118,19 @@ sso++++++///++//oyyyyhhhyyyyssoo+++syhhhdmNNNNmmmmmmmmdhhyhmNNNmddhhddmmmmmmmmNm
 			</label>
 		</div>
 		<div class = "row rows collapse">
-				<label>
-					<span>Persist Memory</span>
-					<input type = "checkbox" id = "persist" />
-				</label>
-				<label>
-					<span>Single Expression</span>
-					<input type = "checkbox" id = "singleExpression" />
-				</label>
-				<label>
-					<span>Autorun</span>
-					<input type = "checkbox" id = "autorun" />
-				</label>
-			</div>
+			<label>
+				<span>Persist Memory</span>
+				<input type = "checkbox" id = "persist" />
+			</label>
+			<label>
+				<span>Single Expression</span>
+				<input type = "checkbox" id = "singleExpression" />
+			</label>
+			<label>
+				<span>Autorun</span>
+				<input type = "checkbox" id = "autorun" />
+			</label>
+		</div>
 		<button data-run disabled>run</button>
 		<!-- <button data-tokenize>parse</button> -->
 	</div>
@@ -187,7 +188,7 @@ sso++++++///++//oyyyyhhhyyyyssoo+++syhhhdmNNNNmmmmmmmmdhhyhmNNNmddhhddmmmmmmmmNm
 			</div>
 		</div>
 	</div>
-
+	<div id = "example"></div>
 	<div class = "row status toolbar">
 		<div>
 			<div class = "row start" data-status>
@@ -198,4 +199,3 @@ sso++++++///++//oyyyyhhhyyyyssoo+++syhhhdmNNNNmmmmmmmmdhhyhmNNNmddhhddmmmmmmmmNm
 		</div>
 	</div>
 </body>
-

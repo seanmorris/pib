@@ -17,17 +17,18 @@ if(serviceWorker)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	const input  = document.querySelector('.input  textarea');
-	const stdout = document.querySelector('.stdout > * > div.scroller');
-	const stderr = document.querySelector('.stderr > * > div.scroller');
-	const stdret = document.querySelector('.stdret > * > div.scroller');
-	const run    = document.querySelector('[data-run]');
-	const token  = document.querySelector('[data-tokenize]');
-	const status = document.querySelector('[data-status]');
-	const load   = document.querySelector('[data-load-demo]')
-	const demo   = document.querySelector('[data-select-demo]')
-	const editor = ace.edit(input);
-	const ret    = document.querySelector('#ret');
+	const input   = document.querySelector('.input  textarea');
+	const stdout  = document.querySelector('.stdout > * > div.scroller');
+	const stderr  = document.querySelector('.stderr > * > div.scroller');
+	const stdret  = document.querySelector('.stdret > * > div.scroller');
+	const run     = document.querySelector('[data-run]');
+	const refresh = document.querySelector('[data-refresh]');
+	const token   = document.querySelector('[data-tokenize]');
+	const status  = document.querySelector('[data-status]');
+	const load    = document.querySelector('[data-load-demo]')
+	const demo    = document.querySelector('[data-select-demo]')
+	const editor  = ace.edit(input);
+	const ret     = document.querySelector('#ret');
 
 	const stdoutFrame = document.querySelector('.stdout > * > iframe');
 	const stderrFrame = document.querySelector('.stderr > * > iframe');
@@ -128,6 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 
 	load.addEventListener('click', event => {
+		document.querySelector('#example').innerHTML = '';
+
+		if(!persistBox.checked)
+		{
+			php.refresh();
+		}
+
 		if(!demo.value)
 		{
 			return;
@@ -135,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		let scriptPath = '/php-wasm/scripts';
 
-		if(window.location.hostname === 'localhost')
+		if(window.location.hostname === 'localhost' || window.location.hostname.substr(0,4) === '192.')
 		{
 			scriptPath = '/scripts';
 		}
@@ -352,6 +360,8 @@ else
 		});
 
 		run.addEventListener('click', runCode);
+
+		// refresh.addEventListener('click', () => void php.refresh());
 
 		if(query.get('autorun'))
 		{

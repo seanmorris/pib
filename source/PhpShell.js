@@ -1,6 +1,5 @@
 import { PhpBase } from './PhpBase';
-
-const PhpBinary = require('./php-shell');
+import PhpBinary from './php-shell';
 
 export class PhpWeb extends PhpBase
 {

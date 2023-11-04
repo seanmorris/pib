@@ -1,6 +1,5 @@
 import { PhpBase } from './PhpBase';
-
-const PhpBinary = require('./php-node');
+import PhpBinary from './php-node';
 
 export class PhpNode extends PhpBase
 {
@@ -17,7 +16,7 @@ export class PhpNode extends PhpBase
 
 		const locateFile = wasmBinary => path.resolve(dir, wasmBinary);
 
-		
+
 		super(PhpBinary, {...args, locateFile});
 	}
 }
