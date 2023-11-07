@@ -13,7 +13,7 @@ jobs:
   make:
     parallelism: 1
     machine:
-      image: ubuntu-2004:202107-02
+      image: ubuntu-2204:2023.10.1
     steps:
       - checkout
       - run: sudo apt update

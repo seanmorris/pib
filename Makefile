@@ -198,12 +198,12 @@ lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
 ########### Build the final files. ###########
 
 ifdef INLINING_LIMIT
-${EXTRA_FLAGS}+= -sINLINING_LIMIT${INLINING_LIMIT}
+EXTRA_FLAGS+= -sINLINING_LIMIT${INLINING_LIMIT}
 endif
 
 ifdef SYMBOLS
 ifneq (${SYMBOLS},0)
-${EXTRA_FLAGS}+= -g${SYMBOLS}
+EXTRA_FLAGS+= -g${SYMBOLS}
 endif
 endif
 
