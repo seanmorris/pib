@@ -820,6 +820,9 @@ docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
 
 ########### Clerical stuff. ###########
 
+.env:
+	touch .env
+
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.br *.wasm.gz *.data
 	${DOCKER_RUN} rm -rf /src/lib/lib/${PHP_AR}.* /src/lib/lib/php /src/lib/include/php
