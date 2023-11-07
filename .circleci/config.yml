@@ -23,5 +23,5 @@ jobs:
       - run: docker system prune -af
       - run: npm install
       - run: make image
-      - run: make -j`nproc`
+      - run: make -j
 
