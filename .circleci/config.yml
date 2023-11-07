@@ -21,6 +21,7 @@ jobs:
       - run: sudo apt-get install --reinstall ca-certificates
       - run: sudo update-ca-certificates
       - run: docker system prune -af
+      - run: npm install
       - run: make image
       - run: make -j1 OPTIMIZE=-O0
 
