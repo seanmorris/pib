@@ -44,7 +44,7 @@ PHP_AR         ?=libphp
 
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
-DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose -p phpwasm run --rm \
+DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose --progress quiet -p phpwasm run --rm \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
@@ -52,7 +52,7 @@ DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose -p phpwasm run --rm \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
 	-e EMCC_CORES=`nproc`
 
-DOCKER_ENV_SIDE=docker-compose -p phpwasm run --rm \
+DOCKER_ENV_SIDE=docker-compose --progress quiet -p phpwasm run --rm \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
@@ -851,13 +851,13 @@ hooks:
 	git config core.hooksPath githooks
 
 image:
-	docker-compose build
+	docker-compose --progress quiet build
 
 pull-image:
-	docker-compose push
+	docker-compose --progress quiet push
 
 push-image:
-	docker-compose pull
+	docker-compose --progress quiet pull
 
 demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm
 
