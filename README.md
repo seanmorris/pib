@@ -28,20 +28,24 @@ The module we export in this image is called `createPhpModule`.
 
 Use this as template to build PHP with emscripten. At build these arguments are available:
 
-```
+```console
 LIBXML2_TAG=v2.9.10
-PHP_BRANCH=PHP-8.2.9
+PHP_BRANCH=PHP-8.3.0
 ```
 
 The next args are used for [emcc options](https://github.com/soyuka/php-wasm/blob/513f284e1ba8f26d66e08a97291f484b3dd7de1b/Dockerfile#L108) `-sOPTION`
 see [settings.js](https://github.com/emscripten-core/emscripten/blob/9bdb310b89472a0f4d64f36e4a79273d8dc7fa98/src/settings.js#L633).
 In fact it's even easier for you to set them directly in [the Dockerfile](https://github.com/soyuka/php-wasm/blob/513f284e1ba8f26d66e08a97291f484b3dd7de1b/Dockerfile#L108).
 
-```
+```console
 WASM_ENVIRONMENT=web
 ASSERTIONS=0
 OPTIMIZE=-O2
 INITIAL_MEMORY=256mb
+JAVASCRIPT_EXTENSION=mjs # change by js if needed
+MODULARIZE=1
+EXPORT_ES6=1
+EXPORT_NAME=createPhpModule
 ```
 
 ### Preload data

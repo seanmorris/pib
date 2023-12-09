@@ -40,7 +40,7 @@ WORKDIR /src/sqlite
 RUN emcc -Oz -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DISABLE_LFS -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_NORMALIZE -c sqlite3.c -o sqlite3.o
 
 FROM build_tool as php_src
-ARG PHP_BRANCH=PHP-8.2.10
+ARG PHP_BRANCH=PHP-8.3.0
 RUN git clone https://github.com/php/php-src.git php-src \
 		--branch $PHP_BRANCH \
 		--single-branch \
@@ -48,6 +48,10 @@ RUN git clone https://github.com/php/php-src.git php-src \
 
 FROM php_src AS php-wasm
 ARG WASM_ENVIRONMENT=web
+ARG JAVASCRIPT_EXTENSION=mjs
+ARG EXPORT_NAME=createPhpModule
+ARG MODULARIZE=1
+ARG EXPORT_ES6=1
 ARG ASSERTIONS=0
 ARG OPTIMIZE=-O1
 # TODO: find a way to keep this, it can't be empty if defined...
@@ -84,6 +88,7 @@ RUN cd /src/php-src && ./buildconf --force \
 		--enable-ctype     \
 		--enable-mbstring  \
 		--disable-mbregex  \
+		--with-config-file-scan-dir=/src/php  \
 		--enable-tokenizer \
 		--enable-simplexml   \
 		--enable-pdo       \
@@ -103,7 +108,7 @@ RUN cd /src/php-src && emcc $OPTIMIZE \
 		-o /src/phpw.o \
 		-s ERROR_ON_UNDEFINED_SYMBOLS=0
 RUN mkdir /build && cd /src/php-src && emcc $OPTIMIZE \
-	-o /build/php-$WASM_ENVIRONMENT.mjs \
+	-o /build/php-$WASM_ENVIRONMENT.$JAVASCRIPT_EXTENSION \
 	--llvm-lto 2                     \
 	-s EXPORTED_FUNCTIONS='["_phpw", "_phpw_flush", "_phpw_exec", "_phpw_run", "_chdir", "_setenv", "_php_embed_init", "_php_embed_shutdown", "_zend_eval_string"]' \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "FS"]' \
@@ -114,11 +119,11 @@ RUN mkdir /build && cd /src/php-src && emcc $OPTIMIZE \
 	-s ALLOW_MEMORY_GROWTH=1         \
 	-s ASSERTIONS=$ASSERTIONS      \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
-	-s MODULARIZE=1                  \
+	-s MODULARIZE=$MODULARIZE        \
 	-s INVOKE_RUN=0                  \
 	-s LZ4=1                  \
-	-s EXPORT_ES6=1 \
-	-s EXPORT_NAME=createPhpModule \
+	-s EXPORT_ES6=$EXPORT_ES6 \
+	-s EXPORT_NAME=$EXPORT_NAME \
 	# -s DECLARE_ASM_MODULE_EXPORTS=0 \
 	-lidbfs.js                       \
 		/src/phpw.o /src/usr/lib/sqlite3.o .libs/libphp.a /src/usr/lib/libxml2.a
