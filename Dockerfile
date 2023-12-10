@@ -128,3 +128,6 @@ RUN mkdir /build && cd /src/php-src && emcc $OPTIMIZE \
 	-lidbfs.js                       \
 		/src/phpw.o /src/usr/lib/sqlite3.o .libs/libphp.a /src/usr/lib/libxml2.a
 RUN rm -r /src/*
+
+FROM scratch
+COPY --from=php-wasm /build/ .

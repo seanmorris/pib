@@ -13,12 +13,7 @@ I fixed some inconsistencies in the Makefile and removed non-essential things. T
 ## Build
 
 ```
-docker build . -t php-wasm
-# create a temporary container
-docker create --name=php-wasm php-wasm
-# to copy builded files
-docker cp php-wasm:/build/php-web.wasm ./build
-docker cp php-wasm:/build/php-web.mjs ./build/php-web.mjs
+docker buildx bake
 ```
 
 Builded files will be located in `build/php-web.js` and `build/php-web.wasm`.
