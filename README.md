@@ -9,7 +9,7 @@
 
 * Adding ESM & CDN Module support!
 * Adding stdin
-* Buffering stdout/stderr in javascript
+* Buffering stdout/stderr in JavaScript
 * Fixing `<script type = "text/php">` support.
 * Adding fetch support for `src` on above.
 * Adding support for libzip, iconv, & html-tidy
@@ -26,7 +26,7 @@
 
 + [Hello, World](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250Aecho%2520%2522Hello%252C%2520World%21%2522%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text)
 + [phpinfo()](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522html%2522%257D%250Aphpinfo%28%29%253B%250A&autorun=1&persist=0&single-expression=0&render-as=html)
-+ [Javascript Callbacks](https://seanmorris.github.io/php-wasm?render-as=text&autorun=1&persist=1&single-expression=0&code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Atrue%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524setup%2520%253D%2520%2524setup%2520%253F%253F%2520false%253B%250A%2524x%2520%253D%2520%2524x%2520%253F%253F%25200%253B%250A%250Avar_dump%28%2524x%29%253B%250A%250Aif%28%21%2524setup%29%250A%257B%250A%2520%2520%2520%2520%2524window%2520%253D%2520new%2520Vrzno%253B%250A%250A%2520%2520%2520%2520%2524f%2520%253D%2520%2524window-%253EphpFuncA%2520%253D%2520function%28%29%2520use%28%2526%2524x%252C%2520%2524window%29%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520%2524window-%253Ealert%28%27RAN%2520A%21%2520%27%2520.%2520%2524x%252B%252B%29%253B%250A%2520%2520%2520%2520%257D%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520%2524g%2520%253D%2520%2524window-%253EphpFuncB%2520%253D%2520function%28%29%2520use%28%2526%2524x%252C%2520%2524window%29%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520echo%2520%27%2524x%2520is%2520now%2520%27%2520.%2520%28%252B%252B%2524x%29%2520.%2520PHP_EOL%253B%250A%2520%2520%2520%2520%257D%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520%2524setup%2520%253D%2520true%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520echo%2520%2522Initialized.%255Cn%2522%253B%250A%257D%250A%250A%2524window-%253EphpFuncA%28%29%253B%250A%252F%252F%2520%2524window-%253EphpFuncB%28%29%253B%250A%250A%252F%252F%2520vrzno_eval%28%27window.phpFuncA%28%29%27%29%253B%250Avrzno_eval%28%27window.phpFuncB%28%29%27%29%253B%250A)
++ [JavaScript Callbacks](https://seanmorris.github.io/php-wasm?render-as=text&autorun=1&persist=1&single-expression=0&code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Atrue%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524setup%2520%253D%2520%2524setup%2520%253F%253F%2520false%253B%250A%2524x%2520%253D%2520%2524x%2520%253F%253F%25200%253B%250A%250Avar_dump%28%2524x%29%253B%250A%250Aif%28%21%2524setup%29%250A%257B%250A%2520%2520%2520%2520%2524window%2520%253D%2520new%2520Vrzno%253B%250A%250A%2520%2520%2520%2520%2524f%2520%253D%2520%2524window-%253EphpFuncA%2520%253D%2520function%28%29%2520use%28%2526%2524x%252C%2520%2524window%29%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520%2524window-%253Ealert%28%27RAN%2520A%21%2520%27%2520.%2520%2524x%252B%252B%29%253B%250A%2520%2520%2520%2520%257D%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520%2524g%2520%253D%2520%2524window-%253EphpFuncB%2520%253D%2520function%28%29%2520use%28%2526%2524x%252C%2520%2524window%29%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520echo%2520%27%2524x%2520is%2520now%2520%27%2520.%2520%28%252B%252B%2524x%29%2520.%2520PHP_EOL%253B%250A%2520%2520%2520%2520%257D%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520%2524setup%2520%253D%2520true%253B%250A%2520%2520%2520%2520%250A%2520%2520%2520%2520echo%2520%2522Initialized.%255Cn%2522%253B%250A%257D%250A%250A%2524window-%253EphpFuncA%28%29%253B%250A%252F%252F%2520%2524window-%253EphpFuncB%28%29%253B%250A%250A%252F%252F%2520vrzno_eval%28%27window.phpFuncA%28%29%27%29%253B%250Avrzno_eval%28%27window.phpFuncB%28%29%27%29%253B%250A)
 + [Persistent Memory](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Atrue%252C%2520%2522single-expression%2522%253A%2520true%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%252F%252F%2520run%2520this%2520over%2520and%2520over%2520again%250A%2524c%2520%253D%25201%2520%252B%2520%28%2524c%2520%253F%253F%2520-1%29%253B%250A%250Aprint%2520%2524c%253B%250A&autorun=1&persist=1&single-expression=1&render-as=text)
 + [Access The DOM](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524oldTitle%2520%253D%2520NULL%253B%250A%2524newTitle%2520%253D%2520%27Changed%2540%27%2520.%2520date%28%27h%253Ai%253As%27%29%253B%250A%250A%252F%252F%2520Grab%2520the%2520current%2520title%250A%2524oldTitle%2520%253D%2520vrzno_eval%28%27document.title%27%29%253B%250A%250A%252F%252F%2520Change%2520the%2520document%2520title%250A%2524newTitle%2520%253D%2520vrzno_eval%28%27document.title%2520%253D%2520%2522%27%2520.%2520%2524newTitle%2520.%2520%27%2522%27%2520%29%253B%250A%250Aprintf%28%250A%2509%27Title%2520changed%2520from%2520%2522%2525s%2522%2520to%2520%2522%2525s%2522.%27%250A%2509%252C%2520%2524oldTitle%250A%2509%252C%2520%2524newTitle%250A%29%253B%250A%250A%250A%252F%252F%2520Show%2520an%2520alert%250Avrzno_run%28%27alert%27%252C%2520%255B%27Hello%252C%2520World%21%27%255D%29%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text)
 + [goto](https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524x%2520%253D%2520false%253B%250A%250Aa%253A%250A%250Aif%28%21%2524x%29%250A%257B%250A%2509goto%2520b%253B%250A%257D%250A%250Aecho%2520%272.%2520Foo%27%2520.%2520PHP_EOL%253B%250A%250Agoto%2520c%253B%250A%250Ab%253A%250A%250Aecho%2520%271.%2520Bar%27%2520.%2520PHP_EOL%253B%250A%250Aif%28%21%2524x%29%250A%257B%250A%2509%2524x%2520%253D%2520true%253B%250A%2509goto%2520a%253B%250A%257D%250A%250Ac%253A%250Aecho%2520%273.%2520Baz%27%2520.%2520PHP_EOL%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text)
@@ -261,22 +261,22 @@ This will build the following files in the current directory (or in `PHP_DIST_DI
 ```sh
 # php-wasm build web
 PhpWeb.js       # require this module in your scripts
-php-web.js      # internal interface between WASM and javscript
+php-web.js      # internal interface between WASM and JavaScript
 php-web.wasm    # binary php-wasm
 
 # php-wasm build node
 PhpNode.js      # require this module in your scripts
-php-node.js     # internal interface between WASM and javscript
+php-node.js     # internal interface between WASM and JavaScript
 php-node.wasm   # binary php-wasm
 
 # php-wasm build web mjs
 PhpWeb.mjs      # import this module in your scripts
-php-web.mjs     # internal interface between WASM and javscript
+php-web.mjs     # internal interface between WASM and JavaScript
 php-web.wasm    # Binary php-wasm
 
 # php-wasm build node mjs
 PhpNode.mjs     # import this module in your scripts
-php-node.mjs    # internal interface between WASM and javscript
+php-node.mjs    # internal interface between WASM and JavaScript
 php-node.wasm   # binary php-wasm
 ```
 
@@ -325,7 +325,7 @@ WITH_VRZNO=1
 
 ### Persistent Memory
 
-So long as `php.refresh()` is not called from Javascript, the instance will maintain its own persistent memory.
+So long as `php.refresh()` is not called from JavaScript, the instance will maintain its own persistent memory.
 
 ```php
 <?php
