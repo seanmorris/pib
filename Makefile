@@ -83,7 +83,7 @@ DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emsc
 DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo scripts third_party/preload php-tags.mjs
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo scripts third_party/preload php-tags.mjs test
 
 MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
 	PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs
@@ -880,3 +880,6 @@ NPM_PUBLISH_DRY?=--dry-run
 
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
+
+test:
+	node --test test/*.mjs
