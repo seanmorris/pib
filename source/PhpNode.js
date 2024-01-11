@@ -1,13 +1,17 @@
 import { PhpBase } from './PhpBase';
 import PhpBinary from './php-node';
+import path from 'node:path';
+import url from 'node:url';
 
 export class PhpNode extends PhpBase
 {
 	constructor(args = {})
 	{
-		if(typeof __dirname === undefined)
+		let dir;
+
+		if(typeof __dirname === 'undefined')
 		{
-			dir = path.dirname(fileURLToPath(import.meta.url));
+			dir = path.dirname(url.fileURLToPath(import.meta.url));
 		}
 		else
 		{

@@ -149,7 +149,7 @@ class EventBuffer
 			return;
 		}
 
-		const event = new CustomEvent(this.eventType, {
+		const event = new _Event(this.eventType, {
 			detail: [this.decoder.decode(new Uint8Array(this.buffer))]
 		});
 

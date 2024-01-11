@@ -44,7 +44,15 @@ PHP_AR         ?=libphp
 
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
-DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose --progress quiet -p phpwasm run --rm \
+INTERACTIVE=
+PROGRESS=--progress quiet
+
+# ifeq (${IS_TTY},1)
+# INTERACTIVE=
+# PROGRESS=--progress tty
+# endif
+
+DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
@@ -52,7 +60,7 @@ DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose --progress quiet -p phpwa
 	-e PHP_BRANCH=${PHP_BRANCH}           \
 	-e EMCC_CORES=`nproc`
 
-DOCKER_ENV_SIDE=docker-compose --progress quiet -p phpwasm run --rm \
+DOCKER_ENV_SIDE=docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
@@ -207,10 +215,14 @@ EXTRA_FLAGS+= -g${SYMBOLS}
 endif
 endif
 
+ifdef SOURCE_MAP_BASE
+EXTRA_FLAGS+= --source-map-base ${SOURCE_MAP_BASE}
+endif
+
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='[${EXPORTED_FUNCTIONS}]' \
-	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
+	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
 	-s INITIAL_MEMORY=${INITIAL_MEMORY} \
 	-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
@@ -240,7 +252,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 
 # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
-DEPENDENCIES+=${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c third_party/preload/bench.php
+DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c third_party/preload/bench.php
 BUILD_TYPE ?=js
 
 build/php-web-drupal.js: BUILD_TYPE=js
@@ -507,31 +519,31 @@ PhpWebview.js: source/PhpWebview.js PhpBase.js
 
 PhpBase.mjs: source/PhpBase.js
 	cp $< $@;
-	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 PhpWebDrupal.mjs: source/PhpWebDrupal.js
 	cp $< $@;
-	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 PhpWeb.mjs: source/PhpWeb.js
 	cp $< $@;
-	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 PhpNode.mjs: source/PhpNode.js
 	cp $< $@;
-	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 PhpShell.mjs: source/PhpShell.js
 	cp $< $@;
-	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 PhpWorker.mjs: source/PhpWorker.js
 	cp $< $@;
-	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 PhpWebview.mjs: source/PhpWebview.js
 	cp $< $@;
-	sed -i -E "s~\\b(import.+ from )(['\"])([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 php-tags.mjs: source/php-tags.mjs
 	cp $< $@;
@@ -551,7 +563,7 @@ dist/PhpBase.js: PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
-dist/PhpBase.mjs: PhpBase.mjs dist/php-tags.mjs dist/php-tags.local.mjs
+dist/PhpBase.mjs: PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
@@ -604,7 +616,7 @@ dist/PhpWebDrupal.mjs: PhpWebDrupal.mjs dist/php-web-drupal.mjs dist/PhpBase.mjs
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
-dist/php-web.js: build/php-web.js
+dist/php-web.js: build/php-web.js dist/php-tags.mjs dist/php-tags.local.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
@@ -618,7 +630,7 @@ ifeq (${BROTLI},1)
 endif
 	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $(basename $@).*'
 
-dist/php-web.mjs: build/php-web.mjs
+dist/php-web.mjs: build/php-web.mjs dist/php-tags.mjs dist/php-tags.local.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
@@ -754,7 +766,7 @@ dist/PhpShell.js: PhpShell.js dist/php-shell.js dist/PhpBase.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
-dist/PhpShell.mjs: PhpShell.js dist/php-shell.mjs dist/PhpBase.mjs
+dist/PhpShell.mjs: PhpShell.mjs dist/php-shell.mjs dist/PhpBase.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
@@ -857,10 +869,10 @@ image:
 	docker-compose --progress quiet build
 
 pull-image:
-	docker-compose --progress quiet push
+	docker-compose --progress quiet pull
 
 push-image:
-	docker-compose --progress quiet pull
+	docker-compose --progress quiet push
 
 demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm
 

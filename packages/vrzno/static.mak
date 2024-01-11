@@ -11,7 +11,7 @@ PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 # VRZNO_DEV_PATH?=
 
 ifdef VRZNO_DEV_PATH
-third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/*.c
+third_party/vrzno/vrzno.c: $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
 	@ echo -e "\e[33;4mImporting VRZNO\e[0m"
 	@ cp -prfv ${VRZNO_DEV_PATH} third_party/
 	${DOCKER_RUN} touch third_party/vrzno/vrzno.c
