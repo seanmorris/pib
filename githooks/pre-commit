@@ -1,9 +1,9 @@
 #!/bin/bash -eux
 
-cp -v ./build/php-web-drupal.wasm ./docs
-cp -v ./build/php-web-drupal.data ./docs
+# cp -v ./build/php-web-drupal.wasm ./docs
+# cp -v ./build/php-web-drupal.data ./docs
 
 # cp -v ./build/php-worker.wasm ./docs
 # cp -v ./build/php-worker.data ./docs
 
-cd docs-source && brunch b -p
+# cd docs-source && brunch b -p
