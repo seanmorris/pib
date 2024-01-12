@@ -14,7 +14,7 @@ third_party/libiconv-1.17/README:
 lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33;4mBuilding LibIconv\e[0m"
 	${DOCKER_RUN_IN_ICONV} autoconf
-	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --config-cache
+	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
 	${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_ICONV} emmake make install
 
