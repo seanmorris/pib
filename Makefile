@@ -171,7 +171,7 @@ third_party/php${PHP_VERSION}-src/.gitignore:
 third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched ${ARCHIVES}
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
 	${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
-	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure \
+	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure --config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--enable-embed=static \
 		--disable-fiber-asm \

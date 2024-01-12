@@ -22,7 +22,7 @@ third_party/${SQLITE_DIR}/sqlite3.c:
 
 lib/lib/libsqlite3.a: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33;4mBuilding LibSqlite3\e[0m"
-	${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/
+	${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ --config-cache
 	${DOCKER_RUN_IN_SQLITE} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_SQLITE} emmake make install
 

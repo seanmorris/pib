@@ -16,13 +16,7 @@ jobs:
       image: ubuntu-2204:2023.10.1
     steps:
       - checkout
-      - run: sudo apt update
-      - run: sudo apt install -y pv ca-certificates apt-transport-https
-      - run: sudo apt-get install --reinstall ca-certificates
-      - run: sudo update-ca-certificates
-      - run: docker system prune -af
       - run: npm install
-      - run: make image
       - run: make
       - run: make test
 
