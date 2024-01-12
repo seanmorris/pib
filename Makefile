@@ -521,27 +521,27 @@ PhpBase.mjs: source/PhpBase.js
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-PhpWebDrupal.mjs: source/PhpWebDrupal.js
+PhpWebDrupal.mjs: source/PhpWebDrupal.js PhpBase.mjs
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-PhpWeb.mjs: source/PhpWeb.js
+PhpWeb.mjs: source/PhpWeb.js PhpBase.mjs
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-PhpNode.mjs: source/PhpNode.js
+PhpNode.mjs: source/PhpNode.js PhpBase.mjs
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-PhpShell.mjs: source/PhpShell.js
+PhpShell.mjs: source/PhpShell.js PhpBase.mjs
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-PhpWorker.mjs: source/PhpWorker.js
+PhpWorker.mjs: source/PhpWorker.js PhpBase.mjs
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-PhpWebview.mjs: source/PhpWebview.js
+PhpWebview.mjs: source/PhpWebview.js PhpBase.mjs
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
