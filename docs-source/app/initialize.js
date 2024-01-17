@@ -336,7 +336,7 @@ fwrite($stdErr, json_encode(['PATH' => $path, "ORIGINAL" => $request->path]) . P
 
 $GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
 
-$_GET['q'] = $itemPath;
+$_GET['q'] = $path;
 
 menu_execute_active_handler();
 
