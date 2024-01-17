@@ -223,9 +223,11 @@ endif
 
 ifeq (${WITH_VRZNO}, 1)
 PRE_JS_FILES+=/src/third_party/vrzno/lib.js
-endif
-
+ifdef VRZNO_DEV_PATH
 EXTRA_FLAGS+= --pre-js ${PRE_JS_FILES}
+DEPENDENCIES+=${VRZNO_DEV_PATH}/lib.js
+endif
+endif
 
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
