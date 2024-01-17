@@ -301,6 +301,8 @@ $path = $path ?: "node";
 
 $_GET['q'] = $path;
 
+$GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
+
 $_SERVER['SERVER_SOFTWARE'] = ${JSON.stringify(navigator.userAgent)};
 $_SERVER['REQUEST_URI']     = $docroot . $path;
 $_SERVER['QUERY_STRING']    = $request->_GET;
