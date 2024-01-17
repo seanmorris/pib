@@ -334,7 +334,7 @@ if(!$_COOKIE || !$_COOKIE[$session_name])
 
 fwrite($stdErr, json_encode(['PATH' => $path, "ORIGINAL" => $request->path]) . PHP_EOL);
 
-$GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
+$GLOBALS['base_path'] = '/php-wasm' . $docroot;
 $base_url = '/php-wasm' . $docroot;
 
 $_GET['q'] = $path;
