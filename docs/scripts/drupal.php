@@ -9,7 +9,7 @@ set_error_handler(function(...$args) use($stdErr, &$errors){
 });
 
 $docroot = '/persist/drupal-7.95';
-$path    = '/node';
+$path    = '/admin/dashboard';
 $script  = 'index.php';
 
 if(!is_dir($docroot))
@@ -61,12 +61,10 @@ if(!$_COOKIE || !$_COOKIE[$$session_name])
 }
 
 $itemPath = $path;
-$itemPath = preg_replace('/^\\/persist/', '', $itemPath);
-$itemPath = preg_replace('/^\\/drupal-7.95/', '', $itemPath);
-$itemPath = preg_replace('/^\//', '', $itemPath);
+$itemPath = preg_replace('/^\\//', '', $path);
 
 $GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
-$base_url = '/php-wasm' . $docroot;;
+$base_url = '/php-wasm' . $docroot;
 
 $_GET['q'] = $itemPath;
 
