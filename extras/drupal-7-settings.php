@@ -309,7 +309,7 @@ $drupal_hash_salt = 'MKTjjvR3sLkXhjilBuWDxh3i-gPCGDIP8ydx6h9Td3o';
  * It is not allowed to have a trailing slash; Drupal will add it
  * for you.
  */
-$base_url = '/persist/drupal-7.95';  // NO trailing slash!
+$base_url = '/php-wasm/persist/drupal-7.95';  // NO trailing slash!
 
 /**
  * PHP settings:

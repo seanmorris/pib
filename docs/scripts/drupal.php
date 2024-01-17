@@ -29,7 +29,7 @@ if(!is_dir($docroot))
     }
 }
 
-$_SERVER['REQUEST_URI']     = $path;
+$_SERVER['REQUEST_URI']     = '/php-wasm' . $docroot . $path;
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 $_SERVER['SERVER_NAME']     = 'localhost';
 $_SERVER['SERVER_PORT']     = 3333;
@@ -62,9 +62,6 @@ if(!$_COOKIE || !$_COOKIE[$$session_name])
 
 $itemPath = $path;
 $itemPath = preg_replace('/^\\//', '', $path);
-
-$GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
-$base_url = '/php-wasm' . $docroot;
 
 $_GET['q'] = $itemPath;
 
