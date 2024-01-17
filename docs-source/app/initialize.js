@@ -289,7 +289,7 @@ $_COOKIE = $request->_COOKIE;
 fwrite($stdErr, json_encode(['_GET' => $_GET]) . PHP_EOL);
 fwrite($stdErr, json_encode(['_POST' => $_POST]) . PHP_EOL);
 
-$docroot = '/persist/drupal-7.95/';
+$docroot = '/persist/drupal-7.95';
 $script  = 'index.php';
 
 $path = $request->path;
