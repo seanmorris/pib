@@ -8,7 +8,7 @@ set_error_handler(function(...$args) use($stdErr, &$errors){
 	fwrite($stdErr, print_r($args,1));
 });
 
-$docroot = '/php-wasm/persist/drupal-7.95';
+$docroot = '/persist/drupal-7.95';
 $path    = '/node';
 $script  = 'index.php';
 
@@ -64,6 +64,8 @@ $itemPath = $path;
 $itemPath = preg_replace('/^\\/persist/', '', $itemPath);
 $itemPath = preg_replace('/^\\/drupal-7.95/', '', $itemPath);
 $itemPath = preg_replace('/^\//', '', $itemPath);
+
+$GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
 
 $_GET['q'] = $itemPath;
 
