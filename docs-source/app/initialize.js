@@ -299,10 +299,6 @@ $path = preg_replace('/^\\/drupal-7.95/', '', $path);
 $path = preg_replace('/^\\//', '', $path);
 $path = $path ?: "node";
 
-$_GET['q'] = $path;
-
-$GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
-
 $_SERVER['SERVER_SOFTWARE'] = ${JSON.stringify(navigator.userAgent)};
 $_SERVER['REQUEST_URI']     = $docroot . $path;
 $_SERVER['QUERY_STRING']    = $request->_GET;
@@ -337,6 +333,10 @@ if(!$_COOKIE || !$_COOKIE[$session_name])
 }
 
 fwrite($stdErr, json_encode(['PATH' => $path, "ORIGINAL" => $request->path]) . PHP_EOL);
+
+$GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
+
+$_GET['q'] = $itemPath;
 
 menu_execute_active_handler();
 
