@@ -300,7 +300,7 @@ $path = preg_replace('/^\\//', '', $path);
 $path = $path ?: "node";
 
 $_SERVER['SERVER_SOFTWARE'] = ${JSON.stringify(navigator.userAgent)};
-$_SERVER['REQUEST_URI']     = $docroot . $path;
+$_SERVER['REQUEST_URI']     = $docroot . '/' . $path;
 $_SERVER['QUERY_STRING']    = $request->_GET;
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 $_SERVER['SERVER_NAME']     = 'localhost';
