@@ -66,6 +66,7 @@ $itemPath = preg_replace('/^\\/drupal-7.95/', '', $itemPath);
 $itemPath = preg_replace('/^\//', '', $itemPath);
 
 $GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
+$base_url = '/php-wasm' . $docroot;;
 
 $_GET['q'] = $itemPath;
 
