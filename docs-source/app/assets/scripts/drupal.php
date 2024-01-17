@@ -63,6 +63,9 @@ if(!$_COOKIE || !$_COOKIE[$$session_name])
 $itemPath = $path;
 $itemPath = preg_replace('/^\\//', '', $path);
 
+$GLOBALS['base_path'] = '/php-wasm' . $docroot . '/';
+$base_url = '/php-wasm' . $docroot;
+
 $_GET['q'] = $itemPath;
 
 menu_execute_active_handler();
