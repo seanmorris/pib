@@ -209,7 +209,6 @@ self.addEventListener('message', function (event) {});
 self.addEventListener('push', function (event) {
   console.log(event);
 });
-
 });
 
 require.register("___globals___", function(exports, require, module) {
@@ -217,3 +216,4 @@ require.register("___globals___", function(exports, require, module) {
 });})();require('___globals___');
 
 require('DrupalWorker');
+//# sourceMappingURL=DrupalWorker.js.map

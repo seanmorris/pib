@@ -859,8 +859,8 @@ docs-source/app/assets/php-web-drupal.wasm: dist/php-web-drupal.js
 
 ########### Clerical stuff. ###########
 
-# .env:
-# 	touch .env
+${ENV_FILE}:
+	touch ${ENV_FILE}
 
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.br *.wasm.gz *.data

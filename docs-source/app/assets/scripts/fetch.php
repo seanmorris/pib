@@ -6,3 +6,5 @@ $window = new Vrzno;
 $window->fetch($url)
 ->then(function($r) { return $r->json(); })
 ->then(var_dump(...));
+
+echo "Yeah, its async.\n\n";

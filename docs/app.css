@@ -1,1 +1,324 @@
-@font-face{src:url(fsex302-webfont.woff) format('woff');font-weight:400;font-style:normal;font-family:fixedsys}body{font-family:fixedsys;display:flex;flex-direction:column;align-items:stretch;height:100vh;padding:0;margin:0;background-color:#aaa}.output .scroller{background-color:#eee}.output div.scroller{white-space:pre}.output .row{background-color:#fff;padding:.5em .5em;border-bottom:1px #fff solid}.row.toolbar{margin:.5em;padding:.5em 0;border:2px solid;border-image:url(border-inset.png) 2 2 2 2;align-items:center}.row.toolbar>div{display:flex;justify-content:flex-end;padding:0 .5em;flex:1;flex-direction:row}.row.toolbar>div .start{align-items:center;flex:1}.row.toolbar button[data-refresh],.row.toolbar button[data-reset-storage],.row.toolbar button[data-run]{height:50px;min-width:3em;font-weight:700;border:2px solid;align-self:center;margin-right:.5em;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:85%}button{border-image:url(border.png) 2 2 2 2}button[data-run]:not([disabled])::after{position:absolute;top:-2px;left:-2px;bottom:-2px;right:-2px;content:'';background-color:red!important;mix-blend-mode:darken;opacity:.5}.header button[data-reset-storage]{max-width:6em}.header button[data-refresh],.header button[data-reset-storage],.header button[data-run]{position:relative;font-weight:700;font-size:13pt;box-sizing:border-box}:focus{outline-style:dotted;outline-color:#000}.row:focus{background-color:#000082;border-bottom:1px #000082 solid;color:#fff}.row.toolbar.header{background-color:#bbb}.row.toolbar.status{padding:0}.row.toolbar.status>div{padding:.25em}h1{margin:0;margin:.25em;white-space:nowrap}.row{display:flex;flex-direction:row}body>div{display:flex;flex-direction:row}.row.body{flex-grow:1}.collapse{flex-grow:0;flex-shrink:1}div.column{position:relative;flex:1}div.column .scroller{position:absolute;top:0;left:0;bottom:0;right:0;width:100%;height:100%;overflow-y:auto;overflow-x:auto;font-size:.9rem}div.panel{font-family:fixedsys;display:flex;position:relative;background-color:#aaa;flex-direction:column;box-sizing:border-box;margin:.5em;flex:1;border-right:1px solid rgba(0,0,0,.5);border-bottom:1px solid rgba(0,0,0,.5)}div.panel div.input{background-color:#272822}div.panel>div{background-color:#fff;border:2px solid;border-image:url(border-inset.png) 2 2 2 2;flex-direction:column;display:flex;flex:1}.liquid{display:flex;flex-direction:column;flex:1}.panel label,button{user-select:none;border:2px solid;border-image:url(border.png) 2 2 2 2!important;background-color:#c3c3c3;padding:.25em}.input,.output .scroller,iframe{user-select:normal}.panel .cols{margin-top:-1px}.panel label[tabindex]:first-child{margin-left:-1px}.panel .cols>label[tabindex]:last-child{margin-right:-3px}.ace_editor{margin-right:-2px}button:active,label[tabindex]:active{border:2px solid;border-image:url(border-inset.png) 2 2 2 2!important;position:relative;z-index:100}.header label{display:flex;align-items:center;justify-content:flex-end}.header label p{text-align:right}pre{flex:1;margin-top:0;margin-bottom:0}.round{border-radius:50%;height:49px;margin-right:5px}.credit{padding-right:.5em;padding-left:.5em}.column .row{white-space:pre}.cols{display:flex;flex-direction:row!important}.rows{display:flex;flex-direction:column!important}.cols label{flex:1}label{user-select:none}.collapse{flex:0!important;white-space:nowrap}.header.row{align-items:flex-start}iframe{border:none}input[type=file]{display:none}.header select{font-size:1rem}form{display:flex;flex-direction:column;max-width:15rem}form label{display:flex;flex-direction:row}form label>span:first-child{flex:1}
+@font-face {
+    src: url('fsex302-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+	font-family: 'fixedsys';
+}
+
+body {
+	font-family: 'fixedsys';
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	height: 100vh;
+	padding: 0px;
+	margin: 0px;
+	background-color: #aaa;
+}
+
+.output {
+
+}
+
+.output .scroller {
+	background-color: #EEE;
+}
+
+.output div.scroller {
+	white-space: pre;
+}
+
+.output .row {
+	background-color: #FFF;
+	padding: 0.5em 0.5em;
+	border-bottom: 1px white solid;
+}
+
+.row.toolbar {
+	margin: 0.5em;
+	padding: 0.5em 0em;
+	border: 2px solid;
+	border-image: url(border-inset.png) 2 2 2 2;
+	align-items: center;
+}
+
+.row.toolbar > div{
+	display: flex;
+	justify-content: flex-end;
+	padding: 0em 0.5em;
+	flex: 1;
+	flex-direction: row;
+}
+
+.row.toolbar > div .start{
+	align-items: center;
+	flex: 1;
+}
+
+.row.toolbar button[data-run],
+.row.toolbar button[data-reset-storage],
+.row.toolbar button[data-refresh] {
+	height: 50px;
+	min-width: 3em;
+	font-weight: bold;
+	border: 2px solid;
+	align-self: center;
+	margin-right: 0.5em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 85%;
+}
+
+button {
+	border-image: url(border.png) 2 2 2 2;
+}
+
+button[data-run]:not([disabled])::after {
+	position: absolute;
+	top: -2px;
+	left:-2px;
+	bottom:-2px;
+	right:-2px;
+	content: '';
+	background-color: #F00 !important;
+	mix-blend-mode: darken;
+    opacity: 0.5;
+}
+
+.header button[data-reset-storage] {
+	max-width: 6em;
+}
+
+.header button[data-run],
+.header button[data-reset-storage],
+.header button[data-refresh] {
+	position: relative;
+	font-weight: bold;
+	font-size: 13pt;
+	box-sizing: border-box;
+}
+
+*:focus {
+	outline-style: dotted;
+	outline-color: black;
+}
+
+.row:focus {
+	background-color: #000082;
+	border-bottom: 1px #000082 solid;
+	color: #FFF;
+}
+
+.row.toolbar.header{
+	background-color: #BBB;
+}
+
+.row.toolbar.status {
+	padding: 0;
+}
+
+.row.toolbar.status > div {
+	padding: 0.25em;
+}
+
+h1 {
+	margin: 0em;
+	margin: 0.25em;
+	white-space: nowrap;
+}
+
+.row {
+	display: flex;
+	flex-direction: row;
+}
+
+body > div {
+	display: flex;
+	flex-direction: row;
+}
+
+.row.body {
+	flex-grow: 1;
+}
+
+.collapse {
+	flex-grow: 0;
+	flex-shrink: 1;
+}
+
+div.column {
+	position: relative;
+	flex: 1;
+}
+
+div.column .scroller {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 100%;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: auto;
+	font-size: 0.9rem;
+}
+
+div.panel {
+    font-family: 'fixedsys';
+	display: flex;
+	position: relative;
+	background-color: #aaa;
+	flex-direction: column;
+	box-sizing: border-box;
+	margin: 0.5em;
+	flex: 1;
+	border-right: 1px solid rgba(0,0,0,0.5);
+	border-bottom: 1px solid rgba(0,0,0,0.5);
+}
+
+div.panel div.input {
+	background-color: #272822;
+}
+
+div.panel > div {
+	background-color: white;
+	border: 2px solid;
+	border-image: url(border-inset.png) 2 2 2 2;
+	flex-direction: column;
+	display: flex;
+	flex: 1;
+}
+
+.liquid{
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+button,
+.panel label {
+	user-select: none;
+	border: 2px solid;
+	border-image: url(border.png) 2 2 2 2 !important;
+	background-color: #c3c3c3;
+	padding: 0.25em;
+}
+
+.input, .output .scroller, iframe {
+	user-select: normal;
+}
+
+.panel .cols {
+	margin-top: -1px;
+}
+
+.panel label[tabindex]:first-child {
+	margin-left: -1px;
+}
+
+.panel .cols > label[tabindex]:last-child {
+	margin-right: -3px;
+}
+
+.ace_editor {
+	margin-right: -2px;
+}
+
+label[tabindex]:active,
+button:active {
+	border: 2px solid;
+	border-image: url(border-inset.png) 2 2 2 2 !important;
+	position: relative;
+	z-index: 100;
+}
+
+.header label {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.header label p {
+	text-align: right;
+}
+
+pre {
+	flex: 1;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.round {
+	border-radius: 50%;
+	height: 49px;
+	margin-right: 5px;
+}
+
+.credit{
+	padding-right: 0.5em;
+	padding-left: 0.5em;
+}
+
+.column .row {
+	white-space: pre;
+}
+
+.cols {
+	display: flex;
+	flex-direction: row !important;
+}
+
+.rows {
+	display: flex;
+	flex-direction: column !important;
+}
+
+.cols label {
+	flex: 1;
+}
+
+label {
+	user-select: none;
+}
+
+.collapse {
+	flex: 0 !important;
+	white-space: nowrap;
+}
+
+.header.row {
+	align-items: flex-start;
+}
+
+iframe {
+	border: none;
+}
+
+input[type=file] {
+	display: none;
+}
+
+.header select {
+	font-size: 1rem;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	max-width: 15rem;
+}
+
+form label {
+	display: flex;
+	flex-direction: row;
+}
+
+form label > span:first-child{
+	flex:1;
+}
+
+
+/*# sourceMappingURL=app.css.map*/
