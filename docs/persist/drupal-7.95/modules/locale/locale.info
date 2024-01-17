@@ -1,0 +1,12 @@
+name = Locale
+description = Adds language handling functionality and enables the translation of the user interface to languages other than English.
+package = Core
+version = VERSION
+core = 7.x
+files[] = locale.test
+configure = admin/config/regional/language
+
+; Information added by Drupal.org packaging script on 2023-03-15
+version = "7.95"
+project = "drupal"
+datestamp = "1678902530"

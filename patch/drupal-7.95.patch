@@ -36,7 +36,7 @@ index 4f7a8f6..980ad35 100644
 -    }
 +    // // Otherwise use $base_url as session name, without the protocol
 +    // // to use the same session identifiers across HTTP and HTTPS.
-+    // list( , $session_name) = explode('://', $base_url, 2);
++    $cookie_domain = $session_name = '';
 +    // // HTTP_HOST can be modified by a visitor, but we already sanitized it
 +    // // in drupal_settings_initialize().
 +    // if (!empty($_SERVER['HTTP_HOST'])) {
@@ -45,24 +45,12 @@ index 4f7a8f6..980ad35 100644
  
      // Drupal 7.83 included a security improvement whereby www. is no longer
      // stripped from the cookie domain. However, this can cause problems with
-diff --git a/third_party/drupal-7.95/sites/default/files/.htaccess b/third_party/drupal-7.95/sites/default/files/.htaccess
-new file mode 100644
---- /dev/null
-+++ b/third_party/drupal-7.95/sites/default/files/.htaccess
-@@ -0,0 +1,16 @@
-+# Turn off all options we don't need.
-+Options None
-+Options +FollowSymLinks
+diff --git a/third_party/drupal-7.95/includes/bootstrap.inc b/third_party/drupal-7.95-original/includes/bootstrap.inc
+index 4f7a8f6..980ad35 100644
+--- a/third_party/drupal-7.95/includes/common.inc
++++ b/third_party/drupal-7.95/includes/common.inc
+@@ -2890,3 +2890,3 @@
+   }
+-  exit;
 +
-+# Set the catch-all handler to prevent scripts from being executed.
-+SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
-+<Files *>
-+  # Override the handler again if we're run later in the evaluation list.
-+  SetHandler Drupal_Security_Do_Not_Remove_See_SA_2013_003
-+</Files>
-+
-+# If we know how to do it safely, disable the PHP engine entirely.
-+<IfModule mod_php5.c>
-+  php_flag engine off
-+</IfModule>
-+
+ }

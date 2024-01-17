@@ -16,36 +16,35 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 	const url      = new URL(event.request.url);
 	const pathname = url.pathname.replace(/^\//, '');
 	const path     = pathname.split('/');
+	const _path    = path.slice(0);
 
-	// console.log(path);
+	if(_path[0] === 'php-wasm')
+	{
+		_path.shift();
+	}
 
-	if(!path[ path.length-1 ].match(/\.\w+$/)
-		&& (path[1] === 'drupal-7.59' || path[2] === 'drupal-7.59')
-	){
+	// while(_path[ _path.length-1 ] === '')
+	// {
+	// 	_path.pop();
+	// }
+
+	if(!_path[ _path.length-1 ].match(/\.\w+$/) && _path[1] === 'drupal-7.95')
+	{
 		const getClient = self.clients.matchAll({
 			includeUncontrolled:true
 		});
 
 		const getPost = event.request.method !== 'POST'
 			? Promise.resolve()
-			: event.request.formData().then((formData)=>{
-				const post = {};
-
-				for (var key of formData.keys()) {
-					post[key] = formData.get(key);
-				}
-
-				return post;
-			});
+			: event.request.formData();
 
 		return Promise.all([getClient,getPost]).then(([clients, post]) => {
-
 			clients.forEach(client => {
 				client.postMessage({
 					method:  event.request.method
-					, path:  '/' + pathname
+					, path:  '/' + path.join('/')
 					, _GET:  url.search
-					, _POST: post || null
+					, _POST: event.request.method === 'POST' ? ('?' + String(new URLSearchParams(post))) : ''
 				});
 			});
 

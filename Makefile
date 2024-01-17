@@ -33,8 +33,8 @@ ENVIRONMENT    ?=web
 # INITIAL_MEMORY ?=3072MB
 INITIAL_MEMORY ?=64MB
 MAXIMUM_MEMORY ?=4096MB
-ASSERTIONS     ?=1
-# SYMBOLS        ?=3
+ASSERTIONS     ?=0
+SYMBOLS        ?=3
 OPTIMIZE       ?=2
 RELEASE_SUFFIX ?=
 
@@ -66,7 +66,7 @@ DOCKER_ENV_SIDE=docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
 	-e EMCC_CORES=`nproc`                 \
-	-e CFLAGS=" -I/root/lib/include " \
+	-e CFLAGS=" -I/root/lib/include "     \
 	-e EMCC_FLAGS=" -sSIDE_MODULE=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 "
 
 DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
@@ -113,6 +113,7 @@ EXTRA_FLAGS=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
 EXPORTED_FUNCTIONS="_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string"
+PRE_JS_FILES?=
 
 # include make/iconv.mak make/icu.mak make/libxml.mak make/sqlite.mak make/tidy.mak make/vrzno.mak
 
@@ -150,6 +151,7 @@ third_party/drupal-7.95/README.txt:
 	${DOCKER_RUN} mv drupal-7.95 third_party/drupal-7.95
 	${DOCKER_RUN} git apply --no-index patch/drupal-7.95.patch
 	${DOCKER_RUN} cp -r extras/drupal-7-settings.php third_party/drupal-7.95/sites/default/settings.php
+	${DOCKER_RUN} mkdir /src/third_party/drupal-7.95/sites/default/files/
 	${DOCKER_RUN} cp -r extras/drowser-files/.ht.sqlite third_party/drupal-7.95/sites/default/files/.ht.sqlite
 	${DOCKER_RUN} cp -r extras/drowser-files/* third_party/drupal-7.95/sites/default/files
 	${DOCKER_RUN} cp -r extras/drowser-logo.png third_party/drupal-7.95/sites/default/logo.png
@@ -171,7 +173,7 @@ third_party/php${PHP_VERSION}-src/.gitignore:
 third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched ${ARCHIVES}
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
 	${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
-	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure --cache-file=/tmp/config-cache \
+	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--enable-embed=static \
 		--disable-fiber-asm \
@@ -200,7 +202,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 
 lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
 	@ echo -e "\e[33;4mBuilding PHP\e[0m"
-	${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC'
+	${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC -g3 -gsource-map'
 	${DOCKER_RUN_IN_PHPSIDE} emmake make install
 
 ########### Build the final files. ###########
@@ -219,11 +221,18 @@ ifdef SOURCE_MAP_BASE
 EXTRA_FLAGS+= --source-map-base ${SOURCE_MAP_BASE}
 endif
 
+ifeq (${WITH_VRZNO}, 1)
+PRE_JS_FILES+=/src/third_party/vrzno/lib.js
+endif
+
+EXTRA_FLAGS+= --pre-js ${PRE_JS_FILES}
+
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
 	-s EXPORTED_FUNCTIONS='[${EXPORTED_FUNCTIONS}]' \
-	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue"]' \
+	-s EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
+	-D ENVIRONMENT=${ENVIRONMENT}    \
 	-s INITIAL_MEMORY=${INITIAL_MEMORY} \
 	-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
 	-s ALLOW_MEMORY_GROWTH=1         \
@@ -235,19 +244,19 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-s INVOKE_RUN=0                  \
 	-s USE_ZLIB=1                    \
 	-s ASYNCIFY                      \
-	-I .     \
-    -I Zend  \
-    -I main  \
-    -I TSRM/ \
+	-I /src/third_party/php${PHP_VERSION}-src/ \
+	-I /src/third_party/php${PHP_VERSION}-src/Zend  \
+    -I /src/third_party/php${PHP_VERSION}-src/main  \
+    -I /src/third_party/php${PHP_VERSION}-src/TSRM/ \
 	-I /src/third_party/libxml2 \
 	-I /src/third_party/${SQLITE_DIR} \
-	-I ext/pdo_sqlite \
-	-I ext/json \
-	-I ext/vrzno \
+	-I /src/third_party/php${PHP_VERSION}-src/ext/pdo_sqlite \
+	-I /src/third_party/php${PHP_VERSION}-src/ext/json \
+	-I /src/third_party/php${PHP_VERSION}-src/ext/vrzno \
 	${EXTRA_FLAGS} \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
-	$(addprefix /src/,${ARCHIVES}) \
 	/src/lib/lib/${PHP_AR}.a \
+	$(addprefix /src/,${ARCHIVES}) \
 	${EXTRA_FILES}
 
 # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
@@ -263,7 +272,7 @@ build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt thir
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${DOCKER_RUN} mkdir -p /src/third_party/preload/
 	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
-	${FINAL_BUILD} -s ENVIRONMENT=web
+	${FINAL_BUILD} -s ENVIRONMENT=web -D ENVIRONMENT=web -Wno-macro-redefined -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-web-drupal.mjs: BUILD_TYPE=mjs
@@ -274,49 +283,49 @@ build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt thi
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${DOCKER_RUN} mkdir -p /src/third_party/preload/
 	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
-	${FINAL_BUILD} -s ENVIRONMENT=web
+	${FINAL_BUILD} -s ENVIRONMENT=web -D ENVIRONMENT=web -Wno-macro-redefined -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-web.js: BUILD_TYPE=js
 build/php-web.js: ENVIRONMENT=web
 build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web\e[0m"
-	${FINAL_BUILD}
+	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
 build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web\e[0m"
-	${FINAL_BUILD}
+	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
 build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for workers\e[0m"
-	${FINAL_BUILD}
+	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
 build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for workers\e[0m"
-	${FINAL_BUILD}
+	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-node.js: BUILD_TYPE=js
 build/php-node.js: ENVIRONMENT=node
 build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for node\e[0m"
-	${FINAL_BUILD}
+	${FINAL_BUILD} -lnodefs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
 build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for node\e[0m"
-	${FINAL_BUILD}
+	${FINAL_BUILD} -lnodefs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
 
 build/php-shell.js: BUILD_TYPE=js
@@ -352,27 +361,37 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 php-web-drupal.js: build/php-web-drupal.js
 	cp $^ $@
 	cp $(basename $^).wasm* $(dir $(basename $@))
-	cp $(basename $^).data $(basename $@).data
+	cp $(basename $^).data* $(basename $@).data
+	${DOCKER_RUN} rm -rf docs/third_party
+	cp -r third_party docs/
 ifeq (${GZIP},1)
 	rm -f $(basename $@).wasm.gz
+	rm -f $(basename $@).data.gz
 	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+	bash -c 'gzip -9 < $(basename $@).data > $(basename $@).data.gz'
 endif
 ifeq (${BROTLI},1)
 	rm -f $(basename $@).wasm.br
+	rm -f $(basename $@).data.br
 	brotli -9 $(basename $@).wasm
+	brotli -9 $(basename $@).data
 endif
 
 php-web-drupal.mjs: build/php-web-drupal.mjs
 	cp $^ $@
 	cp $(basename $^).wasm* $(dir $(basename $@))
-	cp $(basename $^).data $(basename $@).data
+	cp $(basename $^).data* $(basename $@).data
 ifeq (${GZIP},1)
 	rm -f $(basename $@).wasm.gz
+	rm -f $(basename $@).data.gz
 	bash -c 'gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz'
+	bash -c 'gzip -9 < $(basename $@).data > $(basename $@).data.gz'
 endif
 ifeq (${BROTLI},1)
 	rm -f $(basename $@).wasm.br
+	rm -f $(basename $@).data.br
 	brotli -9 $(basename $@).wasm
+	brotli -9 $(basename $@).data
 endif
 
 php-web.js: build/php-web.js
@@ -586,11 +605,15 @@ dist/php-web-drupal.js: build/php-web-drupal.js
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).data || true
 ifeq (${GZIP},1)
 	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} rm -f $(basename $@).data.gz
 	${DOCKER_RUN_USER} gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz
+	${DOCKER_RUN_USER} gzip -9 < $(basename $@).data > $(basename $@).data.gz
 endif
 ifeq (${BROTLI},1)
 	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} rm -f $(basename $@).data.br
 	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).data
 endif
 
 dist/php-web-drupal.mjs: build/php-web-drupal.mjs
@@ -600,11 +623,15 @@ dist/php-web-drupal.mjs: build/php-web-drupal.mjs
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 ifeq (${GZIP},1)
 	rm -f $(basename $@).wasm.gz
+	rm -f $(basename $@).data.gz
 	gzip -9 < $(basename $@).wasm > $(basename $@).wasm.gz
+	gzip -9 < $(basename $@).wasm > $(basename $@).data.gz
 endif
 ifeq (${BROTLI},1)
 	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.br
+	${DOCKER_RUN_USER} rm -f $(basename $@).data.br
 	${DOCKER_RUN_USER} brotli -9 $(basename $@).wasm
+	${DOCKER_RUN_USER} brotli -9 $(basename $@).data
 endif
 
 dist/PhpWebDrupal.js: PhpWebDrupal.js dist/php-web-drupal.js dist/PhpBase.js
@@ -813,27 +840,27 @@ dist/PhpWebview.mjs: PhpWebview.js dist/php-webview.mjs dist/PhpBase.mjs
 ############# Demo files ##############
 
 docs-source/app/assets/php-web-drupal.wasm: ENVIRONMENT=web-drupal
-docs-source/app/assets/php-web-drupal.wasm: php-web-drupal.js
+docs-source/app/assets/php-web-drupal.wasm: dist/php-web-drupal.js
 	${DOCKER_RUN} cp -rv \
-		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
-		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
+		dist/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
+		dist/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data* \
 		./docs-source/app/assets;
 
 	${DOCKER_RUN} cp -rv \
-		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
-		build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
+		dist/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
+		dist/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data* \
 		./docs-source/public;
 
 	${DOCKER_RUN} chown $(or $(UID),1000):$(or $(GID),1000) \
 		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
-		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data \
+		./docs-source/app/assets/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data* \
 		./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.wasm* \
-		./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data;
+		./docs-source/public/php-${ENVIRONMENT}${RELEASE_SUFFIX}.data*
 
 ########### Clerical stuff. ###########
 
-.env:
-	touch .env
+# .env:
+# 	touch .env
 
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.br *.wasm.gz *.data
@@ -875,6 +902,9 @@ push-image:
 	docker-compose --progress quiet push
 
 demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm
+
+serve-demo:
+	cd docs-source && brunch w -s
 
 NPM_PUBLISH_DRY?=--dry-run
 

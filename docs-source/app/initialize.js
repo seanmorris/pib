@@ -2,17 +2,15 @@
 
 import { PhpWebDrupal as PHP } from 'php-wasm/PhpWebDrupal';
 
-window.PHP = PHP;
-const php  = new PHP;
+let php = new PHP;
 
 let session_id = '';
 
 const serviceWorker = navigator.serviceWorker;
 
-if(serviceWorker)
+if(serviceWorker && !serviceWorker.controller)
 {
 	serviceWorker.register(`${location.pathname}DrupalWorker.js`);
-	// .then(result => console.log('Result, ', result))
 	// .catch(error => console.log('Error, ', error));
 }
 
@@ -22,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	const stderr  = document.querySelector('.stderr > * > div.scroller');
 	const stdret  = document.querySelector('.stdret > * > div.scroller');
 	const run     = document.querySelector('[data-run]');
+	const reset   = document.querySelector('[data-reset-storage]');
 	const refresh = document.querySelector('[data-refresh]');
 	const token   = document.querySelector('[data-tokenize]');
 	const status  = document.querySelector('[data-status]');
-	const load    = document.querySelector('[data-load-demo]')
-	const demo    = document.querySelector('[data-select-demo]')
+	const load    = document.querySelector('[data-load-demo]');
+	const demo    = document.querySelector('[data-select-demo]');
 	const editor  = ace.edit(input);
 	const ret     = document.querySelector('#ret');
 
@@ -34,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const stderrFrame = document.querySelector('.stderr > * > iframe');
 	const stdretFrame = document.querySelector('.stdret > * > iframe');
 	const openFile    = document.getElementById('openFile');
-	const exitBox     = document.querySelector('#exit')
+	const exitBox     = document.querySelector('#exit');
 	const exitLabel   = exitBox.querySelector('span');
 	const persistBox  = document.getElementById('persist');
 	const singleBox   = document.getElementById('singleExpression');
@@ -46,6 +45,23 @@ document.addEventListener('DOMContentLoaded', () => {
 	const errorBuffer = [];
 	let outputTimer;
 	let errorTimer;
+
+	reset.addEventListener('click', event => {
+
+		const openDb = indexedDB.open("/persist", 21);
+
+
+		openDb.onsuccess = event => {
+			const db = openDb.result;
+			const transaction = db.transaction(["FILE_DATA"], "readwrite");
+			const objectStore = transaction.objectStore("FILE_DATA");
+			const objectStoreRequest = objectStore.clear();
+
+			objectStoreRequest.onsuccess = (event) => {
+				location.reload();
+			};
+		};
+	});
 
 	openFile.addEventListener('input', event =>{
 
@@ -86,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		let code = editor.session.getValue();
 
-		if(code.length < 1024 * 2)
+		if(1 || code.length < 1024 * 2)
 		{
 			query.set('autorun', autorun.checked ? 1 : 0);
 			query.set('persist', persistBox.checked ? 1 : 0);
@@ -123,82 +139,97 @@ document.addEventListener('DOMContentLoaded', () => {
 		}).finally(() => {
 			if(!persistBox.checked)
 			{
-				php.refresh();
+				refreshPhp();
+				// php.refresh();
 			}
 		});
 	};
 
-	load.addEventListener('click', event => {
-		document.querySelector('#example').innerHTML = '';
-
-		if(!persistBox.checked)
-		{
-			php.refresh();
-		}
-
+	demo.addEventListener('change', event => {
 		if(!demo.value)
 		{
 			return;
 		}
 
-		let scriptPath = '/php-wasm/scripts';
-
-		if(window.location.hostname === 'localhost' || window.location.hostname.substr(0,4) === '192.')
+		if(demo.value === 'drupal.php')
 		{
-			scriptPath = '/scripts';
+			reset.style.display = '';
 		}
+		else
+		{
+			reset.style.display = 'none';
+		}
+	});
 
-		fetch(`${scriptPath}/${demo.value}`)
-		.then(r => r.text())
-		.then(phpCode => {
-
-			const firstLine = String(phpCode.split(/\n/).shift());
-			const settings  = JSON.parse(firstLine.split('//').pop());
-
-			if('autorun' in settings)
+	load.addEventListener('click', event => {
+		document.querySelector('#example').innerHTML = '';
+		refreshPhp().then(() => {
+			if(!demo.value)
 			{
-				autorun.checked = !!settings.autorun;
+				return;
 			}
 
-			if('single-expression' in settings)
+			let scriptPath = '/php-wasm/scripts';
+
+			if(window.location.hostname === 'localhost' || window.location.hostname.substr(0,4) === '192.')
 			{
-				singleBox.checked = !!settings['single-expression'];
+				scriptPath = '/scripts';
 			}
 
-			if('persist' in settings)
-			{
-				persistBox.checked = !!settings.persist;
-			}
+			fetch(`${scriptPath}/${demo.value}`)
+			.then(r => r.text())
+			.then(phpCode => {
 
-			if('render-as' in settings)
-			{
-				if(settings['render-as'] === 'text')
+				const firstLine = String(phpCode.split(/\n/).shift());
+				const settings  = JSON.parse(firstLine.split('//').pop());
+
+				query.set('demo', demo.value);
+
+				if('autorun' in settings)
 				{
-					renderAs[0].checked = true;
-
-					renderAs[0].dispatchEvent(new Event('change'));
-
-					query.set('render-as', 'text');
+					autorun.checked = !!settings.autorun;
 				}
-				else if(settings['render-as'] === 'html')
+
+				if('single-expression' in settings)
 				{
-					renderAs[1].checked = true;
-
-					renderAs[1].dispatchEvent(new Event('change'));
-
-					query.set('render-as', 'html');
+					singleBox.checked = !!settings['single-expression'];
 				}
-			}
 
-			persistBox.dispatchEvent(new Event('change'));
-			singleBox.dispatchEvent(new Event('input'));
-			autorun.dispatchEvent(new Event('change'));
+				if('persist' in settings)
+				{
+					persistBox.checked = !!settings.persist;
+				}
 
-			history.replaceState({}, document.title, "?" + query.toString());
+				if('render-as' in settings)
+				{
+					if(settings['render-as'] === 'text')
+					{
+						renderAs[0].checked = true;
 
-			editor.getSession().setValue(phpCode);
+						renderAs[0].dispatchEvent(new Event('change'));
 
-			setTimeout(() => runCode(), 100);
+						query.set('render-as', 'text');
+					}
+					else if(settings['render-as'] === 'html')
+					{
+						renderAs[1].checked = true;
+
+						renderAs[1].dispatchEvent(new Event('change'));
+
+						query.set('render-as', 'html');
+					}
+				}
+
+				persistBox.dispatchEvent(new Event('change'));
+				singleBox.dispatchEvent(new Event('input'));
+				autorun.dispatchEvent(new Event('change'));
+
+				history.replaceState({}, document.title, "?" + query.toString());
+
+				editor.getSession().setValue(phpCode);
+
+				refreshPhp(2).then(() => runCode());
+			});
 		});
 	});
 
@@ -208,6 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	editor.session.setMode("ace/mode/php");
 
 	status.innerText = 'php-wasm loading...';
+
+	const cookieJar = new Map;
 
 	const navigate = ({path, method, _GET, _POST}) => {
 
@@ -237,112 +270,92 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 
 		const code = `<?php
-ini_set('session.save_path', '/home/web_user');
+ini_set('session.save_path', '/persist');
+ini_set('display_errors', 0);
 
 $stdErr = fopen('php://stderr', 'w');
 $errors = [];
 
-fwrite($stdErr, isset($_SESSION) && json_encode(['session' => $_SESSION]) . "\n");
-
-register_shutdown_function(function() use($stdErr){
-	fwrite($stdErr, json_encode(['session_id' => session_id()]) . "\n");
-	fwrite($stdErr, json_encode(['headers'=>headers_list()]) . "\n");
-	fwrite($stdErr, json_encode(['errors' => error_get_last()]) . "\n");
-	fwrite($stdErr, json_encode(['session' => $_SESSION]) . "\n");
-});
-
-set_error_handler(function(...$args) use($stdErr, &$errors){
-	fwrite($stdErr, json_encode($args, JSON_PRETTY_PRINT) . "\n" );
-});
-
 $request = (object) json_decode(
-	'${ JSON.stringify({path, method, _GET, _POST}) }'
+	'${ JSON.stringify({path, method, _GET, _POST, _COOKIE: Object.fromEntries(cookieJar.entries())}) }'
 	, JSON_OBJECT_AS_ARRAY
 );
 
 parse_str(substr($request->_GET, 1), $_GET);
+parse_str(substr($request->_POST, 1), $_POST);
 
-$_POST = $request->_POST;
+$_COOKIE = $request->_COOKIE;
 
-$origin  = 'http://localhost:3333';
-$docroot = '/preload/drupal-7.59';
+fwrite($stdErr, json_encode(['_GET' => $_GET]) . PHP_EOL);
+fwrite($stdErr, json_encode(['_POST' => $_POST]) . PHP_EOL);
+
+$docroot = '/persist/drupal-7.95/';
 $script  = 'index.php';
 
 $path = $request->path;
 $path = preg_replace('/^\\/php-wasm/', '', $path);
+$path = preg_replace('/^\\/persist/', '', $path);
+$path = preg_replace('/^\\/drupal-7.95/', '', $path);
+$path = preg_replace('/^\\//', '', $path);
+$path = $path ?: "node";
+
+$_GET['q'] = $path;
 
 $_SERVER['SERVER_SOFTWARE'] = ${JSON.stringify(navigator.userAgent)};
-$_SERVER['REQUEST_URI']     = $path;
+$_SERVER['REQUEST_URI']     = $docroot . $path;
+$_SERVER['QUERY_STRING']    = $request->_GET;
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
-$_SERVER['SERVER_NAME']     = $origin;
+$_SERVER['SERVER_NAME']     = 'localhost';
 $_SERVER['SERVER_PORT']     = 3333;
 $_SERVER['REQUEST_METHOD']  = $request->method;
 $_SERVER['SCRIPT_FILENAME'] = $docroot . '/' . $script;
 $_SERVER['SCRIPT_NAME']     = $docroot . '/' . $script;
 $_SERVER['PHP_SELF']        = $docroot . '/' . $script;
-$_SERVER['DOCUMENT_ROOT']   = '/';
-$_SERVER['HTTPS']           = '';
 
 chdir($docroot);
 
-define('DRUPAL_ROOT', getcwd());
+if(!defined('DRUPAL_ROOT')) define('DRUPAL_ROOT', getcwd());
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+drupal_session_start();
+
+fwrite($stdErr, json_encode(['session_id' => session_id()]) . "\n");
+
+global $user;
 
 $uid     = 1;
 $user    = user_load($uid);
 $account = array('uid' => $user->uid);
-user_login_submit(array(), $account);
 
-$itemPath = $path;
-$itemPath = preg_replace('/^\\/preload/', '', $itemPath);
-$itemPath = preg_replace('/^\\/drupal-7.59/', '', $itemPath);
-$itemPath = preg_replace('/^\\//', '', $itemPath);
-
-if($itemPath && (substr($itemPath, 0, 4) !== 'node' || substr($itemPath, -4) === 'edit'))
+$session_name = session_name();
+if(!$_COOKIE || !$_COOKIE[$session_name])
 {
-    $router_item = menu_get_item($itemPath);
-    $router_item['access_callback'] = true;
-    $router_item['access'] = true;
-
-    if ($router_item['include_file']) {
-      require_once DRUPAL_ROOT . '/' . $router_item['include_file'];
-    }
-
-    $page_callback_result = call_user_func_array(
-    	$router_item['page_callback']
-    	, is_string($router_item['page_arguments'])
-    		? unserialize($router_item['page_arguments'])
-    		: $router_item['page_arguments']
-    );
-
-    drupal_deliver_page($page_callback_result);
+	user_login_submit(array(), $account);
 }
-else
-{
-    menu_execute_active_handler();
-}`;
 
-		php.run(code).then(exitCode => {
+fwrite($stdErr, json_encode(['PATH' => $path, "ORIGINAL" => $request->path]) . PHP_EOL);
+
+menu_execute_active_handler();
+
+fwrite($stdErr, json_encode(['HEADERS' =>headers_list()]) . "\n");
+fwrite($stdErr, json_encode(['COOKIE'  => $_COOKIE]) . PHP_EOL);
+fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
+`;
+
+		refreshPhp()
+		.then(() => php.run(code))
+		.then(exitCode => {
 			exitLabel.innerText = exitCode;
 			status.innerText = 'php-wasm ready!';
-		}).finally(
-			() => {
-				if(!persistBox.checked)
-				{
-					php.refresh();
-				}
-			}
-		);
+		})
+		.catch(error => console.error(error))
+		.finally(() => refreshPhp());
 	};
 
-	php.addEventListener('ready', event => {
+	let _init = true;
 
-		if(serviceWorker)
-		{
-			serviceWorker.addEventListener('message', event => navigate(event.data));
-		}
+	const ready = event => {
 
 		status.innerText = 'php-wasm ready!';
 
@@ -363,13 +376,13 @@ else
 
 		// refresh.addEventListener('click', () => void php.refresh());
 
-		if(query.get('autorun'))
+		if(_init && _init !== 2 && query.get('autorun'))
 		{
 			runCode();
 		}
-	});
+	};
 
-	php.addEventListener('output', (event) => {
+	const output = event => {
 		const content = event.detail.join('');
 
 		outputBuffer.push(content);
@@ -401,47 +414,75 @@ else
 			outputBuffer.splice(0);
 		}, 50);
 
-	});
+	};
 
-	php.addEventListener('error', (event) => {
+	const error = event => {
 		const content = event.detail.join('');
 
 		try{
-			const headers = JSON.parse(content);
+			const packet = JSON.parse(content);
 
-			if(headers.session_id)
+			if(packet.HEADERS)
 			{
-				session_id = headers.session_id;
-			}
+				const raw = packet.HEADERS;
+				const headers = {};
 
-			if(headers.headers)
-			{
-				for(const header of headers.headers)
+				for(let line of raw)
 				{
-					const splitAt = header.indexOf(':')
-					const [name, value] = [
-						header.substring(0,splitAt)
-						, header.substring(splitAt + 2)
-					];
+					line = String(line);
+					const colon = line.indexOf(':');
 
-					if(name === 'Location')
+					if(colon >= 0)
 					{
-						console.log(value);
-
-						const redirectUrl = new URL(value);
-
-						setTimeout(()=>navigate({
-							method: 'GET'
-							, path: redirectUrl.pathname
-							, _GET:''
-							, _POST:{}
-						}), 2000);
+						headers[ line.substr(0, colon) ] = line.substr(2 + colon);
+					}
+					else
+					{
+						headers[ line ] = true;
 					}
 				}
+
+				if((headers[302] || headers[303]) && headers.Location)
+				{
+					const redirectUrl = headers.Location;
+					const _GET = redirectUrl.search;
+
+					navigate({
+						method: 'GET'
+						, path: redirectUrl.pathname
+						, _GET: ''
+						, _POST:''
+					});
+				}
+
+				if(headers['Set-Cookie'])
+				{
+					const raw = headers['Set-Cookie'];
+					const semi  = raw.indexOf(';');
+					const equal = raw.indexOf('=');
+					const key   = raw.substr(0, equal);
+					const value = raw.substr(equal, semi - equal);
+
+					cookieJar.set(key, value);
+				}
+
+				// if(headers.headers)
+				// {
+				// 	for(const header of headers.headers)
+				// 	{
+				// 		const splitAt = header.indexOf(':')
+				// 		const [name, value] = [
+				// 			header.substring(0,splitAt)
+				// 			, header.substring(splitAt + 2)
+				// 		];
+				// 	}
+				// }
 			}
+
 		}
 		catch(error)
 		{
+			console.error(error);
 		}
 
 		errorBuffer.push(content);
@@ -469,7 +510,48 @@ else
 			errorBuffer.splice(0);
 		}, 50);
 
-	});
+	};
+
+	const onNavigate = event => navigate(event.data);
+
+	const refreshPhp = (init = false) => {
+
+		_init = init;
+
+		if(init)
+		{
+			if(php)
+			{
+				php.removeEventListener('ready', ready);
+				php.removeEventListener('output', output);
+				php.removeEventListener('error', error);
+
+				if(serviceWorker)
+				{
+					serviceWorker.removeEventListener('message', onNavigate);
+				}
+			}
+
+			php = new PHP;
+
+			php.addEventListener('ready', ready);
+			php.addEventListener('output', output);
+			php.addEventListener('error', error);
+
+			if(serviceWorker)
+			{
+				serviceWorker.addEventListener('message', onNavigate);
+			}
+		}
+		else
+		{
+			return php.refresh();
+		}
+
+		return php.binary;
+	};
+
+	refreshPhp(true);
 
 	ret.style.display = 'none';
 
@@ -501,6 +583,12 @@ else
 	autorun.checked    = Number(query.get('autorun'));
 	persistBox.checked = Number(query.get('persist'));
 	singleBox.checked  = Number(query.get('single-expression'));
+	demo.value = String(query.get('demo'));
+
+	if(demo.value !== 'drupal.php')
+	{
+		reset.style.display = 'none';
+	}
 
 	if(singleBox.checked)
 	{

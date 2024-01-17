@@ -1,0 +1,15 @@
+name = Comment
+description = Allows users to comment on and discuss published content.
+package = Core
+version = VERSION
+core = 7.x
+dependencies[] = text
+files[] = comment.module
+files[] = comment.test
+configure = admin/content/comment
+stylesheets[all][] = comment.css
+
+; Information added by Drupal.org packaging script on 2023-03-15
+version = "7.95"
+project = "drupal"
+datestamp = "1678902530"

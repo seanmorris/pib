@@ -17,7 +17,7 @@ set_error_handler(function(...$args) use($stdErr, &$errors){
 });
 
 $origin  = 'http://localhost:3333';
-$docroot = '/preload/drupal-7.59';
+$docroot = '/persist/drupal-7.59';
 $path    = '/';
 $script  = 'index.php';
 
@@ -43,7 +43,7 @@ $account = array('uid' => $user->uid);
 user_login_submit(array(), $account);
 
 $itemPath = $path;
-$itemPath = preg_replace('/^\\/preload/', '', $itemPath);
+$itemPath = preg_replace('/^\\/persist/', '', $itemPath);
 $itemPath = preg_replace('/^\\/drupal-7.59/', '', $itemPath);
 $itemPath = preg_replace('/^\\//', '', $itemPath);
 

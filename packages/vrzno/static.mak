@@ -8,10 +8,21 @@ PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
 CONFIGURE_FLAGS+= --enable-vrzno
 PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 
-# VRZNO_DEV_PATH?=
+${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js)
+	cat ${VRZNO_DEV_PATH}/js/WeakerMap.js \
+		${VRZNO_DEV_PATH}/js/PolyFill.js \
+		${VRZNO_DEV_PATH}/js/UniqueIndex.js \
+		${VRZNO_DEV_PATH}/js/marshalObject.js \
+		${VRZNO_DEV_PATH}/js/callableToJs.js \
+		${VRZNO_DEV_PATH}/js/zvalToJs.js \
+		${VRZNO_DEV_PATH}/js/jsToZval.js \
+		${VRZNO_DEV_PATH}/js/PdoD1Driver.js \
+		${VRZNO_DEV_PATH}/js/module.js \
+		> ${VRZNO_DEV_PATH}/lib.js
+	cat ${VRZNO_DEV_PATH}/lib.js
 
 ifdef VRZNO_DEV_PATH
-third_party/vrzno/vrzno.c: $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
+third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
 	@ echo -e "\e[33;4mImporting VRZNO\e[0m"
 	@ cp -prfv ${VRZNO_DEV_PATH} third_party/
 	${DOCKER_RUN} touch third_party/vrzno/vrzno.c

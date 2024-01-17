@@ -1,4 +1,6 @@
 #include "sapi/embed/php_embed.h"
+#include "ext/session/php_session.h"
+// #include "SAPI.h"
 #include <emscripten.h>
 #include <stdlib.h>
 
@@ -10,13 +12,49 @@
 #include "../vrzno/php_vrzno.h"
 #endif
 
+#define MACRO_STRING_INTERNAL(name) #name
+#define MACRO_STRING(name) MACRO_STRING_INTERNAL(name)
+
 int main() { return 0; }
+bool started = false;
 
 int EMSCRIPTEN_KEEPALIVE pib_init()
 {
 	putenv("USE_ZEND_ALLOC=0");
 
-	return php_embed_init(0, NULL);
+	if(!started)
+	{
+		started = true;
+		char *wasmEnv = MACRO_STRING(ENVIRONMENT);
+
+		EM_ASM({
+			const wasmEnv = UTF8ToString($0);
+			const persistPath = '/persist';
+
+			FS.mkdir(persistPath);
+
+			switch(wasmEnv)
+			{
+				case 'web':
+					FS.mount(IDBFS, {}, '/persist');
+					break;
+
+				case 'node':
+					const fs = require('fs');
+					if(!fs.existsSync('./persist'))
+					{
+						fs.mkdirSync('./persist');
+					}
+					FS.mount(NODEFS, { root: './persist' }, '/persist');
+					break;
+			}
+
+		}, wasmEnv);
+	}
+
+	int res = php_embed_init(0, NULL);
+
+	return res;
 }
 
 void pib_finally()
@@ -59,7 +97,16 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 
 	zend_try
 	{
+		SG(headers_sent) = 0;
+		SG(request_info).no_headers = 0;
+		PS(session_status) = php_session_none;
+
 		retVal = zend_eval_string(code, NULL, "php-wasm run script");
+
+		if (!SG(headers_sent)) {
+			sapi_send_headers();
+			SG(headers_sent) = 1;
+		}
 
 		if(EG(exception))
 		{

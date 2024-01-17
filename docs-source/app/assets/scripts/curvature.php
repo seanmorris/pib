@@ -4,7 +4,7 @@ $require = $window->require;
 $Form = $require('curvature/form/Form')->Form;
 $View = $require('curvature/base/View')->View;
 
-$form = vrzno_new($Form, (object)[
+$form = new $Form((object)[
     'id'   => (object)['type' => 'number'],
     'name' => (object)['type' => 'text'],
 ]);

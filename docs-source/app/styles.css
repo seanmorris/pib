@@ -56,12 +56,19 @@ body {
 }
 
 .row.toolbar button[data-run],
+.row.toolbar button[data-reset-storage],
 .row.toolbar button[data-refresh] {
-	padding: 0.75em;
+	height: 50px;
+	min-width: 3em;
 	font-weight: bold;
 	border: 2px solid;
 	align-self: center;
 	margin-right: 0.5em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 85%;
 }
 
 button {
@@ -80,7 +87,12 @@ button[data-run]:not([disabled])::after {
     opacity: 0.5;
 }
 
+.header button[data-reset-storage] {
+	max-width: 6em;
+}
+
 .header button[data-run],
+.header button[data-reset-storage],
 .header button[data-refresh] {
 	position: relative;
 	font-weight: bold;

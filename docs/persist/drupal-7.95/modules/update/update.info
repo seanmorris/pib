@@ -1,0 +1,12 @@
+name = Update manager
+description = Checks for available updates, and can securely install or update modules and themes via a web interface.
+version = VERSION
+package = Core
+core = 7.x
+files[] = update.test
+configure = admin/reports/updates/settings
+
+; Information added by Drupal.org packaging script on 2023-03-15
+version = "7.95"
+project = "drupal"
+datestamp = "1678902530"
