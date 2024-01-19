@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		const openDb = indexedDB.open("/persist", 21);
 
-
 		openDb.onsuccess = event => {
 			const db = openDb.result;
 			const transaction = db.transaction(["FILE_DATA"], "readwrite");
@@ -121,8 +120,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			code = code.replace(/\?>\s*/, '');
 		}
 
-		php[func](code).then(ret=>{
+		let refresh = Promise.resolve();
 
+		if(!persistBox.checked)
+		{
+			refresh = refreshPhp();
+		}
+
+		run.setAttribute('disabled', 'disabled');
+
+		refresh
+		.then(() => php[func](code))
+		.then(ret=>{
 			status.innerText = 'php-wasm ready!';
 
 			const content = String(ret);
@@ -136,13 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			{
 				setTimeout(() => exitLabel.innerText = ret, 100);
 			}
-		}).finally(() => {
-			if(!persistBox.checked)
-			{
-				refreshPhp();
-				// php.refresh();
-			}
-		});
+		}).finally(() => run.removeAttribute('disabled'));
 	};
 
 	demo.addEventListener('change', event => {
@@ -163,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	load.addEventListener('click', event => {
 		document.querySelector('#example').innerHTML = '';
-		refreshPhp().then(() => {
+		refreshPhp(2).then(() => {
 			if(!demo.value)
 			{
 				return;
@@ -226,9 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				history.replaceState({}, document.title, "?" + query.toString());
 
-				editor.getSession().setValue(phpCode);
+				editor.getSession().setValue(phpCode)
 
-				refreshPhp(2).then(() => runCode());
+				refreshPhp().then(() => runCode());
 			});
 		});
 	});
@@ -352,8 +355,7 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 			exitLabel.innerText = exitCode;
 			status.innerText = 'php-wasm ready!';
 		})
-		.catch(error => console.error(error))
-		.finally(() => refreshPhp());
+		.catch(error => console.error(error));
 	};
 
 	let _init = true;
@@ -422,70 +424,54 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 	const error = event => {
 		const content = event.detail.join('');
 
-		try{
-			const packet = JSON.parse(content);
+		const packet = {};
 
-			if(packet.HEADERS)
+		try{ Object.assign(packet, JSON.parse(content)); }
+		catch(error) { /*console.error(error);*/ }
+
+		if(packet.HEADERS)
+		{
+			const raw = packet.HEADERS;
+			const headers = {};
+
+			for(let line of raw)
 			{
-				const raw = packet.HEADERS;
-				const headers = {};
+				line = String(line);
+				const colon = line.indexOf(':');
 
-				for(let line of raw)
+				if(colon >= 0)
 				{
-					line = String(line);
-					const colon = line.indexOf(':');
-
-					if(colon >= 0)
-					{
-						headers[ line.substr(0, colon) ] = line.substr(2 + colon);
-					}
-					else
-					{
-						headers[ line ] = true;
-					}
+					headers[ line.substr(0, colon) ] = line.substr(2 + colon);
 				}
-
-				if((headers[302] || headers[303]) && headers.Location)
+				else
 				{
-					const redirectUrl = headers.Location;
-					const _GET = redirectUrl.search;
-
-					navigate({
-						method: 'GET'
-						, path: redirectUrl.pathname
-						, _GET: ''
-						, _POST:''
-					});
+					headers[ line ] = true;
 				}
-
-				if(headers['Set-Cookie'])
-				{
-					const raw = headers['Set-Cookie'];
-					const semi  = raw.indexOf(';');
-					const equal = raw.indexOf('=');
-					const key   = raw.substr(0, equal);
-					const value = raw.substr(equal, semi - equal);
-
-					cookieJar.set(key, value);
-				}
-
-				// if(headers.headers)
-				// {
-				// 	for(const header of headers.headers)
-				// 	{
-				// 		const splitAt = header.indexOf(':')
-				// 		const [name, value] = [
-				// 			header.substring(0,splitAt)
-				// 			, header.substring(splitAt + 2)
-				// 		];
-				// 	}
-				// }
 			}
 
-		}
-		catch(error)
-		{
-			console.error(error);
+			if((headers[302] || headers[303]) && headers.Location)
+			{
+				const redirectUrl = headers.Location;
+				const _GET = redirectUrl.search;
+
+				navigate({
+					method: 'GET'
+					, path: redirectUrl.pathname
+					, _GET: ''
+					, _POST:''
+				});
+			}
+
+			if(headers['Set-Cookie'])
+			{
+				const raw = headers['Set-Cookie'];
+				const semi  = raw.indexOf(';');
+				const equal = raw.indexOf('=');
+				const key   = raw.substr(0, equal);
+				const value = raw.substr(equal, semi - equal);
+
+				cookieJar.set(key, value);
+			}
 		}
 
 		errorBuffer.push(content);
@@ -545,13 +531,13 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 			{
 				serviceWorker.addEventListener('message', onNavigate);
 			}
+
+			return php.binary;
 		}
 		else
 		{
 			return php.refresh();
 		}
-
-		return php.binary;
 	};
 
 	refreshPhp(true);
@@ -586,7 +572,11 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 	autorun.checked    = Number(query.get('autorun'));
 	persistBox.checked = Number(query.get('persist'));
 	singleBox.checked  = Number(query.get('single-expression'));
-	demo.value = String(query.get('demo'));
+
+	if(query.has('demo'))
+	{
+		demo.value = String(query.get('demo'));
+	}
 
 	if(demo.value !== 'drupal.php')
 	{

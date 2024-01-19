@@ -9,7 +9,7 @@ set_error_handler(function(...$args) use($stdErr, &$errors){
 });
 
 $docroot = '/persist/drupal-7.95';
-$path    = '/admin/dashboard';
+$path    = '/node';
 $script  = 'index.php';
 
 if(!is_dir($docroot))

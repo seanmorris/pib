@@ -35,9 +35,11 @@ export class PhpBase extends EventTarget
 			},
 		};
 
+		const fixed = { onRefresh: new Set };
+
 		const phpSettings = globalThis.phpSettings ?? {};
 
-		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args)).then(php => {
+		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(php => {
 			const retVal = php.ccall(
 				'pib_init'
 				, NUM
@@ -128,15 +130,24 @@ export class PhpBase extends EventTarget
 
 	refresh()
 	{
-		const call = this.binary.then(php => php.ccall(
-			'pib_refresh'
-			, NUM
-			, []
-			, []
-			, {async:true}
-		));
+		const call = this.binary.then(php => {
+
+			for(const callback of php.onRefresh)
+			{
+				callback();
+			}
+
+			return php.ccall(
+				'pib_refresh'
+				, NUM
+				, []
+				, []
+				, {async:true}
+			);
+		});
 
 		call.catch(error => console.error(error));
+
 
 		return call;
 	}

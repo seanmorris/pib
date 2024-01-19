@@ -1,5 +1,6 @@
 #include "sapi/embed/php_embed.h"
 #include "ext/session/php_session.h"
+#include "main/php_output.h"
 // #include "SAPI.h"
 #include <emscripten.h>
 #include <stdlib.h>
@@ -59,11 +60,7 @@ int EMSCRIPTEN_KEEPALIVE pib_init()
 
 void pib_finally()
 {
-	// fflush(stdout);
-	// fprintf(stdout, "\n");
-
-	// fflush(stderr);
-	// fprintf(stderr, "\n");
+	php_output_flush_all();
 }
 
 char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)

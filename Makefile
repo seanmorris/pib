@@ -214,6 +214,7 @@ endif
 ifdef SYMBOLS
 ifneq (${SYMBOLS},0)
 EXTRA_FLAGS+= -g${SYMBOLS}
+# EXTRA_FLAGS+= -g${SYMBOLS} -fno-inline
 endif
 endif
 
