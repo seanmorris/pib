@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
-	load.addEventListener('click', event => {
+	const loadDemo = () => {
 		document.querySelector('#example').innerHTML = '';
 		refreshPhp(2).then(() => {
 			if(!demo.value)
@@ -234,7 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				refreshPhp().then(() => runCode());
 			});
 		});
-	});
+	};
+
+	load.addEventListener('click', event => loadDemo());
 
 	const query = new URLSearchParams(location.search);
 
@@ -573,9 +575,21 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 	persistBox.checked = Number(query.get('persist'));
 	singleBox.checked  = Number(query.get('single-expression'));
 
+	const rewriteDemo = `%3C%3Fphp%0Aini_set('session.save_path'%2C%20'%2Fhome%2Fweb_user')%3B%0A%0A%24stdErr%20%3D%20fopen('php%3A%2F%2Fstderr'%2C%20'w')%3B%0A%24errors%20%3D%20%5B%5D%3B%0A%0Aregister_shutdown_function(function()%20use(%24stdErr%2C%20%26%24errors)%7B%0A%20%20%20%20fwrite(%24stdErr%2C%20json_encode(%5B'session_id'%20%3D%3E%20session_id()%5D)%20.%20%22%5Cn%22)%3B%0A%20%20%20%20fwrite(%24stdErr%2C%20json_encode(%5B'headers'%3D%3Eheaders_list()%5D)%20.%20%22%5Cn%22)%3B%0A%20%20%20%20fwrite(%24stdErr%2C%20json_encode(%5B'errors'%20%3D%3E%20error_get_last()%5D)%20.%20%22%5Cn%22)%3B%0A%7D)%3B%0A%0Aset_error_handler(function(...%24args)%20use(%24stdErr%2C%20%26%24errors)%7B%0A%09fwrite(%24stdErr%2C%20print_r(%24args%2C1))%3B%0A%7D)%3B%0A%0A%24docroot%20%3D%20'%2Fpreload%2Fdrupal-7.59'%3B%0A%24path%20%20%20%20%3D%20'%2F'%3B%0A%24script%20%20%3D%20'index.php'%3B%0A%0A%24_SERVER%5B'REQUEST_URI'%5D%20%20%20%20%20%3D%20%24docroot%20.%20%24path%3B%0A%24_SERVER%5B'REMOTE_ADDR'%5D%20%20%20%20%20%3D%20'127.0.0.1'%3B%0A%24_SERVER%5B'SERVER_NAME'%5D%20%20%20%20%20%3D%20'localhost'%3B%0A%24_SERVER%5B'SERVER_PORT'%5D%20%20%20%20%20%3D%203333%3B%0A%24_SERVER%5B'REQUEST_METHOD'%5D%20%20%3D%20'GET'%3B%0A%24_SERVER%5B'SCRIPT_FILENAME'%5D%20%3D%20%24docroot%20.%20'%2F'%20.%20%24script%3B%0A%24_SERVER%5B'SCRIPT_NAME'%5D%20%20%20%20%20%3D%20%24docroot%20.%20'%2F'%20.%20%24script%3B%0A%24_SERVER%5B'PHP_SELF'%5D%20%20%20%20%20%20%20%20%3D%20%24docroot%20.%20'%2F'%20.%20%24script%3B%0A%0Achdir(%24docroot)%3B%0A%0Aob_start()%3B%0A%0Adefine('DRUPAL_ROOT'%2C%20getcwd())%3B%0A%0Arequire_once%20DRUPAL_ROOT%20.%20'%2Fincludes%2Fbootstrap.inc'%3B%0Adrupal_bootstrap(DRUPAL_BOOTSTRAP_FULL)%3B%0A%0A%24uid%20%20%20%20%20%3D%201%3B%0A%24user%20%20%20%20%3D%20user_load(%24uid)%3B%0A%24account%20%3D%20array('uid'%20%3D%3E%20%24user-%3Euid)%3B%0Auser_login_submit(array()%2C%20%24account)%3B%0A%0A%24itemPath%20%3D%20%24path%3B%0A%24itemPath%20%3D%20preg_replace('%2F%5E%5C%5C%2Fpreload%2F'%2C%20''%2C%20%24itemPath)%3B%0A%24itemPath%20%3D%20preg_replace('%2F%5E%5C%5C%2Fdrupal-7.59%2F'%2C%20''%2C%20%24itemPath)%3B%0A%24itemPath%20%3D%20preg_replace('%2F%5E%5C%2F%2F'%2C%20''%2C%20%24itemPath)%3B%0A%0Aif(%24itemPath)%0A%7B%0A%20%20%20%20%0A%20%20%20%20%24router_item%20%3D%20menu_get_item(%24itemPath)%3B%0A%20%20%20%20%24router_item%5B'access_callback'%5D%20%3D%20true%3B%0A%20%20%20%20%24router_item%5B'access'%5D%20%3D%20true%3B%0A%20%20%20%20%0A%20%20%20%20if%20(%24router_item%5B'include_file'%5D)%20%7B%0A%20%20%20%20%20%20require_once%20DRUPAL_ROOT%20.%20'%2F'%20.%20%24router_item%5B'include_file'%5D%3B%0A%20%20%20%20%7D%0A%20%20%20%20%0A%20%20%20%20%24page_callback_result%20%3D%20call_user_func_array(%24router_item%5B'page_callback'%5D%2C%20unserialize(%24router_item%5B'page_arguments'%5D))%3B%0A%20%20%20%20%0A%20%20%20%20drupal_deliver_page(%24page_callback_result)%3B%0A%7D%0Aelse%0A%7B%0A%20%20%20%20menu_execute_active_handler()%3B%0A%7D`;
+
+	if(query.has('code'))
+	{
+		if(query.get('code') === rewriteDemo)
+		{
+			query.delete('code');
+			query.set('demo', 'drupal.php')
+		}
+	}
+
 	if(query.has('demo'))
 	{
 		demo.value = String(query.get('demo'));
+		loadDemo();
 	}
 
 	if(demo.value !== 'drupal.php')
