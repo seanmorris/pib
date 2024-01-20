@@ -2,7 +2,7 @@
 
 import { PhpWebDrupal as PHP } from 'php-wasm/PhpWebDrupal';
 
-let php = new PHP;
+let php = new PHP({persist: {mountPath: '/persist'}});
 
 let session_id = '';
 
@@ -364,6 +364,8 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 
 	const ready = event => {
 
+		document.body.classList.remove('loading');
+
 		status.innerText = 'php-wasm ready!';
 
 		run.removeAttribute('disabled');
@@ -523,7 +525,7 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 				}
 			}
 
-			php = new PHP;
+			php = new PHP({persist: {mountPath: '/persist'}});
 
 			php.addEventListener('ready', ready);
 			php.addEventListener('output', output);

@@ -70,61 +70,26 @@ export class PhpBase extends EventTarget
 
 	run(phpCode)
 	{
-		return this.binary.then(php =>  {
-			const sync = new Promise(accept => {
-				php.FS.syncfs(true, err => {
-					err && console.error(err);
-					accept(err);
-				});
-			});
-
-			const run = sync.then(() => php.ccall(
-				'pib_run'
-				, NUM
-				, [STR]
-				, [`?>${phpCode}`]
-				, {async:true}
-			));
-
-			return run.then(() => {
-				return new Promise(accept => {
-					php.FS.syncfs(false, err => {
-						err && console.error(err);
-						accept(run)
-					});
-				});
-			});
-		})
+		return this.binary.then(php => php.ccall(
+			'pib_run'
+			, NUM
+			, [STR]
+			, [`?>${phpCode}`]
+			, {async:true}
+		))
 		.finally(() => this.flush());
 	}
 
 	exec(phpCode)
 	{
-		return this.binary.then(php => {
-			const sync = new Promise(accept => {
-				php.FS.syncfs(true, err => {
-					err && console.error(err);
-					accept(err);
-				});
-			});
-
-			const run = sync.then(() => php.ccall(
-				'pib_exec'
-				, STR
-				, [STR]
-				, [phpCode]
-				, {async:true}
-			));
-
-			return run.then(() => {
-				return new Promise(accept => {
-					return php.FS.syncfs(false, err => {
-						err && console.error(err);
-						accept(run)
-					});
-				});
-			});
-		})
+		return this.binary
+		.then(php => php.ccall(
+			'pib_exec'
+			, STR
+			, [STR]
+			, [phpCode]
+			, {async:true}
+		))
 		.finally(() => this.flush());
 	}
 

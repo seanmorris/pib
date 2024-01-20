@@ -29,32 +29,35 @@ int EMSCRIPTEN_KEEPALIVE pib_init()
 		char *wasmEnv = MACRO_STRING(ENVIRONMENT);
 
 		EM_ASM({
-			const wasmEnv = UTF8ToString($0);
-			const persistPath = '/persist';
-
-			FS.mkdir(persistPath);
-
-			switch(wasmEnv)
+			if(Module.persist)
 			{
-				case 'web':
-					FS.mount(IDBFS, {}, '/persist');
-					break;
+				const localPath = Module.persist.localPath || './persist';
+				const mountPath = Module.persist.mountPath || '/persist';
 
-				case 'node':
-					const fs = require('fs');
-					if(!fs.existsSync('./persist'))
-					{
-						fs.mkdirSync('./persist');
-					}
-					FS.mount(NODEFS, { root: './persist' }, '/persist');
-					break;
+				const wasmEnv = UTF8ToString($0);
+
+				FS.mkdir(mountPath);
+
+				switch(wasmEnv)
+				{
+					case 'web':
+						FS.mount(IDBFS, {}, mountPath);
+						break;
+
+					case 'node':
+						const fs = require('fs');
+						if(!fs.existsSync(localPath))
+						{
+							fs.mkdirSync(localPath, {recursive: true});
+						}
+						FS.mount(NODEFS, { root: localPath }, mountPath);
+						break;
+				}
 			}
-
 		}, wasmEnv);
 	}
 
 	int res = php_embed_init(0, NULL);
-
 	return res;
 }
 
@@ -70,11 +73,8 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 	zend_try
 	{
 		zval retZv;
-
 		zend_eval_string(code, &retZv, "php-wasm evaluate expression");
-
 		convert_to_string(&retZv);
-
 		retVal = Z_STRVAL(retZv);
 	}
 	zend_catch
@@ -82,9 +82,7 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 	}
 
 	zend_end_try();
-
 	pib_finally();
-
 	return retVal;
 }
 
@@ -117,16 +115,13 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 	}
 
 	zend_end_try();
-
 	pib_finally();
-
 	return retVal;
 }
 
 char *pib_tokenize(char *code)
 {
 	// tokenize_parse(zval zend_string)
-
 	return "";
 }
 
@@ -146,11 +141,8 @@ int EMSCRIPTEN_KEEPALIVE pib_refresh()
 int EMSCRIPTEN_KEEPALIVE exec_callback(zend_function *fptr, zval *argv, int argc)
 {
 	// int retVal = vrzno_exec_callback(fptr, argv, argc);
-
 	// fflush(stdout);
-
 	// return retVal;
-
 	return NULL;
 }
 
