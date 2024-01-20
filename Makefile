@@ -909,6 +909,9 @@ demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wa
 serve-demo:
 	cd docs-source && brunch w -s
 
+build-demo:
+	cd docs-source && brunch b -p
+
 NPM_PUBLISH_DRY?=--dry-run
 
 publish:
