@@ -23,32 +23,25 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 		_path.shift();
 	}
 
-	// while(_path[ _path.length-1 ] === '')
-	// {
-	// 	_path.pop();
-	// }
-
 	if(!_path[ _path.length-1 ].match(/\.\w+$/) && _path[1] === 'drupal-7.95')
 	{
-		const getClient = self.clients.matchAll({
-			includeUncontrolled:true
-		});
-
 		const getPost = event.request.method !== 'POST'
 			? Promise.resolve()
 			: event.request.formData();
 
-		return Promise.all([getClient,getPost]).then(([clients, post]) => {
-			clients.forEach(client => {
-				client.postMessage({
-					method:  event.request.method
-					, path:  '/' + path.join('/')
-					, _GET:  url.search
-					, _POST: event.request.method === 'POST' ? ('?' + String(new URLSearchParams(post))) : ''
-				});
-			});
-
-			accept(new Response('Loopback Request...'));
+		return getPost.then(post => {
+			accept(new Response(`<script>window.parent.postMessage({
+				action: 'respond'
+				, method:  '${event.request.method}'
+				, path:  '${'/' + path.join('/')}'
+				, _GET:  '${url.search}'
+				, _POST: '${event.request.method === 'POST'
+					? ('?' + String(new URLSearchParams(post)))
+					: ''
+				}'
+			});</script>`, {
+				headers: {'Content-Type': 'text/html'}
+			}));
 		});
 	}
 	else

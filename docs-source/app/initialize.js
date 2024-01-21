@@ -2,17 +2,17 @@
 
 import { PhpWebDrupal as PHP } from 'php-wasm/PhpWebDrupal';
 
-let php = new PHP({persist: {mountPath: '/persist'}});
-
 let session_id = '';
-
 const serviceWorker = navigator.serviceWorker;
+
+serviceWorker.register(`${location.pathname}DrupalWorker.js`);
 
 if(serviceWorker && !serviceWorker.controller)
 {
-	serviceWorker.register(`${location.pathname}DrupalWorker.js`);
-	// .catch(error => console.log('Error, ', error));
+	location.reload();
 }
+
+let php = new PHP({persist: {mountPath: '/persist'}});
 
 document.addEventListener('DOMContentLoaded', () => {
 	const input   = document.querySelector('.input  textarea');
@@ -247,7 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const cookieJar = new Map;
 
-	const navigate = ({path, method, _GET, _POST}) => {
+	const navigate = ({action, clientId, path, method, _GET, _POST}) => {
+
+		if(action !== 'respond')
+		{
+			return;
+		}
 
 		// console.trace({path, method, _GET, _POST});
 
@@ -513,16 +518,13 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 
 		if(init)
 		{
+			window.addEventListener('message', onNavigate);
+
 			if(php)
 			{
 				php.removeEventListener('ready', ready);
 				php.removeEventListener('output', output);
 				php.removeEventListener('error', error);
-
-				if(serviceWorker)
-				{
-					serviceWorker.removeEventListener('message', onNavigate);
-				}
 			}
 
 			php = new PHP({persist: {mountPath: '/persist'}});
@@ -530,11 +532,6 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 			php.addEventListener('ready', ready);
 			php.addEventListener('output', output);
 			php.addEventListener('error', error);
-
-			if(serviceWorker)
-			{
-				serviceWorker.addEventListener('message', onNavigate);
-			}
 
 			return php.binary;
 		}
