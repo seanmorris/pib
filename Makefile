@@ -102,6 +102,7 @@ dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-nod
 web-drupal: php-web-drupal.wasm
 web: lib/pib_eval.o php-web.wasm
 	echo "Done!"
+node: php-node.wasm
 
 PRELOAD_ASSETS?=
 PHP_CONFIGURE_DEPS=
@@ -160,6 +161,10 @@ third_party/drupal-7.95/README.txt:
 third_party/preload/bench.php: third_party/php${PHP_VERSION}-src/.gitignore
 	mkdir -p third_party/preload/
 	cp -p third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload/
+
+third_party/preload/dump-request.php: third_party/preload
+	mkdir -p third_party/preload/
+	cp -p extras/dump-request.php third_party/preload/
 
 third_party/php${PHP_VERSION}-src/.gitignore:
 	@ echo -e "\e[33;4mDownloading and patching PHP\e[0m"
@@ -264,16 +269,15 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 
 # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
-DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c third_party/preload/bench.php
+DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c
 BUILD_TYPE ?=js
 
 build/php-web-drupal.js: BUILD_TYPE=js
 build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.js: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.js: ENVIRONMENT=web-drupal
-build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload | ${ORDER_ONLY}
+build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload/dump-request.php third_party/preload | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
-	${DOCKER_RUN} mkdir -p /src/third_party/preload/
 	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
 	${FINAL_BUILD} -s ENVIRONMENT=web -D ENVIRONMENT=web -Wno-macro-redefined -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
@@ -282,12 +286,14 @@ build/php-web-drupal.mjs: BUILD_TYPE=mjs
 build/php-web-drupal.mjs: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.mjs: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
-build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/preload | ${ORDER_ONLY}
+build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/preload third_party/preload/dump-request.php | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
-	${DOCKER_RUN} mkdir -p /src/third_party/preload/
 	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
 	${FINAL_BUILD} -s ENVIRONMENT=web -D ENVIRONMENT=web -Wno-macro-redefined -lidbfs.js
 	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+
+
+$(foreach EMSCRIPTEN_ENVIRONMENT,${EMSCRIPTEN_ENVIRONMENTS},)
 
 build/php-web.js: BUILD_TYPE=js
 build/php-web.js: ENVIRONMENT=web
@@ -602,10 +608,7 @@ dist/php-web-drupal.js: build/php-web-drupal.js
 	${DOCKER_RUN_USER} cp $(basename $<).wasm $(basename $@).wasm
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data
 	${DOCKER_RUN_USER} cp $(basename $<).data $(basename $@).data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).wasm
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).data
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).data || true
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).wasm $(basename $@).data $(basename $@).data || true
 ifeq (${GZIP},1)
 	${DOCKER_RUN_USER} rm -f $(basename $@).wasm.gz
 	${DOCKER_RUN_USER} rm -f $(basename $@).data.gz
@@ -868,6 +871,7 @@ ${ENV_FILE}:
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.br *.wasm.gz *.data
 	${DOCKER_RUN} rm -rf /src/lib/lib/${PHP_AR}.* /src/lib/lib/php /src/lib/include/php
+	${DOCKER_RUN_IN_PHP} rm -fv configured
 	${DOCKER_RUN_IN_PHP} make clean
 
 php-clean:

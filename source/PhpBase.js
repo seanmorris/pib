@@ -113,6 +113,36 @@ export class PhpBase extends EventTarget
 
 		call.catch(error => console.error(error));
 
+		return call;
+	}
+
+	request()
+	{
+		const filepath     = '/preload/dump-request.php';
+		const method       = 'POST';
+		const request_uri  = '/';
+		const query_string = 'hello=world';
+		const cookie_data  = '';
+		const content_type = '';
+		const post_data    = 'hai2=you';
+
+		const call = this.binary.then(php => php.ccall(
+			'pib_request'
+			, NUM
+			, [STR, STR, STR, STR, STR, STR, STR]
+			, [
+				filepath
+				, method
+				, request_uri
+				, query_string
+				, cookie_data
+				, content_type
+				, post_data
+			]
+			, {async:true}
+		));
+
+		call.catch(error => console.error(error));
 
 		return call;
 	}

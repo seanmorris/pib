@@ -14,6 +14,8 @@ if(serviceWorker && !serviceWorker.controller)
 
 let php = new PHP({persist: {mountPath: '/persist'}});
 
+window.php = php;
+
 document.addEventListener('DOMContentLoaded', () => {
 	const input   = document.querySelector('.input  textarea');
 	const stdout  = document.querySelector('.stdout > * > div.scroller');
@@ -527,7 +529,7 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 				php.removeEventListener('error', error);
 			}
 
-			php = new PHP({persist: {mountPath: '/persist'}});
+			window.php = php = new PHP({persist: {mountPath: '/persist'}});
 
 			php.addEventListener('ready', ready);
 			php.addEventListener('output', output);

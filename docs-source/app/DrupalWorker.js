@@ -1,7 +1,5 @@
 "use strict";
 
-// import { process } from 'process/browser';
-
 self.addEventListener('install', event => {
 	console.log('Install');
 	self.skipWaiting();
@@ -52,7 +50,6 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 
 self.addEventListener('message', event => {
 });
-
 
 self.addEventListener('push', event => {
 	console.log(event);
