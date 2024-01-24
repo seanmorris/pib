@@ -77,9 +77,10 @@ Include the `php-tags.js` script from a CDN:
 And run some PHP right in the page!
 
 ```html
-<script type = "text/php">
+<script type = "text/php" data-stdout = "#output">
 <?php phpinfo();
 </script>
+<div id = "output"></div>
 ```
 
 Inline php can use standard input, output and error with `data-` attributes. Just set the value of the attribute to a selector that will match that tag.
