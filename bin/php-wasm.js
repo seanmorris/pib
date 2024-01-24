@@ -25,9 +25,13 @@ const commands = {};
 		if(fs.existsSync(cwd + '/.php-wasm-rc'))
 		{
 			options.push(`ENV_FILE=${rcFile}`,);
+			child_process.spawn(`touch`, [rcFile], {
+				stdio: [ 'inherit', 'inherit', 'inherit' ],
+				cwd: __dirname + '/..',
+			});
 		}
 
-		const subprocess = child_process.spawn(`make`, options, {
+		child_process.spawn(`make`, options, {
 			stdio: [ 'inherit', 'inherit', 'inherit' ],
 			cwd: __dirname + '/..',
 		});

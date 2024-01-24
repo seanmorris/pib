@@ -17,5 +17,6 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
 	${DOCKER_RUN_IN_ICONV} emmake make EMCC_CFLAGS='-fPIC'
 	${DOCKER_RUN_IN_ICONV} emmake make install
+	${DOCKER_RUN_IN_ICONV} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 
 endif

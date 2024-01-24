@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+MAKEFLAGS += --no-builtin-rules
+
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
@@ -19,8 +21,8 @@ BUILD_SHELL?=1
 BUILD_WORKER?=1
 BUILD_WEBVIEW?=1
 
-_UID:=$(shell echo $$UID)
-_GID:=$(shell echo $$UID)
+_UID:=$(shell id -u)
+_GID:=$(shell id -g)
 UID?=${_UID}
 GID?=${_GID}
 
@@ -83,7 +85,7 @@ DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emsc
 DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo scripts third_party/preload php-tags.mjs test
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo scripts third_party/preload test
 
 MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
 	PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs \
@@ -124,8 +126,8 @@ PRE_JS_FILES?=
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ifdef PRELOAD_ASSETS
-DEPENDENCIES+=third_party/preload
-ORDER_ONLY+=
+DEPENDENCIES+=
+ORDER_ONLY+=third_party/preload
 EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 endif
 
@@ -274,25 +276,25 @@ build/php-web-drupal.js: BUILD_TYPE=js
 build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.js: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.js: ENVIRONMENT=web-drupal
-build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload | ${ORDER_ONLY}
+build/php-web-drupal.js: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/php${PHP_VERSION}-src/Zend/bench.php | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${DOCKER_RUN} mkdir -p /src/third_party/preload/
 	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
 	${FINAL_BUILD} -s ENVIRONMENT=web -D ENVIRONMENT=web -Wno-macro-redefined -lidbfs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-web-drupal.mjs: BUILD_TYPE=mjs
 build/php-web-drupal.mjs: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.mjs: EXTRA_FLAGS+= --preload-file /src/third_party/preload@/preload
 build/php-web-drupal.mjs: ENVIRONMENT=web-drupal
-build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/preload | ${ORDER_ONLY}
+build/php-web-drupal.mjs: ${DEPENDENCIES} third_party/drupal-7.95/README.txt third_party/php${PHP_VERSION}-src/Zend/bench.php | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web (drupal)\e[0m"
 	${DOCKER_RUN} mkdir -p /src/third_party/preload/
 	${DOCKER_RUN} cp -prf ${PRELOAD_ASSETS} /src/third_party/preload/
 	${FINAL_BUILD} -s ENVIRONMENT=web -D ENVIRONMENT=web -Wno-macro-redefined -lidbfs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-web.js: BUILD_TYPE=js
 build/php-web.js: ENVIRONMENT=web
@@ -300,7 +302,7 @@ build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web\e[0m"
 	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
@@ -308,7 +310,7 @@ build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for web\e[0m"
 	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
@@ -316,7 +318,7 @@ build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for workers\e[0m"
 	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
@@ -324,7 +326,7 @@ build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for workers\e[0m"
 	${FINAL_BUILD} -lidbfs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-node.js: BUILD_TYPE=js
 build/php-node.js: ENVIRONMENT=node
@@ -332,7 +334,7 @@ build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for node\e[0m"
 	${FINAL_BUILD} -lnodefs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
@@ -340,7 +342,7 @@ build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for node\e[0m"
 	${FINAL_BUILD} -lnodefs.js
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-shell.js: BUILD_TYPE=js
 build/php-shell.js: ENVIRONMENT=shell
@@ -348,7 +350,7 @@ build/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for shell\e[0m"
 	${FINAL_BUILD}
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-shell.mjs: BUILD_TYPE=mjs
 build/php-shell.mjs: ENVIRONMENT=shell
@@ -356,7 +358,7 @@ build/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for shell\e[0m"
 	${FINAL_BUILD}
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-webview.js: BUILD_TYPE=js
 build/php-webview.js: ENVIRONMENT=webview
@@ -364,7 +366,7 @@ build/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for webview\e[0m"
 	${FINAL_BUILD}
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-webview.mjs: BUILD_TYPE=mjs
 build/php-webview.mjs: ENVIRONMENT=webview
@@ -372,15 +374,16 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for webview\e[0m"
 	${FINAL_BUILD}
 	${DOCKER_RUN_IN_PHP} mv ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	${DOCKER_RUN} chown ${UID}:${GID} $(basename $@)*
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 ########## Package files ###########
 
 php-web-drupal.js: build/php-web-drupal.js
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
-	cp $^.data* $@.data
+	cp $^.wasm* $(dir $@)
+	cp $^.data $@.data
 	${DOCKER_RUN} rm -rf docs/third_party
+	${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) third_party
 	cp -r third_party docs/
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
@@ -397,8 +400,11 @@ endif
 
 php-web-drupal.mjs: build/php-web-drupal.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
-	cp $^.data* $@.data
+	cp $^.wasm* $(dir $@)
+	cp $^.data $@.data
+	${DOCKER_RUN} rm -rf docs/third_party
+	${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) third_party/
+	cp -r third_party docs/
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	rm -f $@.data.gz
@@ -414,7 +420,7 @@ endif
 
 php-web.js: build/php-web.js
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -426,7 +432,7 @@ endif
 
 php-web.mjs: build/php-web.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -438,7 +444,7 @@ endif
 
 php-worker.js: build/php-worker.js
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -450,7 +456,7 @@ endif
 
 php-worker.mjs: build/php-worker.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -462,7 +468,7 @@ endif
 
 php-node.js: build/php-node.js
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -474,7 +480,7 @@ endif
 
 php-node.mjs: build/php-node.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -486,7 +492,7 @@ endif
 
 php-shell.js: build/php-shell.js
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -498,7 +504,7 @@ endif
 
 php-shell.mjs: build/php-shell.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -510,7 +516,7 @@ endif
 
 php-webview.js: build/php-webview.js
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -522,7 +528,7 @@ endif
 
 php-webview.mjs: build/php-webview.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $(basename $@))
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
