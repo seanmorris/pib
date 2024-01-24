@@ -114,7 +114,10 @@ EXTRA_FLAGS=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
 EXPORTED_FUNCTIONS="_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string"
-PRE_JS_FILES?=
+PRE_JS_FILES=/src/source/locateFile.js
+EXTRA_PRE_JS_FILES?=
+
+PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
 
 # include make/iconv.mak make/icu.mak make/libxml.mak make/sqlite.mak make/tidy.mak make/vrzno.mak
 
@@ -181,11 +184,12 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--enable-embed=static \
+		--disable-fiber \
 		--disable-fiber-asm \
 		--prefix=/src/lib/ \
 		--with-layout=GNU  \
-		--disable-cgi      \
-		--disable-cli      \
+		--enable-cgi       \
+		--enable-cli       \
 		--disable-all      \
 		--enable-session   \
 		--enable-filter    \
@@ -205,22 +209,17 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 		${CONFIGURE_FLAGS}
 	${DOCKER_RUN_IN_PHPSIDE} touch /src/third_party/php${PHP_VERSION}-src/configured
 
-lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
-	@ echo -e "\e[33;4mBuilding PHP\e[0m"
-	${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC -g3 -gsource-map'
-	${DOCKER_RUN_IN_PHPSIDE} emmake make install
-
-########### Build the final files. ###########
+SYMBOL_FLAGS=
+ifdef SYMBOLS
+ifneq (${SYMBOLS},0)
+SYMBOL_FLAGS=-g${SYMBOLS}
+EXTRA_FLAGS+=${SYMBOL_FLAGS}
+# EXTRA_FLAGS+= -g${SYMBOLS} -fno-inline
+endif
+endif
 
 ifdef INLINING_LIMIT
 EXTRA_FLAGS+= -sINLINING_LIMIT${INLINING_LIMIT}
-endif
-
-ifdef SYMBOLS
-ifneq (${SYMBOLS},0)
-EXTRA_FLAGS+= -g${SYMBOLS}
-# EXTRA_FLAGS+= -g${SYMBOLS} -fno-inline
-endif
 endif
 
 ifdef SOURCE_MAP_BASE
@@ -230,10 +229,68 @@ endif
 ifeq (${WITH_VRZNO}, 1)
 PRE_JS_FILES+=/src/third_party/vrzno/lib.js
 ifdef VRZNO_DEV_PATH
-EXTRA_FLAGS+= --pre-js ${PRE_JS_FILES}
 DEPENDENCIES+=${VRZNO_DEV_PATH}/lib.js
 endif
 endif
+
+ifneq (${PRE_JS_FILES},)
+EXTRA_FLAGS+= --pre-js /src/.cache/pre.js
+endif
+
+.cache/pre.js:
+ifneq (${PRE_JS_FILES},)
+	${DOCKER_RUN} cat ${PRE_JS_FILES} > .cache/pre.js
+endif
+
+BUILD_FLAGS:=-j`nproc`\
+	ZEND_EXTRA_LIBS='-lsqlite3' \
+	SAPI_CGI_PATH='sapi/cgi/php-cgi.js' \
+	SAPI_CLI_PATH='sapi/cli/php.js'\
+	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion' \
+	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
+		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
+		-fPIC ${SYMBOL_FLAGS}                    \
+		-s EXPORTED_FUNCTIONS='\''[${EXPORTED_FUNCTIONS}]'\'' \
+		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS"]'\'' \
+		-s ENVIRONMENT=worker                    \
+		-D ENVIRONMENT=web                       \
+		-s INITIAL_MEMORY=${INITIAL_MEMORY}      \
+		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY}      \
+		-s ALLOW_MEMORY_GROWTH=1                 \
+		-s ASSERTIONS=${ASSERTIONS}              \
+		-s ERROR_ON_UNDEFINED_SYMBOLS=0          \
+		-s FORCE_FILESYSTEM                      \
+		-s EXPORT_NAME="'PHP'"                   \
+		-s MODULARIZE=1                          \
+		-s INVOKE_RUN=0                          \
+		-s EXIT_RUNTIME=1                        \
+		-s USE_ZLIB=1                            \
+		-s ASYNCIFY                              \
+		-I /src/third_party/libxml2              \
+		-I /src/third_party/${SQLITE_DIR}        \
+		-lidbfs.js                               \
+		--embed-file /src/third_party/preload@/preload \
+		${EXTRA_FLAGS} \
+		$(addprefix /src/,${ARCHIVES})'
+
+lib/lib/${PHP_AR}.a: third_party/php${PHP_VERSION}-src/configured ${ENV_FILE} ${ARCHIVES} source/pib_eval.c third_party/preload third_party/preload/dump-request.php .cache/pre.js
+	@ echo -e "\e[33;4mBuilding PHP\e[0m"
+	${DOCKER_RUN_IN_PHPSIDE} emmake make ${BUILD_FLAGS}
+	${DOCKER_RUN_IN_PHPSIDE} emmake make install ${BUILD_FLAGS}
+	cp third_party/php8.2-src/sapi/cgi/php-cgi.wasm* third_party/php8.2-src/sapi/cgi/php-cgi.js ./
+	cp third_party/php8.2-src/sapi/cgi/php-cgi.wasm* ./docs-source/app/assets
+
+# lib/lib/${PHP_AR}.a: ${PHP_ARCHIVE_DEPS}
+# 	@ echo -e "\e[33;4mBuilding PHP\e[0m"
+# 	${DOCKER_RUN_IN_PHPSIDE} emmake make -j`nproc` EXTRA_CFLAGS='-Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC ${SYMBOL_FLAGS}'
+
+
+# ${DOCKER_RUN_IN_PHPSIDE} emmake make install \
+# 	EXTRA_CFLAGS='-sERROR_ON_UNDEFINED_SYMBOLS=0 -s ENVIRONMENT=web -Wno-int-conversion -Wno-incompatible-function-pointer-types -fPIC ${SYMBOL_FLAGS} -I /src/third_party/${SQLITE_DIR}/ -I /src/third_party/libxml2' \
+# 	EXTRA_LIBS='$(addprefix /src/,${ARCHIVES})' \
+# 	SAPI_CGI_PATH='sapi/cgi/php-cgi.html'
+
+########### Build the final files. ###########
 
 FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-Wno-int-conversion -Wno-incompatible-function-pointer-types \
@@ -256,6 +313,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-I /src/third_party/php${PHP_VERSION}-src/Zend  \
     -I /src/third_party/php${PHP_VERSION}-src/main  \
     -I /src/third_party/php${PHP_VERSION}-src/TSRM/ \
+    -I /src/third_party/php${PHP_VERSION}-src/sapi/cgi/ \
 	-I /src/third_party/libxml2 \
 	-I /src/third_party/${SQLITE_DIR} \
 	-I /src/third_party/php${PHP_VERSION}-src/ext/pdo_sqlite \
@@ -263,14 +321,18 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc -O${OPTIMIZE} \
 	-I /src/third_party/php${PHP_VERSION}-src/ext/vrzno \
 	${EXTRA_FLAGS} \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} \
-	/src/lib/lib/${PHP_AR}.a \
-	$(addprefix /src/,${ARCHIVES}) \
+	/src/lib/lib/${PHP_AR}.a         \
+	$(addprefix /src/,${ARCHIVES})   \
 	${EXTRA_FILES}
 
 # /src/lib/lib/libicudata.a /src/lib/lib/libicui18n.a /src/lib/lib/libicuio.a /src/lib/lib/libicuuc.a
 
 DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES} lib/lib/${PHP_AR}.a source/pib_eval.c
 BUILD_TYPE ?=js
+
+ifneq (${PRE_JS_FILES},)
+DEPENDENCIES+= .cache/pre.js
+endif
 
 build/php-web-drupal.js: BUILD_TYPE=js
 build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
@@ -876,6 +938,7 @@ clean:
 
 php-clean:
 	${DOCKER_RUN_IN_PHP} rm -fv configured
+	${DOCKER_RUN_IN_PHP} rm -f /src/lib/lib/${PHP_AR}.a
 	${DOCKER_RUN_IN_PHP} make clean
 
 deep-clean:
@@ -908,7 +971,7 @@ pull-image:
 push-image:
 	docker-compose --progress quiet push
 
-demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm
+demo: PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.wasm lib/lib/${PHP_AR}.a
 
 serve-demo:
 	cd docs-source && brunch w -s

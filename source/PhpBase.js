@@ -1,6 +1,8 @@
 const STR = 'string';
 const NUM = 'number';
 
+import { OutputBuffer } from './OutputBuffer';
+
 export class PhpBase extends EventTarget
 {
 	constructor(PhpBinary, args = {})
@@ -17,8 +19,8 @@ export class PhpBase extends EventTarget
 
 		Object.defineProperty(this, 'buffers', {value: {
 			stdin: [],
-			stdout: new EventBuffer(this, 'output', -1),
-			stderr: new EventBuffer(this, 'error',  -1),
+			stdout: new OutputBuffer(this, 'output', -1),
+			stderr: new OutputBuffer(this, 'error',  -1),
 		} });
 
 		Object.freeze(this.buffers);
@@ -115,37 +117,6 @@ export class PhpBase extends EventTarget
 
 		return call;
 	}
-
-	request()
-	{
-		const filepath     = '/preload/dump-request.php';
-		const method       = 'POST';
-		const request_uri  = '/';
-		const query_string = 'hello=world';
-		const cookie_data  = '';
-		const content_type = '';
-		const post_data    = 'hai2=you';
-
-		const call = this.binary.then(php => php.ccall(
-			'pib_request'
-			, NUM
-			, [STR, STR, STR, STR, STR, STR, STR]
-			, [
-				filepath
-				, method
-				, request_uri
-				, query_string
-				, cookie_data
-				, content_type
-				, post_data
-			]
-			, {async:true}
-		));
-
-		call.catch(error => console.error(error));
-
-		return call;
-	}
 }
 
 const _Event = globalThis.CustomEvent ?? class extends globalThis.Event
@@ -156,59 +127,3 @@ const _Event = globalThis.CustomEvent ?? class extends globalThis.Event
 		this.detail = options.detail;
 	}
 };
-
-class EventBuffer
-{
-	constructor(target, eventType, maxLength)
-	{
-		Object.defineProperty(this, 'target',    {value: target});
-		Object.defineProperty(this, 'buffer',    {value: []});
-		Object.defineProperty(this, 'eventType', {value: eventType});
-		Object.defineProperty(this, 'maxLength', {value: maxLength});
-		Object.defineProperty(this, 'decoder',   {value: new TextDecoder()});
-	}
-
-	push(...items)
-	{
-		this.buffer.push(...items);
-
-		const end = this.buffer.length - 1;
-
-		if(this.maxLength === -1 && this.buffer[end] === 10)
-		{
-			this.flush();
-		}
-
-		if(this.maxLength >= 0 && this.buffer.length >= this.maxLength)
-		{
-			this.flush();
-		}
-	}
-
-	flush()
-	{
-		if(!this.buffer.length)
-		{
-			return;
-		}
-
-		const event = new _Event(this.eventType, {
-			detail: [this.decoder.decode(new Uint8Array(this.buffer))]
-		});
-
-		if(this.target['on' + this.eventType])
-		{
-			if(this.target['on' + this.eventType](event) === false)
-			{
-				return;
-			}
-		}
-
-		if(!this.target.dispatchEvent(event))
-		{
-			return;
-		}
-
-		this.buffer.splice(0);
-	}
-}

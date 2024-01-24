@@ -46,12 +46,16 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/config.m4 b/third_party/php8.
 -
 -  PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
    PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
-     $ext_shared,,-I$pdo_cv_inc_path)
-
-diff --git a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
+-    $ext_shared,,-I$pdo_cv_inc_path)
++    $ext_shared,,)
+ 
+   PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
+ fi
+diff --git a/ext/pdo_sqlite/pdo_sqlite.c b/ext/pdo_sqlite/pdo_sqlite.c
+index 81761b1..0942423 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
-@@ -23,8 +23,8 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
@@ -161,3 +165,58 @@ diff --git a/third_party/php8.2-src/ext/standard/credits.c b/ext/standard/credit
  	if (flag & PHP_CREDITS_GROUP) {
  		/* Group */
  
+diff --git a/third_party/php8.2-src/sapi/cgi/cgi_main.c b/sapi/cgi/cgi_main.c
+index b454680..e98bf3e 100644
+--- a/third_party/php8.2-src/sapi/cgi/cgi_main.c
++++ b/third_party/php8.2-src/sapi/cgi/cgi_main.c
+@@ -18,7 +18,7 @@
+    |          Dmitry Stogov <dmitry@php.net>                              |
+    +----------------------------------------------------------------------+
+ */
+-
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1858,7 +1858,8 @@ int main(int argc, char *argv[])
+ 	SG(request_info).path_translated = NULL;
+ #endif
+ 
+-	cgi_sapi_module.executable_location = argv[0];
++	// cgi_sapi_module.executable_location = argv[0];
++	cgi_sapi_module.executable_location = NULL;
+ 	if (!cgi && !fastcgi && !bindpath) {
+ 		cgi_sapi_module.additional_functions = additional_functions;
+ 	}
+@@ -1934,8 +1935,10 @@ consult the installation file that came with this distribution, or visit \n\
+ 	}
+ 
+ 	/* make php call us to get _ENV vars */
+-	php_php_import_environment_variables = php_import_environment_variables;
+-	php_import_environment_variables = cgi_php_import_environment_variables;
++	if(php_import_environment_variables != cgi_php_import_environment_variables) {
++		php_php_import_environment_variables = php_import_environment_variables;
++		php_import_environment_variables = cgi_php_import_environment_variables;
++	}
+ 
+ 	if (fastcgi) {
+ 		/* How many times to run PHP scripts before dying */
+@@ -2640,3 +2643,18 @@ consult the installation file that came with this distribution, or visit \n\
+ 	return exit_status;
+ }
+ /* }}} */
++
++void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
++{
++	putenv("USE_ZEND_ALLOC=0");
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_getenv(char *name)
++{
++	return getenv(name);
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_putenv(char *name, char *value)
++{
++	return _sapi_cgi_putenv(name, strlen(name), value);
++}

@@ -9,7 +9,7 @@ serviceWorker.register(`${location.pathname}DrupalWorker.js`);
 
 if(serviceWorker && !serviceWorker.controller)
 {
-	location.reload();
+	// location.reload();
 }
 
 let php = new PHP({persist: {mountPath: '/persist'}});

@@ -10,7 +10,7 @@ CONFIGURE_FLAGS+=  \
 	--with-sqlite3 \
 	--enable-pdo   \
 	--with-pdo-sqlite=/src/lib
-EXTRA_FILES+= ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c
+# EXTRA_FILES+= ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c
 
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
