@@ -341,7 +341,7 @@ php-node.js.wasm   # binary php-wasm
 
 # php-wasm build web mjs
 PhpWeb.mjs         # ⭐ import this module in your javascript if you want to use PHP in JS.
-php-tags.local.mjs # ✨include this with a script tag in your HTML if you want to use inline PHP
+php-tags.local.mjs # ✨ include this with a script tag in your HTML if you want to use inline PHP
 php-web.mjs        # internal interface between WASM and javscript
 php-web.mjs.wasm   # Binary php-wasm
 
