@@ -8,7 +8,7 @@ _PHP in WebAssembly, npm not required._
 
 find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
 
-### v0.0.8 - Preparing for Lift-off
+### 🚀 v0.0.8 - Preparing for Lift-off
 
 * Adding ESM & CDN Module support!
 * Adding stdin
@@ -25,7 +25,7 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
-## Examples
+## 🕶️ Examples
 
 <table>
  <tr>
@@ -65,7 +65,7 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
  </tr>
 </table>
 
-## Quickstart
+## 🍎 Quickstart
 
 ### Inline PHP
 
@@ -135,7 +135,7 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 <script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.jsdelivr.mjs"></script>
 ``` -->
 
-## Install & Use
+## 🛠️ Install & Use
 
 Install with npm:
 
@@ -201,7 +201,14 @@ If you're using a more advanced bundler, use the vendor's documentation to learn
 ./node_modules/php-wasm/php-web.*
 ```
 
-## Running PHP & Taking Output
+## 🥤 Running PHP & Taking Output
+
+Create a PHP instance:
+
+```javascript
+const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
+const php = new PhpWeb;
+```
 
 Add your output listeners:
 
@@ -241,7 +248,36 @@ php.addEventListener('ready', () => {
 });
 ```
 
-## Building in-place
+## 💾 Persistent Storage (IDBFS & NodeFS)
+
+### IDBFS (Web & Worker)
+
+To use IDBFS in PhpWeb, pass a `persist` object with a `mountPath` key.
+
+`mountPath` will be used as the path to the persistent directory within the PHP environment.
+
+```javascript
+const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
+const php = new PhpWeb;
+
+let php = new PhpWeb({persist: {mountPath: '/persist'}});
+```
+
+### NodeFS (NodeJS Only)
+
+To use NodeFS in PhpWeb, pass a `persist` object with `mountPath` & `localPath` keys.
+
+`localPath` will be used as the path to the HOST directory to expose to PHP.
+`mountPath` will be used as the path to the persistent directory within the PHP environment.
+
+```javascript
+const { PhpNode } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpNode.mjs');
+const php = new PhpNode;
+
+let php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files'}});
+```
+
+## 🏗️ Building in-place
 
 To use the the in-place builder, first install php-wasm globally:
 
@@ -355,7 +391,7 @@ WITH_SQLITE=1
 WITH_VRZNO=1
 ```
 
-### Packaging files
+## 📦 Packaging files
 
 Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
 
@@ -372,11 +408,11 @@ print ++$x;
 
 ```
 
-## php-wasm started as a fork of oraoto/PIB...
+## 🤝 php-wasm started as a fork of oraoto/PIB...
 
 https://github.com/oraoto/pib
 
-## Licensed under the Apache License, Version 2.0
+## 🍻 Licensed under the Apache License, Version 2.0
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
