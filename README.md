@@ -187,7 +187,7 @@ const php = new PhpWeb;
 
 ***You won't need to use this if you build in-place or use a CDN.***
 
-The php-wasm package comes with pre-build binaries out of the box so you can get started quickly.
+The php-wasm package comes with pre-built binaries out of the box so you can get started quickly.
 
 You'll need to add the following `postinstall` script entry to your package.json to ensure the static assets are available to your web application. Make sure to replace `public/` with the path to your public document root if necessary.
 
@@ -207,7 +207,7 @@ If you're using a more advanced bundler, use the vendor's documentation to learn
 ./node_modules/php-wasm/php-web.*
 ```
 
-### Running PHP & Taking Output
+## Running PHP & Taking Output
 
 Add your output listeners:
 
@@ -247,7 +247,7 @@ php.addEventListener('ready', () => {
 });
 ```
 
-### Building in-place
+## Building in-place
 
 To use the the in-place builder, first install php-wasm globally:
 
@@ -269,7 +269,7 @@ Optionally clean up files from a previous build:
 $ php-wasm clean
 ```
 
-#### Build for web
+### Build for web
 
 Then navigate to the directory you want the files to be built in, and run `php-wasm build`
 
@@ -280,14 +280,14 @@ $ php-wasm build
 #  "web" is the default here
 ```
 
-#### Build for node
+### Build for node
 
 ```sh
 $ cd ~/my-project
 $ php-wasm build node
 ```
 
-#### ESM Modules:
+### ESM Modules:
 
 Build ESM modules with:
 
@@ -299,34 +299,32 @@ $ php-wasm build node mjs
 This will build the following files in the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
 
 ```sh
+PhpBase.js        # All cjs builds depend on this file.
+PhpBase.mjs       # All mjs builds depend on this file.
+
 # php-wasm build web
-PhpWeb.js       # require this module in your scripts
-php-web.js      # internal interface between WASM and javscript
-php-web.wasm    # binary php-wasm
+PhpWeb.js         # require this module in your javascript if you want to use PHP in JS.
+php-web.js        # internal interface between WASM and javscript
+php-web.js.wasm   # binary php-wasm
 
 # php-wasm build node
-PhpNode.js      # require this module in your scripts
-php-node.js     # internal interface between WASM and javscript
-php-node.wasm   # binary php-wasm
+PhpNode.js        # require this module in your scripts
+php-node.js       # internal interface between WASM and javscript
+php-node.js.wasm  # binary php-wasm
 
 # php-wasm build web mjs
-PhpWeb.mjs      # import this module in your scripts
-php-web.mjs     # internal interface between WASM and javscript
-php-web.wasm    # Binary php-wasm
+PhpWeb.mjs        # import this module in your javascript if you want to use PHP in JS.
+php-tags.mjs      # include this with a script tag in your HTML if you want to use inline PHP
+php-web.mjs       # internal interface between WASM and javscript
+php-web.mjs.wasm  # Binary php-wasm
 
 # php-wasm build node mjs
-PhpNode.mjs     # import this module in your scripts
-php-node.mjs    # internal interface between WASM and javscript
-php-node.wasm   # binary php-wasm
+PhpNode.mjs       # import this module in your scripts
+php-node.mjs      # internal interface between WASM and javscript
+php-node.mjs.wasm # binary php-wasm
 ```
 
-### Packaging files
-
-Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
-
-These files will be available under `/preload` in the final package.
-
-#### .php-wasm-rc
+### .php-wasm-rc
 
 You can also create a `.php-wasm-rc` file in this directory to customize the build.
 
@@ -362,6 +360,12 @@ WITH_SQLITE=1
 # Build with VRZNO
 WITH_VRZNO=1
 ```
+
+### Packaging files
+
+Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
+
+These files will be available under `/preload` in the final package.
 
 ### Persistent Memory
 
