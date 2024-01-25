@@ -11,17 +11,17 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 ### v0.0.8 - Preparing for Lift-off
 
 * Adding ESM & CDN Module support!
-* Adding stdin
-* Buffering stdout/stderr in javascript
+* Adding stdin.
+* Buffering stdout/stderr in javascript.
 * Fixing `<script type = "text/php">` support.
 * Adding fetch support for `src` on above.
 * Adding support for libzip, iconv, & html-tidy
+* Adding support for NodeFS & IDBFS.
 * In-place builds.
-* Conditional builds.
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
 * Modularizing dependencies.
-* Pre-compressing assets.
+* Compressing assets.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
