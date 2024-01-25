@@ -4,7 +4,7 @@
 [![Apache-2.0 Licence Badge](https://img.shields.io/npm/l/cv3-inject?logo=apache&color=427819&style=for-the-badge)](https://github.com/seanmorris/php-wasm/blob/master/LICENSE) [![GitHub Sponsors](https://img.shields.io/github/sponsors/seanmorris?style=for-the-badge&color=f1e05a)](https://github.com/sponsors/seanmorris) ![Size](https://img.shields.io/github/languages/code-size/seanmorris/php-wasm?color=e34c26&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAQAAACFzfR7AAABF0lEQVQoFQXBQWvOAQDA4ef/7o29YWtqKU7ExWE5OIvm4LKcnXwD7aQ0N/kAczO1i1KOO0xJvQojaTm4KbJabnJysLSf5wFAa603CUB322yOAAitVT86BTTQ1+oJDYDQcv+qFRr3vC1ooYPqDkHoYgfVKmnSfhG62t/qBkHn2q8ekjRpryB0v/rZ2eh4r6tpY5pp3Gx7RTONoJfVLnpQfekYtNG0832rRj3tEaT31bOxQ5wc/oATrnnniEMfXfaZDFrAoEk71XajNN9OVVW7HYVeVZ9AF/pd3YPm267qbYs0tF597wygpaquQ7Nt9QLoVlWXCEK3q1oCCF2p6iYBpKGN6kNzATrdr2qVAACa9rgRQKPetAnAf1jX/qSkN8aIAAAAAElFTkSuQmCC&style=for-the-badge) ![GitHub Repo stars](https://img.shields.io/github/stars/seanmorris/php-wasm?style=for-the-badge&label=GitHub%20Stars&link=https%3A%2F%2Fgithub.com%2Fseanmorris%2Fphp-wasm) [![CircleCI](https://img.shields.io/circleci/build/github/seanmorris/php-wasm?logo=circleci&logoColor=white&style=for-the-badge&token=12dae2d9c3cd5ac38bd81752b0751872c556282d)](https://circleci.com/gh/seanmorris/php-wasm/) ![NPM Downloads](https://img.shields.io/npm/dw/php-wasm?style=for-the-badge&color=C80&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fphp-wasm&label=npm%20installs) ![jsDelivr hits (npm)](https://img.shields.io/jsdelivr/npm/hw/php-wasm?style=for-the-badge&color=09D&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fphp-wasm&label=jsdelivr%20hits) [![Static Badge](https://img.shields.io/badge/reddit-always%20online-336699?style=for-the-badge&logo=reddit)](https://www.reddit.com/r/phpwasm/) [![Discord](https://img.shields.io/discord/1199824765666463835?style=for-the-badge&logo=discord&link=https%3A%2F%2Fdiscord.gg%2Fj8VZzju7gJ)](https://discord.gg/j8VZzju7gJ)
 
 
-_PHP in WebAssembly_
+_PHP in WebAssembly, npm not required._
 
 find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
 
@@ -117,7 +117,9 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 
 #### Self-hosted:
 
+```html
 <script async type = "text/javascript" src = "./php-tags.local.mjs"></script>
+```
 
 #### CDNs
 
@@ -185,7 +187,7 @@ const php = new PhpWeb;
 
 ***You won't need to use this if you build in-place or use a CDN.***
 
-The php-wasm package comes with pre-build binaries out of the box so you can get started quickly.
+The php-wasm package comes with pre-built binaries out of the box so you can get started quickly.
 
 You'll need to add the following `postinstall` script entry to your package.json to ensure the static assets are available to your web application. Make sure to replace `public/` with the path to your public document root if necessary.
 
@@ -205,7 +207,7 @@ If you're using a more advanced bundler, use the vendor's documentation to learn
 ./node_modules/php-wasm/php-web.*
 ```
 
-### Running PHP & Taking Output
+## Running PHP & Taking Output
 
 Add your output listeners:
 
@@ -245,7 +247,7 @@ php.addEventListener('ready', () => {
 });
 ```
 
-### Building in-place
+## Building in-place
 
 To use the the in-place builder, first install php-wasm globally:
 
@@ -267,7 +269,7 @@ Optionally clean up files from a previous build:
 $ php-wasm clean
 ```
 
-#### Build for web
+### Build for web
 
 Then navigate to the directory you want the files to be built in, and run `php-wasm build`
 
@@ -278,14 +280,14 @@ $ php-wasm build
 #  "web" is the default here
 ```
 
-#### Build for node
+### Build for node
 
 ```sh
 $ cd ~/my-project
 $ php-wasm build node
 ```
 
-#### ESM Modules:
+### ESM Modules:
 
 Build ESM modules with:
 
@@ -297,34 +299,32 @@ $ php-wasm build node mjs
 This will build the following files in the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
 
 ```sh
+PhpBase.js        # All cjs builds depend on this file.
+PhpBase.mjs       # All mjs builds depend on this file.
+
 # php-wasm build web
-PhpWeb.js       # require this module in your scripts
-php-web.js      # internal interface between WASM and javscript
-php-web.wasm    # binary php-wasm
+PhpWeb.js         # require this module in your javascript if you want to use PHP in JS.
+php-web.js        # internal interface between WASM and javscript
+php-web.js.wasm   # binary php-wasm
 
 # php-wasm build node
-PhpNode.js      # require this module in your scripts
-php-node.js     # internal interface between WASM and javscript
-php-node.wasm   # binary php-wasm
+PhpNode.js        # require this module in your scripts
+php-node.js       # internal interface between WASM and javscript
+php-node.js.wasm  # binary php-wasm
 
 # php-wasm build web mjs
-PhpWeb.mjs      # import this module in your scripts
-php-web.mjs     # internal interface between WASM and javscript
-php-web.wasm    # Binary php-wasm
+PhpWeb.mjs        # import this module in your javascript if you want to use PHP in JS.
+php-tags.mjs      # include this with a script tag in your HTML if you want to use inline PHP
+php-web.mjs       # internal interface between WASM and javscript
+php-web.mjs.wasm  # Binary php-wasm
 
 # php-wasm build node mjs
-PhpNode.mjs     # import this module in your scripts
-php-node.mjs    # internal interface between WASM and javscript
-php-node.wasm   # binary php-wasm
+PhpNode.mjs       # import this module in your scripts
+php-node.mjs      # internal interface between WASM and javscript
+php-node.mjs.wasm # binary php-wasm
 ```
 
-### Packaging files
-
-Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
-
-These files will be available under `/preload` in the final package.
-
-#### .php-wasm-rc
+### .php-wasm-rc
 
 You can also create a `.php-wasm-rc` file in this directory to customize the build.
 
@@ -360,6 +360,12 @@ WITH_SQLITE=1
 # Build with VRZNO
 WITH_VRZNO=1
 ```
+
+### Packaging files
+
+Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
+
+These files will be available under `/preload` in the final package.
 
 ### Persistent Memory
 
