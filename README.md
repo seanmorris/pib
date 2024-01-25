@@ -72,7 +72,7 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 Include the `php-tags.js` script from a CDN:
 
 ```html
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
 ```
 
 And run some PHP right in the page!
@@ -87,7 +87,7 @@ And run some PHP right in the page!
 Inline php can use standard input, output and error with `data-` attributes. Just set the value of the attribute to a selector that will match that tag.
 
 ```html
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
 
 <script id = "input" type = "text/plain">Hello, world!</script>
 
@@ -104,7 +104,7 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 ```html
 <html>
     <head>
-        <script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+        <script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
         <script id = "input" src = "/test-input.json" type = "text/json"></script>
         <script type = "text/php" src = "/test.php" data-stdin = "#input" data-stdout = "#output" data-stderr = "#error"></script>
     </head>
@@ -115,26 +115,28 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 </html>
 ```
 
-#### CDN
+#### Self-hosted:
 
-Any NPM-enabled CDN will work:
+<script async type = "text/javascript" src = "./php-tags.local.mjs"></script>
+
+#### CDNs
 
 ##### JSDelivr
 
 ```html
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
+<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
 ```
 
 ##### Unpkg
 
 ```html
-<script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.mjs"></script>
+<script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.unpkg.mjs"></script>
 ```
 
 <!--
 ##### esm.sh
 ```html
-<script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.mjs"></script>
+<script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.jsdelivr.mjs"></script>
 ``` -->
 
 ## Install & Use
@@ -165,8 +167,17 @@ const php = new PhpWeb;
 
 ***Note: This does not require npm.***
 
+##### jsdelivr
+
 ```javascript
 const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
+const php = new PhpWeb;
+```
+
+##### unpkg
+
+```javascript
+const { PhpWeb } = await import('https://www.unpkg.com/php-wasm/php-wasm/PhpWeb.mjs');
 const php = new PhpWeb;
 ```
 
