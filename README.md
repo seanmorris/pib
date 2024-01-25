@@ -303,23 +303,23 @@ PhpBase.js        # All cjs builds depend on this file.
 PhpBase.mjs       # All mjs builds depend on this file.
 
 # php-wasm build web
-PhpWeb.js         # require this module in your javascript if you want to use PHP in JS.
+PhpWeb.js         # ⭐ require this module in your javascript if you want to use PHP in JS.
 php-web.js        # internal interface between WASM and javscript
 php-web.js.wasm   # binary php-wasm
 
 # php-wasm build node
-PhpNode.js        # require this module in your scripts
+PhpNode.js        # ⭐ require this module in your scripts to use PHP in JS in node.
 php-node.js       # internal interface between WASM and javscript
 php-node.js.wasm  # binary php-wasm
 
 # php-wasm build web mjs
-PhpWeb.mjs        # import this module in your javascript if you want to use PHP in JS.
-php-tags.mjs      # include this with a script tag in your HTML if you want to use inline PHP
+PhpWeb.mjs        # ⭐ import this module in your javascript if you want to use PHP in JS.
+php-tags.mjs      # ✨include this with a script tag in your HTML if you want to use inline PHP
 php-web.mjs       # internal interface between WASM and javscript
 php-web.mjs.wasm  # Binary php-wasm
 
 # php-wasm build node mjs
-PhpNode.mjs       # import this module in your scripts
+PhpNode.mjs       # ⭐ import this module in your scripts to use PHP in JS in node.
 php-node.mjs      # internal interface between WASM and javscript
 php-node.mjs.wasm # binary php-wasm
 ```

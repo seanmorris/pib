@@ -666,7 +666,7 @@ dist/PhpWebDrupal.mjs: PhpWebDrupal.mjs dist/php-web-drupal.mjs dist/PhpBase.mjs
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 
-dist/php-web.js: build/php-web.js dist/php-tags.mjs dist/php-tags.local.mjs
+dist/php-web.js: build/php-web.js
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
 	${DOCKER_RUN_USER} cp $<.data $@.data || true
