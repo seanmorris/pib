@@ -117,7 +117,9 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 
 #### Self-hosted:
 
+```html
 <script async type = "text/javascript" src = "./php-tags.local.mjs"></script>
+```
 
 #### CDNs
 
