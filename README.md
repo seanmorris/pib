@@ -25,7 +25,7 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
-## 🕶️ Examples
+## ☀️ Examples
 
 <table>
  <tr>
