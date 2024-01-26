@@ -3,7 +3,7 @@
 	"description": "Run PHP right in the browser or anywhere else JS can run.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris<php-wasm@seanmorr.is>",
-	"version": "0.0.0-esm-preview-55",
+	"version": "0.0.0-esm-preview-56",
 	"license": "Apache-2.0",
 	"bin": {
 		"php-wasm": "./bin/php-wasm.js"
