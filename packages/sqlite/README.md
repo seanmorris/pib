@@ -1,4 +1,6 @@
 # php-wasm-sqlite
 
-https://github.com/php-wasm
+sqlite for php-wasm
+
+https://github.com/seanmorris/php-wasm
 https://www.npmjs.com/package/php-wasm

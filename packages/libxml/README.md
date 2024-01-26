@@ -1,4 +1,6 @@
 # php-wasm-libxml
 
-https://github.com/php-wasm
+libxml for php-wasm
+
+https://github.com/seanmorris/php-wasm
 https://www.npmjs.com/package/php-wasm

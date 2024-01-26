@@ -93,6 +93,18 @@ export class PhpBase extends EventTarget
 		.finally(() => this.flush());
 	}
 
+	tokenize(phpCode)
+	{
+		return this.binary
+		.then(php => php.ccall(
+			'pib_tokenize'
+			, STR
+			, [STR]
+			, [phpCode]
+			, {async:true}
+		));
+	}
+
 	refresh()
 	{
 		const call = this.binary.then(php => {

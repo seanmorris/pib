@@ -16,12 +16,12 @@
 		"@babel/core": "^7.8.7",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",
 		"@babel/preset-env": "^7.0.0",
-		"php-wasm-iconv": "^0.0.0",
-		"php-wasm-libxml": "^0.0.0",
-		"php-wasm-libzip": "^0.0.0",
-		"php-wasm-sqlite": "^0.0.0",
-		"php-wasm-tidy": "^0.0.0-a",
-		"vrzno": "^0.0.0"
+		"php-wasm-iconv": "^0.0.1",
+		"php-wasm-libxml": "^0.0.1",
+		"php-wasm-libzip": "^0.0.1",
+		"php-wasm-sqlite": "^0.0.1",
+		"php-wasm-tidy": "^0.0.1",
+		"vrzno": "^0.0.1"
 	},
 	"contributors": [
 		{

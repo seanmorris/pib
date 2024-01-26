@@ -8,6 +8,10 @@ PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
 CONFIGURE_FLAGS+= --enable-vrzno
 PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 
+DEPENDENCIES+= third_party/vrzno/vrzno.c
+
+ifdef VRZNO_DEV_PATH
+
 ${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js)
 	cat ${VRZNO_DEV_PATH}/js/WeakerMap.js \
 		${VRZNO_DEV_PATH}/js/PolyFill.js \
@@ -21,7 +25,6 @@ ${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js)
 		> ${VRZNO_DEV_PATH}/lib.js
 	cat ${VRZNO_DEV_PATH}/lib.js
 
-ifdef VRZNO_DEV_PATH
 third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
 	@ echo -e "\e[33;4mImporting VRZNO\e[0m"
 	@ cp -prfv ${VRZNO_DEV_PATH} third_party/

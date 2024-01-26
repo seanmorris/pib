@@ -9,6 +9,10 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 
+#include "../json/php_json.h"
+#include "../json/php_json_encoder.h"
+#include "../json/php_json_parser.h"
+
 #ifdef WITH_VRZNO
 #include "../vrzno/php_vrzno.h"
 #endif
@@ -73,7 +77,7 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 	zend_try
 	{
 		zval retZv;
-		zend_eval_string(code, &retZv, "php-wasm evaluate expression");
+		zend_eval_string(code, &retZv, "php-wasm exec expression");
 		convert_to_string(&retZv);
 		retVal = Z_STRVAL(retZv);
 	}
@@ -119,10 +123,29 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 	return retVal;
 }
 
-char *pib_tokenize(char *code)
+bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class);
+
+char *EMSCRIPTEN_KEEPALIVE pib_tokenize(char *code)
 {
-	// tokenize_parse(zval zend_string)
-	return "";
+	zval parsed;
+	zend_string *zCode = zend_string_init(code, strlen(code), 0);
+	tokenize(&parsed, zCode, NULL);
+	zend_string_release(zCode);
+
+	php_json_encoder encoder;
+	php_json_encode_init(&encoder);
+	smart_str buf = {0};
+	encoder.max_depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
+	php_json_encode_zval(&buf, &parsed, 0, &encoder);
+	smart_str_0(&buf);
+
+	zend_long len = ZSTR_LEN(buf.s);
+	char *json = ZSTR_VAL(buf.s);
+	char *ret = emalloc(len);
+	memcpy(ret, json, len);
+	smart_str_free(&buf);
+
+	return ret;
 }
 
 void EMSCRIPTEN_KEEPALIVE pib_destroy()
