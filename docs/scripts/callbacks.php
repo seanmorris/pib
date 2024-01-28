@@ -20,12 +20,14 @@ if(!$setup)
 {
     $window = new Vrzno;
 
-    $f = $window->phpFuncA = function() use(&$x, $window) {
-        echo '$x is now ' . (++$x) . PHP_EOL;
+    $f = $window->phpFuncA = function() use(&$x, &$y, $window) {
+        printf('RAN phpFuncA! $x: %d, $y: %d' . PHP_EOL, ++$x, $y);
+		return $x;
     };
 
-    $g = $window->phpFuncB = function() use(&$y, $window) {
-		$window->alert('RAN phpFuncB! $y:' . ++$y);
+    $g = $window->phpFuncB = function() use(&$x, &$y, $window) {
+		$window->alert(sprintf('RAN phpFuncB! $x: %d, $y: %d', $x, ++$y));
+		return $y;
     };
 
     $setup = true;

@@ -1,41 +1,3 @@
-// import PHP from 'php-wasm/php-cgi';
-
-// const input = [];
-
-// const request = (p, {filename, method = 'GET', url = '', get, post, cookie}) => {
-
-// 	const toQueryString = obj => obj ? String(new URLSearchParams(obj)).toString() : '';
-
-// 	const putEnv = (key, value) => p.ccall(
-// 		'wasm_sapi_cgi_putenv'
-// 		, 'number'
-// 		, ['string', 'string']
-// 		, [key, String(value)]
-// 	);
-
-// 	input.splice(0);
-
-// 	if(method === 'POST')
-// 	{
-// 		input.push(...(toQueryString(post)).split(''));
-// 	}
-
-// 	putEnv('PHP_FCGI_MAX_REQUESTS', 1);
-
-// 	putEnv('SERVER_SOFTWARE', navigator.userAgent);
-// 	putEnv('REQUEST_METHOD', method);
-// 	putEnv('REQUEST_URI', url);
-// 	putEnv('SCRIPT_FILENAME', filename);
-// 	putEnv('PATH_TRANSLATED', filename);
-// 	putEnv('QUERY_STRING', toQueryString(get));
-// 	putEnv('HTTP_COOKIE', toQueryString(cookie));
-// 	putEnv('REDIRECT_STATUS', '200');
-// 	putEnv('CONTENT_TYPE', 'application/x-www-form-urlencoded');
-// 	putEnv('CONTENT_LENGTH', input.length);
-
-// 	return p._main();
-// };
-
 import { PhpCgi } from "./PhpCgi";
 
 self.addEventListener('install', event => {
@@ -50,58 +12,98 @@ self.addEventListener('activate', event => {
 
 let c = 0;
 
+const php = new PhpCgi({ docroot: '/preload/drupal-7.95' });
+
 self.addEventListener('fetch', event => event.respondWith(new Promise(accept => {
 
-	// const php = new PHP({ stdin: () => input ? String(input.shift()).charCodeAt(0) : null });
-
-	// php.then(p => {
-
-	// 	p.ccall('wasm_sapi_cgi_init', 'number', [], []);
-
-	// 	console.log(++c, request(p, {
-	// 		filename: '/preload/dump-request.php'
-	// 		, method: 'POST'
-	// 		, url:    '/index'
-	// 		, get:    { hello: 'world' }
-	// 		, post:   { field: 'this is post data' }
-	// 		, cookie: { cookie: 'chocolate chip' }
-	// 	}));
-	// });
-
-	const php = new PhpCgi;
-
-	console.log(++c, php.request({
-		filename: '/preload/dump-request.php'
-		, method: 'POST'
-		, url:    '/index'
-		, get:    { hello: 'world' }
-		, post:   { field: 'this is post data' }
-		, cookie: { cookie: 'chocolate chip' }
-	}));
-
-	const url      = new URL(event.request.url);
+	const request  = event.request;
+	const url      = new URL(request.url);
 	const pathname = url.pathname.replace(/^\//, '');
 	const path     = pathname.split('/');
 	const _path    = path.slice(0);
+
+	// if(self.location.hostname === url.hostname)
+	if(self.location.hostname === url.hostname && (_path[0] === 'php-wasm' || _path[0] === 'preload'))
+	{
+		if(_path[0] === 'php-wasm')
+		{
+		}
+
+		_path.shift();
+
+		if(_path[0] === 'drupal-7.95')
+		{
+			_path.shift();
+		}
+
+		if(_path[0] === 'persist')
+		{
+			_path.shift();
+			if(_path[0] === 'drupal-7.95')
+			{
+				_path.shift();
+			}
+		}
+
+		let getPost = Promise.resolve();
+
+		if(request.body)
+		{
+			getPost = new Promise(accept => {
+				const reader = request.body.getReader();
+				const postBody = [];
+
+				const processBody = ({done, value}) => {
+
+					console.log({done,value});
+
+					if(value)
+					{
+						postBody.push([...value].map(x => String.fromCharCode(x)).join(''));
+					}
+
+					if(!done)
+					{
+						return reader.read().then(processBody);
+					}
+
+					console.log(postBody.join(''));
+					accept(postBody.join(''));
+				};
+
+				return reader.read().then(processBody);
+			});
+		}
+
+		return getPost.then(post => {
+			return php.request({
+				method: request.method
+				, path: _path.join('/')
+				, get: url.search ? url.search.substr(1) : ''
+				, post: request.method === 'POST'
+					? String(new URLSearchParams(post))
+					: null
+			});
+		})
+		.then((r) => accept(r));
+	}
 
 	if(_path[0] === 'php-wasm')
 	{
 		_path.shift();
 	}
 
-	if(!_path[ _path.length-1 ].match(/\.\w+$/) && _path[1] === 'drupal-7.95')
+	if(_path.length && !_path[ _path.length-1 ].match(/\.\w+$/) && _path[1] === 'drupal-7.95')
 	{
-		const getPost = event.request.method !== 'POST'
-			? Promise.resolve()
-			: event.request.formData();
+		const getPost = request.method !== 'POST' ? Promise.resolve() : request.formData();
 
 		return getPost.then(post => {
 			accept(new Response(`<script>window.parent.postMessage({
 				action: 'respond'
-				, method:  '${event.request.method}'
+				, method:  '${request.method}'
 				, path:  '${'/' + path.join('/')}'
 				, _GET:  '${url.search}'
-				, _POST: '${event.request.method === 'POST'
+				, _POST: '${request.method === 'POST'
 					? ('?' + String(new URLSearchParams(post)))
 					: ''
 				}'
@@ -112,7 +114,7 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 	}
 	else
 	{
-		accept(fetch(event.request));
+		accept(fetch(request));
 	}
 })));
 

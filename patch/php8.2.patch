@@ -220,3 +220,16 @@ index b454680..e98bf3e 100644
 +{
 +	return _sapi_cgi_putenv(name, strlen(name), value);
 +}
+diff --git a/third_party/php8.2-src/ext/tokenizer/tokenizer.c b/third_party/php8.2-src/ext/tokenizer/tokenizer.c
+index 20124db..33327c1 100644
+--- a/third_party/php8.2-src/ext/tokenizer/tokenizer.c
++++ b/third_party/php8.2-src/ext/tokenizer/tokenizer.c
+@@ -319,7 +319,7 @@ static void add_token(
+ 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
+ }
+ 
+-static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
++bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
+ {
+ 	zval source_zval;
+ 	zend_lex_state original_lex_state;

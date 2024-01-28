@@ -1,4 +1,6 @@
 # php-wasm-iconv
 
-https://github.com/php-wasm
+libiconv for php-wasm
+
+https://github.com/seanmorris/php-wasm
 https://www.npmjs.com/package/php-wasm
