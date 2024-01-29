@@ -309,7 +309,7 @@ $drupal_hash_salt = 'MKTjjvR3sLkXhjilBuWDxh3i-gPCGDIP8ydx6h9Td3o';
  * It is not allowed to have a trailing slash; Drupal will add it
  * for you.
  */
-$base_url = '/php-wasm/persist/drupal-7.95';  // NO trailing slash!
+$base_url = '/php-wasm/drupal';  // NO trailing slash!
 
 /**
  * PHP settings:
@@ -639,3 +639,46 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * @see drupal_clean_css_identifier()
  */
 # $conf['allow_css_double_underscores'] = TRUE;
+
+$conf['drupal_http_request_function'] = 'vrzno_http_request';
+
+function vrzno_http_request($url, array $options = array()) {
+	$uri = @parse_url($url);
+
+	$result = new stdClass();
+
+	if ($uri == FALSE) {
+	  $result->error = 'unable to parse URL';
+	  $result->code = -1001;
+	  return $result;
+	}
+
+	// Merge the default options.
+	$options += array(
+	  'headers' => array(),
+	  'method' => 'GET',
+	  'data' => NULL,
+	  'max_redirects' => 3,
+	  'timeout' => 30.0,
+	  'context' => NULL,
+	  'scheme' => 'http',
+	);
+
+	// Merge the default headers.
+	$options['headers'] += array(
+	  'User-Agent' => 'Drupal (+http://drupal.org/)',
+	);
+
+	$request = (new Vrzno)->fetch($url, (object)[
+	  'headers' => (object) $options['headers'],
+	  'method'  => $options['method'],
+	]);
+
+	$response = vrzno_await($request);
+	$content  = vrzno_await($response->text());
+
+	$result->data = $content;
+	$result->code = 200;
+
+	return $result;
+  }

@@ -14,6 +14,10 @@ WITH_ICU   ?=0
 WITH_SQLITE?=1
 WITH_VRZNO ?=1
 
+WITH_ZLIB  ?=1
+WITH_LIBPNG?=1
+WITH_GD    ?=1
+
 GZIP       ?=0
 BROTLI     ?=0
 
@@ -118,8 +122,8 @@ CONFIGURE_FLAGS=
 EXTRA_FLAGS=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
-EXPORTED_FUNCTIONS="_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string"
-PRE_JS_FILES=/src/source/locateFile.js
+EXPORTED_FUNCTIONS="_pib_init", "_pib_storage_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_pib_flush", "_main", "_malloc", "_free"
+PRE_JS_FILES=
 EXTRA_PRE_JS_FILES?=
 
 PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
@@ -217,7 +221,6 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 		--disable-mbregex  \
 		--enable-tokenizer \
 		--enable-pib       \
-		--with-gd          \
 		${CONFIGURE_FLAGS}
 	${DOCKER_RUN_IN_PHPSIDE} touch /src/third_party/php${PHP_VERSION}-src/configured
 
@@ -266,12 +269,14 @@ PRELOAD_METHOD=--preload-file
 SAPI_CLI_PATH=sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE}
 SAPI_CGI_PATH=sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE}
 
+EXTRA_CFLAGS=
+
 BUILD_FLAGS=-j`nproc`\
 	ZEND_EXTRA_LIBS='-lsqlite3' \
-	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
-	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion' \
+	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
+	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion ${EXTRA_CFLAGS}' \
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		-fPIC ${SYMBOL_FLAGS}                    \
@@ -303,7 +308,7 @@ BUILD_FLAGS=-j`nproc`\
 		$(addprefix /src/,${ARCHIVES}) \
 		${EXTRA_FILES} \
 		${EXTRA_FLAGS} \
-		'
+	'
 
 DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES} third_party/php${PHP_VERSION}-src/configured
 BUILD_TYPE ?=js
@@ -317,12 +322,13 @@ build/php-web-drupal.js: FS_TYPE=${WEB_FS_TYPE}
 build/php-web-drupal.js: ENVIRONMENT=web-drupal
 build/php-web-drupal.js: PRELOAD_METHOD=--preload-file
 build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-build/php-web-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
+build/php-web-drupal.js: EXTRA_CFLAGS+= -D ENVIRONMENT=web
+build/php-web-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -D ENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
 build/php-web-drupal.js: ${DEPENDENCIES} third_party/preload/drupal-7.95/README.txt third_party/preload/bench.php third_party/preload/dump-request.php| ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -rf third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} 'PHP_BINARIES=cli'
+	# mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	# cp -rf third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
 	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 	cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./docs-source/app/assets
@@ -334,16 +340,17 @@ build/php-worker-drupal.js: ENVIRONMENT=worker-drupal
 build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker
 build/php-worker-drupal.js: PRELOAD_METHOD=--embed-file
 build/php-worker-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker ${PRELOAD_METHOD} /src/third_party/preload@/preload
+build/php-worker-drupal.js: EXTRA_CFLAGS+= -D ENVIRONMENT=web
+build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker -D ENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
 build/php-worker-drupal.js: ${DEPENDENCIES} third_party/preload/drupal-7.95/README.txt third_party/preload/bench.php third_party/preload/dump-request.php | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} 'PHP_BINARIES=cgi'
 	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp -rf third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
 	cp -rf third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./docs-source/app/assets
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./docs-source/app/assets
+	# mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	# cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
+	# cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./docs-source/app/assets
 
 build/php-web.js: BUILD_TYPE=js
 build/php-web.js: ENVIRONMENT=web

@@ -1,8 +1,6 @@
 import PHP from 'php-cgi-wasm/php-cgi-worker-drupal';
 import parseResponse from './parseResponse';
 
-const toQueryString = x => String(new URLSearchParams(x)).toString();
-
 const putEnv = (php, key, value) => php.ccall(
 	'wasm_sapi_cgi_putenv'
 	, 'number'
@@ -23,26 +21,73 @@ export class PhpCgi
 
 	cookies = new Map;
 
+	count = 0;
+
+	completions = new Map;
+	inFlight = new Set;
+	queue = [];
+
 	constructor({docroot, rewrite, ...args} = {})
 	{
+		const mountPath = '/persist';
+
 		this.php = new PHP({
 			stdin:   () => this.input ? String(this.input.shift()).charCodeAt(0) : null, ...args
-			, print: x  => this.output.push(x)
-		});
+			, stdout: x => this.output.push(String.fromCharCode(x))
+			, persist: {mountPath}
+		}).then(p => {
+			p.ccall('pib_storage_init' , 'number' , [] , [] );
+			p.ccall('wasm_sapi_cgi_init' , 'number' , [] , [] );
 
-		this.php.then(p => {
-			p.ccall('wasm_sapi_cgi_init' , 'number' , [] , [] )
+			return p;
 		});
 
 		this.docroot = docroot || '';
 		this.rewrite = rewrite || this.rewrite;
 	}
 
-	request({filename, method = 'GET', path = '', get, post, cookie})
+	enqueue({url, filename, method = 'GET', path = '', get, post, contentType = ''})
 	{
-		// console.log({filename, method, path, get, post, cookie});
+		const request = {url, filename, method, path, get, post, contentType};
+		const completion = new Promise((accept, reject) => this.completions.set(request, {accept, reject}));
 
-		this.input  = ['POST', 'PUT', 'PATCH'].includes(method) ? toQueryString(post).split('') : [];
+		const runRequest = () => {
+			this.inFlight.add(runRequest);
+			const doReq = this.request(request)
+
+			doReq
+			.finally(() => {
+				this.inFlight.delete(runRequest);
+
+				if(this.queue.length)
+				{
+					const next = this.queue.shift();
+					next();
+				}
+			});
+
+			doReq
+			.then(result => this.completions.get(request).accept(result))
+			.catch(error => this.completions.get(request).reject(error));
+
+			return doReq;
+		};
+
+		if(this.inFlight.size)
+		{
+			this.queue.push(runRequest);
+		}
+		else
+		{
+			runRequest();
+		}
+
+		return completion;
+	}
+
+	async request({url, filename, method = 'GET', path = '', get, post, contentType = ''})
+	{
+		this.input  = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
 		this.output = [];
 		this.error  = [];
 
@@ -56,90 +101,108 @@ export class PhpCgi
 			path = '/' + path;
 		}
 
-		return this.php.then(p => {
+		if(!filename)
+		{
+			filename = this.docroot + path;
+		}
 
-			// if(!aboutPath.exists || !p.FS.isFile(aboutPath.object.mode))
-			// {
-			// 	console.log({path, filename, rewritten, aboutPath});
-			// 	const status = '404 - Not Found';
-			// 	return new Response(status, {status: 400});
-			// }
+		const cache = await caches.open('static-v1');
 
-			filename = filename || this.docroot + path;
+		let rewritten = this.rewrite(filename);
 
-			const rewritten = this.rewrite(filename);
-			const aboutPath = p.FS.analyzePath(rewritten);
+		const cached = await cache.match(url);
 
-			if(aboutPath.exists && rewritten.substr(-4) !== '.php')
+		if(cached)
+		{
+			const cacheTime = Number(cached.headers.get('x-php-wasm-cache-time'));
+
+			if(45_000 < Date.now() - cacheTime)
 			{
-				return new Response(p.FS.readFile(rewritten, { encoding: 'binary' }), {});
+				return cached;
 			}
-			else
+		}
+
+		const php = await this.php;
+		const aboutPath = php.FS.analyzePath(rewritten);
+
+		let isStatic = false;
+
+		if(rewritten.substr(-4) !== '.php')
+		{
+			// Return static file
+			if(aboutPath.exists)
 			{
-				filename = '/preload/drupal-7.95/index.php';
-			}
+				const response = new Response(php.FS.readFile(rewritten, { encoding: 'binary', url }), {});
 
-			new URLSearchParams()
+				response.headers.append('x-php-wasm-cache-time', new Date().getTime());
 
-			console.log( [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
+				cache.put(url, response.clone());
 
-			putEnv(p, 'DOCROOT', this.docroot);
-			putEnv(p, 'SERVER_SOFTWARE', navigator.userAgent);
-			putEnv(p, 'REQUEST_METHOD', method);
-			putEnv(p, 'REQUEST_URI', rewritten);
-			putEnv(p, 'REMOTE_ADDR', '127.0.0.1');
-			putEnv(p, 'SCRIPT_NAME', filename);
-			putEnv(p, 'SCRIPT_FILENAME', filename);
-			putEnv(p, 'PATH_TRANSLATED', rewritten);
-			putEnv(p, 'QUERY_STRING', toQueryString(get));
-			putEnv(p, 'HTTP_COOKIE', [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
-			putEnv(p, 'REDIRECT_STATUS', '200');
-			putEnv(p, 'CONTENT_TYPE', 'application/x-www-form-urlencoded');
-			putEnv(p, 'CONTENT_LENGTH', String(this.input.length));
-
-			p._main();
-
-			const parsedResponse = parseResponse(this.output.join('\n') + '\n');
-
-			let status = 200;
-
-			for(const [name, value] of Object.entries(parsedResponse.headers))
-			{
-				if(name === 'Status')
-				{
-					status = value.substr(0, 3);
-				}
+				return response;
 			}
 
-			console.log(parsedResponse.headers);
+			// Rewrite to index
+			filename = this.docroot + '/index.php';
+		}
 
-			if(parsedResponse.headers['Set-Cookie'])
+		{
+			putEnv(php, 'DOCROOT', this.docroot);
+			putEnv(php, 'SERVER_SOFTWARE', navigator.userAgent);
+			putEnv(php, 'REQUEST_METHOD', method);
+			putEnv(php, 'REQUEST_URI', rewritten);
+			putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
+			putEnv(php, 'SCRIPT_NAME', filename);
+			putEnv(php, 'SCRIPT_FILENAME', filename);
+			putEnv(php, 'PATH_TRANSLATED', rewritten);
+			putEnv(php, 'QUERY_STRING', get);
+			putEnv(php, 'HTTP_COOKIE', [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
+			putEnv(php, 'REDIRECT_STATUS', '200');
+			putEnv(php, 'CONTENT_TYPE', contentType);
+			putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
+		}
+
+		await new Promise(accept => php.FS.syncfs(true, err => {
+			if(err) console.warn(err);
+			accept();
+		}));
+
+		php._main();
+
+		await new Promise(accept => php.FS.syncfs(false, err => {
+			if(err) console.warn(err);
+			accept();
+		}));
+
+		const parsedResponse = parseResponse(this.output.join(''));
+
+		let status = 200;
+
+		for(const [name, value] of Object.entries(parsedResponse.headers))
+		{
+			if(name === 'Status')
 			{
-				const raw = parsedResponse.headers['Set-Cookie'];
-				const semi  = raw.indexOf(';');
-				const equal = raw.indexOf('=');
-				const key   = raw.substr(0, equal);
-				const value = raw.substr(1 + equal, semi - equal);
-
-				this.cookies.set(key, value);
-
-				console.log({key, value});
+				status = value.substr(0, 3);
 			}
+		}
 
-			const headers = {
-				"Content-Type": parsedResponse.headers["Content-Type"]
-			};
+		if(parsedResponse.headers['Set-Cookie'])
+		{
+			const raw = parsedResponse.headers['Set-Cookie'];
+			const semi  = raw.indexOf(';');
+			const equal = raw.indexOf('=');
+			const key   = raw.substr(0, equal);
+			const value = raw.substr(1 + equal, semi - equal);
 
-			if(parsedResponse.headers.Location)
-			{
-				headers.Location = parsedResponse.headers.Location;
-			}
+			this.cookies.set(key, value);
+		}
 
-			// console.log({path, filename, rewritten, headers, aboutPath});
+		const headers = { "Content-Type": parsedResponse.headers["Content-Type"] };
 
-			return new Response(parsedResponse.body, {
-				headers, status, url: rewritten
-			});
-		});
+		if(parsedResponse.headers.Location)
+		{
+			headers.Location = parsedResponse.headers.Location;
+		}
+
+		return new Response(parsedResponse.body, { headers, status, url });
 	}
 }

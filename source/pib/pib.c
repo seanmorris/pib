@@ -1,7 +1,7 @@
 #include "sapi/embed/php_embed.h"
 #include "ext/session/php_session.h"
 #include "main/php_output.h"
-// #include "SAPI.h"
+#include "SAPI.h"
 #include <emscripten.h>
 #include <stdlib.h>
 
@@ -30,12 +30,10 @@
 #define MACRO_STRING(name) MACRO_STRING_INTERNAL(name)
 
 int main() { return 0; }
+
 bool started = false;
-
-int EMSCRIPTEN_KEEPALIVE  __attribute__((noinline)) pib_init(void)
+void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 {
-	putenv("USE_ZEND_ALLOC=0");
-
 	if(!started)
 	{
 		started = true;
@@ -46,8 +44,7 @@ int EMSCRIPTEN_KEEPALIVE  __attribute__((noinline)) pib_init(void)
 			{
 				const localPath = Module.persist.localPath || './persist';
 				const mountPath = Module.persist.mountPath || '/persist';
-
-				const wasmEnv = UTF8ToString($0);
+				const wasmEnv   = UTF8ToString($0);
 
 				FS.mkdir(mountPath);
 
@@ -69,14 +66,34 @@ int EMSCRIPTEN_KEEPALIVE  __attribute__((noinline)) pib_init(void)
 			}
 		}, wasmEnv);
 	}
+}
 
-	int res = php_embed_init(0, NULL);
-	return res;
+int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(void)
+{
+	putenv("USE_ZEND_ALLOC=0");
+	pib_storage_init();
+	return php_embed_init(0, NULL);
+}
+
+void EMSCRIPTEN_KEEPALIVE pib_destroy(void)
+{
+	php_embed_shutdown();
+}
+
+int EMSCRIPTEN_KEEPALIVE pib_refresh(void)
+{
+	pib_destroy();
+	return pib_init();
+}
+
+void EMSCRIPTEN_KEEPALIVE pib_flush(void)
+{
+	php_output_flush_all();
 }
 
 void pib_finally(void)
 {
-	php_output_flush_all();
+	pib_flush();
 }
 
 char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
@@ -155,18 +172,6 @@ char *EMSCRIPTEN_KEEPALIVE pib_tokenize(char *code)
 	smart_str_free(&buf);
 
 	return ret;
-}
-
-void EMSCRIPTEN_KEEPALIVE pib_destroy(void)
-{
-	return php_embed_shutdown();
-}
-
-int EMSCRIPTEN_KEEPALIVE pib_refresh(void)
-{
-	pib_destroy();
-
-	return pib_init();
 }
 
 #ifdef WITH_VRZNO

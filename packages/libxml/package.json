@@ -1,6 +1,6 @@
 {
 	"name": "php-wasm-libxml",
-	"description": "libxml for phpwasm.",
+	"description": "libxml for php-wasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
 	"version": "0.0.1",

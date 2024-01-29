@@ -1,4 +1,7 @@
 import { PhpCgi } from "./PhpCgi";
+import { Request } from "./PhpCgi";
+
+const php = new PhpCgi({ docroot: '/persist/drupal-7.95' });
 
 self.addEventListener('install', event => {
 	console.log('Install');
@@ -10,10 +13,6 @@ self.addEventListener('activate', event => {
 	event.waitUntil(clients.claim());
 });
 
-let c = 0;
-
-const php = new PhpCgi({ docroot: '/preload/drupal-7.95' });
-
 self.addEventListener('fetch', event => event.respondWith(new Promise(accept => {
 
 	const request  = event.request;
@@ -23,26 +22,23 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 	const _path    = path.slice(0);
 
 	// if(self.location.hostname === url.hostname)
-	if(self.location.hostname === url.hostname && (_path[0] === 'php-wasm' || _path[0] === 'preload'))
+	if(self.location.hostname === url.hostname && ((_path[0] === 'php-wasm' && _path[1] === 'drupal') || _path[0] === 'persist'))
 	{
+		_path.shift();
+
 		if(_path[0] === 'php-wasm')
 		{
+			_path.shift();
 		}
 
-		_path.shift();
+		if(_path[0] === 'drupal')
+		{
+			_path.shift();
+		}
 
 		if(_path[0] === 'drupal-7.95')
 		{
 			_path.shift();
-		}
-
-		if(_path[0] === 'persist')
-		{
-			_path.shift();
-			if(_path[0] === 'drupal-7.95')
-			{
-				_path.shift();
-			}
 		}
 
 		let getPost = Promise.resolve();
@@ -55,8 +51,6 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 
 				const processBody = ({done, value}) => {
 
-					console.log({done,value});
-
 					if(value)
 					{
 						postBody.push([...value].map(x => String.fromCharCode(x)).join(''));
@@ -67,7 +61,6 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 						return reader.read().then(processBody);
 					}
 
-					console.log(postBody.join(''));
 					accept(postBody.join(''));
 				};
 
@@ -75,17 +68,17 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 			});
 		}
 
-		return getPost.then(post => {
-			return php.request({
-				method: request.method
-				, path: _path.join('/')
-				, get: url.search ? url.search.substr(1) : ''
-				, post: request.method === 'POST'
-					? String(new URLSearchParams(post))
-					: null
-			});
-		})
-		.then((r) => accept(r));
+		return getPost.then(post => php.enqueue({
+			url
+			, method: request.method
+			, path: _path.join('/')
+			, get: url.search ? url.search.substr(1) : ''
+			, post: request.method === 'POST' ? post : null
+			, contentType: request.method === 'POST'
+				? (request.headers.get('Content-Type') ?? 'application/x-www-form-urlencoded')
+				: null
+		}))
+		.then(accept);
 	}
 
 	if(_path[0] === 'php-wasm')
