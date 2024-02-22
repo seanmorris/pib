@@ -45,7 +45,7 @@ EXPORT_NAME=createPhpModule
 
 ### Preload data
 
-My prefered option is to use the [`file_packager`](https://github.com/emscripten-core/emscripten/blob/9bdb310b89472a0f4d64f36e4a79273d8dc7fa98/tools/file_packager) tool to build the preloaded data in a `php-web.data.js` (and `php-web.data` file). These are preloaded into IDBFS. That can be changed changing the `-lidbfs.js` argument to `emcc`.
+My preferred option is to use the [`file_packager`](https://github.com/emscripten-core/emscripten/blob/9bdb310b89472a0f4d64f36e4a79273d8dc7fa98/tools/file_packager) tool to build the preloaded data in a `php-web.data.js` (and `php-web.data` file). These are preloaded into IDBFS. That can be changed changing the `-lidbfs.js` argument to `emcc`.
 
 This will preload `SOME_DIR` into the `/src` directory inside the WASM filesystem:
 
@@ -109,6 +109,53 @@ console.log(ccall("phpw_exec", STR, [STR], ["phpversion();"]));
 ```
 
 [More about how to call exposed functions](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html?highlight=call#interacting-with-code-ccall-cwrap)
+
+## Demo
+
+Before running the demo, you need to build the library.
+
+```bash
+docker buildx bake
+```
+
+Then you need to copy
+the `php-web.js` and `php-web.wasm` to the `demo` directory.
+
+```console
+$ cp build/php-web.* demo/public/
+```
+
+Then to build the preloaded data:
+
+```bash
+docker run \
+  -v $(pwd)/demo/src:/src \
+  -v $(pwd)/demo/public:/dist \
+  -w /dist \
+  soyuka/php-wasm:8.2.9 \
+  python3 \
+    /emsdk/upstream/emscripten/tools/file_packager.py \
+    php-web.data \
+      --use-preload-cache \
+      --lz4 \
+      --preload "/src" \
+      --js-output=php-web.data.js \
+      --no-node \
+      --exclude '*/.*' \
+      --export-name=createPhpModule
+```
+
+Then attach the `php-web.data.js` to the `demo/public/php-web.mjs`:
+
+```bash
+sed '/--pre-js/r demo/public/php-web.data.js' demo/public/php-web.mjs > this-has-preloaded-data-php-web.mjs ; mv this-has-preloaded-data-php-web.mjs demo/public/php-web.mjs
+```
+
+And finally open a web sserver in the `demo` directory:
+
+```console
+$ php -S 127.0.0.1:8000 -t demo/public
+```
 
 ## TODO
 
