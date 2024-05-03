@@ -2,6 +2,14 @@
 
 Changes
 
+## v0.0.9 - Proving Grounds
+
+* Adding PHP-CGI support!
+* Adding httpd-like CGI wrapper.
+* Adding libicu, freetype, zlib, gd, libpng, libjpeg, & openssl.
+* Demos for CodeIgniter, CakePHP, Laravel & Laminas.
+* Drupal & all other demos now use standard build + zip install.
+
 ## v0.0.8 - Preparing for Lift-off
 
 * Adding ESM & CDN Module support!
@@ -22,7 +30,6 @@ Changes
 * Updating PHP to 8.2.4
 * Updating SQLite to 3.41
 * Updating Drupal to 7.95
-
 * Correcting hiccups in the build process
 
 ## 0.0.6 - Ease
@@ -64,7 +71,6 @@ Changes
 * Build dependencies are now expressed in the makefile
 * Project can be built in its entirety by running `make`.
 * Ensuring newlines in PHP output are respected.
-
 
 ## 0.0.1 - Humble Beginnings
 

@@ -16,12 +16,12 @@ third_party/gd/.gitignore:
 		--single-branch     \
 		--depth 1;
 
-gd: third_party/gd/.gitignore
+lib/lib/libgd.a: third_party/gd/.gitignore
 	@ echo -e "\e[33;4mBuilding GD\e[0m"
 	${DOCKER_RUN_IN_GD} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC"
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE}"
 	${DOCKER_RUN_IN_GD} emmake make -j1;
 	${DOCKER_RUN_IN_GD} emmake make install;
 

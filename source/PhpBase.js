@@ -23,6 +23,9 @@ export class PhpBase extends EventTarget
 
 		Object.freeze(this.buffers);
 
+		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
+		this.transactionStarted = false;
+
 		const defaults  = {
 			stdin:  () => this.buffers.stdin.shift() ?? null,
 			stdout: byte => this.buffers.stdout.push(byte),
@@ -70,27 +73,101 @@ export class PhpBase extends EventTarget
 
 	run(phpCode)
 	{
-		return this.binary.then(php => php.ccall(
-			'pib_run'
-			, NUM
-			, [STR]
-			, [`?>${phpCode}`]
-			, {async:true}
-		))
+		return this.binary.then(php => {
+			const sync = this.autoTransaction
+				? this.startTransaction()
+				: Promise.resolve();
+
+			const run  = sync.then(() => php.ccall(
+				'pib_run'
+				, NUM
+				, [STR]
+				, [`?>${phpCode}`]
+				, {async: true}
+			));
+
+			return this.autoTransaction
+				? run.then(() => this.commitTransaction()).then(() => run)
+				: run;
+		})
 		.finally(() => this.flush());
 	}
 
 	exec(phpCode)
 	{
-		return this.binary
-		.then(php => php.ccall(
-			'pib_exec'
-			, STR
-			, [STR]
-			, [phpCode]
-			, {async:true}
-		))
+		return this.binary.then(php => {
+			const sync = this.autoTransaction
+				? this.startTransaction()
+				: Promise.resolve();
+
+			const run = sync.then(() => php.ccall(
+				'pib_exec'
+				, STR
+				, [STR]
+				, [phpCode]
+				, {async: true}
+			));
+
+			return this.autoTransaction
+				? run.then(() => this.commitTransaction()).then(() => run)
+				: run;
+		})
 		.finally(() => this.flush());
+	}
+
+	startTransaction()
+	{
+		return this.binary.then(php => {
+			if(this.transactionStarted || !php.persist)
+			{
+				return Promise.resolve();
+			}
+
+			return new Promise((accept, reject) => {
+				php.FS.syncfs(true, error => {
+					if(error)
+					{
+						console.error(error);
+						reject(error);
+					}
+					else
+					{
+						this.transactionStarted = true;
+						accept();
+					}
+				});
+			});
+		});
+	}
+
+	commitTransaction()
+	{
+		return this.binary.then(php => {
+			if(!php.persist)
+			{
+				return Promise.resolve();
+			}
+
+			if(!this.transactionStarted)
+			{
+				throw new Error('No transaction initialized.');
+			}
+
+			return new Promise((accept, reject) => {
+				php.FS.syncfs(false, error => {
+					if(error)
+					{
+						console.error(error);
+						reject(error);
+					}
+					else
+					{
+						this.transactionStarted = false;
+						accept();
+					}
+				}
+			)});
+		});
 	}
 
 	tokenize(phpCode)
@@ -101,7 +178,7 @@ export class PhpBase extends EventTarget
 			, STR
 			, [STR]
 			, [phpCode]
-			, {async:true}
+			, {async: true}
 		));
 	}
 
@@ -138,7 +215,7 @@ const _Event = globalThis.CustomEvent ?? class extends globalThis.Event
 	}
 };
 
-class OutputBuffer
+export class OutputBuffer
 {
 	constructor(target, eventType, maxLength)
 	{

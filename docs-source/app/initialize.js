@@ -1,15 +1,39 @@
 "use strict";
-
 import { PhpWebDrupal as PHP } from 'php-wasm/PhpWebDrupal.js';
 
-let session_id = '';
 const serviceWorker = navigator.serviceWorker;
+
+serviceWorker.addEventListener('message', event => {
+	console.log(event.data);
+});
 
 serviceWorker.register(`${location.pathname}DrupalWorker.js`);
 
+serviceWorker.ready.then(registration => {
+
+	window.phpListFiles = path => {
+		registration.active.postMessage({
+			action:   'readdir'
+			, params: [path]
+			, token:  crypto.randomUUID()
+		});
+	};
+
+	window.phpReadFile = path => {
+		registration.active.postMessage({
+			action:   'readFile'
+			, params: [path]
+			, token:  crypto.randomUUID()
+		});
+	};
+
+	window.phpListFiles('/preload/drupal-7.95/');
+	window.phpReadFile('/preload/drupal-7.95/index.php');
+});
+
 if(serviceWorker && !serviceWorker.controller)
 {
-	// location.reload();
+	location.reload();
 }
 
 let php = new PHP({persist: {mountPath: '/persist'}});
@@ -514,7 +538,10 @@ fwrite($stdErr, json_encode(['errors'  => error_get_last()]) . "\n");
 
 	};
 
-	const onNavigate = event => navigate(event.data);
+	const onNavigate = event => {
+		console.log(event);
+		navigate(event.data)
+	};
 
 	const refreshPhp = (init = false) => {
 

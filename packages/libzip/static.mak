@@ -14,12 +14,14 @@ third_party/libzip/.gitignore:
 		--single-branch     \
 		--depth 1;
 
-lib/lib/libzip.a: third_party/libzip/.gitignore
+lib/lib/libzip.a: third_party/libzip/.gitignore lib/lib/libz.a
 	@ echo -e "\e[33;4mBuilding LibZip\e[0m"
 	${DOCKER_RUN_IN_LIBZIP} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
+		-DZLIB_LIBRARY=/src/lib/lib/libz.a \
+		-DZLIB_INCLUDE_DIR=/src/lib/include/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC"
+		-DCMAKE_C_FLAGS=" -fPIC"
 	${DOCKER_RUN_IN_LIBZIP} emmake make -j1;
 	${DOCKER_RUN_IN_LIBZIP} emmake make install;
 

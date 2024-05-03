@@ -29,7 +29,7 @@
 #define MACRO_STRING_INTERNAL(name) #name
 #define MACRO_STRING(name) MACRO_STRING_INTERNAL(name)
 
-int main() { return 0; }
+int main(void) { return 0; }
 
 bool started = false;
 void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
@@ -38,33 +38,50 @@ void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 	{
 		started = true;
 		char *wasmEnv = MACRO_STRING(ENVIRONMENT);
+		bool useNodeRawFS = false;
+#ifndef NODERAWFS
+		useNodeRawFS = true;
+#endif
 
 		EM_ASM({
 			if(Module.persist)
 			{
-				const localPath = Module.persist.localPath || './persist';
-				const mountPath = Module.persist.mountPath || '/persist';
+				let persist = Module.persist;
+
+				if(!Array.isArray(persist))
+				{
+					persist = [persist];
+				}
 				const wasmEnv   = UTF8ToString($0);
 
-				FS.mkdir(mountPath);
+				persist.forEach(p => {
+					const localPath = p.localPath || './persist';
+					const mountPath = p.mountPath || '/persist';
 
-				switch(wasmEnv)
-				{
-					case 'web':
-						FS.mount(IDBFS, {}, mountPath);
-						break;
+					FS.mkdir(mountPath);
 
-					case 'node':
-						const fs = require('fs');
-						if(!fs.existsSync(localPath))
-						{
-							fs.mkdirSync(localPath, {recursive: true});
-						}
-						FS.mount(NODEFS, { root: localPath }, mountPath);
-						break;
-				}
+					switch(wasmEnv)
+					{
+						case 'web':
+							FS.mount(IDBFS, {}, mountPath);
+							break;
+
+						case 'node':
+							if(!useNodeRawFS)
+							{
+								const fs = require('fs');
+								if(!fs.existsSync(localPath))
+								{
+									fs.mkdirSync(localPath, {recursive: true});
+								}
+								FS.mount(NODEFS, { root: localPath }, mountPath);
+							}
+							break;
+					}
+				})
+
 			}
-		}, wasmEnv);
+		}, wasmEnv, useNodeRawFS);
 	}
 }
 
@@ -110,9 +127,10 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 	zend_catch
 	{
 	}
-
 	zend_end_try();
+
 	pib_finally();
+
 	return retVal;
 }
 
@@ -143,8 +161,8 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 	{
 		retVal = 1; // Code died.
 	}
-
 	zend_end_try();
+
 	pib_finally();
 	return retVal;
 }
@@ -199,7 +217,6 @@ int EMSCRIPTEN_KEEPALIVE del_callback(zend_function *fptr)
 	ZEND_PARSE_PARAMETERS_START(0, 0) \
 	ZEND_PARSE_PARAMETERS_END()
 #endif
-
 
 PHP_RINIT_FUNCTION(pib)
 {

@@ -1,7 +1,28 @@
 import { PhpCgi } from "./PhpCgi";
 import { Request } from "./PhpCgi";
 
-const php = new PhpCgi({ docroot: '/persist/drupal-7.95' });
+const php = new PhpCgi({ docroot: '/persist/drupal-7.95', rewrite: path => {
+	const _path = path.split('/');
+
+	_path.shift();
+
+	if(_path[0] === 'php-wasm')
+	{
+		_path.shift();
+	}
+
+	if(_path[0] === 'drupal')
+	{
+		_path.shift();
+	}
+
+	if(_path[0] === 'drupal-7.95')
+	{
+		_path.shift();
+	}
+
+	return _path.join('/');
+} });
 
 self.addEventListener('install', event => {
 	console.log('Install');
@@ -14,33 +35,14 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => event.respondWith(new Promise(accept => {
-
 	const request  = event.request;
 	const url      = new URL(request.url);
 	const pathname = url.pathname.replace(/^\//, '');
 	const path     = pathname.split('/');
 	const _path    = path.slice(0);
 
-	// if(self.location.hostname === url.hostname)
 	if(self.location.hostname === url.hostname && ((_path[0] === 'php-wasm' && _path[1] === 'drupal') || _path[0] === 'persist'))
 	{
-		_path.shift();
-
-		if(_path[0] === 'php-wasm')
-		{
-			_path.shift();
-		}
-
-		if(_path[0] === 'drupal')
-		{
-			_path.shift();
-		}
-
-		if(_path[0] === 'drupal-7.95')
-		{
-			_path.shift();
-		}
-
 		let getPost = Promise.resolve();
 
 		if(request.body)
@@ -71,7 +73,7 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 		return getPost.then(post => php.enqueue({
 			url
 			, method: request.method
-			, path: _path.join('/')
+			, path: pathname
 			, get: url.search ? url.search.substr(1) : ''
 			, post: request.method === 'POST' ? post : null
 			, contentType: request.method === 'POST'
@@ -111,7 +113,28 @@ self.addEventListener('fetch', event => event.respondWith(new Promise(accept => 
 	}
 })));
 
-self.addEventListener('message', event => {
+self.addEventListener('message', async event => {
+	const { data, source } = event;
+	const { action, token, params = [] } = data;
+
+	switch(action)
+	{
+		case 'readdir':
+			source.postMessage({re: token, result: await php.readdir(...params)});
+		break;
+
+		case 'mkdir':
+			source.postMessage({re: token, result: await php.mkdir(...params)});
+		break;
+
+		case 'readFile':
+			source.postMessage({re: token, result: await php.readFile(...params)});
+		break;
+
+		case 'writeFile':
+			source.postMessage({re: token, result: await php.writeFile(...params)});
+		break;
+	}
 });
 
 self.addEventListener('push', event => {

@@ -233,3 +233,15 @@ index 20124db..33327c1 100644
  {
  	zval source_zval;
  	zend_lex_state original_lex_state;
+diff --git a/third_party/php8.2-src/main/fastcgi.c b/third_party/php8.2-src/main/fastcgi.c
+index a77491f..7f9778f 100644
+--- a/third_party/php8.2-src/main/fastcgi.c
++++ b/third_party/php8.2-src/main/fastcgi.c
+@@ -553,6 +553,7 @@ void fcgi_shutdown(void)
+ {
+ 	if (is_initialized) {
+ 		zend_hash_destroy(&fcgi_mgmt_vars);
++		is_initialized = 0;
+ 	}
+ 	is_fastcgi = 0;
+ 	if (allowed_clients) {

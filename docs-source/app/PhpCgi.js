@@ -34,6 +34,7 @@ export class PhpCgi
 		this.php = new PHP({
 			stdin:   () => this.input ? String(this.input.shift()).charCodeAt(0) : null, ...args
 			, stdout: x => this.output.push(String.fromCharCode(x))
+			// , printErr: line => console.warn(line)
 			, persist: {mountPath}
 		}).then(p => {
 			p.ccall('pib_storage_init' , 'number' , [] , [] );
@@ -96,6 +97,8 @@ export class PhpCgi
 			path = '/index.php';
 		}
 
+		path = this.rewrite(path);
+
 		if(path[0] !== '/')
 		{
 			path = '/' + path;
@@ -106,10 +109,7 @@ export class PhpCgi
 			filename = this.docroot + path;
 		}
 
-		const cache = await caches.open('static-v1');
-
-		let rewritten = this.rewrite(filename);
-
+		const cache  = await caches.open('static-v1');
 		const cached = await cache.match(url);
 
 		if(cached)
@@ -122,17 +122,16 @@ export class PhpCgi
 			}
 		}
 
-		const php = await this.php;
-		const aboutPath = php.FS.analyzePath(rewritten);
+		const php       = await this.php;
+		const originalFilename = filename;
+		const aboutPath = php.FS.analyzePath(originalFilename);
 
-		let isStatic = false;
-
-		if(rewritten.substr(-4) !== '.php')
+		if(originalFilename.substr(-4) !== '.php')
 		{
 			// Return static file
 			if(aboutPath.exists)
 			{
-				const response = new Response(php.FS.readFile(rewritten, { encoding: 'binary', url }), {});
+				const response = new Response(php.FS.readFile(originalFilename, { encoding: 'binary', url }), {});
 
 				response.headers.append('x-php-wasm-cache-time', new Date().getTime());
 
@@ -146,14 +145,16 @@ export class PhpCgi
 		}
 
 		{
-			putEnv(php, 'DOCROOT', this.docroot);
+			const docroot = this.docroot;
+
+			putEnv(php, 'DOCROOT', docroot);
 			putEnv(php, 'SERVER_SOFTWARE', navigator.userAgent);
 			putEnv(php, 'REQUEST_METHOD', method);
-			putEnv(php, 'REQUEST_URI', rewritten);
+			putEnv(php, 'REQUEST_URI', originalFilename);
 			putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
 			putEnv(php, 'SCRIPT_NAME', filename);
 			putEnv(php, 'SCRIPT_FILENAME', filename);
-			putEnv(php, 'PATH_TRANSLATED', rewritten);
+			putEnv(php, 'PATH_TRANSLATED', originalFilename);
 			putEnv(php, 'QUERY_STRING', get);
 			putEnv(php, 'HTTP_COOKIE', [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
 			putEnv(php, 'REDIRECT_STATUS', '200');
@@ -172,6 +173,8 @@ export class PhpCgi
 			if(err) console.warn(err);
 			accept();
 		}));
+
+		console.log(++this.count);
 
 		const parsedResponse = parseResponse(this.output.join(''));
 
@@ -204,5 +207,35 @@ export class PhpCgi
 		}
 
 		return new Response(parsedResponse.body, { headers, status, url });
+	}
+
+	async readdir(path)
+	{
+		return (await this.php).FS.readdir(path);
+	}
+
+	async mkdir(path)
+	{
+		return (await this.php).FS.mkdir(path);
+	}
+
+	async rmdir(path)
+	{
+		return (await this.php).FS.rmdir(path);
+	}
+
+	async readFile(path)
+	{
+		return (await this.php).FS.readFile(path);
+	}
+
+	async writeFile(path, data, options)
+	{
+		return (await this.php).FS.writeFile(path, data, options);
+	}
+
+	async unlink(path)
+	{
+		return (await this.php).FS.unlink(path);
 	}
 }

@@ -16,10 +16,10 @@ third_party/zlib/.gitignore:
 		--single-branch     \
 		--depth 1;
 
-zlib: third_party/zlib/.gitignore
+lib/lib/libz.a: third_party/zlib/.gitignore
 	@ echo -e "\e[33;4mBuilding ZLib\e[0m"
 	${DOCKER_RUN_IN_ZLIB} emconfigure ./configure --prefix=/src/lib/ --static
-	${DOCKER_RUN_IN_ZLIB} emmake make EMCC_CFLAGS='-fPIC'
+	${DOCKER_RUN_IN_ZLIB} emmake make EMCC_CFLAGS='-fPIC '
 	${DOCKER_RUN_IN_ZLIB} emmake make install
 	${DOCKER_RUN_IN_ZLIB} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 

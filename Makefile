@@ -66,14 +66,14 @@ DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm ru
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
-	-e EMCC_CORES=`nproc`
+	-e EMCC_CORES=$$((`nproc` / 2))
 
 DOCKER_ENV_SIDE=docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm \
 	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
-	-e EMCC_CORES=`nproc`                 \
+	-e EMCC_CORES=$$((`nproc` / 2))       \
 	-e CFLAGS=" -I/root/lib/include "     \
 	-e EMCC_FLAGS=" -sSIDE_MODULE=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 "
 
@@ -94,7 +94,7 @@ TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 
 MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
 	PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs \
-	build/php-worker-drupal.mjs
+	# build/php-worker-drupal.mjs
 
 CJS=php-web.js php-webview.js php-node.js php-shell.js php-worker.js \
 	PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js \
@@ -108,9 +108,9 @@ dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-nod
       dist/php-web-drupal.js  dist/php-web.js  dist/php-webview.js  dist/php-node.js  dist/php-shell.js  dist/php-worker.js \
 	  dist/php-tags.mjs
 
-web-drupal: php-web-drupal.wasm
+# web-drupal: php-web-drupal.wasm
 web: lib/pib_eval.o php-web.wasm
-	echo "Done!"
+worker: lib/pib_eval.o php-worker.wasm
 node: php-node.wasm
 
 PRELOAD_ASSETS?=
@@ -198,6 +198,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 	${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
 	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
+		--with-config-file-path=/config \
 		--enable-embed=static \
 		--disable-fiber \
 		--disable-fiber-asm \
@@ -241,18 +242,11 @@ ifdef SOURCE_MAP_BASE
 EXTRA_FLAGS+= --source-map-base ${SOURCE_MAP_BASE}
 endif
 
-ifeq (${WITH_VRZNO}, 1)
-PRE_JS_FILES+=/src/third_party/vrzno/lib.js
-ifdef VRZNO_DEV_PATH
-DEPENDENCIES+=${VRZNO_DEV_PATH}/lib.js
-endif
-endif
-
 ifneq (${PRE_JS_FILES},)
 EXTRA_FLAGS+= --pre-js /src/.cache/pre.js
 endif
 
-.cache/pre.js:
+.cache/pre.js: ${PRE_JS_FILES}
 ifneq (${PRE_JS_FILES},)
 	${DOCKER_RUN} cat ${PRE_JS_FILES} > .cache/pre.js
 endif
@@ -271,7 +265,7 @@ SAPI_CGI_PATH=sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD
 
 EXTRA_CFLAGS=
 
-BUILD_FLAGS=-j`nproc`\
+BUILD_FLAGS=-j$$((`nproc` / 2))\
 	ZEND_EXTRA_LIBS='-lsqlite3' \
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
@@ -281,11 +275,12 @@ BUILD_FLAGS=-j`nproc`\
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		-fPIC ${SYMBOL_FLAGS}                    \
 		-s EXPORTED_FUNCTIONS='\''[${EXPORTED_FUNCTIONS}]'\'' \
-		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS"]'\'' \
+		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS", "ENV"]'\'' \
+		-DENVIRONMENT=${ENVIRONMENT}             \
 		-s ENVIRONMENT=${ENVIRONMENT}            \
-		-D ENVIRONMENT=${ENVIRONMENT}            \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY}      \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY}      \
+		-s TOTAL_STACK=32MB                      \
 		-s ALLOW_MEMORY_GROWTH=1                 \
 		-s ASSERTIONS=${ASSERTIONS}              \
 		-s ERROR_ON_UNDEFINED_SYMBOLS=0          \
@@ -300,8 +295,9 @@ BUILD_FLAGS=-j`nproc`\
 		-I /src/third_party/php${PHP_VERSION}-src/Zend  \
 		-I /src/third_party/php${PHP_VERSION}-src/main  \
 		-I /src/third_party/php${PHP_VERSION}-src/TSRM/ \
-		-I /src/third_party/libxml2              \
-		-I /src/third_party/${SQLITE_DIR}        \
+		-I /src/third_party/libxml2                \
+		-I /src/third_party/openssl/crypto/x509    \
+		-I /src/third_party/${SQLITE_DIR}          \
 		-I /src/third_party/php${PHP_VERSION}-src/ext/json \
 		-I /src/third_party/php${PHP_VERSION}-src/sapi/embed \
 		${FS_TYPE}                               \
@@ -319,31 +315,29 @@ endif
 
 build/php-web-drupal.js: BUILD_TYPE=js
 build/php-web-drupal.js: FS_TYPE=${WEB_FS_TYPE}
-build/php-web-drupal.js: ENVIRONMENT=web-drupal
 build/php-web-drupal.js: PRELOAD_METHOD=--preload-file
 build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-build/php-web-drupal.js: EXTRA_CFLAGS+= -D ENVIRONMENT=web
-build/php-web-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -D ENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
+build/php-web-drupal.js: ENVIRONMENT=web-drupal
+build/php-web-drupal.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
+build/php-web-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
 build/php-web-drupal.js: ${DEPENDENCIES} third_party/preload/drupal-7.95/README.txt third_party/preload/bench.php third_party/preload/dump-request.php| ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} 'PHP_BINARIES=cli'
 	# mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	# cp -rf third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 	cp -rf third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./docs-source/app/assets
 	# ${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
 
 build/php-worker-drupal.js: BUILD_TYPE=js
 build/php-worker-drupal.js: FS_TYPE=${WORKER_FS_TYPE}
-build/php-worker-drupal.js: ENVIRONMENT=worker-drupal
-build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker
 build/php-worker-drupal.js: PRELOAD_METHOD=--embed-file
-build/php-worker-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-build/php-worker-drupal.js: EXTRA_CFLAGS+= -D ENVIRONMENT=web
-build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker -D ENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
-build/php-worker-drupal.js: ${DEPENDENCIES} third_party/preload/drupal-7.95/README.txt third_party/preload/bench.php third_party/preload/dump-request.php | ${ORDER_ONLY}
-	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+build/php-worker-drupal.js: ENVIRONMENT=worker-drupal
+build/php-worker-drupal.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
+build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker -DENVIRONMENT=web
+build/php-worker-drupal.js: ${DEPENDENCIES} | ${ORDER_ONLY}
+	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} 'PHP_BINARIES=cgi'
 	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp -rf third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
@@ -354,70 +348,82 @@ build/php-worker-drupal.js: ${DEPENDENCIES} third_party/preload/drupal-7.95/READ
 
 build/php-web.js: BUILD_TYPE=js
 build/php-web.js: ENVIRONMENT=web
+build/php-web.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
+build/php-web.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
 build/php-web.js: FS_TYPE=${WEB_FS_TYPE}
 build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
+build/php-web.mjs: EXTRA_CFLAGS+= -DENVIRONMENT=web
+build/php-web.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
 build/php-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
+build/php-worker.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
+build/php-worker.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
 build/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 build/php-worker.js: PRELOAD_METHOD=--embed-file
 build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
+build/php-worker.mjs: EXTRA_CFLAGS+= -DENVIRONMENT=web
+build/php-worker.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
 build/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 build/php-worker.mjs: PRELOAD_METHOD=--embed-file
 build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-node.js: BUILD_TYPE=js
 build/php-node.js: ENVIRONMENT=node
+build/php-node.js: EXTRA_CFLAGS+= -DENVIRONMENT=node
+build/php-node.js: EXTRA_FLAGS+= -s ENVIRONMENT=node -DENVIRONMENT=node
 build/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
+build/php-node.mjs: EXTRA_CFLAGS+= -DENVIRONMENT=node
+build/php-node.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=node -DENVIRONMENT=node
 build/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-shell.js: BUILD_TYPE=js
@@ -425,9 +431,9 @@ build/php-shell.js: ENVIRONMENT=shell
 build/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-shell.mjs: BUILD_TYPE=mjs
@@ -435,9 +441,9 @@ build/php-shell.mjs: ENVIRONMENT=shell
 build/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}/
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-webview.js: BUILD_TYPE=js
@@ -445,9 +451,9 @@ build/php-webview.js: ENVIRONMENT=webview
 build/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 build/php-webview.mjs: BUILD_TYPE=mjs
@@ -455,9 +461,9 @@ build/php-webview.mjs: ENVIRONMENT=webview
 build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	mv -f third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
-	mv -f third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
+	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
 ########## Package files ###########
@@ -504,31 +510,47 @@ endif
 
 php-web.js: build/php-web.js
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 php-web.mjs: build/php-web.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 php-worker.js: build/php-worker.js
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -540,7 +562,7 @@ endif
 
 php-worker.mjs: build/php-worker.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -552,74 +574,122 @@ endif
 
 php-node.js: build/php-node.js
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 php-node.mjs: build/php-node.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 php-shell.js: build/php-shell.js
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 php-shell.mjs: build/php-shell.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 php-webview.js: build/php-webview.js
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 php-webview.mjs: build/php-webview.mjs
 	cp $^ $@
-	cp $^.wasm* $(dir $@)
+	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.gz
+	bash -c 'gzip -9 < $@.data > $@.data.gz'
+endif
 endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+ifneq (${PRELOAD_ASSETS},)
+	rm -f $@.data.br
+	brotli -9 $@.data
+endif
 endif
 
 PhpBase.js: source/PhpBase.js
@@ -968,7 +1038,7 @@ ${ENV_FILE}:
 
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.wasm.br *.wasm.gz *.data *.data.br  *.data.gz
-	${DOCKER_RUN} rm -rf lib/lib/${PHP_AR}.* lib/lib/php lib/include/php build/php* packages/php-cgi-wasm/php* third_party/preload
+	${DOCKER_RUN} rm -rf lib/lib/${PHP_AR}.* lib/lib/php lib/include/php build/php* packages/php-cgi-wasm/php* third_party/preload .cache/pre.js
 	${DOCKER_RUN_IN_PHP} rm -fv configured
 	${DOCKER_RUN_IN_PHP} make clean
 
@@ -985,6 +1055,9 @@ deep-clean:
 		third_party/php${PHP_VERSION}-src lib/* build/* \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
+		third_party/freetype-2.10.0 third_party/freetype \
+		third_party/gd third_party/jpeg-9f third_party/libicu \
+		third_party/libjpeg third_party/libpng third_party/openssl third_party/zlib \
 		third_party/vrzno third_party/libzip third_party/preload \
 		dist/* sqlite-*
 
@@ -1009,7 +1082,9 @@ pull-image:
 push-image:
 	docker-compose --progress quiet push
 
-demo: build/php-worker-drupal.js PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.js.wasm
+demo: build/php-worker-drupal.js PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.js.wasm php-web.js
+
+# demo-cgi: build/php-cgi-worker-drupal.js php-cgi-web-drupal.js docs-source/app/assets/php-cgi-web-drupal.js.wasm php-web.js
 
 serve-demo:
 	cd docs-source && brunch w -s
