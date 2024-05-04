@@ -8,6 +8,7 @@ CONFIGURE_FLAGS+= \
 	--enable-gd
 
 DOCKER_RUN_IN_GD=${DOCKER_ENV} -w /src/third_party/gd/ emscripten-builder
+TEST_LIST+=$(shell ls packages/gd/test/*.mjs)
 
 third_party/gd/.gitignore:
 	@ echo -e "\e[33;4mDownloading GD\e[0m"

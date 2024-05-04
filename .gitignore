@@ -1,5 +1,9 @@
 /php*.js
 /php*.mjs
+/php*.js.br
+/php*.mjs.br
+/php*.js.gz
+/php*.mjs.gz
 /php*.wasm
 /php*.wat
 /php-*.wasm.gz

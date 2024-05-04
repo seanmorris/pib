@@ -10,17 +10,48 @@ const rcFile = cwd + '/.php-wasm-rc';
 const commands = {};
 
 { // build
-	const build = (flags, envName = 'web', buildType = 'js') => {
+	const build = (flags, ...buildArgs) => {
 
-		const envNameCap = String(envName[0]).toUpperCase() + envName.substr(1);
+		let envName = 'web'
+		let buildType = 'js'
+		let binaryMode = 'cli'
+
+		if(buildArgs.includes('node'))
+		{
+			envName = 'node';
+		}
+
+		if(buildArgs.includes('worker'))
+		{
+			envName = 'worker';
+		}
+
+		if(buildArgs.includes('mjs'))
+		{
+			buildType = 'mjs';
+		}
+
+		if(buildArgs.includes('cgi'))
+		{
+			binaryMode = 'cgi';
+		}
+
+		console.log({envName, binaryMode, buildType});
+		// const envNameCap = String(envName[0]).toUpperCase() + envName.substr(1);
+
 		const buildTypeLower = String(buildType).toLowerCase();
 
+		console.log({cwd});
+		// return;
+
 		const options = [
-			`dist/Php${envNameCap}.${buildTypeLower}`,
-			`PHP_DIST_DIR_DEFAULT=${cwd}`,
+			`${envName}${binaryMode === 'cgi' ? '-cgi-' : '-'}${buildTypeLower}`,
+			`PHP${binaryMode === 'cgi' ? '_CGI_' : '_'}DIST_DIR=${cwd}`,
 			`BUILD_TYPE=${buildTypeLower}`,
 			`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`
 		];
+
+		console.log(options);
 
 		if(fs.existsSync(cwd + '/.php-wasm-rc'))
 		{

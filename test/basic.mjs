@@ -3,7 +3,6 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../PhpNode.mjs';
 
 test('Can run PHP', async () => {
-
 	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '';
@@ -21,7 +20,6 @@ test('Can run PHP', async () => {
 });
 
 test('Can print to STDOUT', async () => {
-
 	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '';
@@ -39,7 +37,6 @@ test('Can print to STDOUT', async () => {
 });
 
 test('Can print to STDERR', async () => {
-
 	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '';
@@ -57,7 +54,6 @@ test('Can print to STDERR', async () => {
 });
 
 test('Can take input on STDIN', async () => {
-
 	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '', stdin = 'This is a string of data provided on STDIN.';
@@ -77,7 +73,6 @@ test('Can take input on STDIN', async () => {
 });
 
 test('Can maintain memory between executions', async () => {
-
 	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '';
@@ -95,7 +90,6 @@ test('Can maintain memory between executions', async () => {
 });
 
 test('Can refresh memory between executions', async () => {
-
 	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '';
@@ -114,7 +108,6 @@ test('Can refresh memory between executions', async () => {
 });
 
 test('Can read files from the local FS', async () => {
-
 	const php = new PhpNode( { persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
 
 	let stdOut = '', stdErr = '';
@@ -126,5 +119,22 @@ test('Can read files from the local FS', async () => {
 	await php.run(`<?php echo file_get_contents('/persist/test-content.txt');`);
 
 	assert.equal(stdOut, `Hello, world!\n`);
+	assert.equal(stdErr, '');
+});
+
+test('PIB extension is enabled.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php var_dump(extension_loaded('pib'));`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
 });

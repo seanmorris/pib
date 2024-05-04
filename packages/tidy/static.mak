@@ -12,8 +12,10 @@ ARCHIVES+= lib/lib/libtidy.a
 CONFIGURE_FLAGS+= --with-tidy=/src/lib
 
 DOCKER_RUN_IN_TIDY=${DOCKER_ENV} -w /src/third_party/tidy-html5/ emscripten-builder
+TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 
 third_party/tidy-html5/.gitignore:
+	@ echo -e "\e[33;4mDownloading LibTidy\e[0m"
 	${DOCKER_RUN} git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
 		--branch ${TIDYHTML_TAG} \
 		--single-branch     \
@@ -22,6 +24,7 @@ third_party/tidy-html5/.gitignore:
 
 lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	@ echo -e "\e[33;4mBuilding LibTidy\e[0m"
+	${DOCKER_RUN_IN_TIDY} pwd
 	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \

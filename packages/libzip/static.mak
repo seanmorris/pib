@@ -8,6 +8,7 @@ ARCHIVES+= lib/lib/libzip.a
 CONFIGURE_FLAGS+= --with-zip
 
 DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -w /src/third_party/libzip/ emscripten-builder
+TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 
 third_party/libzip/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibZip\e[0m"

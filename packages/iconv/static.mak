@@ -8,6 +8,7 @@ CONFIGURE_FLAGS+= \
 	--with-iconv=/src/lib
 
 DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -w /src/third_party/libiconv-1.17/ emscripten-builder
+TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 
 third_party/libiconv-1.17/README:
 	${DOCKER_RUN} wget -q https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz

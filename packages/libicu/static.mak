@@ -11,6 +11,7 @@ DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/libicu/icu4c/source emscr
 DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/libicu/libicu_alt/icu4c/source emscripten-builder
 PRELOAD_ASSETS+= lib/share/icu/72.1/icudt72l.dat
 PRE_JS_FILES+= packages/libicu/env.js
+TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
 
 third_party/libicu/.gitignore:
 	@ echo -e "\e[33;4mDownloading LIBICU\e[0m"

@@ -9,6 +9,8 @@ CONFIGURE_FLAGS+= \
 
 DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} -eCC=emcc -eCXX=emcc -w /src/third_party/openssl/ emscripten-builder
 
+TEST_LIST+=$(shell ls packages/openssl/test/*.mjs)
+
 third_party/openssl/.gitignore:
 	@ echo -e "\e[33;4mDownloading OpenSSL\e[0m"
 	${DOCKER_RUN} git clone https://github.com/openssl/openssl.git third_party/openssl \

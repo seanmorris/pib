@@ -8,6 +8,7 @@ CONFIGURE_FLAGS+= \
 	--enable-png
 
 DOCKER_RUN_IN_LIBPNG=${DOCKER_ENV} -w /src/third_party/libpng/ emscripten-builder
+TEST_LIST+=$(shell ls packages/libpng/test/*.mjs)
 
 third_party/libpng/.gitignore:
 	@ echo -e "\e[33;4mDownloading LIBPNG\e[0m"
@@ -21,8 +22,9 @@ lib/lib/libpng.a: third_party/libpng/.gitignore
 	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE} "
-	${DOCKER_RUN_IN_LIBPNG} emmake make -j`nproc`;
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE} " \
+		-DPNG_SHARED="OFF"
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 endif

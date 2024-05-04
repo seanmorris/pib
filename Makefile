@@ -34,8 +34,7 @@ GID?=${_GID}
 
 SHELL=bash -euo pipefail
 
-PHP_DIST_DIR_DEFAULT ?=./dist
-PHP_DIST_DIR ?=${PHP_DIST_DIR_DEFAULT}
+PHP_DIST_DIR?=./
 
 ENVIRONMENT    ?=web
 # INITIAL_MEMORY ?=3072MB
@@ -74,40 +73,34 @@ DOCKER_RUN_IN_PHP =${DOCKER_ENV} -e CFLAGS="-I/root/lib/include" -w /src/third_p
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 
-MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
-	PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs \
-	OutputBuffer.mjs webTransactions.mjs _Event.mjs
+MJS=$(addprefix ${PHP_DIST_DIR}/,php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs) \
+	$(addprefix ${PHP_DIST_DIR}/,PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs) \
+	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.mjs webTransactions.mjs _Event.mjs)
 
-CJS=php-web.js php-webview.js php-node.js php-shell.js php-worker.js \
-	PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js \
-	OutputBuffer.js webTransactions.js  _Event.js
+CJS=$(addprefix ${PHP_DIST_DIR}/,php-web.js php-webview.js php-node.js php-shell.js php-worker.js) \
+	$(addprefix ${PHP_DIST_DIR}/,PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js) \
+	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.js webTransactions.js  _Event.js)
 
-TAG_JS=php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs
+TAG_JS=$(addprefix ${PHP_DIST_DIR},php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs)
 
 all: ${MJS} ${CJS} ${TAG_JS}
 cjs: ${CJS}
 mjs: ${MJS}
 
-dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-node.mjs dist/php-shell.mjs dist/php-worker.mjs \
-      dist/php-web-drupal.js  dist/php-web.js  dist/php-webview.js  dist/php-node.js  dist/php-shell.js  dist/php-worker.js \
-	  dist/OutputBuffer.mjs dist/webTransactions.mjs dist/_Event.mjs \
-	  dist/OutputBuffer.js dist/webTransactions.js dist/_Event.js \
-	  dist/php-tags.mjs
+web-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-web.mjs)
+web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  webTransactions.js  _Event.js php-web.js)
 
-webMjs: PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-web.mjs
-webJs:  PhpBase.js  PhpWeb.js  OutputBuffer.js  webTransactions.js  _Event.js php-web.js
+worker-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-worker.mjs)
+worker-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  webTransactions.js  _Event.js php-worker.js)
 
-workerMjs: PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-worker.mjs
-workerJs:  PhpBase.js  PhpWorker.js  OutputBuffer.js  webTransactions.js  _Event.js php-worker.js
+webview-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-webview.mjs)
+webview-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  webTransactions.js  _Event.js php-webview.js)
 
-nodeMjs: PhpBase.mjs PhpNode.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-node.mjs
-nodeJs:  PhpBase.js  PhpNode.js  OutputBuffer.js  webTransactions.js  _Event.js php-node.js
+node-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs OutputBuffer.mjs _Event.mjs php-node.mjs)
+node-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js   _Event.js php-node.js)
 
-shellMjs: PhpBase.mjs PhpShell.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-shell.mjs
-shellJs:  PhpBase.js  PhpShell.js  OutputBuffer.js  webTransactions.js  _Event.js php-shell.js
-
-webviewMjs: PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-webview.mjs
-webviewJs:  PhpBase.js  PhpWebview.js  OutputBuffer.js  webTransactions.js  _Event.js php-webview.js
+shell-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpShell.mjs OutputBuffer.mjs _Event.mjs php-shell.mjs)
+shell-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpShell.js  OutputBuffer.js  _Event.js php-shell.js)
 
 WITH_CGI=1
 
@@ -125,6 +118,8 @@ PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
 
 PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
+
+TEST_LIST=
 
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
@@ -346,9 +341,7 @@ build/php-web.js: ENVIRONMENT=web
 build/php-web.js: FS_TYPE=${WEB_FS_TYPE}
 build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -359,9 +352,7 @@ build/php-web.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
 build/php-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -373,9 +364,7 @@ build/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 build/php-worker.js: PRELOAD_METHOD=--embed-file
 build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -385,9 +374,7 @@ build/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 build/php-worker.mjs: PRELOAD_METHOD=--embed-file
 build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -396,9 +383,7 @@ build/php-node.js: ENVIRONMENT=node
 build/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -407,9 +392,7 @@ build/php-node.mjs: ENVIRONMENT=node
 build/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -417,9 +400,7 @@ build/php-shell.js: BUILD_TYPE=js
 build/php-shell.js: ENVIRONMENT=shell
 build/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -427,9 +408,7 @@ build/php-shell.mjs: BUILD_TYPE=mjs
 build/php-shell.mjs: ENVIRONMENT=shell
 build/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}/
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -437,9 +416,7 @@ build/php-webview.js: BUILD_TYPE=js
 build/php-webview.js: ENVIRONMENT=webview
 build/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
 
@@ -447,7 +424,7 @@ build/php-webview.mjs: BUILD_TYPE=mjs
 build/php-webview.mjs: ENVIRONMENT=webview
 build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS}
+	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php8.2-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./packages/php-cgi-wasm/
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php8.2-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -455,26 +432,26 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 ########## Package files ###########
 
-%.js: source/%.js
+${PHP_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir .
 
-%.mjs: source/%.js
+${PHP_DIST_DIR}/%.mjs: source/%.js
 	cp $< $@;
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-php-tags.mjs: source/php-tags.mjs
+${PHP_DIST_DIR}/php-tags.mjs: source/php-tags.mjs
 	cp $< $@;
 
-php-tags.jsdelivr.mjs: source/php-tags.jsdelivr.mjs
+${PHP_DIST_DIR}/php-tags.jsdelivr.mjs: source/php-tags.jsdelivr.mjs
 	cp $< $@;
 
-php-tags.unpkg.mjs: source/php-tags.unpkg.mjs
+${PHP_DIST_DIR}/php-tags.unpkg.mjs: source/php-tags.unpkg.mjs
 	cp $< $@;
 
-php-tags.local.mjs: source/php-tags.local.mjs
+${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 	cp $< $@;
 
-%.js: build/%.js
+${PHP_DIST_DIR}/%.js: build/%.js
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
 	cp $^.data $@.data
@@ -489,17 +466,21 @@ endif
 ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+	rm -f $@.br
+	brotli -9 $@
 ifneq (${PRELOAD_ASSETS},)
 	rm -f $@.data.br
 	brotli -9 $@.data
 endif
 endif
 
-%.mjs: build/%.mjs
+${PHP_DIST_DIR}/%.mjs: build/%.mjs
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
 	cp $^.data $@.data
 ifeq (${GZIP},1)
+	rm -f $@.gz
+	bash -c 'gzip -9 < $@ > $@.gz'
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
 ifneq (${PRELOAD_ASSETS},)
@@ -508,6 +489,8 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 endif
 ifeq (${BROTLI},1)
+	rm -f $@.br
+	brotli -9 $@
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
 ifneq (${PRELOAD_ASSETS},)
@@ -516,311 +499,37 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 endif
 
-php-worker.js: build/php-worker.js
+${PHP_DIST_DIR}/php-worker.js: build/php-worker.js
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
+	rm -f $@.gz
+	bash -c 'gzip -9 < $@ > $@.gz'
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
 endif
 ifeq (${BROTLI},1)
+	rm -f $@.br
+	brotli -9 $@
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
 endif
 
-php-worker.mjs: build/php-worker.mjs
+${PHP_DIST_DIR}/php-worker.mjs: build/php-worker.mjs
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
+	rm -f $@.gz
+	bash -c 'gzip -9 < $@.wasm > $@.gz'
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
 endif
 ifeq (${BROTLI},1)
+	rm -f $@.br
+	brotli -9 $@
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
 endif
-
-########## Dist files ###########
-
-dist/PhpBase.js: PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/PhpBase.mjs: PhpBase.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/_Event.js: _Event.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/_Event.mjs: _Event.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/OutputBuffer.js: OutputBuffer.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/OutputBuffer.mjs: OutputBuffer.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/webTransactions.js: webTransactions.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/webTransactions.mjs: webTransactions.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/php-tags.mjs: source/php-tags.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/php-tags.local.mjs: source/php-tags.local.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/php-web-drupal.js: build/php-web-drupal.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@ $(basename $@).wasm $(basename $@).data $(basename $@).data || true
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} rm -f $@.data.gz
-	${DOCKER_RUN_USER} gzip -9 < $@.wasm > $@.wasm.gz
-	${DOCKER_RUN_USER} gzip -9 < $@.data > $@.data.gz
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} rm -f $@.data.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-	${DOCKER_RUN_USER} brotli -9 $@.data
-endif
-
-dist/php-web-drupal.mjs: build/php-web-drupal.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	rm -f $@.data.gz
-	gzip -9 < $@.wasm > $@.wasm.gz
-	gzip -9 < $@.wasm > $@.data.gz
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} rm -f $@.data.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-	${DOCKER_RUN_USER} brotli -9 $@.data
-endif
-
-dist/PhpWebDrupal.js: PhpWebDrupal.js dist/php-web-drupal.js dist/PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/PhpWebDrupal.mjs: PhpWebDrupal.mjs dist/php-web-drupal.mjs dist/PhpBase.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-
-dist/php-web.js: build/php-web.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/php-web.mjs: build/php-web.mjs dist/php-tags.mjs dist/php-tags.local.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-
-dist/PhpWeb.js: PhpWeb.js dist/php-web.js dist/php-web.js dist/PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/PhpWeb.mjs: PhpWeb.mjs dist/php-web.mjs dist/php-web.mjs dist/PhpBase.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-
-dist/php-worker.js: build/php-worker.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/php-worker.mjs: build/php-worker.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/PhpWorker.js: PhpWorker.js dist/php-worker.js dist/PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/PhpWorker.mjs: PhpWorker.mjs dist/php-worker.mjs dist/PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-
-dist/php-node.js: build/php-node.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} rm -f $@.data.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/php-node.mjs: build/php-node.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/PhpNode.js: PhpNode.js dist/php-node.js dist/PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/PhpNode.mjs: PhpNode.mjs dist/php-node.mjs dist/PhpBase.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-
-dist/php-shell.js: build/php-shell.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/php-shell.mjs: build/php-shell.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/PhpShell.js: PhpShell.js dist/php-shell.js dist/PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/PhpShell.mjs: PhpShell.mjs dist/php-shell.mjs dist/PhpBase.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-
-dist/php-webview.js: build/php-webview.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/php-webview.mjs: build/php-webview.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN_USER} cp $<.wasm $@.wasm
-	${DOCKER_RUN_USER} cp $<.data $@.data || true
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-ifeq (${GZIP},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.gz
-	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-endif
-ifeq (${BROTLI},1)
-	${DOCKER_RUN_USER} rm -f $@.wasm.br
-	${DOCKER_RUN_USER} brotli -9 $@.wasm
-endif
-	${DOCKER_RUN} bash -c 'chown $(or ${UID},1000):$(or ${GID},1000) $@.*'
-
-dist/PhpWebview.js: PhpWebview.js dist/php-webview.js dist/PhpBase.js
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
-dist/PhpWebview.mjs: PhpWebview.js dist/php-webview.mjs dist/PhpBase.mjs
-	${DOCKER_RUN_USER} cp $< $@
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
-
 
 ############# Demo files ##############
 
@@ -849,7 +558,10 @@ ${ENV_FILE}:
 
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.wasm.br *.wasm.gz *.data *.data.br  *.data.gz
-	${DOCKER_RUN} rm -rf lib/lib/${PHP_AR}.* lib/lib/php lib/include/php build/php* packages/php-cgi-wasm/php* third_party/preload .cache/pre.js
+	${DOCKER_RUN} rm -rf lib/lib/${PHP_AR}.* lib/lib/php lib/include/php build/php* \
+		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
+		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
+		third_party/preload .cache/pre.js
 	${DOCKER_RUN_IN_PHP} rm -fv configured
 	${DOCKER_RUN_IN_PHP} make clean
 
@@ -906,5 +618,5 @@ NPM_PUBLISH_DRY?=--dry-run
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
 
-test:
-	node --test test/*.mjs
+test: node-mjs
+	node --test ${TEST_LIST} `ls test/*.mjs`
