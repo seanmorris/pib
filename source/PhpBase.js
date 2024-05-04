@@ -1,3 +1,6 @@
+import { OutputBuffer } from "./OutputBuffer";
+import { _Event } from "./_Event";
+
 const STR = 'string';
 const NUM = 'number';
 
@@ -14,7 +17,6 @@ export class PhpBase extends EventTarget
 		this.onready  = function () {};
 
 		Object.defineProperty(this, 'encoder', {value: new TextEncoder()});
-
 		Object.defineProperty(this, 'buffers', {value: {
 			stdin: [],
 			stdout: new OutputBuffer(this, 'output', -1),
@@ -26,7 +28,7 @@ export class PhpBase extends EventTarget
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
-		const defaults  = {
+		const defaults = {
 			stdin:  () => this.buffers.stdin.shift() ?? null,
 			stdout: byte => this.buffers.stdout.push(byte),
 			stderr: byte => this.buffers.stderr.push(byte),
@@ -78,7 +80,7 @@ export class PhpBase extends EventTarget
 				? this.startTransaction()
 				: Promise.resolve();
 
-			const run  = sync.then(() => php.ccall(
+			const run = sync.then(() => php.ccall(
 				'pib_run'
 				, NUM
 				, [STR]
@@ -117,57 +119,12 @@ export class PhpBase extends EventTarget
 
 	startTransaction()
 	{
-		return this.binary.then(php => {
-			if(this.transactionStarted || !php.persist)
-			{
-				return Promise.resolve();
-			}
-
-			return new Promise((accept, reject) => {
-				php.FS.syncfs(true, error => {
-					if(error)
-					{
-						console.error(error);
-						reject(error);
-					}
-					else
-					{
-						this.transactionStarted = true;
-						accept();
-					}
-				});
-			});
-		});
+		return Promise.resolve();
 	}
 
 	commitTransaction()
 	{
-		return this.binary.then(php => {
-			if(!php.persist)
-			{
-				return Promise.resolve();
-			}
-
-			if(!this.transactionStarted)
-			{
-				throw new Error('No transaction initialized.');
-			}
-
-			return new Promise((accept, reject) => {
-				php.FS.syncfs(false, error => {
-					if(error)
-					{
-						console.error(error);
-						reject(error);
-					}
-					else
-					{
-						this.transactionStarted = false;
-						accept();
-					}
-				}
-			)});
-		});
+		return Promise.resolve();
 	}
 
 	tokenize(phpCode)
@@ -203,70 +160,5 @@ export class PhpBase extends EventTarget
 		call.catch(error => console.error(error));
 
 		return call;
-	}
-}
-
-const _Event = globalThis.CustomEvent ?? class extends globalThis.Event
-{
-	constructor(name, options = {})
-	{
-		super(name, options)
-		this.detail = options.detail;
-	}
-};
-
-export class OutputBuffer
-{
-	constructor(target, eventType, maxLength)
-	{
-		Object.defineProperty(this, 'target',    {value: target});
-		Object.defineProperty(this, 'buffer',    {value: []});
-		Object.defineProperty(this, 'eventType', {value: eventType});
-		Object.defineProperty(this, 'maxLength', {value: maxLength});
-		Object.defineProperty(this, 'decoder',   {value: new TextDecoder()});
-	}
-
-	push(...items)
-	{
-		this.buffer.push(...items);
-
-		const end = this.buffer.length - 1;
-
-		if(this.maxLength === -1 && this.buffer[end] === 10)
-		{
-			this.flush();
-		}
-
-		if(this.maxLength >= 0 && this.buffer.length >= this.maxLength)
-		{
-			this.flush();
-		}
-	}
-
-	flush()
-	{
-		if(!this.buffer.length)
-		{
-			return;
-		}
-
-		const event = new _Event(this.eventType, {
-			detail: [this.decoder.decode(new Uint8Array(this.buffer))]
-		});
-
-		if(this.target['on' + this.eventType])
-		{
-			if(this.target['on' + this.eventType](event) === false)
-			{
-				return;
-			}
-		}
-
-		if(!this.target.dispatchEvent(event))
-		{
-			return;
-		}
-
-		this.buffer.splice(0);
 	}
 }

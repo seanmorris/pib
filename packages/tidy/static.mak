@@ -11,6 +11,8 @@ endif
 ARCHIVES+= lib/lib/libtidy.a
 CONFIGURE_FLAGS+= --with-tidy=/src/lib
 
+DOCKER_RUN_IN_TIDY=${DOCKER_ENV} -w /src/third_party/tidy-html5/ emscripten-builder
+
 third_party/tidy-html5/.gitignore:
 	${DOCKER_RUN} git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \
 		--branch ${TIDYHTML_TAG} \

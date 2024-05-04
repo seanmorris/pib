@@ -10,6 +10,8 @@ CONFIGURE_FLAGS+= \
 	--enable-dom  \
 	--enable-simplexml
 
+DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
+
 third_party/libxml2/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibXML2\e[0m"
 	${DOCKER_RUN} git clone https://gitlab.gnome.org/GNOME/libxml2.git third_party/libxml2 \

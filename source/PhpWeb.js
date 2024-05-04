@@ -1,4 +1,5 @@
 import { PhpBase } from './PhpBase';
+import { commitTransaction, startTransaction } from './webTransactions';
 import PhpBinary from './php-web';
 
 export class PhpWeb extends PhpBase
@@ -6,6 +7,16 @@ export class PhpWeb extends PhpBase
 	constructor(args = {})
 	{
 		super(PhpBinary, args);
+	}
+
+	startTransaction()
+	{
+		return startTransaction(this);
+	}
+
+	commitTransaction()
+	{
+		return commitTransaction(this);
 	}
 }
 
@@ -92,29 +103,6 @@ const runPhpScriptTag = element => {
 				tags.stderr && (tags.stderr.innerHTML = stderr);
 			});
 		});
-
-		// const observer = new MutationObserver((mutations, observer) => {
-		// 	for(const mutation of mutations)
-		// 	{
-		// 		for(const addedNode of mutation.addedNodes)
-		// 		{
-		// 			console.log(addedNode);
-		// 			// php.inputString(addedNode);
-		// 			// php.run(code)
-		// 			// .then(exitCode => console.log(exitCode))
-		// 			// .catch(error => console.warn(error))
-		// 			// .finally(() => {
-		// 			// 	php.flush();
-		// 			// 	tags.stdout && (tags.stdout.innerHTML = stdout);
-		// 			// 	tags.stderr && (tags.stderr.innerHTML = stderr);
-		// 			// 	php.removeEventListener('output', outListener);
-		// 			// 	php.removeEventListener('error',  errListener);
-		// 			// });
-		// 		}
-		// 	}
-		// });
-
-		// observer.observe(element, {childList: true, subtree: true});
 	});
 }
 

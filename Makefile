@@ -53,7 +53,7 @@ PHP_AR         ?=libphp
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 INTERACTIVE=
-PROGRESS=--progress quiet
+PROGRESS=--progress auto
 
 # ifeq (${IS_TTY},1)
 # INTERACTIVE=
@@ -68,50 +68,48 @@ DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm ru
 	-e PHP_BRANCH=${PHP_BRANCH}           \
 	-e EMCC_CORES=$$((`nproc` / 2))
 
-DOCKER_ENV_SIDE=docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm \
-	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
-	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
-	-e ENVIRONMENT=${ENVIRONMENT}         \
-	-e PHP_BRANCH=${PHP_BRANCH}           \
-	-e EMCC_CORES=$$((`nproc` / 2))       \
-	-e CFLAGS=" -I/root/lib/include "     \
-	-e EMCC_FLAGS=" -sSIDE_MODULE=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 "
-
-DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
-DOCKER_RUN_USER      =${DOCKER_ENV} -e UID=${UID} -e GID=${GID} emscripten-builder
-DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
-DOCKER_RUN_IN_PHPSIDE=${DOCKER_ENV_SIDE} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
-DOCKER_RUN_IN_ICU4C  =${DOCKER_ENV} -w /src/third_party/libicu-src/icu4c/source/ emscripten-builder
-DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
-DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -w /src/third_party/libzip/ emscripten-builder
-DOCKER_RUN_IN_SQLITE =${DOCKER_ENV_SIDE} -w /src/third_party/${SQLITE_DIR}/ emscripten-builder
-DOCKER_RUN_IN_TIDY   =${DOCKER_ENV_SIDE} -w /src/third_party/tidy-html5/ emscripten-builder
-DOCKER_RUN_IN_ICU    =${DOCKER_ENV_SIDE} -w /src/third_party/libicu-src/icu4c/source emscripten-builder
-DOCKER_RUN_IN_ICONV  =${DOCKER_ENV_SIDE} -w /src/third_party/libiconv-1.17/ emscripten-builder
-DOCKER_RUN_IN_TIMELIB=${DOCKER_ENV_SIDE} -w /src/third_party/timelib/ emscripten-builder
+DOCKER_RUN=${DOCKER_ENV} emscripten-builder
+DOCKER_RUN_USER   =${DOCKER_ENV} -e UID=${UID} -e GID=${GID} emscripten-builder
+DOCKER_RUN_IN_PHP =${DOCKER_ENV} -e CFLAGS="-I/root/lib/include" -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 
 MJS=php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs \
 	PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs \
-	# build/php-worker-drupal.mjs
+	OutputBuffer.mjs webTransactions.mjs _Event.mjs
 
 CJS=php-web.js php-webview.js php-node.js php-shell.js php-worker.js \
 	PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js \
-	PhpWebDrupal.js  php-web-drupal.js
+	OutputBuffer.js webTransactions.js  _Event.js
 
-all: ${MJS} ${CJS} php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs
+TAG_JS=php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs
+
+all: ${MJS} ${CJS} ${TAG_JS}
 cjs: ${CJS}
 mjs: ${MJS}
 
 dist: dist/php-web-drupal.mjs dist/php-web.mjs dist/php-webview.mjs dist/php-node.mjs dist/php-shell.mjs dist/php-worker.mjs \
       dist/php-web-drupal.js  dist/php-web.js  dist/php-webview.js  dist/php-node.js  dist/php-shell.js  dist/php-worker.js \
+	  dist/OutputBuffer.mjs dist/webTransactions.mjs dist/_Event.mjs \
+	  dist/OutputBuffer.js dist/webTransactions.js dist/_Event.js \
 	  dist/php-tags.mjs
 
-# web-drupal: php-web-drupal.wasm
-web: lib/pib_eval.o php-web.wasm
-worker: lib/pib_eval.o php-worker.wasm
-node: php-node.wasm
+webMjs: PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-web.mjs
+webJs:  PhpBase.js  PhpWeb.js  OutputBuffer.js  webTransactions.js  _Event.js php-web.js
+
+workerMjs: PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-worker.mjs
+workerJs:  PhpBase.js  PhpWorker.js  OutputBuffer.js  webTransactions.js  _Event.js php-worker.js
+
+nodeMjs: PhpBase.mjs PhpNode.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-node.mjs
+nodeJs:  PhpBase.js  PhpNode.js  OutputBuffer.js  webTransactions.js  _Event.js php-node.js
+
+shellMjs: PhpBase.mjs PhpShell.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-shell.mjs
+shellJs:  PhpBase.js  PhpShell.js  OutputBuffer.js  webTransactions.js  _Event.js php-shell.js
+
+webviewMjs: PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-webview.mjs
+webviewJs:  PhpBase.js  PhpWebview.js  OutputBuffer.js  webTransactions.js  _Event.js php-webview.js
+
+WITH_CGI=1
 
 PRELOAD_ASSETS?=
 PHP_CONFIGURE_DEPS=
@@ -123,15 +121,11 @@ EXTRA_FLAGS=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
 EXPORTED_FUNCTIONS="_pib_init", "_pib_storage_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_pib_flush", "_main", "_malloc", "_free"
-PRE_JS_FILES=
+PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
 
 PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
 
-# include make/iconv.mak make/icu.mak make/libxml.mak make/sqlite.mak make/tidy.mak make/vrzno.mak
-
-# SUBSOFILES?=
-# SUBSOFILES+=$(addsuffix /*.so,$(shell npm ls -p))
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ifdef PRELOAD_ASSETS
@@ -195,8 +189,8 @@ third_party/php${PHP_VERSION}-src/ext/pib/pib.c: source/pib/pib.c
 
 third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/pib/pib.c ${ARCHIVES}
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
-	${DOCKER_RUN_IN_PHPSIDE} ./buildconf --force
-	${DOCKER_RUN_IN_PHPSIDE} emconfigure ./configure --cache-file=/src/.cache/config-cache \
+	${DOCKER_RUN_IN_PHP} ./buildconf --force
+	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		--with-config-file-path=/config \
 		--enable-embed=static \
@@ -223,7 +217,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 		--enable-tokenizer \
 		--enable-pib       \
 		${CONFIGURE_FLAGS}
-	${DOCKER_RUN_IN_PHPSIDE} touch /src/third_party/php${PHP_VERSION}-src/configured
+	${DOCKER_RUN_IN_PHP} touch /src/third_party/php${PHP_VERSION}-src/configured
 
 SYMBOL_FLAGS=
 ifdef SYMBOLS
@@ -251,12 +245,13 @@ ifneq (${PRE_JS_FILES},)
 	${DOCKER_RUN} cat ${PRE_JS_FILES} > .cache/pre.js
 endif
 
-ifeq (${WITH_VRZNO}, 1)
-endif
-
 WEB_FS_TYPE?=-lidbfs.js
 NODE_FS_TYPE?=-lnodefs.js
 WORKER_FS_TYPE?=${WEB_FS_TYPE}
+
+ifeq (${NODE_RAW_FS}, 1)
+NODE_FS_TYPE+= -lnoderawfs.js
+endif
 
 PRELOAD_METHOD=--preload-file
 
@@ -270,13 +265,13 @@ BUILD_FLAGS=-j$$((`nproc` / 2))\
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
 	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
-	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion ${EXTRA_CFLAGS}' \
+	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion ${EXTRA_CFLAGS} -D ENVIRONMENT=${ENVIRONMENT} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		-fPIC ${SYMBOL_FLAGS}                    \
 		-s EXPORTED_FUNCTIONS='\''[${EXPORTED_FUNCTIONS}]'\'' \
 		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS", "ENV"]'\'' \
-		-DENVIRONMENT=${ENVIRONMENT}             \
+		-D ENVIRONMENT=${ENVIRONMENT}             \
 		-s ENVIRONMENT=${ENVIRONMENT}            \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY}      \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY}      \
@@ -318,8 +313,8 @@ build/php-web-drupal.js: FS_TYPE=${WEB_FS_TYPE}
 build/php-web-drupal.js: PRELOAD_METHOD=--preload-file
 build/php-web-drupal.js: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
 build/php-web-drupal.js: ENVIRONMENT=web-drupal
-build/php-web-drupal.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
-build/php-web-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
+build/php-web-drupal.js: EXTRA_CFLAGS+= -D ENVIRONMENT=web
+build/php-web-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -D ENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
 build/php-web-drupal.js: ${DEPENDENCIES} third_party/preload/drupal-7.95/README.txt third_party/preload/bench.php third_party/preload/dump-request.php| ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} 'PHP_BINARIES=cli'
@@ -334,8 +329,8 @@ build/php-worker-drupal.js: BUILD_TYPE=js
 build/php-worker-drupal.js: FS_TYPE=${WORKER_FS_TYPE}
 build/php-worker-drupal.js: PRELOAD_METHOD=--embed-file
 build/php-worker-drupal.js: ENVIRONMENT=worker-drupal
-build/php-worker-drupal.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
-build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker -DENVIRONMENT=web
+build/php-worker-drupal.js: EXTRA_CFLAGS+= -D ENVIRONMENT=web
+build/php-worker-drupal.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker -D ENVIRONMENT=web
 build/php-worker-drupal.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} 'PHP_BINARIES=cgi'
@@ -348,8 +343,6 @@ build/php-worker-drupal.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 build/php-web.js: BUILD_TYPE=js
 build/php-web.js: ENVIRONMENT=web
-build/php-web.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
-build/php-web.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
 build/php-web.js: FS_TYPE=${WEB_FS_TYPE}
 build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
@@ -374,8 +367,8 @@ build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
-build/php-worker.js: EXTRA_CFLAGS+= -DENVIRONMENT=web
-build/php-worker.js: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
+build/php-worker.js: EXTRA_CFLAGS+= -DENVIRONMENT=worker
+build/php-worker.js: EXTRA_FLAGS+= -s ENVIRONMENT=worker -DENVIRONMENT=worker
 build/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 build/php-worker.js: PRELOAD_METHOD=--embed-file
 build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
@@ -388,8 +381,6 @@ build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
-build/php-worker.mjs: EXTRA_CFLAGS+= -DENVIRONMENT=web
-build/php-worker.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=web -DENVIRONMENT=web
 build/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 build/php-worker.mjs: PRELOAD_METHOD=--embed-file
 build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
@@ -402,8 +393,6 @@ build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 build/php-node.js: BUILD_TYPE=js
 build/php-node.js: ENVIRONMENT=node
-build/php-node.js: EXTRA_CFLAGS+= -DENVIRONMENT=node
-build/php-node.js: EXTRA_FLAGS+= -s ENVIRONMENT=node -DENVIRONMENT=node
 build/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
@@ -415,8 +404,6 @@ build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
-build/php-node.mjs: EXTRA_CFLAGS+= -DENVIRONMENT=node
-build/php-node.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=node -DENVIRONMENT=node
 build/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
@@ -468,49 +455,29 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 
 ########## Package files ###########
 
-php-web-drupal.js: build/php-web-drupal.js
+%.js: source/%.js
+	npx babel $< --out-dir .
+
+%.mjs: source/%.js
+	cp $< $@;
+	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
+
+php-tags.mjs: source/php-tags.mjs
+	cp $< $@;
+
+php-tags.jsdelivr.mjs: source/php-tags.jsdelivr.mjs
+	cp $< $@;
+
+php-tags.unpkg.mjs: source/php-tags.unpkg.mjs
+	cp $< $@;
+
+php-tags.local.mjs: source/php-tags.local.mjs
+	cp $< $@;
+
+%.js: build/%.js
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
 	cp $^.data $@.data
-	${DOCKER_RUN} rm -rf docs/third_party
-	${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) third_party
-	cp -r third_party docs/
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	rm -f $@.data.br
-	brotli -9 $@.wasm
-	brotli -9 $@.data
-endif
-
-php-web-drupal.mjs: build/php-web-drupal.mjs
-	cp $^ $@
-	cp $^.wasm* $(dir $@)
-	cp $^.data $@.data
-	${DOCKER_RUN} rm -rf docs/third_party
-	${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) third_party/
-	cp -r third_party docs/
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	rm -f $@.data.br
-	brotli -9 $@.wasm
-	brotli -9 $@.data
-endif
-
-php-web.js: build/php-web.js
-	cp $^ $@
-	cp $^.* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -528,9 +495,10 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 endif
 
-php-web.mjs: build/php-web.mjs
+%.mjs: build/%.mjs
 	cp $^ $@
-	cp $^.* $(dir $@)
+	cp $^.wasm* $(dir $@)
+	cp $^.data $@.data
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -550,7 +518,7 @@ endif
 
 php-worker.js: build/php-worker.js
 	cp $^ $@
-	cp $^.* $(dir $@)
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -562,7 +530,7 @@ endif
 
 php-worker.mjs: build/php-worker.mjs
 	cp $^ $@
-	cp $^.* $(dir $@)
+	cp $^.wasm* $(dir $@)
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -571,188 +539,6 @@ ifeq (${BROTLI},1)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
 endif
-
-php-node.js: build/php-node.js
-	cp $^ $@
-	cp $^.* $(dir $@)
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	brotli -9 $@.wasm
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.br
-	brotli -9 $@.data
-endif
-endif
-
-php-node.mjs: build/php-node.mjs
-	cp $^ $@
-	cp $^.* $(dir $@)
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	brotli -9 $@.wasm
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.br
-	brotli -9 $@.data
-endif
-endif
-
-php-shell.js: build/php-shell.js
-	cp $^ $@
-	cp $^.* $(dir $@)
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	brotli -9 $@.wasm
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.br
-	brotli -9 $@.data
-endif
-endif
-
-php-shell.mjs: build/php-shell.mjs
-	cp $^ $@
-	cp $^.* $(dir $@)
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	brotli -9 $@.wasm
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.br
-	brotli -9 $@.data
-endif
-endif
-
-php-webview.js: build/php-webview.js
-	cp $^ $@
-	cp $^.* $(dir $@)
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	brotli -9 $@.wasm
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.br
-	brotli -9 $@.data
-endif
-endif
-
-php-webview.mjs: build/php-webview.mjs
-	cp $^ $@
-	cp $^.* $(dir $@)
-ifeq (${GZIP},1)
-	rm -f $@.wasm.gz
-	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.gz
-	bash -c 'gzip -9 < $@.data > $@.data.gz'
-endif
-endif
-ifeq (${BROTLI},1)
-	rm -f $@.wasm.br
-	brotli -9 $@.wasm
-ifneq (${PRELOAD_ASSETS},)
-	rm -f $@.data.br
-	brotli -9 $@.data
-endif
-endif
-
-PhpBase.js: source/PhpBase.js
-	npx babel $< --out-dir .
-
-PhpWebDrupal.js: source/PhpWebDrupal.js PhpBase.js
-	npx babel $< --out-dir .
-
-PhpWeb.js: source/PhpWeb.js PhpBase.js
-	npx babel $< --out-dir .
-
-PhpNode.js: source/PhpNode.js PhpBase.js
-	npx babel $< --out-dir .
-
-PhpShell.js: source/PhpShell.js PhpBase.js
-	npx babel $< --out-dir .
-
-PhpWorker.js: source/PhpWorker.js PhpBase.js
-	npx babel $< --out-dir .
-
-PhpWebview.js: source/PhpWebview.js PhpBase.js
-	npx babel $< --out-dir .
-
-
-PhpBase.mjs: source/PhpBase.js
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-PhpWebDrupal.mjs: source/PhpWebDrupal.js PhpBase.mjs
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-PhpWeb.mjs: source/PhpWeb.js PhpBase.mjs
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-PhpNode.mjs: source/PhpNode.js PhpBase.mjs
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-PhpShell.mjs: source/PhpShell.js PhpBase.mjs
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-PhpWorker.mjs: source/PhpWorker.js PhpBase.mjs
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-PhpWebview.mjs: source/PhpWebview.js PhpBase.mjs
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-php-tags.mjs: source/php-tags.mjs
-	cp $< $@;
-
-php-tags.jsdelivr.mjs: source/php-tags.jsdelivr.mjs
-	cp $< $@;
-
-php-tags.unpkg.mjs: source/php-tags.unpkg.mjs
-	cp $< $@;
-
-php-tags.local.mjs: source/php-tags.local.mjs
-	cp $< $@;
 
 ########## Dist files ###########
 
@@ -761,6 +547,30 @@ dist/PhpBase.js: PhpBase.js
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
 dist/PhpBase.mjs: PhpBase.mjs
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+
+dist/_Event.js: _Event.js
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+
+dist/_Event.mjs: _Event.mjs
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+
+dist/OutputBuffer.js: OutputBuffer.js
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+
+dist/OutputBuffer.mjs: OutputBuffer.mjs
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+
+dist/webTransactions.js: webTransactions.js
+	${DOCKER_RUN_USER} cp $< $@
+	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
+
+dist/webTransactions.mjs: webTransactions.mjs
 	${DOCKER_RUN_USER} cp $< $@
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 
@@ -901,6 +711,7 @@ dist/php-node.js: build/php-node.js
 	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@
 ifeq (${GZIP},1)
 	${DOCKER_RUN_USER} rm -f $@.wasm.gz
+	${DOCKER_RUN_USER} rm -f $@.data.gz
 	${DOCKER_RUN_USER} bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
 endif
 ifeq (${BROTLI},1)
@@ -1083,8 +894,6 @@ push-image:
 	docker-compose --progress quiet push
 
 demo: build/php-worker-drupal.js PhpWebDrupal.js php-web-drupal.js docs-source/app/assets/php-web-drupal.js.wasm php-web.js
-
-# demo-cgi: build/php-cgi-worker-drupal.js php-cgi-web-drupal.js docs-source/app/assets/php-cgi-web-drupal.js.wasm php-web.js
 
 serve-demo:
 	cd docs-source && brunch w -s

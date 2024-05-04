@@ -22,7 +22,7 @@ lib/lib/libpng.a: third_party/libpng/.gitignore
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE} "
-	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j`nproc`;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 endif

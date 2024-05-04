@@ -12,6 +12,8 @@ CONFIGURE_FLAGS+=  \
 	--with-pdo-sqlite=/src/lib
 # EXTRA_FILES+= ext/pdo_sqlite/pdo_sqlite.c ext/pdo_sqlite/sqlite_driver.c ext/pdo_sqlite/sqlite_statement.c
 
+DOCKER_RUN_IN_SQLITE=${DOCKER_ENV} -w /src/third_party/${SQLITE_DIR}/ emscripten-builder
+
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
 	wget -q https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz

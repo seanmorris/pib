@@ -26,9 +26,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#define MACRO_STRING_INTERNAL(name) #name
-#define MACRO_STRING(name) MACRO_STRING_INTERNAL(name)
-
 int main(void) { return 0; }
 
 bool started = false;
@@ -37,51 +34,46 @@ void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 	if(!started)
 	{
 		started = true;
-		char *wasmEnv = MACRO_STRING(ENVIRONMENT);
 		bool useNodeRawFS = false;
-#ifndef NODERAWFS
+#ifdef NODERAWFS
 		useNodeRawFS = true;
 #endif
 
 		EM_ASM({
 			if(Module.persist)
 			{
-				let persist = Module.persist;
+				const persist = Array.isArray(Module.persist)
+					? Module.persist
+					: [Module.persist];
 
-				if(!Array.isArray(persist))
-				{
-					persist = [persist];
-				}
-				const wasmEnv   = UTF8ToString($0);
+				const useNodeRawFS = $0;
 
 				persist.forEach(p => {
-					const localPath = p.localPath || './persist';
 					const mountPath = p.mountPath || '/persist';
+					const localPath = p.localPath || './persist';
 
 					FS.mkdir(mountPath);
 
-					switch(wasmEnv)
+					if(ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER)
 					{
-						case 'web':
-							FS.mount(IDBFS, {}, mountPath);
-							break;
-
-						case 'node':
-							if(!useNodeRawFS)
+						FS.mount(IDBFS, {}, mountPath);
+					}
+					else if(ENVIRONMENT_IS_NODE)
+					{
+						if(!useNodeRawFS)
+						{
+							const fs = require('fs');
+							if(!fs.existsSync(localPath))
 							{
-								const fs = require('fs');
-								if(!fs.existsSync(localPath))
-								{
-									fs.mkdirSync(localPath, {recursive: true});
-								}
-								FS.mount(NODEFS, { root: localPath }, mountPath);
+								fs.mkdirSync(localPath, {recursive: true});
 							}
-							break;
+							FS.mount(NODEFS, { root: localPath }, mountPath);
+						}
 					}
 				})
 
 			}
-		}, wasmEnv, useNodeRawFS);
+		}, useNodeRawFS);
 	}
 }
 

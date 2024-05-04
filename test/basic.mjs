@@ -76,3 +76,55 @@ test('Can take input on STDIN', async () => {
 	assert.equal(stdErr, '');
 });
 
+test('Can maintain memory between executions', async () => {
+
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+	await php.run(`<?php $i = 100;`);
+	await php.run(`<?php $i++;`);
+	await php.run(`<?php echo $i . PHP_EOL;`);
+
+	assert.equal(stdOut, `101\n`);
+	assert.equal(stdErr, '');
+});
+
+test('Can refresh memory between executions', async () => {
+
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+	await php.run(`<?php $i = 100;`);
+	await php.run(`<?php $i++;`);
+	await php.refresh();
+	await php.run(`<?php echo $i . PHP_EOL;`);
+
+	assert.equal(stdOut, `\nWarning: Undefined variable $i in php-wasm run script on line 1\n\n`);
+	assert.equal(stdErr, '');
+});
+
+test('Can read files from the local FS', async () => {
+
+	const php = new PhpNode( { persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+	await php.run(`<?php echo file_get_contents('/persist/test-content.txt');`);
+
+	assert.equal(stdOut, `Hello, world!\n`);
+	assert.equal(stdErr, '');
+});
