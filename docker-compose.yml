@@ -15,5 +15,5 @@ services:
       - ./:/src
       - /tmp/emsdk-cache:/emsdk/upstream/emscripten/cache/
       - ./.cache:/emsdk_portable/.data/cache/asmjs/
-      - ${PHP_DIST_DIR:-./dist}:/src/dist
+      - ${PHP_DIST_DIR:-./}:/src/
     command: [bash]

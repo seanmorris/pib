@@ -5,7 +5,8 @@ ifeq (${WITH_LIBZIP}, 1)
 LIBZIP_TAG?=v1.10.1
 
 ARCHIVES+= lib/lib/libzip.a
-CONFIGURE_FLAGS+= --with-zip
+CONFIGURE_FLAGS+= \
+	--with-zip
 
 DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -w /src/third_party/libzip/ emscripten-builder
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
@@ -25,7 +26,7 @@ lib/lib/libzip.a: third_party/libzip/.gitignore lib/lib/libz.a
 		-DZLIB_INCLUDE_DIR=/src/lib/include/ \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_C_FLAGS=" -fPIC"
-	${DOCKER_RUN_IN_LIBZIP} emmake make -j`nproc`;
+	${DOCKER_RUN_IN_LIBZIP} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC  -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_LIBZIP} emmake make install;
 
 endif

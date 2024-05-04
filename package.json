@@ -3,7 +3,7 @@
 	"description": "Run PHP right in the browser or anywhere else JS can run.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris<php-wasm@seanmorr.is>",
-	"version": "0.0.8",
+	"version": "0.0.9",
 	"license": "Apache-2.0",
 	"bin": {
 		"php-wasm": "./bin/php-wasm.js"
@@ -16,12 +16,20 @@
 		"@babel/core": "^7.8.7",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",
 		"@babel/preset-env": "^7.0.0",
-		"php-wasm-iconv": "^0.0.1",
-		"php-wasm-libxml": "^0.0.1",
-		"php-wasm-libzip": "^0.0.1",
-		"php-wasm-sqlite": "^0.0.1",
-		"php-wasm-tidy": "^0.0.1",
-		"vrzno": "^0.0.1"
+		"php-wasm-freetype": "^0.0.9",
+		"php-wasm-gd": "^0.0.9",
+		"php-wasm-iconv": "^0.0.9",
+		"php-wasm-libicu": "^0.0.9",
+		"php-wasm-libjpeg": "^0.0.9",
+		"php-wasm-libpng": "^0.0.9",
+		"php-wasm-libxml": "^0.0.9",
+		"php-wasm-libzip": "^0.0.9",
+		"php-wasm-openssl": "^0.0.9",
+		"php-cgi-wasm": "^0.0.9",
+		"php-wasm-sqlite": "^0.0.9",
+		"php-wasm-tidy": "^0.0.9",
+		"php-wasm-zlib": "^0.0.9",
+		"vrzno": "^0.0.9"
 	},
 	"contributors": [
 		{

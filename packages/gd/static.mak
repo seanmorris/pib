@@ -3,7 +3,8 @@
 ifeq (${WITH_GD}, 1)
 
 GD_TAG?=gd-2.3.3
-ARCHIVES+= lib/lib/libgd.a
+ARCHIVES+= \
+	lib/lib/libgd.a
 CONFIGURE_FLAGS+= \
 	--enable-gd
 
@@ -22,7 +23,7 @@ lib/lib/libgd.a: third_party/gd/.gitignore
 	${DOCKER_RUN_IN_GD} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE}"
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE} "
 	${DOCKER_RUN_IN_GD} emmake make -j`nproc`;
 	${DOCKER_RUN_IN_GD} emmake make install;
 

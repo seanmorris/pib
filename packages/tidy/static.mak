@@ -9,7 +9,8 @@ $(error TIDY REQUIRES LIBXML. PLEASE CHECK YOUR .env FILE.)
 endif
 
 ARCHIVES+= lib/lib/libtidy.a
-CONFIGURE_FLAGS+= --with-tidy=/src/lib
+CONFIGURE_FLAGS+= \
+	--with-tidy=/src/lib
 
 DOCKER_RUN_IN_TIDY=${DOCKER_ENV} -w /src/third_party/tidy-html5/ emscripten-builder
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
@@ -24,7 +25,6 @@ third_party/tidy-html5/.gitignore:
 
 lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	@ echo -e "\e[33;4mBuilding LibTidy\e[0m"
-	${DOCKER_RUN_IN_TIDY} pwd
 	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \

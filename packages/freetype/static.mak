@@ -7,6 +7,7 @@ CONFIGURE_FLAGS+= \
 	--with-freetype
 
 DOCKER_RUN_IN_FREETYPE=${DOCKER_ENV} -w /src/third_party/freetype-2.10.0/build emscripten-builder
+TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
 
 third_party/freetype-2.10.0/README:
 	${DOCKER_RUN} wget -q https://download.savannah.gnu.org/releases/freetype/freetype-2.10.0.tar.gz

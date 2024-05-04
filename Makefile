@@ -7,25 +7,25 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
-WITH_LIBXML?=1
-WITH_TIDY  ?=1
-WITH_ICONV ?=1
-WITH_ICU   ?=0
-WITH_SQLITE?=1
-WITH_VRZNO ?=1
+WITH_ICONV   ?=1
+WITH_LIBXML  ?=1
+WITH_LIBZIP  ?=1
+WITH_SQLITE  ?=1
+WITH_VRZNO   ?=1
+WITH_ZLIB    ?=1
 
-WITH_ZLIB  ?=1
-WITH_LIBPNG?=1
-WITH_GD    ?=1
+WITH_OPENSSL ?=0
+WITH_GD      ?=0
+WITH_LIBPNG  ?=0
+WITH_LIBJPEG ?=0
+WITH_FREETYPE?=0
+
+WITH_ICU   ?=0
+WITH_TIDY  ?=0
+WITH_EXIF  ?=0
 
 GZIP       ?=0
 BROTLI     ?=0
-
-BUILD_WEB?=1
-BUILD_NODE?=1
-BUILD_SHELL?=1
-BUILD_WORKER?=1
-BUILD_WEBVIEW?=1
 
 _UID:=$(shell id -u)
 _GID:=$(shell id -g)
@@ -65,11 +65,11 @@ DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm ru
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e ENVIRONMENT=${ENVIRONMENT}         \
 	-e PHP_BRANCH=${PHP_BRANCH}           \
-	-e EMCC_CORES=$$((`nproc` / 2))
+	-e EMCC_CORES=`nproc`
 
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_USER   =${DOCKER_ENV} -e UID=${UID} -e GID=${GID} emscripten-builder
-DOCKER_RUN_IN_PHP =${DOCKER_ENV} -e CFLAGS="-I/root/lib/include" -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
+DOCKER_RUN_IN_PHP =${DOCKER_ENV} -e CFLAGS="-I /src/lib/include" -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 
@@ -187,30 +187,31 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
-		--with-config-file-path=/config \
-		--enable-embed=static \
-		--disable-fiber \
-		--disable-fiber-asm \
 		--prefix=/src/lib/ \
+		--with-config-file-path=/config \
 		--with-layout=GNU  \
+		--with-valgrind=no \
+		--enable-bcmath    \
+		--enable-calendar  \
 		--enable-cgi       \
 		--enable-cli       \
-		--disable-all      \
-		--enable-session   \
-		--enable-filter    \
-		--enable-calendar  \
-		--disable-rpath    \
-		--disable-phpdbg   \
-		--without-pear     \
-		--with-valgrind=no \
-		--without-pcre-jit \
-		--enable-bcmath    \
-		--enable-json      \
 		--enable-ctype     \
+		--enable-embed=static \
+		--enable-exif      \
+		--enable-filter    \
+		--enable-json      \
 		--enable-mbstring  \
-		--disable-mbregex  \
-		--enable-tokenizer \
 		--enable-pib       \
+		--enable-session   \
+		--enable-tokenizer \
+		--disable-all      \
+		--disable-fiber    \
+		--disable-fiber-asm \
+		--disable-mbregex  \
+		--disable-phpdbg   \
+		--disable-rpath    \
+		--without-pear     \
+		--without-pcre-jit \
 		${CONFIGURE_FLAGS}
 	${DOCKER_RUN_IN_PHP} touch /src/third_party/php${PHP_VERSION}-src/configured
 
@@ -255,7 +256,7 @@ SAPI_CGI_PATH=sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD
 
 EXTRA_CFLAGS=
 
-BUILD_FLAGS=-j$$((`nproc` / 2))\
+BUILD_FLAGS=-j`nproc`\
 	ZEND_EXTRA_LIBS='-lsqlite3' \
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
@@ -265,7 +266,7 @@ BUILD_FLAGS=-j$$((`nproc` / 2))\
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		-fPIC ${SYMBOL_FLAGS}                    \
 		-s EXPORTED_FUNCTIONS='\''[${EXPORTED_FUNCTIONS}]'\'' \
-		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS", "ENV"]'\'' \
+		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS"]'\'' \
 		-D ENVIRONMENT=${ENVIRONMENT}             \
 		-s ENVIRONMENT=${ENVIRONMENT}            \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY}      \
@@ -454,7 +455,9 @@ ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 ${PHP_DIST_DIR}/%.js: build/%.js
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
+ifneq (${PRELOAD_ASSETS},)
 	cp $^.data $@.data
+endif
 ifeq (${GZIP},1)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
@@ -477,7 +480,9 @@ endif
 ${PHP_DIST_DIR}/%.mjs: build/%.mjs
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
+ifneq (${PRELOAD_ASSETS},)
 	cp $^.data $@.data
+endif
 ifeq (${GZIP},1)
 	rm -f $@.gz
 	bash -c 'gzip -9 < $@ > $@.gz'
@@ -557,7 +562,7 @@ ${ENV_FILE}:
 	touch ${ENV_FILE}
 
 clean:
-	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.wasm.br *.wasm.gz *.data *.data.br  *.data.gz
+	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.data *.br  *.gz
 	${DOCKER_RUN} rm -rf lib/lib/${PHP_AR}.* lib/lib/php lib/include/php build/php* \
 		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
 		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
@@ -573,7 +578,7 @@ php-clean:
 	${DOCKER_RUN_IN_PHP} make clean
 
 deep-clean:
-	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.br *.wasm.gz *.data
+	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.data *.br  *.gz
 	${DOCKER_RUN} rm -rfv \
 		third_party/php${PHP_VERSION}-src lib/* build/* \
 		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
@@ -582,6 +587,8 @@ deep-clean:
 		third_party/gd third_party/jpeg-9f third_party/libicu \
 		third_party/libjpeg third_party/libpng third_party/openssl third_party/zlib \
 		third_party/vrzno third_party/libzip third_party/preload \
+		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
+		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
 		dist/* sqlite-*
 
 show-ports:

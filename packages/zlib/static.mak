@@ -16,8 +16,8 @@ third_party/zlib/.gitignore:
 
 lib/lib/libz.a: third_party/zlib/.gitignore
 	@ echo -e "\e[33;4mBuilding ZLib\e[0m"
-	${DOCKER_RUN_IN_ZLIB} emconfigure ./configure --prefix=/src/lib/ --static
-	${DOCKER_RUN_IN_ZLIB} emmake make -j`nproc` EMCC_CFLAGS='-fPIC '
+	${DOCKER_RUN_IN_ZLIB} emconfigure ./configure --prefix=/src/lib/ --static --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_ZLIB} emmake make -j`nproc` EMCC_CFLAGS='-fPIC -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_ZLIB} emmake make install
 	${DOCKER_RUN_IN_ZLIB} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 

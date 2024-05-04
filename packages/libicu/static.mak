@@ -3,9 +3,10 @@
 ifeq (${WITH_ICU}, 1)
 
 LIBICU_TAG?=release-72-1
-CONFIGURE_FLAGS+= --enable-intl
 EXTRA_FLAGS+= -DU_STATIC_IMPLEMENTATION
 ARCHIVES+= lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a
+CONFIGURE_FLAGS+= \
+	--enable-intl
 
 DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/libicu/icu4c/source emscripten-builder
 DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/libicu/libicu_alt/icu4c/source emscripten-builder

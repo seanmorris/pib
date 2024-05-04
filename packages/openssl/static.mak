@@ -21,7 +21,7 @@ third_party/openssl/.gitignore:
 lib/lib/libssl.a: third_party/openssl/.gitignore
 	@ echo -e "\e[33;4mBuilding OpenSSL\e[0m"
 	${DOCKER_RUN_IN_OPENSSL} ./config -fPIC --prefix=/src/lib/ no-asm no-engine no-dso no-dgram no-srtp no-stdio no-ui no-err no-ocsp no-psk no-stdio no-ts -DNO_FORK -static --static
-	${DOCKER_RUN_IN_OPENSSL} emmake make -j`nproc` build_generated libssl.a libcrypto.a
+	${DOCKER_RUN_IN_OPENSSL} emmake make -j`nproc` build_generated libssl.a libcrypto.a  EXTRA_CFLAGS='-O${OPTIMIZE} '
 	${DOCKER_RUN_IN_OPENSSL} emmake make install_sw
 
 endif
