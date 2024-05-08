@@ -1,6 +1,5 @@
 import { parseResponse } from './parseResponse';
 import { breakoutRequest } from './breakoutRequest';
-import PHP from './php-cgi-worker';
 
 const putEnv = (php, key, value) => php.ccall(
 	'wasm_sapi_cgi_putenv'
@@ -34,16 +33,17 @@ export class PhpCgiBase
 
 	queue = [];
 
-	constructor(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
+	constructor(PHP, {docroot, prefix, rewrite, entrypoint, cookies, types, onRequest, notFound, ...args} = {})
 	{
-		this.PHP       = PHP;
-		this.docroot   = docroot   || this.docroot;
-		this.prefix    = prefix    || this.prefix;
-		this.rewrite   = rewrite   || this.rewrite;
-		this.cookies   = cookies   || new Map;
-		this.types     = types     || this.types;
-		this.onRequest = onRequest || this.onRequest;
-		this.notFound  = notFound  || this.notFound;
+		this.PHP        = PHP;
+		this.docroot    = docroot    || this.docroot;
+		this.prefix     = prefix     || this.prefix;
+		this.rewrite    = rewrite    || this.rewrite;
+		this.entrypoint = entrypoint || this.entrypoint;
+		this.cookies    = cookies    || new Map;
+		this.types      = types      || this.types;
+		this.onRequest  = onRequest  || this.onRequest;
+		this.notFound   = notFound   || this.notFound;
 
 		this.phpArgs   = args;
 
@@ -404,6 +404,16 @@ export class PhpCgiBase
 
 			accept(response);
 		});
+	}
+
+	run(code)
+	{
+		return this._enqueue('_run', [code]);
+	}
+
+	async _run(code)
+	{
+		const result = (await this.php).run(code);
 	}
 
 	analyzePath(path)

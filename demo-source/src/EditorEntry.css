@@ -1,0 +1,29 @@
+.editor-entry {
+	user-select: none;
+	cursor: pointer;
+	margin-left: 1rem;
+}
+
+.editor-entry > p {
+	margin: 0;
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
+}
+
+.editor-entry input {
+	padding: 0;
+	border: none;
+	border-bottom: 1px solid #333;
+	background-color: transparent;
+	height: 100%;
+}
+
+.editor-entry > p:focus {
+	background-color: #008;
+}
+
+.editor-entry .icon {
+	height: 1.5rem;
+	vertical-align: middle;
+	margin-right: 0.5rem;
+}

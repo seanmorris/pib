@@ -1,0 +1,22 @@
+.select-framework {
+	width: 100%;
+	height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: #008282;
+}
+
+.select-framework .frameworks {
+	padding: 0.5rem;
+	margin: 0.5rem;
+}
+
+.select-framework .frameworks img {
+	height: 7rem;
+}
+
+.select-framework .frameworks a:not(:last-child) {
+	margin-right: 1.5rem;
+}

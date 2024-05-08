@@ -1,0 +1,86 @@
+#root, .home {
+	width: 100%;
+	height: 100dvh;
+}
+
+.home {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: #008282;
+}
+
+.home h1 {
+	margin: 0;
+	padding: 0;
+	margin-bottom: 1rem;
+}
+
+.home-menu {
+	padding: 1rem;
+}
+
+.home-menu .big-link:not(:last-child) {
+	margin-right: 1rem;
+}
+
+.home-menu .big-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	width: 18rem;
+	display: flex;
+	background-color: white;
+	text-align: center;
+}
+
+.home-menu .big-link {
+	text-decoration: none !important;
+	color: black;
+}
+
+.home-menu .big-link p {
+	font-size: 1.1rem;
+}
+
+.big-link .big-icon {
+	height: 192px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.big-link .big-icon img {
+	object-fit: contain;
+	height: 192px;
+	box-sizing: border-box;
+	max-width: 100%;
+}
+
+.big-link .big-icon[data-scroll-state="0"] img {
+	transition: transform 0s !important;
+}
+
+.big-link .big-icon.cgi img {
+	transition: transform 0.75s cubic-bezier(.65,0,0.25,1.0);
+	position: relative;
+	transform: translateY(calc(-100% * var(--offset, 0)));
+}
+
+.big-link .title {
+	color: #0000EE;
+	text-decoration: underline;
+	font-size: 1.8rem;
+}
+
+.small-icon {
+	height: 1rem;
+	vertical-align: baseline;
+	position: relative;
+	top: 4px;
+}
+
+.demo-bar {
+	margin-top: 1.5rem;
+}
