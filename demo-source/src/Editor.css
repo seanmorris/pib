@@ -1,9 +1,7 @@
 .editor {
-	width: 100%;
-	height: 100%;
 	display: flex;
-	flex-direction: column;
-	background-color: #008282;
+	flex-grow: 1;
+	align-self: stretch;
 }
 
 .editor > .bevel {
@@ -92,7 +90,6 @@
 }
 
 .editor .edit-area {
-	background-color: white;
 	flex-grow: 1;
 	display: flex;
 	flex-direction: column;

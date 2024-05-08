@@ -14,13 +14,18 @@ const openFilesMap = new Map();
 
 const modes = {
 	'php': 'ace/mode/php'
+	, 'module': 'ace/mode/php'
 	, 'inc': 'ace/mode/php'
 	, 'js': 'ace/mode/javascript'
 	, 'json': 'ace/mode/json'
 	, 'html': 'ace/mode/html'
+	, 'css': 'ace/mode/css'
 	, 'md': 'ace/mode/markdown'
 	, 'mjs': 'ace/mode/javascript'
 	, 'txt': 'ace/mode/text'
+	, 'xml': 'ace/mode/xml'
+	, 'yml': 'ace/mode/yaml'
+	, 'yaml': 'ace/mode/yaml'
 };
 
 export default function Editor() {

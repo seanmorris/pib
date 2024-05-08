@@ -12,6 +12,11 @@ import Editor from './Editor';
 
 navigator.serviceWorker.register(`/cgi-worker.js`);
 
+if(!navigator.serviceWorker.controller)
+{
+	window.location.reload();
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

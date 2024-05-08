@@ -7,11 +7,20 @@ import codeIgniterIcon from './codeigniter-icon.svg';
 import laravelIcon from './laravel-icon.svg';
 import laminasIcon from './laminas-icon.svg';
 import reactIcon from './react-icon.svg';
+
+import floppyIcon from './icons/floppy-icon-32.png';
+import rolodexIcon from './icons/rolodex-icon-32.png';
+import editorIcon from './icons/editor-icon-32.png';
+import nukeIcon from './icons/nuke-icon-32.png';
+import donateIcon from './icons/donate-icon-32.png';
+import githubIcon from './icons/github-icon-32.png';
+import cabinetIcon from './icons/file-cabinet-icon-32.png';
+
 import { useEffect, useState } from 'react';
 
 function Home() {
 
-	const [offset, setOffset] = useState(0);
+	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
 	const [scrollState, setScrollState] = useState(1);
 
 	useEffect(() => {
@@ -52,16 +61,52 @@ function Home() {
 					</a>
 					<a className = "big-link inset" href = "/select-framework">
 						<div className = "big-icon cgi" style={{'--offset': offset}} data-scroll-state = {scrollState}>
-							<img src = {cakePhpIcon} />
-							<img src = {codeIgniterIcon} />
-							<img src = {drupalIcon} />
-							<img src = {laravelIcon} />
-							<img src = {laminasIcon} />
-							<img src = {cakePhpIcon} />
+							<div class = "offset-column">
+								<img src = {cakePhpIcon} alt = "CakePHP" />
+								<img src = {codeIgniterIcon} alt = "CodeIgniter" />
+								<img src = {drupalIcon} alt = "Drupal" />
+								<img src = {laravelIcon} alt = "Laravel" />
+								<img src = {laminasIcon} alt = "Laminas" />
+								<img src = {cakePhpIcon} alt = "CakePHP" />
+							</div>
 						</div>
 						<span className = "title">PHP CGI Demo</span>
 						<p>Spin up a CGI service worker and serve a demo from the framework of your choice.</p>
 					</a>
+				</div>
+				<h2>Extras:</h2>
+				<div className = "inset button-bar">
+					<button onClick = {() => window.location = '/code-editor'}>
+						<img src = {editorIcon} class = "icon" />
+						Code Editor
+					</button>
+					<button>
+						<img src = {rolodexIcon} class = "icon" />
+						SQL Editor
+					</button>
+					<button>
+						<img src = {donateIcon} class = "icon" />
+						Donate
+					</button>
+					<button>
+						<img src = {githubIcon} class = "icon" />
+						Github
+					</button>
+				</div>
+				<h2>Filesystem Operations:</h2>
+				<div className = "inset button-bar">
+					<button>
+						<img src = {cabinetIcon} class = "icon" />
+						Backup
+					</button>
+					<button>
+						<img src = {floppyIcon} class = "icon" />
+						Restore
+						</button>
+					<button>
+						<img src = {nukeIcon} class = "icon" />
+						Clear
+					</button>
 				</div>
 				<div className = "inset right demo-bar">
 					<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>

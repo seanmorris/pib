@@ -21,12 +21,10 @@ $zip = new ZipArchive;
 if($zip->open('/persist/restore.zip', ZipArchive::RDONLY) === TRUE)
 {
 	$total = $zip->count();
-	var_dump($total);
 	$percent = 0;
 	for($i = 0; $i < $total; $i++)
 	{
 		$zip->extractTo($docroot, $zip->getNameIndex($i));
-		var_dump($docroot, $zip->getNameIndex($i));
 		$newPercent = ((1+$i) / $total);
 
 		if($newPercent - $percent >= 0.01)

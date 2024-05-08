@@ -1,6 +1,6 @@
 import './Common.css';
 import './EditorEntry.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
 import EditorFile from './EditorFile';
 
@@ -8,13 +8,23 @@ import fileIcon from './nomo-dark/file.svg';
 import folderOpen from './nomo-dark/folder.open.svg';
 import folderClose from './nomo-dark/folder.close.svg';
 
+const pathStates = new Map;
+
 export default function EditorFolder({path = '/', name = ''}) {
 	const [dirs, setDirs]                   = useState([]);
 	const [showContext, setShowContext]     = useState(false);
 	const [showNewFile, setShowNewFile]     = useState(false);
 	const [showNewFolder, setShowNewFolder] = useState(false);
 	const [files, setFiles]                 = useState([]);
-	const [expanded, setExpanded]           = useState(false);
+
+	const query = useMemo(() => new URLSearchParams(window.location.search), []);
+	const startPath = query.has('path') ? query.get('path') : '/';
+
+	const startOpened = pathStates.has(path)
+		? pathStates.get(path)
+		: (path === startPath.substr(0, path.length));
+
+	const [expanded, setExpanded] = useState(startOpened);
 
 	const onContext = event => {
 		event.preventDefault();
@@ -78,6 +88,7 @@ export default function EditorFolder({path = '/', name = ''}) {
 	const toggleExpanded = event => {
 		event.stopPropagation();
 		setExpanded(!expanded);
+		pathStates.set(path, !expanded);
 	};
 
 	return (

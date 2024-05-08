@@ -1,12 +1,3 @@
-html {
-	height: 100dvh;
-}
-
-body, #root, .App {
-	width: 100%;
-	height: 100%;
-}
-
 .App {
 	display: flex;
 	flex-direction: column;
@@ -28,6 +19,11 @@ body {
 	padding: 0px;
 	margin: 0px;
 	background-color: #aaa;
+}
+
+button {
+	font-family: fixedsys;
+	font-size: 1rem;
 }
 
 .output {

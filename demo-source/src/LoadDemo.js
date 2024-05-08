@@ -9,6 +9,11 @@ import { PhpWebDrupal } from './PhpWebDrupal'
 import { useEffect, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
 
+import PencilIcon from './icons/pencil-icon-32.png'
+import BackIcon from './icons/back-icon-32.png'
+import WwwIcon from './icons/www-icon-32.png'
+import editorIcon from './icons/editor-icon-32.png';
+
 const packages = {
 	'drupal-7': {
 		name:  'Drupal 7',
@@ -52,7 +57,7 @@ const packages = {
 	},
 };
 
-const installDemo = async () => {
+const installDemo = async (overwrite = false) => {
 
 	const query = new URLSearchParams(window.location.search);
 
@@ -90,6 +95,14 @@ const installDemo = async () => {
 	await navigator.serviceWorker.getRegistration(`${window.location.origin}/cgo-worker.mjs`);
 	const initPhpCode = await (await fetch(initPhp)).text();
 
+	const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
+
+	if(!overwrite && checkPath.exists)
+	{
+		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Site already exists!'}));
+		return;
+	}
+
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Downloading package...'}));
 	const download = await fetch(selectedFramework.file);
 	const zipContents = await download.arrayBuffer();
@@ -112,8 +125,6 @@ const installDemo = async () => {
 		existingvHost.entrypoint = selectedFramework.entry;
 	}
 
-	console.log(settings);
-
 	await sendMessage('setSettings', [settings]);
 	await sendMessage('storeInit');
 
@@ -134,8 +145,6 @@ const installDemo = async () => {
 const openDemo = () => {
 	const query = new URLSearchParams(window.location.search);
 
-	console.log('!!!');
-
 	if(!query.has('framework'))
 	{
 		window.dispatchEvent(
@@ -143,8 +152,6 @@ const openDemo = () => {
 		);
 		return;
 	}
-
-	console.log('!!!');
 
 	const selectedFrameworkName = query.get('framework');
 
@@ -161,7 +168,33 @@ const openDemo = () => {
 	window.open('/php-wasm/' + selectedFramework.vHost)
 }
 
-function LoadDemo() {
+const openCode = () => {
+	const query = new URLSearchParams(window.location.search);
+
+	if(!query.has('framework'))
+	{
+		window.dispatchEvent(
+			new CustomEvent('install-status', {detail: 'No framework selected.'})
+		);
+		return;
+	}
+
+	const selectedFrameworkName = query.get('framework');
+
+	if(!(selectedFrameworkName in packages))
+	{
+		window.dispatchEvent(
+			new CustomEvent('install-status', {detail: 'Invalid framework selected.'})
+		);
+		return;
+	}
+
+	const selectedFramework = packages[selectedFrameworkName];
+
+	window.location = '/code-editor?path=/persist/' + selectedFramework.path;
+}
+
+export default function LoadDemo() {
 	const [message, setMessage] = useState('Initializing installer...');
 
 	const onStatus = event => setMessage(event.detail);
@@ -180,16 +213,47 @@ function LoadDemo() {
 	return (
 		<div className = "load-demo">
 			<div className = "center">
-				{ message !== 'Done!'
+				{ message !== 'Done!' && message !== 'Site already exists!'
 					? <img className = "loader-icon" src = {loader} />
 					: ''
 				}
 				<div className = "bevel">
-				<div className = "inset">{message}</div>
+				<div className = "inset padded">{message}</div>
+				{ message === 'Site already exists!'
+					? <div className = 'button-bar inset'>
+						<button className = "padded" onClick = {() => window.location = '/select-framework'}>
+							<img src = {BackIcon} class = "icon" />
+							Back
+						</button>
+						<button className = "padded" onClick = {() => openDemo()}>
+							<img src = {WwwIcon} class = "icon" />
+							Open Site
+						</button>
+						<button className = "padded" onClick = {() => installDemo(true)}>
+							<img src = {PencilIcon} class = "icon" />
+							Overwrite
+						</button>
+						<button className = "padded" onClick = {() => openCode()}>
+							<img src = {editorIcon} class = "icon" />
+							Edit Files
+						</button>
+					</div>
+					: ''
+				}
 				{ message === 'Done!'
-					? <div>
-						<button className = "padded margined" onClick = {() => openDemo()}>Open Site</button>
-						<button className = "padded margined" onClick = {() => window.location = '/code-editor'}>Edit Files</button>
+					? <div className = 'button-bar inset'>
+						<button className = "padded" onClick = {() => window.location = '/select-framework'}>
+							<img src = {BackIcon} class = "icon" />
+							Back
+						</button>
+						<button className = "padded" onClick = {() => openDemo()}>
+							<img src = {WwwIcon} class = "icon" />
+							Open Site
+						</button>
+						<button className = "padded" onClick = {() => openCode()}>
+							<img src = {editorIcon} class = "icon" />
+							Edit Files
+						</button>
 					</div>
 					: ''
 				}
@@ -198,5 +262,3 @@ function LoadDemo() {
 		</div>
 	);
 }
-
-export default LoadDemo;

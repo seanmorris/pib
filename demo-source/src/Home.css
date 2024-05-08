@@ -7,7 +7,6 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: #008282;
 }
 
 .home h1 {
@@ -58,14 +57,19 @@
 	max-width: 100%;
 }
 
-.big-link .big-icon[data-scroll-state="0"] img {
+.big-link .big-icon .offset-column {
+	display: flex;
+	flex-direction: column;
+}
+
+.big-link .big-icon[data-scroll-state="0"] .offset-column {
 	transition: transform 0s !important;
 }
 
-.big-link .big-icon.cgi img {
+.big-link .big-icon.cgi .offset-column {
 	transition: transform 0.75s cubic-bezier(.65,0,0.25,1.0);
 	position: relative;
-	transform: translateY(calc(-100% * var(--offset, 0)));
+	transform: translateY(calc(-192px * var(--offset, 0)));
 }
 
 .big-link .title {
@@ -83,4 +87,21 @@
 
 .demo-bar {
 	margin-top: 1.5rem;
+}
+
+.button-bar {
+	display: flex;
+	flex-direction: row;
+}
+
+.button-bar button {
+	padding: 1rem;
+	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.button-bar button img {
+	margin-right: 0.5rem;
 }
