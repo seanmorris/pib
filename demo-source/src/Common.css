@@ -5,7 +5,7 @@
 	display: flex;
 	flex-direction: column;
 	background-image: url(./sane-sigil.svg);
-	background-size: 20% 25%;
+	background-size: max(200px, 10%) max(400px, 35%);
 	background-position: 95% 95%;
 	background-repeat: no-repeat;
 }
@@ -50,4 +50,26 @@ button.padded {
 
 .margined {
 	margin: 1rem;
+}
+
+
+.button-bar {
+	display: flex;
+	flex-direction: row;
+}
+
+.button-bar button {
+	padding: 0.5rem;
+	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.button-bar button img {
+	margin: 0 0.25rem;
+}
+
+.contents {
+	display: contents;
 }

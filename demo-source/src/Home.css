@@ -7,6 +7,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	position: relative;
 }
 
 .home h1 {
@@ -44,7 +45,8 @@
 }
 
 .big-link .big-icon {
-	height: 192px;
+	--size: 212px;
+	height: var(--size);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -52,7 +54,7 @@
 
 .big-link .big-icon img {
 	object-fit: contain;
-	height: 192px;
+	height: var(--size);
 	box-sizing: border-box;
 	max-width: 100%;
 }
@@ -69,7 +71,7 @@
 .big-link .big-icon.cgi .offset-column {
 	transition: transform 0.75s cubic-bezier(.65,0,0.25,1.0);
 	position: relative;
-	transform: translateY(calc(-192px * var(--offset, 0)));
+	transform: translateY(calc(-1 * calc(var(--size) * var(--offset, 0))));
 }
 
 .big-link .title {
@@ -89,19 +91,25 @@
 	margin-top: 1.5rem;
 }
 
-.button-bar {
-	display: flex;
-	flex-direction: row;
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
-.button-bar button {
-	padding: 1rem;
-	flex-grow: 1;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+.overlay:empty {
+	pointer-events: none;
 }
 
-.button-bar button img {
-	margin-right: 0.5rem;
+.column {
+	display: flex;
+	flex-direction: column;
+}
+
+p.padded {
+	margin: 0;
 }

@@ -15,6 +15,10 @@ import fileCssIcon from './nomo-dark/file.css.svg';
 import fileXmlIcon from './nomo-dark/file.xml.svg';
 import fileYmlIcon from './nomo-dark/file.yaml.svg';
 import fileZipIcon from './nomo-dark/file.zip.svg';
+
+import renameIcon from './icons/rename-icon-16.png';
+import deleteIcon from './icons/delete-icon-16.png';
+
 import { useEffect, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
 
@@ -104,11 +108,11 @@ export default function EditorFile({path, name}) {
 			</p>
 			{showContext && <span className = "contents only-focus">
 				<p className = "context" onClick = {() => renameFile(true)}>
-					<img className = "file icon" src = {fileIcon} alt = "" />
+					<img className = "file icon" src = {renameIcon} alt = "" />
 					Rename
 				</p>
 				<p className = "context" onClick = {() => deleteFile(true)}>
-					<img className = "file icon" src = {fileIcon} alt = "" />
+					<img className = "file icon" src = {deleteIcon} alt = "" />
 					Delete
 				</p>
 			</span>}

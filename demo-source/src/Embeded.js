@@ -195,127 +195,130 @@ function Embeded() {
 	};
 
 	return (
-		<div className="App" data-display-mode = {displayMode} data-output-mode = {outputMode}>
-			<div className = "row header toolbar">
-				<div className = "cols">
-					<div className = "row start">
-						<a href = "/">
-							<img src = "sean-icon.png" alt = "sean" />
-						</a>
-						<h1><a href = "/">php-wasm</a></h1>
-						<hr />
-						<select data-select-demo ref = {selectDemoBox}>
-							<option value>Select a Demo</option>
-							<option value = "hello-world.php">Hello, World!</option>
-							<option value = "callbacks.php">Javascript Callbacks</option>
-							<option value = "phpinfo.php">phpinfo();</option>
-							<option value = "persistent-memory.php">Persistent Memory</option>
-							<option value = "dom-access.php">DOM Access</option>
-							<option value = "goto.php">GoTo</option>
-							<option value = "stdio.php">StdOut, StdIn, & Return</option>
-							<option value = "sqlite.php">SQLite</option>
-							<option value = "sqlite-pdo.php">SQLite (PDO)</option>
-							<option value = "json.php">JSON</option>
-							<option value = "closures.php">Closures</option>
-							<option value = "files.php">Files</option>
-							<option value = "zend-benchmark.php">Zend Benchmark</option>
-							<option value = "drupal.php">Drupal 7</option>
-							<option value = "import.php">Import Javascript</option>
-							<option value = "fetch.php">Fetch</option>
-							<option value = "promise.php">Promise</option>
-							<option value = "curvature.php">Curvature</option>
-						</select>
-						<button data-load-demo onClick = {demoSelected}>load</button>
-					</div>
-				</div>
-				<div className = "separator">
-				</div>
-				<div className = "row rows collapse">
-					<label>
-						<span>text</span>
-						<input value = "text" type = "radio" name = "render-as" onChange = {formatSelected} ref = {textRadio} />
-					</label>
-					<label>
-						<span>html</span>
-						<input value = "html" type = "radio" name = "render-as" onChange = {formatSelected} ref = {htmlRadio} />
-					</label>
-				</div>
-				<div className = "row rows collapse">
-					<label>
-						<span>Persist Memory</span>
-						<input type = "checkbox" id = "persist" ref = { persist } />
-					</label>
-					<label>
-						<span>Single Expression</span>
-						<input type = "checkbox" id = "singleExpression" ref = { single } onChange = {singleChanged} />
-					</label>
-				</div>
-				<button data-run onClick = { () => setTimeout(runCode, 16) }><span>run</span></button>
-			</div>
-
-			<div className = "row body">
-				<div className = "panel">
-					<div className = "input">
-						<div className = "cols">
-							<label tabIndex="-1">
-								<img src = "php.png" alt = "php" /> <span>PHP Code</span>
-							</label>
-							<label id = "openFile" className = "collapse"tabIndex="-1">
-								open file<input type = "file" accept=".php" />
-							</label>
+		<div className="Embedded" data-display-mode = {displayMode} data-output-mode = {outputMode}>
+			<div className='bevel margined column'>
+				<div className = "row header toolbar">
+					<div className = "cols">
+						<div className = "row start">
+							<a href = "/">
+								<img src = "sean-icon.png" alt = "sean" />
+							</a>
+							<h1><a href = "/">php-wasm</a></h1>
+							<hr />
+							<select data-select-demo ref = {selectDemoBox}>
+								<option value>Select a Demo</option>
+								<option value = "hello-world.php">Hello, World!</option>
+								<option value = "callbacks.php">Javascript Callbacks</option>
+								<option value = "phpinfo.php">phpinfo();</option>
+								<option value = "persistent-memory.php">Persistent Memory</option>
+								<option value = "dom-access.php">DOM Access</option>
+								<option value = "goto.php">GoTo</option>
+								<option value = "stdio.php">StdOut, StdIn, & Return</option>
+								<option value = "sqlite.php">SQLite</option>
+								<option value = "sqlite-pdo.php">SQLite (PDO)</option>
+								<option value = "json.php">JSON</option>
+								<option value = "closures.php">Closures</option>
+								<option value = "files.php">Files</option>
+								<option value = "zend-benchmark.php">Zend Benchmark</option>
+								<option value = "drupal.php">Drupal 7</option>
+								<option value = "import.php">Import Javascript</option>
+								<option value = "fetch.php">Fetch</option>
+								<option value = "promise.php">Promise</option>
+								<option value = "curvature.php">Curvature</option>
+							</select>
+							<button data-load-demo onClick = {demoSelected}>load</button>
 						</div>
-						<div className = "liquid" id = "input-box"></div>
 					</div>
+					<div className = "separator">
+					</div>
+					<div className = "row rows collapse">
+						<label>
+							<span>text</span>
+							<input value = "text" type = "radio" name = "render-as" onChange = {formatSelected} ref = {textRadio} />
+						</label>
+						<label>
+							<span>html</span>
+							<input value = "html" type = "radio" name = "render-as" onChange = {formatSelected} ref = {htmlRadio} />
+						</label>
+					</div>
+					<div className = "row rows collapse">
+						<label>
+							<span>Persist Memory</span>
+							<input type = "checkbox" id = "persist" ref = { persist } />
+						</label>
+						<label>
+							<span>Single Expression</span>
+							<input type = "checkbox" id = "singleExpression" ref = { single } onChange = {singleChanged} />
+						</label>
+					</div>
+					<button data-run onClick = { () => setTimeout(runCode, 16) }><span>run</span></button>
 				</div>
 
-				<div className = "panel">
-					<div id = "ret">
-						<div className = "cols">
-							<label tabIndex="-1">return</label>
-						</div>
-						<div className = "stdret output liquid">
-							<div className = "column">
-								<iframe srcDoc = {stdRet} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
-								<div className = "scroller">{stdRet}</div>
+				<div className = "row body">
+					<div className = "panel">
+						<div className = "input">
+							<div className = "cols">
+								<label tabIndex="-1">
+									<img src = "php.png" alt = "php" /> <span>PHP Code</span>
+								</label>
+								<label id = "openFile" className = "collapse"tabIndex="-1">
+									open file<input type = "file" accept=".php" />
+								</label>
 							</div>
+							<div className = "liquid" id = "input-box"></div>
+						</div>
+					</div>
+
+					<div className = "panel">
+						<div id = "ret">
+							<div className = "cols">
+								<label tabIndex="-1">return</label>
+							</div>
+							<div className = "stdret output liquid">
+								<div className = "column">
+									<iframe srcDoc = {stdRet} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
+									<div className = "scroller">{stdRet}</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div className = "cols">
+								<label tabIndex="-1">stdout</label>
+								<label id = "exit" className = "collapse" tabIndex="-1">exit code: {exitCode}<span></span></label>
+							</div>
+							<div className = "stdout output liquid">
+								<div className = "column">
+									<iframe srcDoc = {stdOut} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
+									<div className = "scroller">{stdOut}</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div className = "cols">
+								<label tabIndex="-1">stderr</label>
+							</div>
+							<div className = "stderr output liquid">
+								<div className = "column">
+								<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
+									<div className = "scroller">{stdErr}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div id = "example"></div>
+
+				<div className = "row status toolbar">
+					<div>
+						<div className = "row start" data-status>
+							{statusMessage}
 						</div>
 					</div>
 					<div>
-						<div className = "cols">
-							<label tabIndex="-1">stdout</label>
-							<label id = "exit" className = "collapse" tabIndex="-1">exit code: {exitCode}<span></span></label>
-						</div>
-						<div className = "stdout output liquid">
-							<div className = "column">
-								<iframe srcDoc = {stdOut} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
-								<div className = "scroller">{stdOut}</div>
-							</div>
-						</div>
-					</div>
-					<div>
-						<div className = "cols">
-							<label tabIndex="-1">stderr</label>
-						</div>
-						<div className = "stderr output liquid">
-							<div className = "column">
-							<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
-								<div className = "scroller">{stdErr}</div>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>
-			<div id = "example"></div>
-			<div className = "row status toolbar">
-				<div>
-					<div className = "row start" data-status>
-						{statusMessage}
-					</div>
-				</div>
-				<div>
-				</div>
-			</div>
-			<div className = "loader"></div>
 		</div>
 	);
 }

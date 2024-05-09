@@ -9,7 +9,7 @@ import laminasIcon from './laminas-icon.svg';
 import reactIcon from './react-icon.svg';
 
 import floppyIcon from './icons/floppy-icon-32.png';
-import rolodexIcon from './icons/rolodex-icon-32.png';
+// import rolodexIcon from './icons/rolodex-icon-32.png';
 import editorIcon from './icons/editor-icon-32.png';
 import nukeIcon from './icons/nuke-icon-32.png';
 import donateIcon from './icons/donate-icon-32.png';
@@ -18,9 +18,14 @@ import cabinetIcon from './icons/file-cabinet-icon-32.png';
 
 import { useEffect, useState } from 'react';
 
-function Home() {
+import { Backup, Clear, Restore } from './Filesystem';
+import Confirm from './Confirm';
+import DoWithFile from './DoWithFile';
+import ErrorDialog from './ErrorDialog';
 
+function Home() {
 	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
+	const [overlay, setOverlay] = useState(null);
 	const [scrollState, setScrollState] = useState(1);
 
 	useEffect(() => {
@@ -47,6 +52,31 @@ function Home() {
 
 	}, [offset, scrollState]);
 
+	const backupSite = () => setOverlay(<Backup
+		onComplete = { () => setOverlay(null) }
+		onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+	/>);
+
+	const restoreSite = () => setOverlay(<DoWithFile
+		onConfirm = { fileInput => setOverlay(<Restore
+			fileInput = {fileInput}
+			onComplete = { () => setOverlay(null) }
+			onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+		/>) }
+		onCancel = { () => setOverlay(null) }
+		message = {(
+			<span>Select a zip file to restore from.</span>
+		)}
+	/>);
+
+	const clearFilesystem = () => setOverlay(<Confirm
+		onConfirm = { () => setOverlay(<Clear onComplete = { () => setOverlay(null) } />) }
+		onCancel = { () => setOverlay(null) }
+		message = {(
+			<span>Are you sure you want to clear the filesystem? <b>Reminder:</b> This cannot be undone, you should take a backup first.</span>
+		)}
+	/>);
+
 	return (
 		<div className = "home">
 			<div className='home-menu bevel'>
@@ -57,54 +87,55 @@ function Home() {
 							<img src = {phpPageIcon} />
 						</div>
 						<span className = "title">PHP Embedded Demo</span>
-						<p>View, edit & run PHP code right in the browser.</p>
+						<p className='padded'>View, edit & run PHP code right in the browser.</p>
 					</a>
 					<a className = "big-link inset" href = "/select-framework">
 						<div className = "big-icon cgi" style={{'--offset': offset}} data-scroll-state = {scrollState}>
-							<div class = "offset-column">
+							<div className = "offset-column">
 								<img src = {cakePhpIcon} alt = "CakePHP" />
 								<img src = {codeIgniterIcon} alt = "CodeIgniter" />
 								<img src = {drupalIcon} alt = "Drupal" />
-								<img src = {laravelIcon} alt = "Laravel" />
 								<img src = {laminasIcon} alt = "Laminas" />
+								<img src = {laravelIcon} alt = "Laravel" />
 								<img src = {cakePhpIcon} alt = "CakePHP" />
 							</div>
 						</div>
 						<span className = "title">PHP CGI Demo</span>
-						<p>Spin up a CGI service worker and serve a demo from the framework of your choice.</p>
+						<p className='padded'>Spin up a CGI service worker and serve a demo from the framework of your choice.</p>
 					</a>
 				</div>
-				<h2>Extras:</h2>
+				&nbsp;
+				{/* <h2>Extras:</h2> */}
 				<div className = "inset button-bar">
 					<button onClick = {() => window.location = '/code-editor'}>
-						<img src = {editorIcon} class = "icon" />
+						<img src = {editorIcon} className = "icon" alt = "Code Editor" />
 						Code Editor
 					</button>
-					<button>
-						<img src = {rolodexIcon} class = "icon" />
+					{/* <button>
+						<img src = {rolodexIcon} className = "icon" alt = "SQL Editor" />
 						SQL Editor
-					</button>
-					<button>
-						<img src = {donateIcon} class = "icon" />
+					</button> */}
+					<button onClick = {() => window.open('https://github.com/sponsors/seanmorris')}>
+						<img src = {donateIcon} className = "icon" alt = "Donate" />
 						Donate
 					</button>
-					<button>
-						<img src = {githubIcon} class = "icon" />
+					<button onClick = {() => window.open('https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
+						<img src = {githubIcon} className = "icon" alt = "Github" />
 						Github
 					</button>
 				</div>
 				<h2>Filesystem Operations:</h2>
 				<div className = "inset button-bar">
-					<button>
-						<img src = {cabinetIcon} class = "icon" />
+					<button onClick = {backupSite}>
+						<img src = {cabinetIcon} className = "icon" />
 						Backup
 					</button>
-					<button>
-						<img src = {floppyIcon} class = "icon" />
+					<button onClick = {restoreSite}>
+						<img src = {floppyIcon} className = "icon" />
 						Restore
 						</button>
-					<button>
-						<img src = {nukeIcon} class = "icon" />
+					<button onClick = {clearFilesystem}>
+						<img src = {nukeIcon} className = "icon" />
 						Clear
 					</button>
 				</div>
@@ -112,6 +143,7 @@ function Home() {
 					<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
 				</div>
 			</div>
+			<div className = "overlay">{overlay}</div>
 		</div>
 	);
 }

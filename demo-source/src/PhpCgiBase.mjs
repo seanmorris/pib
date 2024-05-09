@@ -326,8 +326,6 @@ export class PhpCgiBase
 			putEnv(php, 'HTTP_HOST', selfUrl.host);
 			putEnv(php, 'REQUEST_SCHEME', selfUrl.protocol.substr(0, selfUrl.protocol.length - 0));
 
-			console.log({docroot, originalPath, scriptName, path});
-
 			putEnv(php, 'DOCUMENT_ROOT', docroot);
 			putEnv(php, 'REQUEST_URI', originalPath);
 			putEnv(php, 'SCRIPT_NAME', scriptName);

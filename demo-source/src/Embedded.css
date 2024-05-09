@@ -1,6 +1,13 @@
-.App {
+.Embedded {
 	display: flex;
 	flex-direction: column;
+	width: 100%;
+	height: 100dvh;
+	display: flex;
+}
+
+.Embedded > .bevel {
+	flex-grow: 1;
 }
 
 @font-face {
@@ -159,6 +166,7 @@ body > div {
 }
 
 div.column {
+	display: flex;
 	position: relative;
 	flex: 1;
 }
@@ -307,7 +315,7 @@ iframe {
 	border: none;
 }
 
-input[type=file] {
+.Embedded [type=file] {
 	display: none;
 }
 
@@ -347,18 +355,18 @@ body:not(.loading) .loader {
 	display: none;
 }
 
-.App[data-display-mode="html"] .stdout div.scroller ,
-.App[data-display-mode="html"] .stderr div.scroller ,
-.App[data-display-mode="html"] .stdret div.scroller {
+.Embedded[data-display-mode="html"] .stdout div.scroller ,
+.Embedded[data-display-mode="html"] .stderr div.scroller ,
+.Embedded[data-display-mode="html"] .stdret div.scroller {
 	display: none;
 }
 
-.App[data-display-mode="html"] .stdout iframe.scroller,
-.App[data-display-mode="html"] .stderr iframe.scroller,
-.App[data-display-mode="html"] .stdret iframe.scroller {
+.Embedded[data-display-mode="html"] .stdout iframe.scroller,
+.Embedded[data-display-mode="html"] .stderr iframe.scroller,
+.Embedded[data-display-mode="html"] .stdret iframe.scroller {
 	display: initial;
 }
 
-.App[data-output-mode="normal"] #ret {
+.Embedded[data-output-mode="normal"] #ret {
 	display: none;
 }

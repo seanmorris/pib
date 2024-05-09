@@ -9,7 +9,7 @@ import { PhpWebDrupal } from './PhpWebDrupal'
 import { useEffect, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
 
-import PencilIcon from './icons/pencil-icon-32.png'
+import NextIcon from './icons/forward-icon-32.png'
 import BackIcon from './icons/back-icon-32.png'
 import WwwIcon from './icons/www-icon-32.png'
 import editorIcon from './icons/editor-icon-32.png';
@@ -61,8 +61,6 @@ const installDemo = async (overwrite = false) => {
 
 	const query = new URLSearchParams(window.location.search);
 
-	console.log('!!!');
-
 	if(!query.has('framework'))
 	{
 		window.dispatchEvent(
@@ -70,8 +68,6 @@ const installDemo = async (overwrite = false) => {
 		);
 		return;
 	}
-
-	console.log('!!!');
 
 	const selectedFrameworkName = query.get('framework');
 
@@ -86,6 +82,8 @@ const installDemo = async (overwrite = false) => {
 	const selectedFramework = packages[selectedFrameworkName];
 
 	const php = new PhpWebDrupal({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+
+	await php.binary;
 
 	php.addEventListener('output', event => console.log(event.detail));
 	php.addEventListener('error', event => console.log(event.detail));
@@ -140,6 +138,16 @@ const installDemo = async (overwrite = false) => {
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Done!'}));
 
 	// window.demoInstalling = null;
+
+	window.location = vHostPrefix;
+
+
+	console.log(window.opener);
+
+	if(window.opener)
+	{
+		window.opener.dispatchEvent(new CustomEvent('install-complete'));
+	}
 };
 
 const openDemo = () => {
@@ -165,7 +173,8 @@ const openDemo = () => {
 
 	const selectedFramework = packages[selectedFrameworkName];
 
-	window.open('/php-wasm/' + selectedFramework.vHost)
+	// window.open('/php-wasm/' + selectedFramework.vHost)
+	window.location = '/php-wasm/' + selectedFramework.vHost;
 }
 
 const openCode = () => {
@@ -213,7 +222,7 @@ export default function LoadDemo() {
 	return (
 		<div className = "load-demo">
 			<div className = "center">
-				{ message !== 'Done!' && message !== 'Site already exists!'
+				{ message !== 'Site already exists!'
 					? <img className = "loader-icon" src = {loader} />
 					: ''
 				}
@@ -222,41 +231,41 @@ export default function LoadDemo() {
 				{ message === 'Site already exists!'
 					? <div className = 'button-bar inset'>
 						<button className = "padded" onClick = {() => window.location = '/select-framework'}>
-							<img src = {BackIcon} class = "icon" />
+							<img src = {BackIcon} className = "icon" />
 							Back
 						</button>
 						<button className = "padded" onClick = {() => openDemo()}>
-							<img src = {WwwIcon} class = "icon" />
+							<img src = {WwwIcon} className = "icon" />
 							Open Site
+						</button>
+						<button className = "padded" onClick = {() => openCode()}>
+							<img src = {editorIcon} className = "icon" />
+							Edit Files
 						</button>
 						<button className = "padded" onClick = {() => installDemo(true)}>
-							<img src = {PencilIcon} class = "icon" />
 							Overwrite
-						</button>
-						<button className = "padded" onClick = {() => openCode()}>
-							<img src = {editorIcon} class = "icon" />
-							Edit Files
+							<img src = {NextIcon} className = "icon" />
 						</button>
 					</div>
 					: ''
 				}
-				{ message === 'Done!'
+				{/* { message === 'Done!'
 					? <div className = 'button-bar inset'>
 						<button className = "padded" onClick = {() => window.location = '/select-framework'}>
-							<img src = {BackIcon} class = "icon" />
+							<img src = {BackIcon} className = "icon" />
 							Back
 						</button>
 						<button className = "padded" onClick = {() => openDemo()}>
-							<img src = {WwwIcon} class = "icon" />
+							<img src = {WwwIcon} className = "icon" />
 							Open Site
 						</button>
 						<button className = "padded" onClick = {() => openCode()}>
-							<img src = {editorIcon} class = "icon" />
+							<img src = {editorIcon} className = "icon" />
 							Edit Files
 						</button>
 					</div>
 					: ''
-				}
+				} */}
 				</div>
 			</div>
 		</div>
