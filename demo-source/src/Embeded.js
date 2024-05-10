@@ -200,10 +200,10 @@ function Embeded() {
 				<div className = "row header toolbar">
 					<div className = "cols">
 						<div className = "row start">
-							<a href = { process.env.PUBLIC_HTML }>
+							<a href = { process.env.PUBLIC_URL }>
 								<img src = "sean-icon.png" alt = "sean" />
 							</a>
-							<h1><a href = { process.env.PUBLIC_HTML }>php-wasm</a></h1>
+							<h1><a href = { process.env.PUBLIC_URL }>php-wasm</a></h1>
 							<hr />
 							<select data-select-demo ref = {selectDemoBox}>
 								<option value>Select a Demo</option>
