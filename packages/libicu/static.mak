@@ -20,7 +20,7 @@ third_party/libicu/.gitignore:
 		--branch ${LIBICU_TAG} \
 		--single-branch     \
 		--depth 1;
-	${DOCKER_RUN} mkdir /src/third_party/libicu /src/third_party/libicu/libicu_alt
+	${DOCKER_RUN} mkdir /src/third_party/libicu/libicu_alt
 	${DOCKER_RUN} cp -rf /src/third_party/libicu/* /src/third_party/libicu/libicu_alt/
 
 lib/share/icu/72.1/icudt72l.dat: lib/lib/libicudata.a
