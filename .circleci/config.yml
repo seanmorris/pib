@@ -14,7 +14,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
-    resource_class: large
+    resource_class: xlarge
     steps:
       - checkout
       - run: npm install
