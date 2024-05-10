@@ -6,6 +6,8 @@ import "react-ace-builds/webpack-resolver-min";
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 
+let init = false;
+
 function Embeded() {
 	const phpRef = useRef(null);
 	const inputBox = useRef(null);
@@ -28,13 +30,13 @@ function Embeded() {
 	const [outputMode, setOutputMode] = useState('');
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
 
-	phpRef.current =  phpRef.current || new PhpWeb();
+	// phpRef.current =  phpRef.current || new PhpWeb();
 
 	const onOutput = event => setStdOut(stdOut => String(stdOut || '') + event.detail.join(''));
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
-
+		console.trace();
 		// phpRef.current = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 		phpRef.current = new PhpWeb();
 
@@ -48,6 +50,14 @@ function Embeded() {
 			php.removeEventListener('error', onError);
 		};
 	}, []);
+
+	useEffect(() => {
+		if(!init)
+		{
+			refreshPhp();
+			init = true;
+		}
+	}, [refreshPhp]);
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -169,8 +179,6 @@ function Embeded() {
 	}, [query, loadDemo]);
 
 	const demoSelected = () => loadDemo(selectDemoBox.current.value);
-
-	useEffect(() => refreshPhp(), [refreshPhp]);
 
 	const runCode = () => {
 		setStatusMessage('Executing...');

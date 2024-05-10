@@ -9,6 +9,7 @@ Changes
 * Adding libicu, freetype, zlib, gd, libpng, libjpeg, & openssl.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
+* ESM modules are now webpack-compatible out of the box.
 
 ## v0.0.8 - Preparing for Lift-off
 
