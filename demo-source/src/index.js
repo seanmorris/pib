@@ -10,7 +10,7 @@ import Home from './Home';
 import LoadDemo from './LoadDemo';
 import Editor from './Editor';
 
-navigator.serviceWorker.register(`/cgi-worker.js`);
+navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 
 if(!navigator.serviceWorker.controller)
 {

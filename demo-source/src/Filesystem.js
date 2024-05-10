@@ -18,7 +18,7 @@ const backupSite = async () => {
 
 	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 	await php.binary;
-	const backupPhpCode = await (await fetch('/scripts/backup.php')).text();
+	const backupPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/backup.php')).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Backing up files...'}));
 	await php.run(backupPhpCode);
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
@@ -40,7 +40,7 @@ const restoreSite = async ({fileInput}) => {
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Uploading zip...'}));
 	await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
 	await php.binary;
-	const restorePhpCode = await (await fetch('/scripts/restore.php')).text();
+	const restorePhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/restore.php')).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Unpacking files...'}));
 	await php.run(restorePhpCode);
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
@@ -102,7 +102,7 @@ const makeComponent = (operation) => ({onComplete, onError, onFinally = () => {}
 		<div className = "center">
 			<div className = "bevel">
 				<div className = "inset padded column center">
-					<img className = "loader-icon" src = {loader} />
+					<img className = "loader-icon" src = {loader} alt = "loading" />
 					{message}
 				</div>
 			</div>

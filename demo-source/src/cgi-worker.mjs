@@ -28,7 +28,7 @@ const notFound = request => {
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({
 	onRequest, notFound
-	, prefix: '/php-wasm/'
+	, prefix: '/php-wasm/cgi-bin/'
 	, docroot: '/persist/www'
 	, types: {
 		jpeg: 'image/jpeg'

@@ -91,17 +91,17 @@ const installDemo = async (overwrite = false) => {
 	php.addEventListener('output', event => console.log(event.detail));
 	php.addEventListener('error', event => console.log(event.detail));
 
-	await navigator.serviceWorker.register(`/cgi-worker.js`);
+	await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 
 	await navigator.serviceWorker.getRegistration(`${window.location.origin}/cgo-worker.mjs`);
-	const initPhpCode = await (await fetch('/scripts/init.php')).text();
+	const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
 
 	const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
 
 	if(!overwrite && checkPath.exists)
 	{
 		window.demoInstalling = null;
-		window.location = '/php-wasm/' + selectedFramework.vHost;
+		window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 		window.opener.dispatchEvent(new CustomEvent('install-complete'));
 		// window.dispatchEvent(new CustomEvent('install-status', {detail: 'Site already exists!'}));
 		return;
@@ -112,7 +112,7 @@ const installDemo = async (overwrite = false) => {
 	const zipContents = await download.arrayBuffer();
 
 	const settings = await sendMessage('getSettings');
-	const vHostPrefix = '/php-wasm/' + selectedFramework.vHost;
+	const vHostPrefix = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 	const existingvHost = settings.vHosts.find(vHost => vHost.pathPrefix === vHostPrefix);
 
 	if(!existingvHost)
@@ -179,8 +179,7 @@ const openDemo = () => {
 
 	const selectedFramework = packages[selectedFrameworkName];
 
-	// window.open('/php-wasm/' + selectedFramework.vHost)
-	window.location = '/php-wasm/' + selectedFramework.vHost;
+	window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 }
 
 const openCode = () => {
