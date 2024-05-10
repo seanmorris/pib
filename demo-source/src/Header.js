@@ -2,10 +2,10 @@ export default function Header() {
 	return (<div className = "row header toolbar">
 		<div className = "cols">
 			<div className = "row start">
-				<a href = "/">
+				<a href = { process.env.PUBLIC_HTML }>
 					<img src = "sean-icon.png" alt = "sean" />
 				</a>
-				<a href = "/"><h1>php-wasm</h1></a>
+				<a href = { process.env.PUBLIC_HTML }><h1>php-wasm</h1></a>
 				<hr />
 			</div>
 		</div>
