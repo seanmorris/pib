@@ -7,43 +7,10 @@ workflows:
 
   build-test-flow:
     jobs:
-      - checkout
-
-      - make-iconv:
-          requires:
-            - checkout
-
-      - make-libxml:
-          requires:
-            - checkout
-
-      - make-libzip:
-          requires:
-            - checkout
-
-      - make-sqlite:
-          requires:
-            - checkout
-
-      - make-zlib:
-          requires:
-            - checkout
-
-      - make-node:
-          requires:
-            - checkout
-            - make-iconv
-            - make-libxml
-            - make-libzip
-            - make-sqlite
-            - make-zlib
-
-      - test:
-          requires:
-            - make-node
+      - make-test
 
 jobs:
-  checkout:
+  make-test:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
@@ -51,63 +18,4 @@ jobs:
     steps:
       - checkout
       - run: npm install
-
-
-
-  make-iconv:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
-    steps:
-      - run: make lib/lib/libiconv.a
-
-  make-libxml:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
-    steps:
-      - run: make lib/lib/libxml2.a
-
-  make-libzip:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
-    steps:
-      - run: make lib/lib/libzip.a
-
-  make-sqlite:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
-    steps:
-      - run: make lib/lib/libsqlite3.a
-
-  make-zlib:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
-    steps:
-      - run: make lib/lib/libz.a
-
-
-
-  make-node:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
-    steps:
-      - run: make node-mjs
-
-  test:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
-    steps:
       - run: make test
