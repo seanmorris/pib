@@ -61,12 +61,12 @@ export class PhpCgiBase
 
 	handleInstallEvent(event)
 	{
-		return self.skipWaiting();
+		return event.waitUntil(self.skipWaiting());
 	}
 
 	handleActivateEvent(event)
 	{
-		return event.waitUntil(clients.claim());
+		return event.waitUntil(self.clients.claim());
 	}
 
 	async handleMessageEvent(event)
