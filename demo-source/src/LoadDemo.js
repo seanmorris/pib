@@ -101,7 +101,7 @@ const installDemo = async (overwrite = false) => {
 	if(!overwrite && checkPath.exists)
 	{
 		window.demoInstalling = null;
-		window.location = process.env.PUBLIC_URL + '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+		window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 		window.opener.dispatchEvent(new CustomEvent('install-complete'));
 		// window.dispatchEvent(new CustomEvent('install-status', {detail: 'Site already exists!'}));
 		return;
@@ -177,7 +177,7 @@ const openDemo = () => {
 
 	const selectedFramework = packages[selectedFrameworkName];
 
-	window.location = process.env.PUBLIC_URL + '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+	window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 }
 
 const openCode = () => {
