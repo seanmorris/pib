@@ -101,7 +101,7 @@ const installDemo = async (overwrite = false) => {
 	if(!overwrite && checkPath.exists)
 	{
 		window.demoInstalling = null;
-		window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+		window.location = process.env.PUBLIC_URL + '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 		window.opener.dispatchEvent(new CustomEvent('install-complete'));
 		// window.dispatchEvent(new CustomEvent('install-status', {detail: 'Site already exists!'}));
 		return;
@@ -179,7 +179,7 @@ const openDemo = () => {
 
 	const selectedFramework = packages[selectedFrameworkName];
 
-	window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+	window.location = process.env.PUBLIC_URL + '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 }
 
 const openCode = () => {
@@ -205,7 +205,7 @@ const openCode = () => {
 
 	const selectedFramework = packages[selectedFrameworkName];
 
-	window.location = '/code-editor?path=/persist/' + selectedFramework.path;
+	window.location = process.env.PUBLIC_URL + '/code-editor?path=/persist/' + selectedFramework.path;
 }
 
 export default function LoadDemo() {
@@ -235,7 +235,7 @@ export default function LoadDemo() {
 				<div className = "inset padded">{message}</div>
 				{ message === 'Site already exists!'
 					? <div className = 'button-bar inset'>
-						<button className = "padded" onClick = {() => window.location = '/select-framework'}>
+						<button className = "padded" onClick = {() => window.location = process.env.PUBLIC_URL + '/select-framework'}>
 							<img src = {BackIcon} className = "icon" />
 							Back
 						</button>
@@ -256,7 +256,7 @@ export default function LoadDemo() {
 				}
 				{/* { message === 'Done!'
 					? <div className = 'button-bar inset'>
-						<button className = "padded" onClick = {() => window.location = '/select-framework'}>
+						<button className = "padded" onClick = {() => window.location = process.env.PUBLIC_URL + '/select-framework'}>
 							<img src = {BackIcon} className = "icon" />
 							Back
 						</button>

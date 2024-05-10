@@ -82,14 +82,14 @@ function Home() {
 			<div className='home-menu bevel'>
 				<h1>Select a demo:</h1>
 				<div className='row'>
-					<a className = "big-link inset" href = "/embedded">
+					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded'}>
 						<div className = "big-icon embedded">
 							<img src = {phpPageIcon} />
 						</div>
 						<span className = "title">PHP Embedded Demo</span>
 						<p className='padded'>View, edit & run PHP code right in the browser.</p>
 					</a>
-					<a className = "big-link inset" href = "/select-framework">
+					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/select-framework'}>
 						<div className = "big-icon cgi" style={{'--offset': offset}} data-scroll-state = {scrollState}>
 							<div className = "offset-column">
 								<img src = {cakePhpIcon} alt = "CakePHP" />
@@ -107,7 +107,7 @@ function Home() {
 				&nbsp;
 				{/* <h2>Extras:</h2> */}
 				<div className = "inset button-bar">
-					<button onClick = {() => window.location = '/code-editor'}>
+					<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor'}>
 						<img src = {editorIcon} className = "icon" alt = "Code Editor" />
 						Code Editor
 					</button>
@@ -115,11 +115,11 @@ function Home() {
 						<img src = {rolodexIcon} className = "icon" alt = "SQL Editor" />
 						SQL Editor
 					</button> */}
-					<button onClick = {() => window.open('https://github.com/sponsors/seanmorris')}>
+					<button onClick = {() => window.open(process.env.PUBLIC_URL + 'https://github.com/sponsors/seanmorris')}>
 						<img src = {donateIcon} className = "icon" alt = "Donate" />
 						Donate
 					</button>
-					<button onClick = {() => window.open('https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
+					<button onClick = {() => window.open(process.env.PUBLIC_URL + 'https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
 						<img src = {githubIcon} className = "icon" alt = "Github" />
 						Github
 					</button>
