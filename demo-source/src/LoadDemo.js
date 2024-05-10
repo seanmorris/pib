@@ -93,7 +93,7 @@ const installDemo = async (overwrite = false) => {
 
 	await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 
-	await navigator.serviceWorker.getRegistration(`${window.location.origin}/cgo-worker.mjs`);
+	await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
 	const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
 
 	const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
