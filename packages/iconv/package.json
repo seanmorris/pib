@@ -1,10 +1,14 @@
 {
 	"name": "php-wasm-iconv",
 	"description": "iconv for php-wasm.",
-	"repository": "https://github.com/seanmorris/php-wasm",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/seanmorris/php-wasm.git"
+	},
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
 	"version": "0.0.9",
 	"files": [
+		"test/basic.mjs",
 		"LICENSE",
 		"NOTICE",
 		"README.md",

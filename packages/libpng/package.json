@@ -5,6 +5,7 @@
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
 	"version": "0.0.9",
 	"files": [
+		"test/basic.mjs",
 		"LICENSE",
 		"NOTICE",
 		"README.md",
