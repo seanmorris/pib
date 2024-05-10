@@ -16,7 +16,7 @@
   "scripts": {
     "start": "npx webpack --config service-worker-webpack.config.ts; react-scripts start",
     "build": "npx webpack --config service-worker-webpack.config.ts; react-scripts build",
-    "test":  "react-scripts test",
+    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -36,5 +36,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }

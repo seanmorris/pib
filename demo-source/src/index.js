@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { Route, Routes } from 'react-router';
-import { BrowserRouter, HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 
 import SelectFramework from './SelectFramework';
 import Embeded from './Embeded';
@@ -20,7 +20,7 @@ if(!navigator.serviceWorker.controller)
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-	<BrowserRouter>
+	<BrowserRouter basename={process.env.PUBLIC_URL}>
 		<Routes>
 			<Route path = "/" element = { <Home /> } />
 			<Route path = "/home" element = { <Home /> } />
