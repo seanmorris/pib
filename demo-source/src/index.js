@@ -12,10 +12,7 @@ import Editor from './Editor';
 
 navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 
-// if(!navigator.serviceWorker.controller)
-// {
-// 	window.location.reload();
-// }
+setTimeout(() => navigator.serviceWorker.controller || window.location.reload(), 250);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -29,23 +26,23 @@ root.render(
 			<Route path = "/load-demo" element = { <LoadDemo /> } />
 			<Route path = "/code-editor" element = { <Editor /> } />
 			<Route
-				path = "/php-wasm/cgi/drupal"
+				path = "/php-wasm/cgi-bin/drupal"
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=drupal-7'} />}
 			/>
 			<Route
-				path = "/php-wasm/cgi/cakephp-5"
+				path = "/php-wasm/cgi-bin/cakephp-5"
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=cakephp-5'} />}
 			/>
 			<Route
-				path = "/php-wasm/cgi/codeigniter-4"
+				path = "/php-wasm/cgi-bin/codeigniter-4"
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=codeigniter-4'} />}
 			/>
 			<Route
-				path = "/php-wasm/cgi/laminas-3"
+				path = "/php-wasm/cgi-bin/laminas-3"
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=laminas-3'} />}
 			/>
 			<Route
-				path = "/php-wasm/cgi/laravel-11"
+				path = "/php-wasm/cgi-bin/laravel-11"
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=laravel-11'} />}
 			/>
 		</Routes>

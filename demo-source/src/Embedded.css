@@ -92,7 +92,7 @@ button {
 	border-image: url(border.png) 2 2 2 2;
 }
 
-button[data-run]:not([disabled])::after {
+[data-running="0"] button[data-run]::after {
 	position: absolute;
 	top: -2px;
 	left:-2px;
@@ -102,6 +102,11 @@ button[data-run]:not([disabled])::after {
 	background-color: #F00 !important;
 	mix-blend-mode: darken;
     opacity: 0.5;
+}
+
+[data-running="1"] button[data-run] {
+	filter: saturate(0) brightness(1.25) contrast(0.25);
+	pointer-events: none;
 }
 
 .header button[data-reset-storage] {

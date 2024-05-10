@@ -23,6 +23,7 @@ function Embeded() {
 	const [stdErr, setStdErr] = useState('');
 	const [stdRet, setStdRet] = useState('');
 
+	const [running, setRunning] = useState(false);
 	const [displayMode, setDisplayMode] = useState('');
 	const [outputMode, setOutputMode] = useState('');
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
@@ -33,6 +34,8 @@ function Embeded() {
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
+
+		// phpRef.current = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 		phpRef.current = new PhpWeb();
 
 		const php = phpRef.current;
@@ -170,6 +173,7 @@ function Embeded() {
 		setStdOut('');
 		setStdErr('');
 		setStdRet('');
+		setRunning(true);
 
 		let code = input.current;
 
@@ -178,24 +182,32 @@ function Embeded() {
 			code = code.replace(/^\s*<\?php/, '');
 			code = code.replace(/\?>\s*/, '');
 
-			phpRef.current.exec(code).then(ret => {
+			phpRef.current.exec(code)
+			.then(ret => {
 				setStdRet(ret);
 				persist.current.checked || phpRef.current.refresh();
-				setTimeout(() => setStatusMessage('php-wasm ready!'), 50);
+				setTimeout(() => {
+					setStatusMessage('php-wasm ready!')
+					setRunning(false);
+				}, 50);
 			});
 		}
 		else
 		{
-			phpRef.current.run(code).then(exitCode => {
+			phpRef.current.run(code)
+			.then(exitCode => {
 				setExitCode(exitCode);
 				persist.current.checked || phpRef.current.refresh();
-				setTimeout(() => setStatusMessage('php-wasm ready!'), 50);
+				setTimeout(() => {
+					setStatusMessage('php-wasm ready!')
+					setRunning(false);
+				}, 50);
 			});
 		}
 	};
 
 	return (
-		<div className="Embedded" data-display-mode = {displayMode} data-output-mode = {outputMode}>
+		<div className="Embedded" data-display-mode = {displayMode} data-output-mode = {outputMode} data-running = {running ? 1: 0}>
 			<div className='bevel margined column'>
 				<div className = "row header toolbar">
 					<div className = "cols">

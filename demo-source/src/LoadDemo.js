@@ -103,7 +103,6 @@ const installDemo = async (overwrite = false) => {
 		window.demoInstalling = null;
 		window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
 		window.opener.dispatchEvent(new CustomEvent('install-complete'));
-		// window.dispatchEvent(new CustomEvent('install-status', {detail: 'Site already exists!'}));
 		return;
 	}
 
@@ -207,7 +206,7 @@ const openCode = () => {
 }
 
 export default function LoadDemo() {
-	const [message, setMessage] = useState('Initializing installer...');
+	const [message, setMessage] = useState('Initializing...');
 
 	const onStatus = event => setMessage(event.detail);
 
