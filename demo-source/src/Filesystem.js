@@ -6,7 +6,7 @@ import loader from './tail-spin.svg';
 import backupPhp from './backup.php';
 import restorePhp from './restore.php';
 
-import { PhpWebDrupal } from './PhpWebDrupal'
+import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
 
@@ -19,7 +19,7 @@ const backupSite = async () => {
 		throw `Filesystem is empty!`;
 	}
 
-	const php = new PhpWebDrupal({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 	await php.binary;
 	const backupPhpCode = await (await fetch(backupPhp)).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Backing up files...'}));
@@ -38,7 +38,7 @@ const restoreSite = async ({fileInput}) => {
 	{
 		throw `No file provided.`;
 	}
-	const php = new PhpWebDrupal({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 	const zipContents = await fileInput.files[0].arrayBuffer();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Uploading zip...'}));
 	await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);

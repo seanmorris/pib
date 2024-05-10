@@ -16,6 +16,8 @@ export default function EditorFolder({path = '/', name = ''}) {
 	const [showNewFile, setShowNewFile]     = useState(false);
 	const [showNewFolder, setShowNewFolder] = useState(false);
 	const [files, setFiles]                 = useState([]);
+	const box = useRef(null);
+
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 	const startPath = query.has('path') ? query.get('path') : '/';
@@ -81,8 +83,14 @@ export default function EditorFolder({path = '/', name = ''}) {
 
 	useEffect(() => {
 		loadFiles();
-		navigator.serviceWorker.addEventListener('message', onMessage);
-		return () => navigator.serviceWorker.removeEventListener('message', onMessage);
+		if(startPath === path)
+		{
+			box.current.focus();
+		}
+	}, []);
+
+	useEffect(() => {
+		loadFiles();
 	}, [expanded, path]);
 
 	const toggleExpanded = event => {
@@ -93,7 +101,7 @@ export default function EditorFolder({path = '/', name = ''}) {
 
 	return (
 		<div className = "editor-entry editor-folder">
-			<p onClick = { toggleExpanded } onContextMenu={onContext} onBlur = {onBlur} tabIndex="0">
+			<p onClick = { toggleExpanded } onContextMenu={onContext} onBlur = {onBlur} tabIndex="0" ref = {box}>
 				<img className = "file icon" src = {expanded  ? folderOpen : folderClose} alt = "" />
 				{name}
 			</p>

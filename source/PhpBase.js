@@ -53,8 +53,7 @@ export class PhpBase extends EventTarget
 			);
 
 			return php;
-
-		}).catch(error => console.error(error));
+		});
 	}
 
 	inputString(byteString)

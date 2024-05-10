@@ -19,7 +19,7 @@ import fileZipIcon from './nomo-dark/file.zip.svg';
 import renameIcon from './icons/rename-icon-16.png';
 import deleteIcon from './icons/delete-icon-16.png';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
 
 const icons = {
@@ -46,6 +46,10 @@ export default function EditorFile({path, name}) {
 	const [deleted, setDeleted]         = useState(false);
 	const [_name, setName] = useState(name);
 	const [_path, setPath] = useState(path);
+	const box = useRef(null);
+
+	const query = useMemo(() => new URLSearchParams(window.location.search), []);
+	const startPath = query.has('path') ? query.get('path') : '/';
 
 	const onContext = event => {
 		event.preventDefault();
@@ -94,6 +98,14 @@ export default function EditorFile({path, name}) {
 	};
 
 	useEffect(() => {
+
+		if(startPath === path)
+		{
+			box.current.focus();
+
+			console.log(box.current);
+		}
+
 		navigator.serviceWorker.addEventListener('message', onMessage);
 		return () => navigator.serviceWorker.removeEventListener('message', onMessage);
 	}, []);
@@ -102,7 +114,7 @@ export default function EditorFile({path, name}) {
 
 	return !deleted && (
 		<div className = "editor-entry editor-file">
-			<p onClick = {openFile} tabIndex="0" onContextMenu={onContext}  onBlur = {onBlur}>
+			<p onClick = {openFile} tabIndex="0" onContextMenu={onContext}  onBlur = {onBlur} ref = {box}>
 				<img className = "file icon" src = {icons[extension] ?? fileIcon} alt = "" />
 				{_name}
 			</p>

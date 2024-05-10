@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AceEditor from "react-ace-builds";
 import "react-ace-builds/webpack-resolver-min";
 
-import { PhpWebDrupal } from './PhpWebDrupal'
+import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 
 function Embeded() {
@@ -27,13 +27,13 @@ function Embeded() {
 	const [outputMode, setOutputMode] = useState('');
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
 
-	phpRef.current =  phpRef.current || new PhpWebDrupal();
+	phpRef.current =  phpRef.current || new PhpWeb();
 
 	const onOutput = event => setStdOut(stdOut => String(stdOut || '') + event.detail.join(''));
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
-		phpRef.current = new PhpWebDrupal();
+		phpRef.current = new PhpWeb();
 
 		const php = phpRef.current;
 
@@ -68,7 +68,7 @@ function Embeded() {
 			editor.current.editor.setValue(phpCode, -1);
 
 			const firstLine = String(phpCode.split(/\n/).shift());
-			const settings  = JSON.parse(firstLine.split('//').pop());
+			const settings  = JSON.parse(firstLine.split('//').pop()) || {};
 
 			persist.current.checked = settings.persist ?? persist.current.checked;
 			single.current.checked = settings['single-expression'] ?? single.current.checked;

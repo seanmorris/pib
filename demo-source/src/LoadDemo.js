@@ -5,7 +5,7 @@ import loader from './tail-spin.svg';
 
 import initPhp from './init.php';
 
-import { PhpWebDrupal } from './PhpWebDrupal'
+import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
 
@@ -79,9 +79,14 @@ const installDemo = async (overwrite = false) => {
 		return;
 	}
 
+	if(query.has('overwrite'))
+	{
+		overwrite = overwrite || query.get('overwrite');
+	}
+
 	const selectedFramework = packages[selectedFrameworkName];
 
-	const php = new PhpWebDrupal({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 	await php.binary;
 
@@ -97,7 +102,10 @@ const installDemo = async (overwrite = false) => {
 
 	if(!overwrite && checkPath.exists)
 	{
-		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Site already exists!'}));
+		window.demoInstalling = null;
+		window.location = '/php-wasm/' + selectedFramework.vHost;
+		window.opener.dispatchEvent(new CustomEvent('install-complete'));
+		// window.dispatchEvent(new CustomEvent('install-status', {detail: 'Site already exists!'}));
 		return;
 	}
 
@@ -137,17 +145,17 @@ const installDemo = async (overwrite = false) => {
 
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Done!'}));
 
-	// window.demoInstalling = null;
-
-	window.location = vHostPrefix;
-
+	window.demoInstalling = null;
 
 	console.log(window.opener);
 
 	if(window.opener)
 	{
-		window.opener.dispatchEvent(new CustomEvent('install-complete'));
+		window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: '/persist/' + selectedFramework.dir}));
+		console.log('...');
 	}
+
+	window.location = vHostPrefix;
 };
 
 const openDemo = () => {

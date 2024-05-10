@@ -17,6 +17,5 @@ jobs:
     steps:
       - checkout
       - run: npm install
-      - run: make PhpNode.mjs php-node.mjs
       - run: make test
 

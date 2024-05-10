@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { PhpCgiWorkerDrupal } from "./PhpCgiWorkerDrupal.mjs";
+import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 
 // Log requests & send lines to all tabs
 const onRequest = (request, response) => {
@@ -26,7 +26,7 @@ const notFound = request => {
 };
 
 // Spawn the PHP-CGI binary
-const php = new PhpCgiWorkerDrupal({
+const php = new PhpCgiWorker({
 	onRequest, notFound
 	, prefix: '/php-wasm/'
 	, docroot: '/persist/www'

@@ -2,9 +2,12 @@
 const config = [
 	{
 		ignores: [
-			"src/PhpBase.mjs",
-			"src/PhpWebDrupal.mjs",
-			"src/php-web-drupal.mjs"
+			"node_modules/php-wasm/PhpBase.mjs",
+			"node_modules/php-wasm/PhpBase.js",
+			"node_modules/php-wasm/PhpWeb.mjs",
+			"node_modules/php-wasm/PhpWeb.js",
+			"node_modules/php-wasm/php-web.mjs",
+			"node_modules/php-wasm/php-web.js"
 		]
 	}
 ];

@@ -75,11 +75,11 @@ TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 
 MJS=$(addprefix ${PHP_DIST_DIR}/,php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs) \
 	$(addprefix ${PHP_DIST_DIR}/,PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs) \
-	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.mjs webTransactions.mjs _Event.mjs)
+	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.mjs webTransactions.mjs _Event.mjs PhpBase.mjs)
 
 CJS=$(addprefix ${PHP_DIST_DIR}/,php-web.js php-webview.js php-node.js php-shell.js php-worker.js) \
 	$(addprefix ${PHP_DIST_DIR}/,PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js) \
-	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.js webTransactions.js  _Event.js)
+	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.js webTransactions.js  _Event.js  PhpBase.js)
 
 TAG_JS=$(addprefix ${PHP_DIST_DIR},php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs)
 
@@ -136,27 +136,12 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/drupal-7.95/README.txt
+third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/php${PHP_VERSION}-src/Zend/bench.php # third_party/drupal-7.95/README.txt
 	# ${DOCKER_RUN} rm -rf /src/third_party/preload
 ifdef PRELOAD_ASSETS
 	@ mkdir -p third_party/preload
 	@ cp -prf ${PRELOAD_ASSETS} third_party/preload/
 endif
-
-third_party/drupal-7.95: third_party/drupal-7.95/README.txt
-
-third_party/drupal-7.95/README.txt:
-	@ echo -e "\e[33;4mDownloading and patching Drupal\e[0m"
-	wget -q https://ftp.drupal.org/files/projects/drupal-7.95.zip
-	${DOCKER_RUN} unzip drupal-7.95.zip
-	${DOCKER_RUN} rm -v drupal-7.95.zip
-	${DOCKER_RUN} mv drupal-7.95 third_party/drupal-7.95
-	${DOCKER_RUN} git apply --no-index patch/drupal-7.95.patch
-	${DOCKER_RUN} cp -r extras/drupal-7-settings.php third_party/drupal-7.95/sites/default/settings.php
-	${DOCKER_RUN} mkdir /src/third_party/drupal-7.95/sites/default/files/
-	${DOCKER_RUN} cp -r extras/drowser-files/.ht.sqlite third_party/drupal-7.95/sites/default/files/.ht.sqlite
-	${DOCKER_RUN} cp -r extras/drowser-files/* third_party/drupal-7.95/sites/default/files
-	${DOCKER_RUN} cp -r extras/drowser-logo.png third_party/drupal-7.95/sites/default/logo.png
 
 third_party/preload/bench.php: third_party/php${PHP_VERSION}-src/.gitignore
 	mkdir -p third_party/preload/
@@ -165,10 +150,6 @@ third_party/preload/bench.php: third_party/php${PHP_VERSION}-src/.gitignore
 third_party/preload/dump-request.php: third_party/preload
 	mkdir -p third_party/preload/
 	cp -p extras/dump-request.php third_party/preload/
-
-third_party/preload/drupal-7.95/README.txt: third_party/drupal-7.95/README.txt
-	mkdir -p third_party/preload/
-	cp -rf third_party/drupal-7.95 third_party/preload/
 
 third_party/php${PHP_VERSION}-src/.gitignore:
 	@ echo -e "\e[33;4mDownloading and patching PHP\e[0m"
@@ -549,44 +530,6 @@ docs-source/app/assets/php-wasm/breakoutRequest.mjs: source/breakoutRequest.js
 	cp $^ $@
 	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-docs-source/app/assets/php-wasm/PhpWebDrupal.mjs: source/PhpWebDrupal.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/PhpWorkerDrupal.mjs: source/PhpCgiWorkerDrupal.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/php-web-drupal.mjs: BUILD_TYPE=mjs
-docs-source/app/assets/php-wasm/php-web-drupal.mjs: FS_TYPE=${WEB_FS_TYPE}
-docs-source/app/assets/php-wasm/php-web-drupal.mjs: PRELOAD_METHOD=--preload-file
-docs-source/app/assets/php-wasm/php-web-drupal.mjs: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-docs-source/app/assets/php-wasm/php-web-drupal.mjs: ENVIRONMENT=web-drupal
-docs-source/app/assets/php-wasm/php-web-drupal.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=web ${PRELOAD_METHOD} /src/third_party/preload@/preload
-docs-source/app/assets/php-wasm/php-web-drupal.mjs: ${DEPENDENCIES} third_party/preload/drupal-7.95/README.txt third_party/preload/bench.php third_party/preload/dump-request.php| ${ORDER_ONLY}
-	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cli
-	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -rf third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./docs-source/app/assets/php-wasm
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
-
-docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs: BUILD_TYPE=mjs
-docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs: FS_TYPE=${WORKER_FS_TYPE}
-docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs: PRELOAD_METHOD=--embed-file
-docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs: PRELOAD_ASSETS=third_party/drupal-7.95 third_party/php${PHP_VERSION}-src/Zend/bench.php
-docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs: ENVIRONMENT=worker-drupal
-docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs: EXTRA_FLAGS+= -s ENVIRONMENT=worker ${PRELOAD_METHOD} /src/third_party/preload@/preload
-docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs: ${DEPENDENCIES} third_party/preload/drupal-7.95/README.txt third_party/preload/bench.php third_party/preload/dump-request.php| ${ORDER_ONLY}
-	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make ${BUILD_FLAGS} PHP_BINARIES=cgi
-	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -rf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./docs-source/app/assets/php-wasm
-	${DOCKER_RUN} chown $(or ${UID},1000):$(or ${GID},1000) $@*
-
 ########### Clerical stuff. ###########
 
 ${ENV_FILE}:
@@ -612,7 +555,7 @@ deep-clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.data *.br  *.gz
 	${DOCKER_RUN} rm -rfv \
 		third_party/php${PHP_VERSION}-src lib/* build/* \
-		third_party/drupal-7.95 third_party/libxml2 third_party/tidy-html5 \
+		third_party/libxml2 third_party/tidy-html5 \
 		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
 		third_party/freetype-2.10.0 third_party/freetype \
 		third_party/gd third_party/jpeg-9f third_party/libicu \
@@ -644,18 +587,13 @@ push-image:
 	docker-compose --progress quiet push
 
 demo: \
-	docs-source/app/assets/php-wasm/php-cgi-worker-drupal.mjs \
-	docs-source/app/assets/php-wasm/php-web-drupal.mjs \
 	docs-source/app/assets/php-wasm/webTransactions.mjs \
 	docs-source/app/assets/php-wasm/OutputBuffer.mjs \
 	docs-source/app/assets/php-wasm/_Event.mjs \
 	docs-source/app/assets/php-wasm/parseResponse.mjs \
 	docs-source/app/assets/php-wasm/breakoutRequest.mjs \
-	docs-source/app/assets/php-wasm/PhpWorkerDrupal.mjs \
-	docs-source/app/assets/php-wasm/PhpWebDrupal.mjs \
 	docs-source/app/assets/php-wasm/PhpCgiBase.mjs \
 	docs-source/app/assets/php-wasm/PhpBase.mjs
-
 
 serve-demo:
 	cd docs-source && brunch w -s
