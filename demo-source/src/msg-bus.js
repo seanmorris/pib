@@ -6,7 +6,7 @@ export const sendMessage = async (action, params, accept, reject) => {
 	incomplete.set(token, [accept, reject]);
 
 	navigator.serviceWorker
-	.getRegistration(`${window.location.origin}/cgo-worker.mjs`)
+	.getRegistration(`${window.location.origin}/cgi-worker.mjs`)
 	.then(registration => registration.active.postMessage({action, params, token}));
 
 	return ret;
