@@ -34,6 +34,7 @@ third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}
 	@ cp -prfv ${VRZNO_DEV_PATH} third_party/
 	${DOCKER_RUN} touch third_party/vrzno/vrzno.c
 else
+
 third_party/vrzno/vrzno.c:
 	@ echo -e "\e[33;4mDownloading and importing VRZNO\e[0m"
 	${DOCKER_RUN} git clone https://github.com/seanmorris/vrzno.git third_party/vrzno \
