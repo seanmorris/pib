@@ -3,8 +3,6 @@ import './LoadDemo.css';
 
 import loader from './tail-spin.svg';
 
-import initPhp from './init.php';
-
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
@@ -96,7 +94,7 @@ const installDemo = async (overwrite = false) => {
 	await navigator.serviceWorker.register(`/cgi-worker.js`);
 
 	await navigator.serviceWorker.getRegistration(`${window.location.origin}/cgo-worker.mjs`);
-	const initPhpCode = await (await fetch(initPhp)).text();
+	const initPhpCode = await (await fetch('/scripts/init.php')).text();
 
 	const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
 

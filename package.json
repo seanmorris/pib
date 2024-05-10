@@ -25,7 +25,6 @@
 		"php-wasm-libxml": "^0.0.9",
 		"php-wasm-libzip": "^0.0.9",
 		"php-wasm-openssl": "^0.0.9",
-		"php-cgi-wasm": "^0.0.9",
 		"php-wasm-sqlite": "^0.0.9",
 		"php-wasm-tidy": "^0.0.9",
 		"php-wasm-zlib": "^0.0.9",

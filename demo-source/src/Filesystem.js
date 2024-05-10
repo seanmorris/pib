@@ -3,9 +3,6 @@ import './LoadDemo.css';
 
 import loader from './tail-spin.svg';
 
-import backupPhp from './backup.php';
-import restorePhp from './restore.php';
-
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
 import { onMessage, sendMessage } from './msg-bus';
@@ -21,7 +18,7 @@ const backupSite = async () => {
 
 	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 	await php.binary;
-	const backupPhpCode = await (await fetch(backupPhp)).text();
+	const backupPhpCode = await (await fetch('/scripts/backup.php')).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Backing up files...'}));
 	await php.run(backupPhpCode);
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
@@ -43,7 +40,7 @@ const restoreSite = async ({fileInput}) => {
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Uploading zip...'}));
 	await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
 	await php.binary;
-	const restorePhpCode = await (await fetch(restorePhp)).text();
+	const restorePhpCode = await (await fetch('/scripts/restore.php')).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Unpacking files...'}));
 	await php.run(restorePhpCode);
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
