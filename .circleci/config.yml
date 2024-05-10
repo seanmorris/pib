@@ -9,27 +9,27 @@ workflows:
     jobs:
       - checkout
 
-      - make-iconv
+      - make-iconv:
           requires:
             - checkout
 
-      - make-libxml
+      - make-libxml:
           requires:
             - checkout
 
-      - make-libzip
+      - make-libzip:
           requires:
             - checkout
 
-      - make-sqlite
+      - make-sqlite:
           requires:
             - checkout
 
-      - make-zlib
+      - make-zlib:
           requires:
             - checkout
 
-      - make-node
+      - make-node:
           requires:
             - checkout
             - make-iconv
@@ -38,7 +38,7 @@ workflows:
             - make-sqlite
             - make-zlib
 
-      - test
+      - test:
           requires:
             - make-node
 
