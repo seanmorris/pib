@@ -626,6 +626,3 @@ publish:
 
 test: node-mjs
 	node --test ${TEST_LIST} `ls test/*.mjs`
-
-
-third_party/vrzno/lib.js: third_party/vrzno/vrzno.c

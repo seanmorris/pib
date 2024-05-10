@@ -27,13 +27,24 @@ ${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js)
 		${VRZNO_DEV_PATH}/js/PdoD1Driver.js \
 		${VRZNO_DEV_PATH}/js/module.js \
 		> ${VRZNO_DEV_PATH}/lib.js
-	cat ${VRZNO_DEV_PATH}/lib.js
 
 third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
 	@ echo -e "\e[33;4mImporting VRZNO\e[0m"
 	@ cp -prfv ${VRZNO_DEV_PATH} third_party/
 	${DOCKER_RUN} touch third_party/vrzno/vrzno.c
 else
+
+third_party/vrzno/lib.js: $(wildcard third_party/vrzno/js/*.js)
+	third_party/vrzno/js/WeakerMap.js \
+		third_party/vrzno/js/PolyFill.js \
+		third_party/vrzno/js/UniqueIndex.js \
+		third_party/vrzno/js/marshalObject.js \
+		third_party/vrzno/js/callableToJs.js \
+		third_party/vrzno/js/zvalToJs.js \
+		third_party/vrzno/js/jsToZval.js \
+		third_party/vrzno/js/PdoD1Driver.js \
+		third_party/vrzno/js/module.js \
+		> third_party/vrzno/lib.js
 
 third_party/vrzno/vrzno.c:
 	@ echo -e "\e[33;4mDownloading and importing VRZNO\e[0m"
