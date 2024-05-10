@@ -33,7 +33,7 @@ function Home() {
 	useEffect(() => {
 		if(query.has('code') || query.has('demo'))
 		{
-			window.location = '/embedded' + window.location.search;
+			window.location = process.env.PUBLIC_URL + '/embedded' + window.location.search;
 		}
 	}, []);
 
