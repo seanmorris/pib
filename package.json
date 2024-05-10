@@ -21,7 +21,7 @@
 		"php-wasm-iconv": "^0.0.9",
 		"php-wasm-libicu": "^0.0.9-d",
 		"php-wasm-libjpeg": "^0.0.9",
-		"php-wasm-libpng": "^0.0.9",
+		"php-wasm-libpng": "^0.0.9-a",
 		"php-wasm-libxml": "^0.0.9",
 		"php-wasm-libzip": "^0.0.9",
 		"php-wasm-openssl": "^0.0.9",
