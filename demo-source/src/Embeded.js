@@ -94,7 +94,11 @@ function Embeded() {
 
 			query.set('persist', persist.current.checked ? 1 : 0);
 			query.set('single-expression', single.current.checked ? 1 : 0);
-			query.set('code', encodeURIComponent(phpCode));
+
+			if(phpCode.length < 1024)
+			{
+				query.set('code', encodeURIComponent(phpCode));
+			}
 
 			window.history.replaceState({}, document.title, "?" + query.toString());
 		});
@@ -177,33 +181,31 @@ function Embeded() {
 
 		let code = input.current;
 
-		if(single.current.checked)
-		{
-			code = code.replace(/^\s*<\?php/, '');
-			code = code.replace(/\?>\s*/, '');
+		setTimeout(async () => {
+			if(single.current.checked)
+			{
+				code = code.replace(/^\s*<\?php/, '');
+				code = code.replace(/\?>\s*/, '');
 
-			phpRef.current.exec(code)
-			.then(ret => {
+				const ret = await phpRef.current.exec(code)
 				setStdRet(ret);
 				persist.current.checked || phpRef.current.refresh();
 				setTimeout(() => {
 					setStatusMessage('php-wasm ready!')
 					setRunning(false);
 				}, 50);
-			});
-		}
-		else
-		{
-			phpRef.current.run(code)
-			.then(exitCode => {
+			}
+			else
+			{
+				const exitCode = await phpRef.current.run(code)
 				setExitCode(exitCode);
 				persist.current.checked || phpRef.current.refresh();
 				setTimeout(() => {
 					setStatusMessage('php-wasm ready!')
 					setRunning(false);
-				}, 50);
-			});
-		}
+				}, 16);
+			}
+		}, 16);
 	};
 
 	return (
