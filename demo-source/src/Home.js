@@ -28,6 +28,15 @@ function Home() {
 	const [overlay, setOverlay] = useState(null);
 	const [scrollState, setScrollState] = useState(1);
 
+	const query = new URLSearchParams(window.location.search);
+
+	useEffect(() => {
+		if(query.has('code') || query.has('demo'))
+		{
+			window.location = '/embedded' + window.location.search;
+		}
+	}, []);
+
 	useEffect(() => {
 		const speed = 1400;
 		setTimeout(() => {

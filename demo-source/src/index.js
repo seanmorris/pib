@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import { Route, Routes } from 'react-router';
+import { Navigate, Route, Routes, redirect } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 
 import SelectFramework from './SelectFramework';
@@ -28,6 +28,26 @@ root.render(
 			<Route path = "/select-framework" element = { <SelectFramework /> } />
 			<Route path = "/load-demo" element = { <LoadDemo /> } />
 			<Route path = "/code-editor" element = { <Editor /> } />
+			<Route
+				path = "/php-wasm/cgi/drupal"
+				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=drupal-7'} />}
+			/>
+			<Route
+				path = "/php-wasm/cgi/cakephp-5"
+				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=cakephp-5'} />}
+			/>
+			<Route
+				path = "/php-wasm/cgi/codeigniter-4"
+				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=codeigniter-4'} />}
+			/>
+			<Route
+				path = "/php-wasm/cgi/laminas-3"
+				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=laminas-3'} />}
+			/>
+			<Route
+				path = "/php-wasm/cgi/laravel-11"
+				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=laravel-11'} />}
+			/>
 		</Routes>
 	</BrowserRouter>
   </React.StrictMode>
