@@ -54,7 +54,7 @@ function SelectFramework() {
 								<img src = {cakePhpIcon} alt = "cakephp 5" />
 							</a>
 							{cakeInstalled && (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/php-wasm/cgi-bin/cakephp-5')}>Open Demo</button>
+								<button onClick = { () => window.open('/php-wasm/cgi-bin/cakephp-5')}>Open Demo</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/cakephp-5')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=cakephp-5&overwrite=true')}>Reset</button>
 							</span>)}
@@ -67,7 +67,7 @@ function SelectFramework() {
 								<img src = {codeIgniterIcon} alt = "codeigniter 4" />
 							</a>
 							{codeigniterInstalled && (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/php-wasm/cgi-bin/codeigniter-4')}>Open Demo</button>
+								<button onClick = { () => window.open('/php-wasm/cgi-bin/codeigniter-4')}>Open Demo</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/codeigniter-4')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=codeigniter-4&overwrite=true')}>Reset</button>
 							</span>)}
@@ -80,7 +80,7 @@ function SelectFramework() {
 								<img src = {drupalIcon} alt = "drupal 7" /> {drupalInstalled}
 							</a>
 							{drupalInstalled && (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/php-wasm/cgi-bin/drupal')}>Open Demo</button>
+								<button onClick = { () => window.open('/php-wasm/cgi-bin/drupal')}>Open Demo</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/drupal-7.95')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=drupal-7&overwrite=true')}>Reset</button>
 							</span>)}
@@ -93,7 +93,7 @@ function SelectFramework() {
 								<img src = {laravelIcon} alt = "laravel 11" />
 							</a>
 							{laravelInstalled && (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/php-wasm/cgi-bin/laravel-11')}>Open Demo</button>
+								<button onClick = { () => window.open('/php-wasm/cgi-bin/laravel-11')}>Open Demo</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/laravel-11')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=laravel-11&overwrite=true')}>Reset</button>
 							</span>)}
@@ -106,7 +106,7 @@ function SelectFramework() {
 								<img src = {laminasIcon} alt = "laminas 3" />
 							</a>
 							{laminasInstalled && (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/php-wasm/cgi-bin/laminas-3')}>Open Demo</button>
+								<button onClick = { () => window.open('/php-wasm/cgi-bin/laminas-3')}>Open Demo</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/laminas-3')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=laminas-3&overwrite=true')}>Reset</button>
 							</span>)}

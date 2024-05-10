@@ -115,11 +115,11 @@ function Home() {
 						<img src = {rolodexIcon} className = "icon" alt = "SQL Editor" />
 						SQL Editor
 					</button> */}
-					<button onClick = {() => window.open(process.env.PUBLIC_URL + 'https://github.com/sponsors/seanmorris')}>
+					<button onClick = {() => window.open('https://github.com/sponsors/seanmorris')}>
 						<img src = {donateIcon} className = "icon" alt = "Donate" />
 						Donate
 					</button>
-					<button onClick = {() => window.open(process.env.PUBLIC_URL + 'https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
+					<button onClick = {() => window.open('https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
 						<img src = {githubIcon} className = "icon" alt = "Github" />
 						Github
 					</button>

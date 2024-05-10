@@ -145,8 +145,6 @@ const installDemo = async (overwrite = false) => {
 
 	window.demoInstalling = null;
 
-	console.log(window.opener);
-
 	if(window.opener)
 	{
 		window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: '/persist/' + selectedFramework.dir}));
