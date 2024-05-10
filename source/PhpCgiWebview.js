@@ -5,7 +5,7 @@ export class PhpCgiWebview extends PhpCgiBase
 {
 	constructor({docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
 	{
-		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {});
+		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args});
 	}
 
 	async _enqueue(method, params = [])
