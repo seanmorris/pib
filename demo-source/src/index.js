@@ -12,10 +12,10 @@ import Editor from './Editor';
 
 navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 
-if(!navigator.serviceWorker.controller)
-{
-	window.location.reload();
-}
+// if(!navigator.serviceWorker.controller)
+// {
+// 	window.location.reload();
+// }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
