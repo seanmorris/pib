@@ -35,7 +35,7 @@ third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}
 else
 
 third_party/vrzno/lib.js: $(wildcard third_party/vrzno/js/*.js)
-	third_party/vrzno/js/WeakerMap.js \
+	${DOCKER_RUN} third_party/vrzno/js/WeakerMap.js \
 		third_party/vrzno/js/PolyFill.js \
 		third_party/vrzno/js/UniqueIndex.js \
 		third_party/vrzno/js/marshalObject.js \
