@@ -108,7 +108,7 @@ const installDemo = async (overwrite = false) => {
 	}
 
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Downloading package...'}));
-	const download = await fetch(selectedFramework.file);
+	const download = await fetch(process.env.PUBLIC_URL + selectedFramework.file);
 	const zipContents = await download.arrayBuffer();
 
 	const settings = await sendMessage('getSettings');

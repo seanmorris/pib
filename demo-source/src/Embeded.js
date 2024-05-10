@@ -54,7 +54,7 @@ function Embeded() {
 	const codeChanged = newValue => input.current = newValue;
 
 	const loadDemo = useCallback(demoName => {
-		fetch('/scripts/' + demoName)
+		fetch(process.env.PUBLIC_URL + '/scripts/' + demoName)
 		.then(response => response.text())
 		.then(async phpCode => {
 			refreshPhp();
