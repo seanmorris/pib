@@ -37,7 +37,7 @@ else
 
 third_party/vrzno/lib.js: $(wildcard third_party/vrzno/js/*.js)
 	@ echo -e "\e[33;4mBuilding VRZNO lib.js\e[0m"
-	${DOCKER_RUN} cat third_party/vrzno/js/WeakerMap.js \
+	${DOCKER_RUN} bash -c 'cat third_party/vrzno/js/WeakerMap.js \
 		third_party/vrzno/js/PolyFill.js \
 		third_party/vrzno/js/UniqueIndex.js \
 		third_party/vrzno/js/marshalObject.js \
@@ -46,7 +46,7 @@ third_party/vrzno/lib.js: $(wildcard third_party/vrzno/js/*.js)
 		third_party/vrzno/js/jsToZval.js \
 		third_party/vrzno/js/PdoD1Driver.js \
 		third_party/vrzno/js/module.js \
-		> third_party/vrzno/lib.js
+		> third_party/vrzno/lib.js'
 
 third_party/vrzno/vrzno.c:
 	@ echo -e "\e[33;4mDownloading and importing VRZNO\e[0m"

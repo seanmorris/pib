@@ -28,7 +28,7 @@
 		"php-wasm-sqlite": "^0.0.9",
 		"php-wasm-tidy": "^0.0.9",
 		"php-wasm-zlib": "^0.0.9",
-		"vrzno": "^0.0.9-c"
+		"vrzno": "^0.0.9-d"
 	},
 	"contributors": [
 		{
