@@ -19,12 +19,8 @@ third_party/libpng/.gitignore:
 
 lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 	@ echo -e "\e[33;4mBuilding LIBPNG\e[0m"
-	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
-		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE} " \
-		-DPNG_SHARED="OFF"
-	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
+	${DOCKER_RUN_IN_LIBPNG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --disable-shared
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 endif
