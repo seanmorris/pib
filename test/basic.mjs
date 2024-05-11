@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { PhpNode } from '../PhpNode.mjs';
+import { PhpNode } from '../packages/php-wasm/PhpNode.mjs';
 
 test('Can run PHP', async () => {
 	const php = new PhpNode();

@@ -1,16 +1,16 @@
-# php-wasm aka PIB
+# php-wasm
 
 Changes
 
 ## v0.0.9 - Proving Grounds
 
 * Adding PHP-CGI support!
-* Adding httpd-like CGI wrapper.
-* Adding libicu, freetype, zlib, gd, libpng, libjpeg, & openssl.
+* New "cgi" option for custom builds.
+* Implemented an httpd-like CGI wrapper.
+* libicu, freetype, zlib, gd, libpng, libjpeg, & openssl.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
 * ESM modules are now webpack-compatible out of the box.
-* Adding "cgi" option for custom builds.
 *
 
 ## v0.0.8 - Preparing for Lift-off
