@@ -136,7 +136,7 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
 third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/php${PHP_VERSION}-src/Zend/bench.php # third_party/drupal-7.95/README.txt
-	# ${DOCKER_RUN} rm -rf /src/third_party/preload
+#	 ${DOCKER_RUN} rm -rf /src/third_party/preload
 ifdef PRELOAD_ASSETS
 	@ mkdir -p third_party/preload
 	@ cp -prf ${PRELOAD_ASSETS} third_party/preload/
