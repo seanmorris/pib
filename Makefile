@@ -525,7 +525,7 @@ clean:
 		packages/php-wasm/*.br packages/php-wasm/*.gz \
 		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
 		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
-		third_party/preload .cache/pre.js
+		third_party/preload .cache/pre.js .cache/config-cache
 	${DOCKER_RUN_IN_PHP} rm -fv configured
 	${DOCKER_RUN_IN_PHP} make clean
 
@@ -550,7 +550,7 @@ deep-clean:
 		packages/php-wasm/*.br packages/php-wasm/*.gz \
 		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
 		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
-		dist/* sqlite-*
+		dist/* sqlite-* .cache/pre.js .cache/config-cache
 
 show-ports:
 	${DOCKER_RUN} emcc --show-ports
