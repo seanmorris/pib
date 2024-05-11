@@ -16,7 +16,7 @@ import donateIcon from './icons/donate-icon-32.png';
 import githubIcon from './icons/github-icon-32.png';
 import cabinetIcon from './icons/file-cabinet-icon-32.png';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Backup, Clear, Restore } from './Filesystem';
 import Confirm from './Confirm';
@@ -28,14 +28,14 @@ function Home() {
 	const [overlay, setOverlay] = useState(null);
 	const [scrollState, setScrollState] = useState(1);
 
-	const query = new URLSearchParams(window.location.search);
+	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
 	useEffect(() => {
 		if(query.has('code') || query.has('demo'))
 		{
 			window.location = process.env.PUBLIC_URL + '/embedded' + window.location.search;
 		}
-	}, []);
+	}, [query]);
 
 	useEffect(() => {
 		const speed = 1400;
@@ -93,7 +93,7 @@ function Home() {
 				<div className='row'>
 					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded'}>
 						<div className = "big-icon embedded">
-							<img src = {phpPageIcon} />
+							<img alt = "page showing php logo" src = {phpPageIcon} />
 						</div>
 						<span className = "title">PHP Embedded Demo</span>
 						<p className='padded'>View, edit & run PHP code right in the browser.</p>
@@ -101,12 +101,12 @@ function Home() {
 					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/select-framework'}>
 						<div className = "big-icon cgi" style={{'--offset': offset}} data-scroll-state = {scrollState}>
 							<div className = "offset-column">
-								<img src = {cakePhpIcon} alt = "CakePHP" />
-								<img src = {codeIgniterIcon} alt = "CodeIgniter" />
-								<img src = {drupalIcon} alt = "Drupal" />
-								<img src = {laminasIcon} alt = "Laminas" />
-								<img src = {laravelIcon} alt = "Laravel" />
-								<img src = {cakePhpIcon} alt = "CakePHP" />
+								<img src = {cakePhpIcon} alt = "CakePHP logo" />
+								<img src = {codeIgniterIcon} alt = "CodeIgniter logo" />
+								<img src = {drupalIcon} alt = "Drupal logo" />
+								<img src = {laminasIcon} alt = "Laminas logo" />
+								<img src = {laravelIcon} alt = "Laravel logo" />
+								<img src = {cakePhpIcon} alt = "CakePHP logo" />
 							</div>
 						</div>
 						<span className = "title">PHP CGI Demo</span>
@@ -136,20 +136,20 @@ function Home() {
 				<h2>Filesystem Operations:</h2>
 				<div className = "inset button-bar">
 					<button onClick = {backupSite}>
-						<img src = {cabinetIcon} className = "icon" />
+						<img alt = "Backup" src = {cabinetIcon} className = "icon" />
 						Backup
 					</button>
 					<button onClick = {restoreSite}>
-						<img src = {floppyIcon} className = "icon" />
+						<img alt = "Restore" src = {floppyIcon} className = "icon" />
 						Restore
 						</button>
 					<button onClick = {clearFilesystem}>
-						<img src = {nukeIcon} className = "icon" />
+						<img alt = "Clear" src = {nukeIcon} className = "icon" />
 						Clear
 					</button>
 				</div>
 				<div className = "inset right demo-bar">
-					<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
+					<span>Demo powered by React</span> <img alt = "react-logo" src = {reactIcon} className='small-icon'/>
 				</div>
 			</div>
 			<div className = "overlay">{overlay}</div>

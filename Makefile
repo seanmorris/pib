@@ -625,3 +625,5 @@ publish:
 
 test: node-mjs
 	node --test ${TEST_LIST} `ls test/*.mjs`
+
+-include packages/php-cgi-wasm/static.mak

@@ -78,19 +78,20 @@ export default function EditorFile({path, name}) {
 	const renameKeyUp = async event => {
 		if(event.key === 'Enter')
 		{
-			const dirPath = _path.substr(0, _path.length - _name.length);
+			if(event.target.value)
+			{
+				const dirPath = _path.substr(0, _path.length - _name.length);
+				const newPath = dirPath + event.target.value;
 
-			const newPath = dirPath + event.target.value;
+				await sendMessage('rename', [_path, newPath]);
 
-			console.log({_path, newPath});
-
-			await sendMessage('rename', [_path, newPath]);
-
-			setName(event.target.value);
-			setPath(newPath);
+				setName(event.target.value);
+				setPath(newPath);
+			}
 
 			setShowRename(false);
 		}
+
 		if(event.key === 'Escape')
 		{
 			setShowRename(false);

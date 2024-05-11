@@ -5,6 +5,7 @@ import "react-ace-builds/webpack-resolver-min";
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
+import Confirm from './Confirm';
 
 let init = false;
 
@@ -24,6 +25,7 @@ function Embeded() {
 	const [stdOut, setStdOut] = useState('');
 	const [stdErr, setStdErr] = useState('');
 	const [stdRet, setStdRet] = useState('');
+	const [overlay, setOverlay] = useState(null);
 
 	const [running, setRunning] = useState(false);
 	const [displayMode, setDisplayMode] = useState('');
@@ -36,7 +38,6 @@ function Embeded() {
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
-		console.trace();
 		// phpRef.current = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 		phpRef.current = new PhpWeb();
 
@@ -67,6 +68,18 @@ function Embeded() {
 	const codeChanged = newValue => input.current = newValue;
 
 	const loadDemo = useCallback(demoName => {
+		if(demoName === 'drupal.php')
+		{
+			setOverlay(<Confirm
+				onConfirm = { () => window.location = '/select-framework' }
+				onCancel = { () => setOverlay(null) }
+				message = {(
+					<span>The Drupal demo has been moved into the <b>php-cgi-wasm</b> demo. Would you like to go there now?</span>
+				)}
+			/>);
+			return;
+		}
+
 		fetch(process.env.PUBLIC_URL + '/scripts/' + demoName)
 		.then(response => response.text())
 		.then(async phpCode => {
@@ -341,6 +354,7 @@ function Embeded() {
 					</div>
 				</div>
 			</div>
+			<div className = "overlay">{overlay}</div>
 		</div>
 	);
 }

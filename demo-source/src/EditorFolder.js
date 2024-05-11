@@ -8,7 +8,7 @@ import fileIcon from './nomo-dark/file.svg';
 import folderOpen from './nomo-dark/folder.open.svg';
 import folderClose from './nomo-dark/folder.close.svg';
 
-const pathStates = new Map;
+const pathStates = new Map();
 
 export default function EditorFolder({path = '/', name = ''}) {
 	const [dirs, setDirs]                   = useState([]);
@@ -28,6 +28,11 @@ export default function EditorFolder({path = '/', name = ''}) {
 
 	const [expanded, setExpanded] = useState(startOpened);
 
+	useEffect(() => {
+		navigator.serviceWorker.addEventListener('message', onMessage);
+		return () => navigator.serviceWorker.removeEventListener('message', onMessage);
+	}, []);
+
 	const onContext = event => {
 		event.preventDefault();
 		setExpanded(true);
@@ -41,12 +46,17 @@ export default function EditorFolder({path = '/', name = ''}) {
 	const newFileKeyUp = async event => {
 		if(event.key === 'Enter')
 		{
-			const newName = path + '/' + event.target.value;
-			sendMessage('writeFile', [newName, new TextEncoder().encode('')]);
+			if(event.target.value)
+			{
+				const newName = path + '/' + event.target.value;
+				sendMessage('writeFile', [newName, new TextEncoder().encode('')]);
+				loadFiles();
+			}
+
 			setShowNewFile(false);
-			loadFiles();
 			event.target.value = '';
 		}
+
 		if(event.key === 'Escape')
 		{
 			setShowNewFile(false);
@@ -57,12 +67,17 @@ export default function EditorFolder({path = '/', name = ''}) {
 	const newFolderKeyUp = async event => {
 		if(event.key === 'Enter')
 		{
-			const newName = path + '/' + event.target.value;
-			sendMessage('mkdir', [newName]);
+			if(event.target.value)
+			{
+				const newName = path + '/' + event.target.value;
+				sendMessage('mkdir', [newName]);
+				loadFiles();
+			}
+
 			setShowNewFolder(false);
 			event.target.value = '';
-			loadFiles();
 		}
+
 		if(event.key === 'Escape')
 		{
 			setShowNewFolder(false);
@@ -73,7 +88,11 @@ export default function EditorFolder({path = '/', name = ''}) {
 	const loadFiles = () => {
 		sendMessage('readdir', [path]).then(async entries => {
 			entries = entries.filter(f => f !== '.' && f !== '..');
-			const types = await Promise.all(entries.map(async f => (await sendMessage('analyzePath', [path + (path[path.length - 1] !== '/' ? '/' : '') + f])).object.isFolder));
+			const types = await Promise.all(entries.map(async f =>
+				(await sendMessage('analyzePath', [path + (path[path.length - 1] !== '/' ? '/' : '') + f]))
+				.object.isFolder
+			));
+
 			const dirs = entries.filter((_,k) => types[k]);
 			const files = entries.filter((_,k) => !types[k]);
 			setDirs(dirs);
