@@ -8,7 +8,16 @@ import laminasIcon from './laminas-icon.svg';
 import { useEffect, useState } from 'react';
 import Header from './Header';
 import { onMessage, sendMessage } from './msg-bus';
+
 import reactIcon from './react-icon.svg';
+
+import floppyIcon from './icons/floppy-icon-32.png';
+import nukeIcon from './icons/nuke-icon-32.png';
+import cabinetIcon from './icons/file-cabinet-icon-32.png';
+import { Backup, Clear, Restore } from './Filesystem';
+import DoWithFile from './DoWithFile';
+import ErrorDialog from './ErrorDialog';
+import Confirm from './Confirm';
 
 function SelectFramework() {
 
@@ -17,6 +26,7 @@ function SelectFramework() {
 	const [drupalInstalled, setDrupalInstalled] = useState(false);
 	const [laravelInstalled, setLaravelInstalled] = useState(false);
 	const [laminasInstalled, setLaminasInstalled] = useState(false);
+	const [overlay, setOverlay] = useState(null);
 
 	sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
 	sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
@@ -25,7 +35,6 @@ function SelectFramework() {
 	sendMessage('analyzePath', ['/persist/laminas-3']).then(about => setLaminasInstalled(about.exists));
 
 	const onComplete = event => {
-		console.log(event.detail);
 		sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/drupal-7.95']).then(about => setDrupalInstalled(about.exists));
@@ -41,6 +50,38 @@ function SelectFramework() {
 			navigator.serviceWorker.removeEventListener('message', onMessage);
 		}
 	}, []);
+
+	const backupSite = () => setOverlay(<Backup
+		onComplete = { () => setOverlay(null) }
+		onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+	/>);
+
+	const restoreSite = () => setOverlay(<DoWithFile
+		onConfirm = { fileInput => setOverlay(<Restore
+			fileInput = {fileInput}
+			onComplete = { () => setOverlay(null) }
+			onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+		/>) }
+		onCancel = { () => setOverlay(null) }
+		message = {(
+			<span>Select a zip file to restore from.</span>
+		)}
+	/>);
+
+	const clearFilesystem = () => setOverlay(<Confirm
+		onConfirm = { () => setOverlay(<Clear onComplete = { () => {
+			setCakeInstalled(false);
+			setCodeigniterInstalled(false);
+			setDrupalInstalled(false);
+			setLaravelInstalled(false);
+			setLaminasInstalled(false);
+			setOverlay(null)
+		 } } />) }
+		onCancel = { () => setOverlay(null) }
+		message = {(
+			<span>Are you sure you want to clear the filesystem? <b>Reminder:</b> This cannot be undone, you should take a backup first.</span>
+		)}
+	/>);
 
 	return (
 		<div className = "select-framework">
@@ -115,11 +156,27 @@ function SelectFramework() {
 							</span>)}
 						</div>
 					</div>
-				</div>
-				<div className = "inset right demo-bar">
-					<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
+					<h2>Filesystem Operations:</h2>
+					<div className = "inset button-bar">
+						<button onClick = {backupSite}>
+							<img alt = "Backup" src = {cabinetIcon} className = "icon" />
+							Backup
+						</button>
+						<button onClick = {restoreSite}>
+							<img alt = "Restore" src = {floppyIcon} className = "icon" />
+							Restore
+							</button>
+						<button onClick = {clearFilesystem}>
+							<img alt = "Clear" src = {nukeIcon} className = "icon" />
+							Clear
+						</button>
+					</div>
+					<div className = "inset right demo-bar">
+						<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
+					</div>
 				</div>
 			</div>
+			<div className = "overlay">{overlay}</div>
 		</div>
 	);
 }

@@ -71,7 +71,7 @@ function Embeded() {
 		if(demoName === 'drupal.php')
 		{
 			setOverlay(<Confirm
-				onConfirm = { () => window.location = '/select-framework' }
+				onConfirm = { () => window.location = process.env.PUBLIC_URL + '/select-framework' }
 				onCancel = { () => setOverlay(null) }
 				message = {(
 					<span>The Drupal demo has been moved into the <b>php-cgi-wasm</b> demo. Would you like to go there now?</span>

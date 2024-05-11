@@ -413,7 +413,7 @@ export class PhpCgiBase
 
 	async _run(code)
 	{
-		const result = (await this.php).run(code);
+		return (await this.php).run(code);
 	}
 
 	analyzePath(path)

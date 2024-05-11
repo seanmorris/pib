@@ -8,24 +8,15 @@ import laravelIcon from './laravel-icon.svg';
 import laminasIcon from './laminas-icon.svg';
 import reactIcon from './react-icon.svg';
 
-import floppyIcon from './icons/floppy-icon-32.png';
 // import rolodexIcon from './icons/rolodex-icon-32.png';
 import editorIcon from './icons/editor-icon-32.png';
-import nukeIcon from './icons/nuke-icon-32.png';
 import donateIcon from './icons/donate-icon-32.png';
 import githubIcon from './icons/github-icon-32.png';
-import cabinetIcon from './icons/file-cabinet-icon-32.png';
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { Backup, Clear, Restore } from './Filesystem';
-import Confirm from './Confirm';
-import DoWithFile from './DoWithFile';
-import ErrorDialog from './ErrorDialog';
-
 function Home() {
 	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
-	const [overlay, setOverlay] = useState(null);
 	const [scrollState, setScrollState] = useState(1);
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -60,31 +51,6 @@ function Home() {
 		}, speed);
 
 	}, [offset, scrollState]);
-
-	const backupSite = () => setOverlay(<Backup
-		onComplete = { () => setOverlay(null) }
-		onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
-	/>);
-
-	const restoreSite = () => setOverlay(<DoWithFile
-		onConfirm = { fileInput => setOverlay(<Restore
-			fileInput = {fileInput}
-			onComplete = { () => setOverlay(null) }
-			onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
-		/>) }
-		onCancel = { () => setOverlay(null) }
-		message = {(
-			<span>Select a zip file to restore from.</span>
-		)}
-	/>);
-
-	const clearFilesystem = () => setOverlay(<Confirm
-		onConfirm = { () => setOverlay(<Clear onComplete = { () => setOverlay(null) } />) }
-		onCancel = { () => setOverlay(null) }
-		message = {(
-			<span>Are you sure you want to clear the filesystem? <b>Reminder:</b> This cannot be undone, you should take a backup first.</span>
-		)}
-	/>);
 
 	return (
 		<div className = "home">
@@ -133,26 +99,10 @@ function Home() {
 						Github
 					</button>
 				</div>
-				<h2>Filesystem Operations:</h2>
-				<div className = "inset button-bar">
-					<button onClick = {backupSite}>
-						<img alt = "Backup" src = {cabinetIcon} className = "icon" />
-						Backup
-					</button>
-					<button onClick = {restoreSite}>
-						<img alt = "Restore" src = {floppyIcon} className = "icon" />
-						Restore
-						</button>
-					<button onClick = {clearFilesystem}>
-						<img alt = "Clear" src = {nukeIcon} className = "icon" />
-						Clear
-					</button>
-				</div>
 				<div className = "inset right demo-bar">
 					<span>Demo powered by React</span> <img alt = "react-logo" src = {reactIcon} className='small-icon'/>
 				</div>
 			</div>
-			<div className = "overlay">{overlay}</div>
 		</div>
 	);
 }

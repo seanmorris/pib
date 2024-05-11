@@ -31,7 +31,7 @@
 	text-align: center;
 }
 
-.select-framework .frameworks img {
+.select-framework .frameworks a img {
 	height: 120px;
 	width: 6rem;
 	margin:0.75rem;

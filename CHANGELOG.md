@@ -10,6 +10,7 @@ Changes
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
 * ESM modules are now webpack-compatible out of the box.
+* Adding "cgi" option for custom builds.
 *
 
 ## v0.0.8 - Preparing for Lift-off
@@ -21,7 +22,7 @@ Changes
 * Adding fetch support for `src` on above.
 * Adding support for libzip, iconv, & html-tidy
 * Adding support for NodeFS & IDBFS.
-* In-place builds.
+* Custom builds.
 * Updating PHP to 8.2.11
 * Building with Emscripten 3.1.43
 * Modularizing dependencies.

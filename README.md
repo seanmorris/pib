@@ -27,6 +27,31 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 
 ## ☀️ Examples
 
+### [[React + php-web/php-cgi-worker demo](https://seanmorris.github.io/php-wasm/)]
+
+<table>
+ <tr>
+	<td width = "500px">
+		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=drupal-7">Drupal Demo</a>
+	</td>
+	<td width = "500px">
+		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=cakephp-5">CakePHP Demo</a>
+	</td>
+	<td width = "500px">
+		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=codeigniter-4">CodeIgniter Demo</a>
+	</td>
+	<td width = "500px">
+		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=laravel-11">Laravel Demo</a>
+	</td>
+	<td width = "500px">
+		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=laminas-3">Laminas Demo</a>
+	</td>
+	<td width = "500px">
+		<a href = "https://seanmorris.github.io/php-wasm/code-editor?path=/persist">Code Editor</a>
+	</td>
+</tr>
+</table>
+
 <table>
  <tr>
     <td width = "500px" border = "0">
