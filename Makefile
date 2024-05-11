@@ -67,7 +67,6 @@ DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm ru
 	-e EMCC_CORES=`nproc`
 
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
-DOCKER_RUN_USER   =${DOCKER_ENV} -e UID=${UID} -e GID=${GID} emscripten-builder
 DOCKER_RUN_IN_PHP =${DOCKER_ENV} -e CFLAGS="-I /src/lib/include" -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
 TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
