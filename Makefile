@@ -34,7 +34,7 @@ GID?=${_GID}
 
 SHELL=bash -euo pipefail
 
-PHP_DIST_DIR?=./packages/php-wasm/
+PHP_DIST_DIR?=./packages/php-wasm
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=64MB
@@ -74,7 +74,7 @@ CJS=$(addprefix ${PHP_DIST_DIR}/,php-web.js php-webview.js php-node.js php-shell
 	$(addprefix ${PHP_DIST_DIR}/,PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js) \
 	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.js webTransactions.js  _Event.js  PhpBase.js)
 
-TAG_JS=$(addprefix ${PHP_DIST_DIR},php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs)
+TAG_JS=$(addprefix ${PHP_DIST_DIR}/,php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs)
 
 all: ${MJS} ${CJS} ${TAG_JS}
 cjs: ${CJS}
@@ -409,7 +409,7 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 ########## Package files ###########
 
 ${PHP_DIST_DIR}/%.js: source/%.js
-	npx babel $< --out-dir .
+	npx babel $< --out-dir ${PHP_DIST_DIR}
 
 ${PHP_DIST_DIR}/%.mjs: source/%.js
 	cp $< $@;
