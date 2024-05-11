@@ -22,7 +22,7 @@ lib/lib/libpng.a: third_party/libpng/.gitignore
 	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-fPIC -O${OPTIMIZE} " \
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE} " \
 		-DPNG_SHARED="OFF"
 	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
