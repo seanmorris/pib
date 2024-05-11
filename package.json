@@ -19,7 +19,7 @@
 		"php-wasm-freetype": "^0.0.9",
 		"php-wasm-gd": "^0.0.9",
 		"php-wasm-iconv": "^0.0.9",
-		"php-wasm-libicu": "^0.0.9-f",
+		"php-wasm-libicu": "^0.0.9-g",
 		"php-wasm-libjpeg": "^0.0.9",
 		"php-wasm-libpng": "^0.0.9-e",
 		"php-wasm-libxml": "^0.0.9",
