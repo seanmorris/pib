@@ -14,9 +14,9 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - checkout
       - run: npm install
       - run: cp .circleci/.env.ci .env
-      - run: make lib/lib/libicudata.a test
+      - run: make test

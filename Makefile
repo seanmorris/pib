@@ -1,6 +1,6 @@
 #!/usr/bin/env make
 
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo scripts third_party/preload test
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts third_party/preload test
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
@@ -34,7 +34,7 @@ GID?=${_GID}
 
 SHELL=bash -euo pipefail
 
-PHP_DIST_DIR?=./
+PHP_DIST_DIR?=./packages/php-wasm/
 
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=64MB
@@ -52,11 +52,6 @@ PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 INTERACTIVE=
 PROGRESS=--progress auto
-
-# ifeq (${IS_TTY},1)
-# INTERACTIVE=
-# PROGRESS=--progress tty
-# endif
 
 DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm \
 	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
@@ -291,8 +286,8 @@ build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
@@ -304,8 +299,8 @@ build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
@@ -318,8 +313,8 @@ build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
@@ -332,8 +327,8 @@ build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-node.js: BUILD_TYPE=js
 build/php-node.js: ENVIRONMENT=node
@@ -345,8 +340,8 @@ build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
@@ -358,8 +353,8 @@ build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-shell.js: BUILD_TYPE=js
 build/php-shell.js: ENVIRONMENT=shell
@@ -370,8 +365,8 @@ build/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-shell.mjs: BUILD_TYPE=mjs
 build/php-shell.mjs: ENVIRONMENT=shell
@@ -382,8 +377,8 @@ build/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}/
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-webview.js: BUILD_TYPE=js
 build/php-webview.js: ENVIRONMENT=webview
@@ -395,8 +390,8 @@ build/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-webview.mjs: BUILD_TYPE=mjs
 build/php-webview.mjs: ENVIRONMENT=webview
@@ -407,9 +402,9 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	sed -i 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	sed -i 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	sed -i='' 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
+	sed -i='' 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 
 ########## Package files ###########
 
@@ -516,36 +511,6 @@ ifeq (${BROTLI},1)
 	brotli -9 $@.wasm
 endif
 
-############# Demo files ##############
-
-docs-source/app/assets/php-wasm/PhpBase.mjs: source/PhpBase.js
-	cp $< $@;
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/PhpCgiBase.mjs: source/PhpCgiBase.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/_Event.mjs: source/_Event.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/OutputBuffer.mjs: source/OutputBuffer.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/webTransactions.mjs: source/webTransactions.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/parseResponse.mjs: source/parseResponse.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
-docs-source/app/assets/php-wasm/breakoutRequest.mjs: source/breakoutRequest.js
-	cp $^ $@
-	perl -pi -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
-
 ########### Clerical stuff. ###########
 
 ${ENV_FILE}:
@@ -602,20 +567,11 @@ pull-image:
 push-image:
 	docker-compose --progress quiet push
 
-demo: \
-	docs-source/app/assets/php-wasm/webTransactions.mjs \
-	docs-source/app/assets/php-wasm/OutputBuffer.mjs \
-	docs-source/app/assets/php-wasm/_Event.mjs \
-	docs-source/app/assets/php-wasm/parseResponse.mjs \
-	docs-source/app/assets/php-wasm/breakoutRequest.mjs \
-	docs-source/app/assets/php-wasm/PhpCgiBase.mjs \
-	docs-source/app/assets/php-wasm/PhpBase.mjs
+demo:
+	cd demo-source && npm run build
 
 serve-demo:
-	cd docs-source && brunch w -s
-
-build-demo:
-	cd docs-source && brunch b -p
+	cd demo-source && npm run start
 
 NPM_PUBLISH_DRY?=--dry-run
 

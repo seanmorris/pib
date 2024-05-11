@@ -11,13 +11,11 @@
 	"scripts": {
 		"postpublish": "ls *.mjs *.js *.wasm *.wasm.gz *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"@babel/cli": "^7.8.4",
 		"@babel/core": "^7.8.7",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",
-		"@babel/preset-env": "^7.0.0"
-	},
-	"devDependencies": {
+		"@babel/preset-env": "^7.0.0",
 		"php-wasm-freetype": "^0.0.9",
 		"php-wasm-gd": "^0.0.9",
 		"php-wasm-iconv": "^0.0.9",
@@ -34,13 +32,13 @@
 	},
 	"contributors": [
 		{
-			"name": "Oraoto",
-			"email": "oraoto@outlook.com"
-		},
-		{
 			"name": "Sean Morris",
 			"email": "php-wasm@seanmorr.is",
 			"url": "https://seanmorr.is"
+		},
+		{
+			"name": "Oraoto",
+			"email": "oraoto@outlook.com"
 		}
 	],
 	"keywords": [
