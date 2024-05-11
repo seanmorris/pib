@@ -6,9 +6,9 @@
 	"author": "Sean Morris<php-wasm@seanmorr.is>",
 	"license": "Apache-2.0",
 	"bin": {
-		"php-wasm": "./bin/php-wasm.js"
+		"php-wasm-build": "./bin/php-wasm-build.js"
 	},
-	"devDependencies": {
+	"dependencies": {
 		"@babel/cli": "^7.8.4",
 		"@babel/core": "^7.8.7",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",

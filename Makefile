@@ -138,14 +138,6 @@ ifdef PRELOAD_ASSETS
 	@ cp -prf ${PRELOAD_ASSETS} third_party/preload/
 endif
 
-third_party/preload/bench.php: third_party/php${PHP_VERSION}-src/.gitignore
-	mkdir -p third_party/preload/
-	cp third_party/php${PHP_VERSION}-src/Zend/bench.php third_party/preload/
-
-third_party/preload/dump-request.php: third_party/preload
-	mkdir -p third_party/preload/
-	cp -p extras/dump-request.php third_party/preload/
-
 third_party/php${PHP_VERSION}-src/.gitignore:
 	@ echo -e "\e[33;4mDownloading and patching PHP\e[0m"
 	${DOCKER_RUN} git clone https://github.com/php/php-src.git third_party/php${PHP_VERSION}-src \
