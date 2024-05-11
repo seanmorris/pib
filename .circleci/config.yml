@@ -19,4 +19,4 @@ jobs:
       - checkout
       - run: npm install
       - run: cp .circleci/.env.ci .env
-      - run: make test
+      - run: make lib/lib/libpng.a test
