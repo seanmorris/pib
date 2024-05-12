@@ -244,7 +244,11 @@ function Embedded() {
 								<option value>Select a Demo</option>
 								<option value = "hello-world.php">Hello, World!</option>
 								<option value = "callbacks.php">Javascript Callbacks</option>
+								<option value = "import.php">Import Javascript Modules</option>
+								<option value = "curvature.php">Curvature</option>
 								<option value = "phpinfo.php">phpinfo();</option>
+								<option value = "fetch.php">Fetch</option>
+								<option value = "promise.php">Promise</option>
 								<option value = "persistent-memory.php">Persistent Memory</option>
 								<option value = "dom-access.php">DOM Access</option>
 								<option value = "goto.php">GoTo</option>
@@ -256,10 +260,6 @@ function Embedded() {
 								<option value = "files.php">Files</option>
 								<option value = "zend-benchmark.php">Zend Benchmark</option>
 								<option value = "drupal.php">Drupal 7</option>
-								<option value = "import.php">Import Javascript</option>
-								<option value = "fetch.php">Fetch</option>
-								<option value = "promise.php">Promise</option>
-								<option value = "curvature.php">Curvature</option>
 							</select>
 							<button data-load-demo onClick = {demoSelected}>load</button>
 						</div>

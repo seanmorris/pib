@@ -7,6 +7,7 @@ import EditorFile from './EditorFile';
 import fileIcon from './nomo-dark/file.svg';
 import folderOpen from './nomo-dark/folder.open.svg';
 import folderClose from './nomo-dark/folder.close.svg';
+import loader from './tail-spin.svg';
 
 const pathStates = new Map();
 
@@ -16,6 +17,7 @@ export default function EditorFolder({path = '/', name = ''}) {
 	const [showNewFile, setShowNewFile]     = useState(false);
 	const [showNewFolder, setShowNewFolder] = useState(false);
 	const [files, setFiles]                 = useState([]);
+	const [loading, setLoading]             = useState(false);
 	const box = useRef(null);
 
 
@@ -86,6 +88,7 @@ export default function EditorFolder({path = '/', name = ''}) {
 	};
 
 	const loadFiles = () => {
+		setLoading(true);
 		sendMessage('readdir', [path]).then(async entries => {
 			entries = entries.filter(f => f !== '.' && f !== '..');
 			const types = await Promise.all(entries.map(async f =>
@@ -97,6 +100,7 @@ export default function EditorFolder({path = '/', name = ''}) {
 			const files = entries.filter((_,k) => !types[k]);
 			setDirs(dirs);
 			setFiles(files);
+			setLoading(false);
 		});
 	};
 
@@ -121,7 +125,11 @@ export default function EditorFolder({path = '/', name = ''}) {
 	return (
 		<div className = "editor-entry editor-folder">
 			<p onClick = { toggleExpanded } onContextMenu={onContext} onBlur = {onBlur} tabIndex="0" ref = {box}>
-				<img className = "file icon" src = {expanded  ? folderOpen : folderClose} alt = "" />
+				<img className = "file icon" src = {
+					!loading
+						? (expanded  ? folderOpen : folderClose)
+						: loader
+				} alt = "" />
 				{name}
 			</p>
 			{showContext && <span className = "contents only-focus">

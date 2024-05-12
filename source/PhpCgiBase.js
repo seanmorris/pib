@@ -59,8 +59,6 @@ export class PhpCgiBase
 		this.dynamicCacheTime = args.dynamicCacheTime || 0;
 		this.vHosts = args.vHosts || [];
 
-		this.initialized = false;
-
 		this.env = {};
 
 		Object.assign(this.env, args.env || {});
@@ -130,7 +128,6 @@ export class PhpCgiBase
 		{
 			requestTimes.set(event.request, Date.now());
 			const response = this.request(event.request);
-			console.log(response);
 			return event.respondWith(response);
 		}
 		else
@@ -174,7 +171,6 @@ export class PhpCgiBase
 		});
 
 		const php = await this.binary;
-		this.initialized = false;
 
 		php.ccall('pib_storage_init',   'number' , [] , []);
 		php.ccall('wasm_sapi_cgi_init', 'number' , [] , []);
@@ -401,8 +397,6 @@ export class PhpCgiBase
 
 		const response = new Response(parsedResponse.body || '', { headers, status, url });
 
-		console.log(parsedResponse);
-
 		this.onRequest(request, response);
 
 		return response;
@@ -497,7 +491,7 @@ export class PhpCgiBase
 	{
 		const settings = await this.getSettings();
 		const env = await this.getEnvs();
-		this.writeFile('/config/init.json', JSON.stringify({settings, env}), {encoding: 'utf8'});
+		await this.writeFile('/config/init.json', JSON.stringify({settings, env}), {encoding: 'utf8'});
 	}
 
 	async loadInit()
@@ -512,7 +506,7 @@ export class PhpCgiBase
 		}
 
 		const initJson = php.FS.readFile(initPath, {encoding: 'utf8'});
-		const init = JSON.parse(initJson || {});
+		const init = JSON.parse(initJson || '{}');
 		const {settings, env} = init;
 
 		this.setSettings(settings);

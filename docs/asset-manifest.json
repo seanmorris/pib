@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/php-wasm/static/css/main.8f830611.css",
-    "main.js": "/php-wasm/static/js/main.df161e95.js",
+    "main.js": "/php-wasm/static/js/main.2d070949.js",
     "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.855228a71a5b71165d46.wasm",
     "worker-xquery.js": "/php-wasm/16470d85f9e6b184411b622ce1783fd0.js",
     "worker-javascript.js": "/php-wasm/70896c45cb42a1a16168cef789116031.js",
@@ -492,10 +492,10 @@
     "d.js": "/php-wasm/c98e74fc97b04fe8bf43dcdff549afcf.js",
     "mode-text.js": "/php-wasm/0ffb18fb70c87335edee31a479f58a43.js",
     "main.8f830611.css.map": "/php-wasm/static/css/main.8f830611.css.map",
-    "main.df161e95.js.map": "/php-wasm/static/js/main.df161e95.js.map"
+    "main.2d070949.js.map": "/php-wasm/static/js/main.2d070949.js.map"
   },
   "entrypoints": [
     "static/css/main.8f830611.css",
-    "static/js/main.df161e95.js"
+    "static/js/main.2d070949.js"
   ]
 }
