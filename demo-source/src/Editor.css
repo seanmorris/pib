@@ -71,13 +71,11 @@
 .editor .tab-area .tab {
 	display: flex;
 	flex-direction: row;
-	align-items: center;
 	background-color: #666;
 	color: #222;
 	margin-left: 4px;
 	margin-top: 4px;
 	margin-bottom: 4px;
-	padding: 0 0.5rem;
 	cursor: pointer;
 }
 
@@ -92,6 +90,24 @@
 
 .editor .tab-area .tab > div {
 	padding: 0rem 0.25rem;
+	align-content: center;
+	justify-content: center;
+	padding: 0 0.5rem;
+}
+
+.editor .tab-area .tab > div:first-child {
+	padding-right: 0;
+}
+
+.editor .tab-area .tab > div:last-child {
+	align-content: center;
+	justify-content: center;
+	padding: 0 0.75rem 0 0.25rem;
+	opacity: 0.5;
+}
+
+.editor .tab-area .tab > div:last-child:hover {
+	opacity: 1;
 }
 
 .editor .edit-area {

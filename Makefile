@@ -319,8 +319,8 @@ build/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-web.mjs: BUILD_TYPE=mjs
 build/php-web.mjs: ENVIRONMENT=web
@@ -332,8 +332,8 @@ build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
@@ -346,8 +346,8 @@ build/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-worker.mjs: BUILD_TYPE=mjs
 build/php-worker.mjs: ENVIRONMENT=worker
@@ -360,8 +360,8 @@ build/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-node.js: BUILD_TYPE=js
 build/php-node.js: ENVIRONMENT=node
@@ -373,8 +373,8 @@ build/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-node.mjs: BUILD_TYPE=mjs
 build/php-node.mjs: ENVIRONMENT=node
@@ -386,8 +386,8 @@ build/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-shell.js: BUILD_TYPE=js
 build/php-shell.js: ENVIRONMENT=shell
@@ -398,8 +398,8 @@ build/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-shell.mjs: BUILD_TYPE=mjs
 build/php-shell.mjs: ENVIRONMENT=shell
@@ -410,8 +410,8 @@ build/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}/
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-webview.js: BUILD_TYPE=js
 build/php-webview.js: ENVIRONMENT=webview
@@ -423,8 +423,8 @@ build/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 build/php-webview.mjs: BUILD_TYPE=mjs
 build/php-webview.mjs: ENVIRONMENT=webview
@@ -436,8 +436,8 @@ build/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ./build/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
+	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 
 ########## Package files ###########
 
