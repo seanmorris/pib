@@ -1,5 +1,5 @@
 export const breakoutRequest = request => {
-	let getPost = Promise.resolve();
+	let getPost = Promise.resolve('');
 
 	if(request.body)
 	{
@@ -23,6 +23,12 @@ export const breakoutRequest = request => {
 
 			return reader.read().then(processBody);
 		});
+	}
+	else if(request.arrayBuffer)
+	{
+		getPost = request.arrayBuffer().then(
+			buffer => [...new Uint8Array(buffer)].map(x => String.fromCharCode(x)).join('')
+		);
 	}
 
 	const url = new URL(request.url);

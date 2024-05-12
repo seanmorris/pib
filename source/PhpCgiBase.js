@@ -129,8 +129,9 @@ export class PhpCgiBase
 		if(url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname)
 		{
 			requestTimes.set(event.request, Date.now());
-
-			return event.respondWith(this.request(event.request));
+			const response = this.request(event.request);
+			console.log(response);
+			return event.respondWith(response);
 		}
 		else
 		{
@@ -251,162 +252,160 @@ export class PhpCgiBase
 
 		const php = await this.binary;
 
-		return new Promise(async accept => {
+		let originalPath = url.pathname;
 
-			let originalPath = url.pathname;
+		const extension = path.split('.').pop();
 
-			const extension = path.split('.').pop();
-
-			if(extension !== 'php')
-			{
-				const aboutPath = php.FS.analyzePath(path);
-
-				// Return static file
-				if(aboutPath.exists && php.FS.isFile(aboutPath.object.mode))
-				{
-					const response = new Response(php.FS.readFile(path, { encoding: 'binary', url }), {});
-					response.headers.append('x-php-wasm-cache-time', new Date().getTime());
-					if(extension in this.types)
-					{
-						response.headers.append('Content-type', this.types[extension]);
-					}
-					cache.put(url, response.clone());
-					this.onRequest(request, response);
-					return accept(response);
-				}
-				else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length  ])
-				{
-					originalPath += '/'
-				}
-
-				// Rewrite to index
-				path = docroot + '/index.php';
-			}
-
-			if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
-			{
-				const response = new Response('408: Request Timed Out.', { status: 408 });
-				this.onRequest(request, response);
-				return accept(response);
-			}
-
+		if(extension !== 'php')
+		{
 			const aboutPath = php.FS.analyzePath(path);
 
-			if(!aboutPath.exists)
+			// Return static file
+			if(aboutPath.exists && php.FS.isFile(aboutPath.object.mode))
 			{
-				const rawResponse = this.notFound
-					? this.notFound(request)
-					: '404 - Not Found.';
-
-				if(rawResponse)
+				const response = new Response(php.FS.readFile(path, { encoding: 'binary', url }), {});
+				response.headers.append('x-php-wasm-cache-time', new Date().getTime());
+				if(extension in this.types)
 				{
-					return accept(rawResponse instanceof Response
-						? rawResponse
-						: new Response(rawResponse, {status: 404})
-					);
+					response.headers.append('Content-type', this.types[extension]);
 				}
-			}
-
-			this.input  = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
-			this.output = [];
-			this.error  = [];
-
-			const selfUrl = new URL(globalThis.location);
-
-			putEnv(php, 'PHP_INI_SCAN_DIR', '/config');
-
-			for(const [name, value] of Object.entries(this.env))
-			{
-				putEnv(php, name, value);
-			}
-
-			putEnv(php, 'SERVER_SOFTWARE', navigator.userAgent);
-			putEnv(php, 'REQUEST_METHOD', method);
-			putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
-			putEnv(php, 'HTTP_HOST', selfUrl.host);
-			putEnv(php, 'REQUEST_SCHEME', selfUrl.protocol.substr(0, selfUrl.protocol.length - 0));
-
-			putEnv(php, 'DOCUMENT_ROOT', docroot);
-			putEnv(php, 'REQUEST_URI', originalPath);
-			putEnv(php, 'SCRIPT_NAME', scriptName);
-			putEnv(php, 'SCRIPT_FILENAME', path);
-			putEnv(php, 'PATH_TRANSLATED', path);
-
-			putEnv(php, 'QUERY_STRING', get);
-			putEnv(php, 'HTTP_COOKIE', [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
-			putEnv(php, 'REDIRECT_STATUS', '200');
-			putEnv(php, 'CONTENT_TYPE', contentType);
-			putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
-
-			try
-			{
-				if(php._main() === 0) // PHP exited with code 0
-				{
-					this._afterRequest();
-				}
-			}
-			catch (error)
-			{
-				console.error(error);
-
-				this.refresh();
-
-				const response = new Response(
-					`500: Internal Server Error.\n`
-						+ `=`.repeat(80) + `\n\n`
-						+ `Stacktrace:\n${error.stack}\n`
-						+ `=`.repeat(80) + `\n\n`
-						+ `STDERR:\n${new TextDecoder().decode(new Uint8Array(this.error).buffer)}\n`
-						+ `=`.repeat(80) + `\n\n`
-						+ `STDOUT:\n${new TextDecoder().decode(new Uint8Array(this.output).buffer)}\n`
-						+ `=`.repeat(80) + `\n\n`
-					, { status: 500 }
-				);
+				cache.put(url, response.clone());
 				this.onRequest(request, response);
-
-				accept(response);
+				return response;
 			}
-
-			++this.count;
-
-			const parsedResponse = parseResponse(this.output);
-
-			let status = 200;
-
-			for(const [name, value] of Object.entries(parsedResponse.headers))
+			else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length  ])
 			{
-				if(name === 'Status')
-				{
-					status = value.substr(0, 3);
-				}
+				originalPath += '/'
 			}
 
-			if(parsedResponse.headers['Set-Cookie'])
+			// Rewrite to index
+			path = docroot + '/index.php';
+		}
+
+		if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
+		{
+			const response = new Response('408: Request Timed Out.', { status: 408 });
+			this.onRequest(request, response);
+			return response;
+		}
+
+		const aboutPath = php.FS.analyzePath(path);
+
+		if(!aboutPath.exists)
+		{
+			const rawResponse = this.notFound
+				? this.notFound(request)
+				: '404 - Not Found.';
+
+			if(rawResponse)
 			{
-				const raw = parsedResponse.headers['Set-Cookie'];
-				const semi  = raw.indexOf(';');
-				const equal = raw.indexOf('=');
-				const key   = raw.substr(0, equal);
-				const value = raw.substr(1 + equal, -1 + semi - equal);
-
-				this.cookies.set(key, value,);
+				return rawResponse instanceof Response
+					? rawResponse
+					: new Response(rawResponse, {status: 404});
 			}
+		}
 
-			const headers = {
-				'Content-Type': parsedResponse.headers["Content-Type"] ?? 'text/html; charset=utf-8'
-			};
+		this.input  = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
+		this.output = [];
+		this.error  = [];
 
-			if(parsedResponse.headers.Location)
+		const selfUrl = new URL(globalThis.location);
+
+		putEnv(php, 'PHP_INI_SCAN_DIR', '/config');
+
+		for(const [name, value] of Object.entries(this.env))
+		{
+			putEnv(php, name, value);
+		}
+
+		putEnv(php, 'SERVER_SOFTWARE', navigator.userAgent);
+		putEnv(php, 'REQUEST_METHOD', method);
+		putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
+		putEnv(php, 'HTTP_HOST', selfUrl.host);
+		putEnv(php, 'REQUEST_SCHEME', selfUrl.protocol.substr(0, selfUrl.protocol.length - 0));
+
+		putEnv(php, 'DOCUMENT_ROOT', docroot);
+		putEnv(php, 'REQUEST_URI', originalPath);
+		putEnv(php, 'SCRIPT_NAME', scriptName);
+		putEnv(php, 'SCRIPT_FILENAME', path);
+		putEnv(php, 'PATH_TRANSLATED', path);
+
+		putEnv(php, 'QUERY_STRING', get);
+		putEnv(php, 'HTTP_COOKIE', [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
+		putEnv(php, 'REDIRECT_STATUS', '200');
+		putEnv(php, 'CONTENT_TYPE', contentType);
+		putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
+
+		try
+		{
+			if(php._main() === 0) // PHP exited with code 0
 			{
-				headers.Location = parsedResponse.headers.Location;
+				this._afterRequest();
 			}
+		}
+		catch (error)
+		{
+			console.error(error);
 
-			const response = new Response(parsedResponse.body || '', { headers, status, url });
+			this.refresh();
 
+			const response = new Response(
+				`500: Internal Server Error.\n`
+					+ `=`.repeat(80) + `\n\n`
+					+ `Stacktrace:\n${error.stack}\n`
+					+ `=`.repeat(80) + `\n\n`
+					+ `STDERR:\n${new TextDecoder().decode(new Uint8Array(this.error).buffer)}\n`
+					+ `=`.repeat(80) + `\n\n`
+					+ `STDOUT:\n${new TextDecoder().decode(new Uint8Array(this.output).buffer)}\n`
+					+ `=`.repeat(80) + `\n\n`
+				, { status: 500 }
+			);
 			this.onRequest(request, response);
 
-			accept(response);
-		});
+			return response;
+		}
+
+		++this.count;
+
+		const parsedResponse = parseResponse(this.output);
+
+		let status = 200;
+
+		for(const [name, value] of Object.entries(parsedResponse.headers))
+		{
+			if(name === 'Status')
+			{
+				status = value.substr(0, 3);
+			}
+		}
+
+		if(parsedResponse.headers['Set-Cookie'])
+		{
+			const raw = parsedResponse.headers['Set-Cookie'];
+			const semi  = raw.indexOf(';');
+			const equal = raw.indexOf('=');
+			const key   = raw.substr(0, equal);
+			const value = raw.substr(1 + equal, -1 + semi - equal);
+
+			this.cookies.set(key, value,);
+		}
+
+		const headers = {
+			'Content-Type': parsedResponse.headers["Content-Type"] ?? 'text/html; charset=utf-8'
+		};
+
+		if(parsedResponse.headers.Location)
+		{
+			headers.Location = parsedResponse.headers.Location;
+		}
+
+		const response = new Response(parsedResponse.body || '', { headers, status, url });
+
+		console.log(parsedResponse);
+
+		this.onRequest(request, response);
+
+		return response;
 	}
 
 	analyzePath(path)

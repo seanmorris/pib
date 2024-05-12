@@ -14,7 +14,7 @@ Changes
 * Modules are now webpack-compatible out of the box.
 * Corrected a bug preventing custom in-place builds.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
-*
+* Fixed the bug preventing POST requests from working under FireFox.
 
 ## v0.0.8 - Preparing for Lift-off
 
