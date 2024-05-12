@@ -4,8 +4,10 @@ ifeq (${WITH_ZLIB}, 1)
 
 ZLIB_TAG?=v1.3.1
 ARCHIVES+= lib/lib/libz.a
+CONFIGURE_FLAGS+= --with-zlib
 
 DOCKER_RUN_IN_ZLIB=${DOCKER_ENV} -w /src/third_party/zlib/ emscripten-builder
+TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 
 third_party/zlib/.gitignore:
 	@ echo -e "\e[33;4mDownloading Zlib\e[0m"

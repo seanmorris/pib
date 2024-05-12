@@ -1,19 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
 import './Common.css';
 import './Editor.css';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+
 import { onMessage, sendMessage } from './msg-bus';
 import EditorFolder from './EditorFolder';
+import Header from './Header';
+
 import ace from 'ace-builds';
 import AceEditor from "react-ace-builds";
 import "react-ace-builds/webpack-resolver-min";
 import { createRoot } from 'react-dom/client';
+
 import reactIcon from './react-icon.svg';
-import Header from './Header';
+import toggleIcon from './nuvola/view_choose.png';
+import saveIcon from './nuvola/3floppy_unmount.png';
 
 const openFilesMap = new Map();
 
 const modes = {
 	'php': 'ace/mode/php'
+	, 'phtml': 'ace/mode/php'
 	, 'module': 'ace/mode/php'
 	, 'inc': 'ace/mode/php'
 	, 'js': 'ace/mode/javascript'
@@ -31,16 +38,20 @@ const modes = {
 export default function Editor() {
 	const [contents, setContents] = useState('...');
 	const [openFiles, setOpenFiles] = useState([]);
+	const [showLeft, setShowLeft] = useState([]);
+	const currentPath = useRef(null);
 	const editBox = useRef(null);
 	const editor = useRef(null);
 	const tabBox = useRef(null);
-	const currentPath = useRef(null);
 
-	const handleSaveByKeyboard = event => {
-		event.preventDefault();
 
+	const query = useMemo(() => new URLSearchParams(window.location.search), []);
+
+	const handleSave = () => {
 		if(currentPath.current)
 		{
+			console.log(openFilesMap, currentPath.current);
+
 			const entry = openFilesMap.get(currentPath.current);
 			entry.dirty = false;
 
@@ -56,10 +67,15 @@ export default function Editor() {
 
 	const onKeyDown = event => {
 		if(event.key === 's' && event.ctrlKey)
-		{
-			handleSaveByKeyboard(event);
+			{
+			event.preventDefault();
+			handleSave();
 			return;
 		}
+	};
+
+	const toggleLeftBar = () => {
+		setShowLeft(!showLeft);
 	};
 
 	useEffect(() => {
@@ -123,6 +139,10 @@ export default function Editor() {
 			? openFilesMap.get(path)
 			: {name, path};
 
+		query.set('path', path);
+
+		window.history.replaceState({}, null, window.location.pathname + '?' + query);
+
 		currentPath.current = path;
 
 		editor.current.editor.setReadOnly(false);
@@ -173,9 +193,17 @@ export default function Editor() {
 	const handleOpenFile = async event => openFile(event.detail);
 
 	return (
-		<div className = "editor">
+		<div className = "editor" data-show-left = {showLeft}>
 			<div className='bevel padded'>
 				<Header />
+				<div className = "row toolbar inset tight">
+					<button className='square' onClick = {toggleLeftBar}>
+						<img src = {toggleIcon} />
+					</button>
+					<button className='square' onClick = {handleSave}>
+						<img src = {saveIcon} />
+					</button>
+				</div>
 				<div className = "row">
 					<div className = "file-area frame inset">
 						<div className = "scroller">

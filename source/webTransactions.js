@@ -8,9 +8,9 @@ export function startTransaction(wrapper)
 
 		return new Promise((accept, reject) => {
 			php.FS.syncfs(true, error => {
+
 				if(error)
 				{
-					console.error(error);
 					reject(error);
 				}
 				else
@@ -38,9 +38,9 @@ export function commitTransaction(wrapper)
 
 		return new Promise((accept, reject) => {
 			php.FS.syncfs(false, error => {
+
 				if(error)
 				{
-					console.error(error);
 					reject(error);
 				}
 				else

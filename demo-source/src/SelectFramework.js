@@ -28,26 +28,53 @@ function SelectFramework() {
 	const [laminasInstalled, setLaminasInstalled] = useState(false);
 	const [overlay, setOverlay] = useState(null);
 
-	sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
-	sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
-	sendMessage('analyzePath', ['/persist/drupal-7.95']).then(about => setDrupalInstalled(about.exists));
-	sendMessage('analyzePath', ['/persist/laravel-11']).then(about => setLaravelInstalled(about.exists));
-	sendMessage('analyzePath', ['/persist/laminas-3']).then(about => setLaminasInstalled(about.exists));
-
-	const onComplete = event => {
+	const refreshAll = () => {
 		sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/drupal-7.95']).then(about => setDrupalInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/laravel-11']).then(about => setLaravelInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/laminas-3']).then(about => setLaminasInstalled(about.exists));
+	};
+
+	useEffect(() => refreshAll(), []);
+
+	const onComplete = event => {
+		switch(event.detail)
+		{
+			case 'cakephp-5':
+				sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
+				break;
+
+			case 'codeigniter-4':
+				sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
+				break;
+
+			case 'drupal-7':
+				sendMessage('analyzePath', ['/persist/drupal-7.95']).then(about => setDrupalInstalled(about.exists));
+				break;
+
+			case 'laminas-3':
+				sendMessage('analyzePath', ['/persist/laminas-3']).then(about => setLaminasInstalled(about.exists));
+				break;
+
+			case 'laravel-11':
+				sendMessage('analyzePath', ['/persist/laravel-11']).then(about => setLaravelInstalled(about.exists));
+				break;
+
+			default:
+			break;
+
+		}
 	}
+
+	const _onMessage = event => onMessage(event);
 
 	useEffect(() => {
 		window.addEventListener('install-complete', onComplete);
-		navigator.serviceWorker.addEventListener('message', onMessage);
+		navigator.serviceWorker.addEventListener('message', _onMessage);
 		return () => {
 			window.removeEventListener('install-complete', onComplete);
-			navigator.serviceWorker.removeEventListener('message', onMessage);
+			navigator.serviceWorker.removeEventListener('message', _onMessage);
 		}
 	}, []);
 
@@ -59,7 +86,7 @@ function SelectFramework() {
 	const restoreSite = () => setOverlay(<DoWithFile
 		onConfirm = { fileInput => setOverlay(<Restore
 			fileInput = {fileInput}
-			onComplete = { () => setOverlay(null) }
+			onComplete = { () => { setOverlay(null); refreshAll(); } }
 			onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
 		/>) }
 		onCancel = { () => setOverlay(null) }
@@ -96,7 +123,7 @@ function SelectFramework() {
 							</a>
 							{cakeInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/cakephp-5')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/cakephp-5')}>IDE</button>
+								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/cakephp-5/README.md')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=cakephp-5&overwrite=true')}>Reset</button>
 							</span>)}
 							{cakeInstalled || (<span className = "contents">
@@ -109,7 +136,7 @@ function SelectFramework() {
 							</a>
 							{codeigniterInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/codeigniter-4')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/codeigniter-4')}>IDE</button>
+								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/codeigniter-4/README.md')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=codeigniter-4&overwrite=true')}>Reset</button>
 							</span>)}
 							{codeigniterInstalled || (<span className = "contents">
@@ -122,7 +149,7 @@ function SelectFramework() {
 							</a>
 							{drupalInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/drupal')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/drupal-7.95')}>IDE</button>
+								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/drupal-7.95/README.txt')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=drupal-7&overwrite=true')}>Reset</button>
 							</span>)}
 							{drupalInstalled || (<span className = "contents">
@@ -135,7 +162,7 @@ function SelectFramework() {
 							</a>
 							{laravelInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/laravel-11')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/laravel-11')}>IDE</button>
+								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/laravel-11/README.md')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=laravel-11&overwrite=true')}>Reset</button>
 							</span>)}
 							{laravelInstalled || (<span className = "contents">
@@ -148,7 +175,7 @@ function SelectFramework() {
 							</a>
 							{laminasInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/laminas-3')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/laminas-3')}>IDE</button>
+								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor?path=/persist/laminas-3/README.md')}>IDE</button>
 								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/load-demo?framework=laminas-3&overwrite=true')}>Reset</button>
 							</span>)}
 							{laminasInstalled || (<span className = "contents">

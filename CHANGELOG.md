@@ -5,12 +5,15 @@ Changes
 ## v0.0.9 - Proving Grounds
 
 * Adding PHP-CGI support!
-* New "cgi" option for custom builds.
 * Implemented an httpd-like CGI wrapper.
-* libicu, freetype, zlib, gd, libpng, libjpeg, & openssl.
+* libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
+* New "cgi" option for custom builds.
+* php-wasm, php-cgi-wasm, & php-wasm builder are now separate packages.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
-* ESM modules are now webpack-compatible out of the box.
+* Modules are now webpack-compatible out of the box.
+* Corrected a bug preventing custom in-place builds.
+* Exposing FS methods w/queueing & locking to sync files between tabs & workers.
 *
 
 ## v0.0.8 - Preparing for Lift-off

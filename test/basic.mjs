@@ -107,7 +107,7 @@ test('Can refresh memory between executions', async () => {
 	assert.equal(stdErr, '');
 });
 
-test('Can read files from the local FS', async () => {
+test('Can read files from the local FS through PHP functions', async () => {
 	const php = new PhpNode( { persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
 
 	let stdOut = '', stdErr = '';
@@ -138,3 +138,20 @@ test('PIB extension is enabled.', async () => {
 	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
 });
+
+// test('Phar extension is enabled.', async () => {
+// 	const php = new PhpNode();
+
+// 	let stdOut = '', stdErr = '';
+
+// 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+// 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+// 	await php.binary;
+
+// 	const exitCode = await php.run(`<?php var_dump(extension_loaded('phar'));`);
+
+// 	assert.equal(exitCode, 0);
+// 	assert.equal(stdOut, `bool(true)\n`);
+// 	assert.equal(stdErr, '');
+// });

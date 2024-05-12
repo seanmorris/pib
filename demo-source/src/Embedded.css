@@ -33,16 +33,14 @@ button {
 	font-size: 1rem;
 }
 
-.output {
-
-}
-
 .output .scroller {
 	background-color: #EEE;
 }
 
 .output div.scroller {
 	white-space: pre;
+	padding: 0.25rem;
+	box-sizing: border-box;
 }
 
 .output .row {
@@ -51,41 +49,12 @@ button {
 	border-bottom: 1px white solid;
 }
 
-.row.toolbar {
+.Embedded .row.toolbar {
 	margin: 0.5em;
 	padding: 0.5em 0em;
 	border: 2px solid;
 	border-image: url(border-inset.png) 2 2 2 2;
 	align-items: center;
-}
-
-.row.toolbar > div{
-	display: flex;
-	justify-content: flex-end;
-	padding: 0em 0.5em;
-	flex: 1;
-	flex-direction: row;
-}
-
-.row.toolbar > div .start{
-	align-items: center;
-	flex: 1;
-}
-
-.row.toolbar button[data-run],
-.row.toolbar button[data-reset-storage],
-.row.toolbar button[data-refresh] {
-	height: 50px;
-	min-width: 3em;
-	font-weight: bold;
-	border: 2px solid;
-	align-self: center;
-	margin-right: 0.5em;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	line-height: 85%;
 }
 
 button {
@@ -133,15 +102,16 @@ button {
 	color: #FFF;
 }
 
-.row.toolbar.header{
+.Embedded .row.toolbar.header {
 	background-color: #BBB;
+	flex-wrap: wrap;
 }
 
-.row.toolbar.status {
+.Embedded .row.toolbar.status {
 	padding: 0;
 }
 
-.row.toolbar.status > div {
+.Embedded .row.toolbar.status > div {
 	padding: 0.25em;
 }
 
@@ -196,10 +166,14 @@ div.panel {
 	background-color: #aaa;
 	flex-direction: column;
 	box-sizing: border-box;
-	margin: 0.5em;
+	margin: 0 0.5em;
 	flex: 1;
 	border-right: 1px solid rgba(0,0,0,0.5);
 	border-bottom: 1px solid rgba(0,0,0,0.5);
+}
+
+div.panel:last-child {
+	margin-left: 0;
 }
 
 div.panel div.input {
@@ -209,6 +183,7 @@ div.panel div.input {
 div.panel > div {
 	background-color: white;
 	border: 2px solid;
+	border-right-width: 0;
 	border-image: url(border-inset.png) 2 2 2 2;
 	flex-direction: column;
 	display: flex;
@@ -235,19 +210,17 @@ button,
 }
 
 .panel .cols {
-	margin-top: -1px;
+	/* margin-top: -1px; */
 }
 
 .panel label[tabindex]:first-child {
-	margin-left: -1px;
+	/* margin-right: -1px; */
+	box-sizing: border-box;
 }
 
 .panel .cols > label[tabindex]:last-child {
-	margin-right: -3px;
-}
-
-.ace_editor {
-	margin-right: -2px;
+	border-right-width: 2px;
+	/* border-right: 1px; */
 }
 
 label[tabindex]:active,
@@ -310,10 +283,6 @@ label {
 .collapse {
 	flex: 0 !important;
 	white-space: nowrap;
-}
-
-.header.row {
-	/* align-items: flex-start; */
 }
 
 iframe {

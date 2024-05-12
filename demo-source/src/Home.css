@@ -13,15 +13,11 @@
 .home h1 {
 	margin: 0;
 	padding: 0;
-	margin-bottom: 1rem;
-}
-
-.home-menu {
-	padding: 1rem;
+	margin-bottom: 0.25rem;
 }
 
 .home-menu .big-link:not(:last-child) {
-	margin-right: 1rem;
+	margin-right: 0.5rem;
 }
 
 .home-menu .big-link {
@@ -88,7 +84,7 @@
 }
 
 .demo-bar {
-	margin-top: 1.5rem;
+	margin-top: 0.5rem;
 }
 
 .column {

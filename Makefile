@@ -7,6 +7,16 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
+WITH_BCMATH  ?=1
+WITH_CALENDAR?=1
+WITH_CTYPE   ?=1
+WITH_EXIF    ?=1
+WITH_FILTER  ?=1
+WITH_MBSTRING?=1
+WITH_PHAR    ?=1
+WITH_SESSION ?=1
+WITH_TOKENIZER?=1
+
 WITH_ICONV   ?=1
 WITH_LIBXML  ?=1
 WITH_LIBZIP  ?=1
@@ -68,11 +78,11 @@ TIMER=(which pv > /dev/null && pv --name '${@}' || cat)
 
 MJS=$(addprefix ${PHP_DIST_DIR}/,php-web.mjs php-webview.mjs php-node.mjs php-shell.mjs php-worker.mjs) \
 	$(addprefix ${PHP_DIST_DIR}/,PhpWeb.mjs  PhpWebview.mjs  PhpNode.mjs  PhpShell.mjs  PhpWorker.mjs) \
-	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.mjs webTransactions.mjs _Event.mjs PhpBase.mjs)
+	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.mjs webTransactions.mjs _Event.mjs PhpBase.mjs fsOps.mjs)
 
 CJS=$(addprefix ${PHP_DIST_DIR}/,php-web.js php-webview.js php-node.js php-shell.js php-worker.js) \
 	$(addprefix ${PHP_DIST_DIR}/,PhpWeb.js  PhpWebview.js  PhpNode.js  PhpShell.js  PhpWorker.js) \
-	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.js webTransactions.js  _Event.js  PhpBase.js)
+	$(addprefix ${PHP_DIST_DIR}/,OutputBuffer.js webTransactions.js  _Event.js  PhpBase.js fsOps.js)
 
 TAG_JS=$(addprefix ${PHP_DIST_DIR}/,php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs)
 
@@ -82,20 +92,20 @@ all: ${ALL}
 cjs: ${CJS}
 mjs: ${MJS}
 
-web-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-web.mjs)
-web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  webTransactions.js  _Event.js php-web.js)
+web-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs _Event.mjs php-web.mjs)
+web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  _Event.js php-web.js)
 
-worker-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-worker.mjs)
-worker-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  webTransactions.js  _Event.js php-worker.js)
+worker-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs _Event.mjs php-worker.mjs)
+worker-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  fsOps.js  webTransactions.js  _Event.js php-worker.js)
 
-webview-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs webTransactions.mjs _Event.mjs php-webview.mjs)
-webview-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  webTransactions.js  _Event.js php-webview.js)
+webview-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs _Event.mjs php-webview.mjs)
+webview-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  fsOps.js  webTransactions.js  _Event.js php-webview.js)
 
-node-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs OutputBuffer.mjs _Event.mjs php-node.mjs)
-node-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js   _Event.js php-node.js)
+node-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs OutputBuffer.mjs fsOps.mjs _Event.mjs php-node.mjs)
+node-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js  fsOps.js   _Event.js php-node.js)
 
-shell-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpShell.mjs OutputBuffer.mjs _Event.mjs php-shell.mjs)
-shell-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpShell.js  OutputBuffer.js  _Event.js php-shell.js)
+shell-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpShell.mjs OutputBuffer.mjs fsOps.mjs _Event.mjs php-shell.mjs)
+shell-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpShell.js  OutputBuffer.js  fsOps.js  _Event.js php-shell.js)
 
 WITH_CGI=1
 
@@ -131,7 +141,7 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} third_party/php${PHP_VERSION}-src/Zend/bench.php # third_party/drupal-7.95/README.txt
+third_party/preload: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS}
 #	 ${DOCKER_RUN} rm -rf /src/third_party/preload
 ifdef PRELOAD_ASSETS
 	@ mkdir -p third_party/preload
@@ -150,6 +160,42 @@ third_party/php${PHP_VERSION}-src/ext/pib/pib.c: source/pib/pib.c
 
 ########### Build the objects. ###########
 
+ifeq (${WITH_BCMATH},1)
+CONFIGURE_FLAGS+= --enable-bcmath
+endif
+
+ifeq (${WITH_CALENDAR},1)
+CONFIGURE_FLAGS+= --enable-calendar
+endif
+
+ifeq (${WITH_CTYPE},1)
+CONFIGURE_FLAGS+= --enable-ctype
+endif
+
+ifeq (${WITH_EXIF},1)
+CONFIGURE_FLAGS+= --enable-exif
+endif
+
+ifeq (${WITH_FILTER},1)
+CONFIGURE_FLAGS+= --enable-filter
+endif
+
+ifeq (${WITH_MBSTRING},1)
+CONFIGURE_FLAGS+= --enable-mbstring
+endif
+
+ifeq (${WITH_PHAR},1)
+CONFIGURE_FLAGS+= --enable-phar
+endif
+
+ifeq (${WITH_SESSION},1)
+CONFIGURE_FLAGS+= --enable-session
+endif
+
+ifeq (${WITH_TOKENIZER},1)
+CONFIGURE_FLAGS+= --enable-tokenizer
+endif
+
 third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/pib/pib.c ${ARCHIVES}
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
@@ -159,18 +205,10 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 		--with-config-file-path=/config \
 		--with-layout=GNU  \
 		--with-valgrind=no \
-		--enable-bcmath    \
-		--enable-calendar  \
 		--enable-cgi       \
 		--enable-cli       \
-		--enable-ctype     \
 		--enable-embed=static \
-		--enable-exif      \
-		--enable-filter    \
-		--enable-mbstring  \
 		--enable-pib       \
-		--enable-session   \
-		--enable-tokenizer \
 		--disable-all      \
 		--disable-fiber-asm \
 		--disable-mbregex  \
@@ -221,9 +259,10 @@ SAPI_CLI_PATH=sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${B
 SAPI_CGI_PATH=sapi/cli/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE}
 
 EXTRA_CFLAGS=
+ZEND_EXTRA_LIBS=
 
 BUILD_FLAGS=-j`nproc`\
-	ZEND_EXTRA_LIBS='-lsqlite3' \
+	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
 	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \

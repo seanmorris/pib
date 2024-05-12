@@ -1,2 +1,6 @@
 *.mjs
 *.js
+*.br
+*.gz
+*.data
+*.wasm

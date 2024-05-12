@@ -40,6 +40,8 @@ const icons = {
 	, zip: fileZipIcon
 };
 
+let init = false;
+
 export default function EditorFile({path, name}) {
 	const [showContext, setShowContext] = useState(false);
 	const [showRename, setShowRename]   = useState(false);
@@ -63,6 +65,10 @@ export default function EditorFile({path, name}) {
 
 	const openFile = () => {
 		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: _path}));
+
+		query.set('path', _path);
+
+		window.history.replaceState({}, null, window.location.pathname + '?' + query);
 	};
 
 	const renameFile = () => {
@@ -99,12 +105,11 @@ export default function EditorFile({path, name}) {
 	};
 
 	useEffect(() => {
-
-		if(startPath === path)
+		if(startPath === path && !init)
 		{
 			box.current.focus();
-
-			console.log(box.current);
+			openFile();
+			init = true;
 		}
 
 		navigator.serviceWorker.addEventListener('message', onMessage);

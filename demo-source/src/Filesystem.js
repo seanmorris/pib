@@ -21,6 +21,7 @@ const backupSite = async () => {
 	const backupPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/backup.php')).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Backing up files...'}));
 	await php.run(backupPhpCode);
+
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
 	await sendMessage('refresh', []);
 	const zipContents = await sendMessage('readFile', ['/persist/backup.zip']);

@@ -4,29 +4,29 @@ PHP_CGI_DIST_DIR=packages/php-cgi-wasm
 
 CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.mjs PhpCgiWebview.mjs PhpCgiNode.mjs PhpCgiShell.mjs PhpCgiWorker.mjs PhpCgiBase.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs)
+	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs webTransactions.mjs)
 
 CGI_CJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-shell.js php-cgi-worker.js) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.js PhpCgiWebview.js PhpCgiNode.js PhpCgiShell.js PhpCgiWorker.js PhpCgiBase.js) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.js breakoutRequest.js parseResponse.js)
+	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.js breakoutRequest.js parseResponse.js fsOps.js webTransactions.js)
 
 CGI_ALL= ${CGI_MJS} ${CGI_CJS}
 ALL+= ${CGI_ALL}
 
-web-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWeb.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-web.mjs)
-web-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWeb.js  breakoutRequest.js  parseResponse.js  php-cgi-web.js)
+web-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWeb.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-web.mjs fsOps.mjs webTransactions.mjs)
+web-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWeb.js  breakoutRequest.js  parseResponse.js  php-cgi-web.js fsOps.js webTransactions.js)
 
-worker-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWorker.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-worker.mjs)
-worker-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWorker.js  breakoutRequest.js  parseResponse.js  php-cgi-worker.js)
+worker-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWorker.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-worker.mjs fsOps.mjs webTransactions.mjs)
+worker-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWorker.js  breakoutRequest.js  parseResponse.js  php-cgi-worker.js fsOps.js webTransactions.js)
 
-webview-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebview.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-webview.mjs)
-webview-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebview.js  breakoutRequest.js  parseResponse.js  php-cgi-webview.js)
+webview-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebview.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-webview.mjs fsOps.mjs webTransactions.mjs)
+webview-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebview.js  breakoutRequest.js  parseResponse.js  php-cgi-webview.js fsOps.js webTransactions.js)
 
-node-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-node.mjs)
-node-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js  breakoutRequest.js  parseResponse.js  php-cgi-node.js)
+node-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-node.mjs fsOps.mjs webTransactions.mjs)
+node-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js  breakoutRequest.js  parseResponse.js  php-cgi-node.js fsOps.js webTransactions.js)
 
-shell-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiShell.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-shell.mjs)
-shell-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiShell.js  breakoutRequest.js  parseResponse.js  php-cgi-shell.js)
+shell-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiShell.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-shell.mjs fsOps.mjs webTransactions.mjs)
+shell-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiShell.js  breakoutRequest.js  parseResponse.js  php-cgi-shell.js fsOps.js webTransactions.js)
 
 cgi: ${CGI_MJS} ${CGI_CJS}
 

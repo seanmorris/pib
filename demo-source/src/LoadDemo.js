@@ -92,65 +92,68 @@ const installDemo = async (overwrite = false) => {
 	php.addEventListener('error', event => console.log(event.detail));
 
 	await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
-
 	await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
-	const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
 
-	const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
+	await navigator.locks.request('php-wasm-demo-install', async () => {
+		const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
 
-	if(!overwrite && checkPath.exists)
-	{
-		window.demoInstalling = null;
-		window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
-		window.opener.dispatchEvent(new CustomEvent('install-complete'));
-		return;
-	}
+		const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
+		if(!overwrite && checkPath.exists)
+		{
+			window.demoInstalling = null;
+			window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+			if(window.opener)
+			{
+				window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: selectedFrameworkName}));
+			}
+			return;
+		}
 
-	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Downloading package...'}));
-	const download = await fetch(process.env.PUBLIC_URL + selectedFramework.file);
-	const zipContents = await download.arrayBuffer();
+		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Downloading package...'}));
+		const download = await fetch(process.env.PUBLIC_URL + selectedFramework.file);
+		const zipContents = await download.arrayBuffer();
 
-	const settings = await sendMessage('getSettings');
-	const vHostPrefix = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
-	const existingvHost = settings.vHosts.find(vHost => vHost.pathPrefix === vHostPrefix);
+		const settings = await sendMessage('getSettings');
+		const vHostPrefix = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+		const existingvHost = settings.vHosts.find(vHost => vHost.pathPrefix === vHostPrefix);
 
-	if(!existingvHost)
-	{
-		settings.vHosts.push({
-			pathPrefix: vHostPrefix,
-			directory:  '/persist/' + selectedFramework.dir,
-			entrypoint: selectedFramework.entry
-		});
-	}
-	else
-	{
-		existingvHost.directory = '/persist/' + selectedFramework.dir;
-		existingvHost.entrypoint = selectedFramework.entry;
-	}
+		if(!existingvHost)
+		{
+			settings.vHosts.push({
+				pathPrefix: vHostPrefix,
+				directory:  '/persist/' + selectedFramework.dir,
+				entrypoint: selectedFramework.entry
+			});
+		}
+		else
+		{
+			existingvHost.directory = '/persist/' + selectedFramework.dir;
+			existingvHost.entrypoint = selectedFramework.entry;
+		}
 
-	await sendMessage('setSettings', [settings]);
-	await sendMessage('storeInit');
+		await sendMessage('setSettings', [settings]);
+		await sendMessage('storeInit');
 
-	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Unpacking files...'}));
+		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Unpacking files...'}));
 
-	await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
-	await sendMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
-	console.log(await php.run(initPhpCode));
+		await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
+		await sendMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
+		console.log(await php.run(initPhpCode));
 
-	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
-	await sendMessage('refresh', []);
+		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
+		await sendMessage('refresh', []);
 
-	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Done!'}));
+		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Opening site...'}));
 
-	window.demoInstalling = null;
+		// window.demoInstalling = null;
 
-	if(window.opener)
-	{
-		window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: '/persist/' + selectedFramework.dir}));
-		console.log('...');
-	}
+		if(window.opener)
+		{
+			window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: selectedFrameworkName}));
+		}
 
-	window.location = vHostPrefix;
+		window.location = vHostPrefix;
+	});
 };
 
 const openDemo = () => {
@@ -251,23 +254,6 @@ export default function LoadDemo() {
 					</div>
 					: ''
 				}
-				{/* { message === 'Done!'
-					? <div className = 'button-bar inset'>
-						<button className = "padded" onClick = {() => window.location = process.env.PUBLIC_URL + '/select-framework'}>
-							<img src = {BackIcon} className = "icon" />
-							Back
-						</button>
-						<button className = "padded" onClick = {() => openDemo()}>
-							<img src = {WwwIcon} className = "icon" />
-							Open Site
-						</button>
-						<button className = "padded" onClick = {() => openCode()}>
-							<img src = {editorIcon} className = "icon" />
-							Edit Files
-						</button>
-					</div>
-					: ''
-				} */}
 				</div>
 			</div>
 		</div>

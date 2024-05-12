@@ -1,6 +1,6 @@
 import { PhpBase } from './PhpBase';
-import { commitTransaction, startTransaction } from './webTransactions';
 import PhpBinary from './php-web';
+import { commitTransaction, startTransaction } from './webTransactions';
 
 export class PhpWeb extends PhpBase
 {
@@ -17,6 +17,53 @@ export class PhpWeb extends PhpBase
 	commitTransaction()
 	{
 		return commitTransaction(this);
+	}
+
+	async refresh()
+	{
+		super.refresh();
+		const php = await this.binary;
+		await navigator.locks.request('php-wasm-fs-lock', async () => {
+			return new Promise((accept, reject) => {
+				php.FS.syncfs(true, error => {
+					if(error) reject(error);
+					else accept();
+				});
+			});
+		});
+	}
+
+	async _enqueue(callback, params = [])
+	{
+		let accept, reject;
+
+		const coordinator = new Promise((a,r) => [accept, reject] = [a, r]);
+
+		this.queue.push([callback, params, accept, reject]);
+
+		navigator.locks.request('php-wasm-fs-lock', async () => {
+
+			console.log(this.queue.length);
+
+			if(!this.queue.length)
+			{
+				return;
+			}
+
+			await (this.autoTransaction ? this.startTransaction() : Promise.resolve());
+
+			do
+			{
+				const [callback, params, accept, reject] = this.queue.shift();
+				console.log(callback, params);
+				await callback(...params).then(accept).catch(reject);
+				// this.queue.length || await new Promise(a => setTimeout(a, 100));
+			} while(this.queue.length)
+
+			await (this.autoTransaction ? this.commitTransaction() : Promise.resolve());
+		});
+
+		return coordinator;
 	}
 }
 

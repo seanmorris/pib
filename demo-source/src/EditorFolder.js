@@ -101,16 +101,16 @@ export default function EditorFolder({path = '/', name = ''}) {
 	};
 
 	useEffect(() => {
-		loadFiles();
 		if(startPath === path)
-		{
+			{
+			loadFiles();
 			box.current.focus();
 		}
 	}, []);
 
 	useEffect(() => {
 		loadFiles();
-	}, [expanded, path]);
+	}, []);
 
 	const toggleExpanded = event => {
 		event.stopPropagation();

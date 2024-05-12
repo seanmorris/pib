@@ -30,4 +30,3 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 endif
-

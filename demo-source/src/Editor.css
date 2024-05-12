@@ -13,13 +13,14 @@
 	flex-grow: 1;
 }
 
-.editor > .bevel > .row:not(.header) {
+.editor > .bevel > .row:not(.header):not(.toolbar) {
 	flex-grow: 1;
 }
 
-.editor .row.header {
+.editor .row.header,
+.editor .row.toolbar {
 	margin: 0;
-	margin-bottom: 1rem;
+	margin-bottom: 0.5rem;
 }
 
 .editor .frame {
@@ -40,6 +41,10 @@
 	flex-grow: 0;
 	background-color: #333;
 	color: #CCC;
+}
+
+.editor[data-show-left="false"] .file-area {
+	display: none;
 }
 
 .editor .file-area .context {

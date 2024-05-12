@@ -5,6 +5,7 @@ SQLITE_DIR?=sqlite3.41-src
 
 ifeq (${WITH_SQLITE}, 1)
 
+ZEND_EXTRA_LIBS+= -lsqlite3
 ARCHIVES+= lib/lib/libsqlite3.a
 CONFIGURE_FLAGS+=  \
 	--with-sqlite3 \

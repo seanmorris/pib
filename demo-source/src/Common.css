@@ -23,7 +23,7 @@ body, #root, .App {
 	border: 2px solid;
 	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAABmJLR0QA/wAAAAAzJ3zzAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5AgMCwwgoCmHaAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAOklEQVQI11XMwQnAMAzAwEvpWPZ0GSwPe6/2USiJnkJoVNVjIzNdEBEiwloLPgnd/dc3zDn3g4HjCS9aigyDqeLTLAAAAABJRU5ErkJggg==) 2 2 2 2 !important;
 	background-color: #c3c3c3;
-	padding: 0.25em;
+	padding: 1em;
 }
 
 .inset {
@@ -49,13 +49,14 @@ button.padded {
 }
 
 .margined {
-	margin: 1rem;
+	margin: 0.5rem;
 }
 
 
 .button-bar {
 	display: flex;
 	flex-direction: row;
+	margin-top: 0.5rem;
 }
 
 .button-bar button {
@@ -87,4 +88,61 @@ button.padded {
 
 .overlay:empty {
 	pointer-events: none;
+}
+
+.row.toolbar {
+	padding: 0.25em 0em;
+	border: 2px solid;
+	border-image: url(border-inset.png) 2 2 2 2;
+	align-items: center;
+}
+
+.row.toolbar.tight {
+	padding: 0;
+}
+
+.row.toolbar > div{
+	display: flex;
+	justify-content: flex-end;
+	padding: 0em 0.5em;
+	flex: 1;
+	flex-direction: row;
+}
+
+.row.toolbar > div .start{
+	align-items: center;
+	flex: 1;
+}
+
+.row.toolbar button[data-run],
+.row.toolbar button[data-reset-storage],
+.row.toolbar button[data-refresh] {
+	height: 50px;
+	min-width: 3em;
+	font-weight: bold;
+	border: 2px solid;
+	align-self: center;
+	margin-right: 0.5em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 85%;
+}
+
+button.square {
+	width:2.15rem;
+	height:2.25rem;
+}
+
+.row.header {
+	margin: 0.5rem;
+}
+
+.flex-end {
+	justify-content: flex-end;
+}
+
+a, button, select, input {
+	cursor: pointer;
 }

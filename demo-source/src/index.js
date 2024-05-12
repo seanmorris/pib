@@ -5,14 +5,14 @@ import { Navigate, Route, Routes, redirect } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 
 import SelectFramework from './SelectFramework';
-import Embeded from './Embeded';
+import Embedded from './Embedded';
 import Home from './Home';
 import LoadDemo from './LoadDemo';
 import Editor from './Editor';
 
 navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 
-setTimeout(() => navigator.serviceWorker.controller || window.location.reload(), 250);
+setTimeout(() => navigator.serviceWorker.controller || window.location.reload(), 350);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -21,10 +21,14 @@ root.render(
 		<Routes>
 			<Route path = "/" element = { <Home /> } />
 			<Route path = "/home" element = { <Home /> } />
-			<Route path = "/embedded" element = { <Embeded /> } />
+			<Route path = "/embedded" element = { <Embedded /> } />
 			<Route path = "/select-framework" element = { <SelectFramework /> } />
 			<Route path = "/load-demo" element = { <LoadDemo /> } />
 			<Route path = "/code-editor" element = { <Editor /> } />
+			<Route
+				path = "/php-wasm/code-editor"
+				element = { <Navigate to = {process.env.PUBLIC_URL + '/code-editor' + window.location.search} />}
+			/>
 			<Route
 				path = "/php-wasm/cgi-bin/drupal"
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/load-demo?framework=drupal-7'} />}

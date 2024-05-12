@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "npx webpack --config service-worker-webpack.config.ts; react-scripts start",
-    "build": "npx webpack --config service-worker-webpack.config.ts; react-scripts build; cp build/index.html build/404.html; git add docs/static/js/*",
+    "build": "npx webpack --config service-worker-webpack.config.ts; react-scripts build; cat aphex.txt >> build/index.html; cp build/index.html build/404.html; git add docs/static/js/*",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -1,4 +1,4 @@
-const incomplete = new Map;
+const incomplete = new Map();
 
 export const sendMessage = async (action, params, accept, reject) => {
 	const token = window.crypto.randomUUID();
@@ -13,10 +13,11 @@ export const sendMessage = async (action, params, accept, reject) => {
 };
 
 export const onMessage = event => {
-
 	if(event.data.re && incomplete.has(event.data.re))
 	{
 		const callbacks = incomplete.get(event.data.re);
+
+		incomplete.delete(event.data.re);
 
 		if(!event.data.error)
 		{

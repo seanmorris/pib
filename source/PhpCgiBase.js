@@ -1,5 +1,9 @@
 import { parseResponse } from './parseResponse';
 import { breakoutRequest } from './breakoutRequest';
+import { fsOps } from './fsOps';
+
+const STR = 'string';
+const NUM = 'number';
 
 const putEnv = (php, key, value) => php.ccall(
 	'wasm_sapi_cgi_putenv'
@@ -47,10 +51,15 @@ export class PhpCgiBase
 
 		this.phpArgs   = args;
 
+		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
+		this.transactionStarted = false;
+
 		this.maxRequestAge    = args.maxRequestAge    || 0;
 		this.staticCacheTime  = args.staticCacheTime  || 0;
 		this.dynamicCacheTime = args.dynamicCacheTime || 0;
 		this.vHosts = args.vHosts || [];
+
+		this.initialized = false;
 
 		this.env = {};
 
@@ -86,6 +95,7 @@ export class PhpCgiBase
 			case 'rename':
 			case 'unlink':
 			case 'putEnv':
+
 			case 'refresh':
 			case 'getSettings':
 			case 'setSettings':
@@ -128,13 +138,13 @@ export class PhpCgiBase
 		}
 	}
 
-	async _enqueue(method, params = [])
+	async _enqueue(callback, params = [])
 	{
 		let accept, reject;
 
 		const coordinator = new Promise((a,r) => [accept, reject] = [a, r]);
 
-		this.queue.push([method, params, accept, reject]);
+		this.queue.push([callback, params, accept, reject]);
 
 		if(!this.queue.length)
 		{
@@ -143,21 +153,16 @@ export class PhpCgiBase
 
 		while(this.queue.length)
 		{
-			const [method, params, accept, reject] = this.queue.shift();
-			await this[method](...params).then(accept).catch(reject);
+			const [callback, params, accept, reject] = this.queue.shift();
+			await callback(...params).then(accept).catch(reject);
 		}
 
 		return coordinator;
 	}
 
-	refresh(request)
+	async refresh()
 	{
-		return this._enqueue('_refresh', [request]);
-	}
-
-	async _refresh()
-	{
-		this.php = new this.PHP({
+		this.binary = new this.PHP({
 			stdin: () =>  this.input
 				? String(this.input.shift()).charCodeAt(0)
 				: null
@@ -167,25 +172,22 @@ export class PhpCgiBase
 			, ...this.phpArgs
 		});
 
-		const php = await this.php;
+		const php = await this.binary;
+		this.initialized = false;
 
 		php.ccall('pib_storage_init',   'number' , [] , []);
 		php.ccall('wasm_sapi_cgi_init', 'number' , [] , []);
 
-		await new Promise((accept,reject) => php.FS.syncfs(true, err => {
-			if(err) reject(err);
-			else    accept();
-		}));
-
 		await this.loadInit();
 	}
 
-	request(request)
-	{
-		return this._enqueue('_request', [request]);
-	}
+	_beforeRequest()
+	{}
 
-	async _request(request)
+	_afterRequest()
+	{}
+
+	async request(request)
 	{
 		const {
 			url
@@ -194,6 +196,8 @@ export class PhpCgiBase
 			, post
 			, contentType
 		} = await breakoutRequest(request);
+
+		await this._beforeRequest();
 
 		let docroot = this.docroot;
 		let vHostEntrypoint, vHostPrefix;
@@ -245,7 +249,7 @@ export class PhpCgiBase
 			}
 		}
 
-		const php = await this.php;
+		const php = await this.binary;
 
 		return new Promise(async accept => {
 
@@ -288,9 +292,11 @@ export class PhpCgiBase
 
 			const aboutPath = php.FS.analyzePath(path);
 
-			if(!aboutPath.exists && this.notFound)
+			if(!aboutPath.exists)
 			{
-				const rawResponse = this.notFound(request);
+				const rawResponse = this.notFound
+					? this.notFound(request)
+					: '404 - Not Found.';
 
 				if(rawResponse)
 				{
@@ -336,10 +342,7 @@ export class PhpCgiBase
 			{
 				if(php._main() === 0) // PHP exited with code 0
 				{
-					await new Promise((accept,reject) => php.FS.syncfs(false, err => {
-						if(err) reject(err);
-						else    accept();
-					}));
+					this._afterRequest();
 				}
 			}
 			catch (error)
@@ -406,170 +409,54 @@ export class PhpCgiBase
 		});
 	}
 
-	run(code)
-	{
-		return this._enqueue('_run', [code]);
-	}
-
-	async _run(code)
-	{
-		return (await this.php).run(code);
-	}
-
 	analyzePath(path)
 	{
-		return this._enqueue('_analyzePath', [path]);
-	}
-
-	async _analyzePath(path)
-	{
-		const result = (await this.php).FS.analyzePath(path);
-
-		if(!result.object)
-		{
-			return { exists: false };
-		}
-
-		const object = {
-			exists: true
-			, id: result.object.id
-			, mode : result.object.mode
-			, mount: {
-				mountpoint: result.object.mount.mountpoint
-				, mounts: result.object.mount.mounts.map(m => m.mountpoint)
-			}
-			, isDevice: result.object.isDevice
-			, isFolder: result.object.isFolder
-			, read: result.object.read
-			, write: result.object.write
-		};
-
-		return {...result, object, parentObject: undefined};
+		return this._enqueue(fsOps.analyzePath, [this.binary, path]);
 	}
 
 	readdir(path)
 	{
-		return this._enqueue('_readdir', [path]);
-	}
-
-	async _readdir(path)
-	{
-		return (await this.php).FS.readdir(path);
+		return this._enqueue(fsOps.readdir, [this.binary, path]);
 	}
 
 	readFile(path)
 	{
-		return this._enqueue('_readFile', [path]);
-	}
-
-	async _readFile(path)
-	{
-		return (await this.php).FS.readFile(path);
+		return this._enqueue(fsOps.readFile, [this.binary, path]);
 	}
 
 	stat(path)
 	{
-		return this._enqueue('_stat', [path]);
-	}
-
-	async _stat(path)
-	{
-		return (await this.php).FS.stat(path);
+		return this._enqueue(fsOps.stat, [this.binary, path]);
 	}
 
 	mkdir(path)
 	{
-		return this._enqueue('_mkdir', [path]);
-	}
-
-	async _mkdir(path)
-	{
-		const php = (await this.php);
-		const _result = php.FS.mkdir(path);
-		const result = {
-			id: _result.id
-			, mode : _result.mode
-			, mount: {
-				mountpoint: _result.mount.mountpoint
-				, mounts: _result.mount.mounts.map(m => m.mountpoint)
-			}
-			, isDevice: _result.isDevice
-			, isFolder: _result.isFolder
-			, read: _result.read
-			, write: _result.write
-		};
-
-		return new Promise(accept => php.FS.syncfs(false, err => {
-			if(err) throw err;
-			accept(result);
-		}));
+		return this._enqueue(fsOps.mkdir, [this.binary, path]);
 	}
 
 	async rmdir(path)
 	{
-		return this._enqueue('_rmdir', [path]);
-	}
-
-	async _rmdir(path)
-	{
-		const php = (await this.php);
-		const result = php.FS.rmdir(path);
-		return new Promise(accept => php.FS.syncfs(false, err => {
-			if(err) throw err;
-			accept(result);
-		}));
+		return this._enqueue(fsOps.rmdir, [this.binary, path]);
 	}
 
 	async rename(path, newPath)
 	{
-		console.trace({path, newPath});
-
-		return this._enqueue('_rename', [path, newPath]);
-	}
-
-	async _rename(path, newPath)
-	{
-		const php = (await this.php);
-		const result = php.FS.rename(path, newPath);
-		return new Promise(accept => php.FS.syncfs(false, err => {
-			if(err) throw err;
-			accept(result);
-		}));
+		return this._enqueue(fsOps.rename, [this.binary, path, newPath]);
 	}
 
 	async writeFile(path, data, options)
 	{
-		return this._enqueue('_writeFile', [path, data, options]);
-	}
-
-	async _writeFile(path, data, options)
-	{
-		const php = (await this.php);
-		const result = php.FS.writeFile(path, data, options);
-		return new Promise(accept => php.FS.syncfs(false, err => {
-			if(err) throw err;
-			accept(result);
-		}));
+		return this._enqueue(fsOps.writeFile, [this.binary, path, data, options]);
 	}
 
 	async unlink(path)
 	{
-		return this._enqueue('_unlink', [path]);
-	}
-
-	async _unlink(path)
-	{
-		const php = (await this.php);
-		const result = php.FS.unlink(path);
-		return new Promise(accept => php.FS.syncfs(false, err => {
-			if(err) throw err;
-			accept(result);
-		}));
+		return this._enqueue(fsOps.unlink, [path]);
 	}
 
 	async putEnv(name, value)
 	{
-		return (await this.php).ccall('wasm_sapi_cgi_putenv', 'number', ['string', 'string'], [name, value]);
+		return (await this.binary).ccall('wasm_sapi_cgi_putenv', 'number', ['string', 'string'], [name, value]);
 	}
 
 	async getSettings()
@@ -617,7 +504,7 @@ export class PhpCgiBase
 	async loadInit()
 	{
 		const initPath = '/config/init.json';
-		const php = (await this.php);
+		const php = (await this.binary);
 		const check = php.FS.analyzePath(initPath);
 
 		if(!check.exists)

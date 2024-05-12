@@ -79,7 +79,6 @@ function Home() {
 						<p className='padded'>Spin up a CGI service worker and serve a demo from the framework of your choice.</p>
 					</a>
 				</div>
-				&nbsp;
 				{/* <h2>Extras:</h2> */}
 				<div className = "inset button-bar">
 					<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor'}>
