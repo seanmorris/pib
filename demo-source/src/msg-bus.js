@@ -1,17 +1,28 @@
 const incomplete = new Map();
 
-export const sendMessage = async (action, params, accept, reject) => {
+/**
+ * Create a sendMessage function given a service worker URL.
+ * @param {*} serviceWorkerUrl The URL to the service worker.
+ * @returns sendMessage function for the service workrer.
+ */
+export const sendMessageFor = (serviceWorkerUrl) => async (action, params, accept, reject) => {
 	const token = window.crypto.randomUUID();
 	const ret = new Promise((_accept, _reject) => [accept, reject] = [_accept, _reject]);
 	incomplete.set(token, [accept, reject]);
 
 	navigator.serviceWorker
-	.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`)
+	.getRegistration(serviceWorkerUrl)
 	.then(registration => registration.active.postMessage({action, params, token}));
 
 	return ret;
 };
 
+export const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+
+/**
+ * Event handler for recieved messages.
+ * @param {*} event
+ */
 export const onMessage = event => {
 	if(event.data.re && incomplete.has(event.data.re))
 	{
@@ -27,7 +38,5 @@ export const onMessage = event => {
 		{
 			callbacks[1](event.data.error);
 		}
-
-		return;
 	}
 };

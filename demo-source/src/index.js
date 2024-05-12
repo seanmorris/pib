@@ -9,8 +9,11 @@ import Embedded from './Embedded';
 import Home from './Home';
 import LoadDemo from './LoadDemo';
 import Editor from './Editor';
+import { onMessage } from './msg-bus';
 
 navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
+
+navigator.serviceWorker.addEventListener('message', onMessage);
 
 setTimeout(() => navigator.serviceWorker.controller || window.location.reload(), 350);
 

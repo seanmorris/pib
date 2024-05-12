@@ -214,7 +214,7 @@ function Embedded() {
 				setTimeout(() => {
 					setStatusMessage('php-wasm ready!')
 					setRunning(false);
-				}, 50);
+				}, 1);
 			}
 			else
 			{
@@ -224,9 +224,9 @@ function Embedded() {
 				setTimeout(() => {
 					setStatusMessage('php-wasm ready!')
 					setRunning(false);
-				}, 16);
+				}, 1);
 			}
-		}, 16);
+		}, 1);
 	};
 
 	return (

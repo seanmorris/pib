@@ -1,7 +1,5 @@
 import './Common.css';
 import './EditorEntry.css';
-// import { useEffect, useState } from 'react';
-// import { onMessage, sendMessage } from './msg-bus';
 
 import fileIcon from './nomo-dark/file.svg';
 import filePhpIcon from './nomo-dark/file.php.svg';
@@ -20,7 +18,9 @@ import renameIcon from './icons/rename-icon-16.png';
 import deleteIcon from './icons/delete-icon-16.png';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { onMessage, sendMessage } from './msg-bus';
+import { sendMessageFor } from './msg-bus';
+
+const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 const icons = {
 	php: filePhpIcon
@@ -111,9 +111,6 @@ export default function EditorFile({path, name}) {
 			openFile();
 			init = true;
 		}
-
-		navigator.serviceWorker.addEventListener('message', onMessage);
-		return () => navigator.serviceWorker.removeEventListener('message', onMessage);
 	}, []);
 
 	const extension = _path.split('.').pop();

@@ -8,6 +8,7 @@
 
 .Embedded > .bevel {
 	flex-grow: 1;
+	padding: 0.5rem;
 }
 
 @font-face {
@@ -61,16 +62,20 @@ button {
 	border-image: url(border.png) 2 2 2 2;
 }
 
-[data-running="0"] button[data-run]::after {
+button[data-run]::after {
 	position: absolute;
 	top: -2px;
 	left:-2px;
 	bottom:-2px;
 	right:-2px;
 	content: '';
-	background-color: #F00 !important;
 	mix-blend-mode: darken;
     opacity: 0.5;
+}
+
+[data-running="0"] button[data-run]::after {
+	background-color: #F00 !important;
+	transition: background-color 0s 0.05s ease-out;
 }
 
 [data-running="1"] button[data-run] {

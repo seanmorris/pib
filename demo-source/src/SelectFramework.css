@@ -8,7 +8,7 @@
 }
 
 .select-framework .frameworks {
-	margin: 0.5rem;
+	/* margin: 0.5rem; */
 }
 
 .select-framework .frameworks .icons {
@@ -17,7 +17,6 @@
 
 .select-framework .frameworks .column {
 	align-items: stretch;
-	background-color: white;
 	/* margin:0.5rem; */
 }
 
@@ -26,8 +25,10 @@
 }
 
 .select-framework .frameworks a {
+	background-color: white;
 	display: block;
 	text-align: center;
+	border-bottom: 1px solid #333;
 }
 
 .select-framework .frameworks a img {
@@ -37,6 +38,6 @@
 
 }
 
-.select-framework .frameworks .column:nth-child(2n) {
+.select-framework .frameworks .column:nth-child(2n) a {
 	background-color: #EEE;
 }

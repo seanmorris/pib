@@ -3,7 +3,7 @@ import './Editor.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { onMessage, sendMessage } from './msg-bus';
+import { sendMessageFor } from './msg-bus';
 import EditorFolder from './EditorFolder';
 import Header from './Header';
 
@@ -15,6 +15,8 @@ import { createRoot } from 'react-dom/client';
 import reactIcon from './react-icon.svg';
 import toggleIcon from './nuvola/view_choose.png';
 import saveIcon from './nuvola/3floppy_unmount.png';
+
+const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 const openFilesMap = new Map();
 
@@ -99,11 +101,9 @@ export default function Editor() {
 
 		window.addEventListener('keydown', onKeyDown);
 		window.addEventListener('editor-open-file', handleOpenFile);
-		navigator.serviceWorker.addEventListener('message', onMessage);
 		return () => {
 			window.removeEventListener('editor-open-file', handleOpenFile);
 			window.removeEventListener('keydown', onKeyDown);
-			navigator.serviceWorker.removeEventListener('message', onMessage);
 		}
 	}, []);
 
@@ -194,7 +194,7 @@ export default function Editor() {
 
 	return (
 		<div className = "editor" data-show-left = {showLeft}>
-			<div className='bevel padded'>
+			<div className='bevel'>
 				<Header />
 				<div className = "row toolbar inset tight">
 					<button className='square' onClick = {toggleLeftBar}>

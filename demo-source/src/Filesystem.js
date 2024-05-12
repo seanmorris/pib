@@ -5,7 +5,9 @@ import loader from './tail-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
-import { onMessage, sendMessage } from './msg-bus';
+import { sendMessageFor } from './msg-bus';
+
+const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 const backupSite = async () => {
 	const persistFile = await sendMessage('readdir', ['/persist']);
@@ -87,14 +89,12 @@ const makeComponent = (operation) => ({onComplete, onError, onFinally = () => {}
 	const onStatus = event => setMessage(event.detail);
 
 	useEffect(() => {
-		navigator.serviceWorker.addEventListener('message', onMessage);
 		window.addEventListener('install-status', onStatus);
 		window.__operation = window.__operation || operation(args)
 		.then(() => onComplete())
 		.catch(error => onError(error))
 		.finally(() => window.__operation = null);
 		return () => {
-			navigator.serviceWorker.removeEventListener('message', onMessage);
 			window.removeEventListener('install-status', onStatus);
 		}
 	}, []);

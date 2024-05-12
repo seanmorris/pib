@@ -95,3 +95,40 @@
 p.padded {
 	margin: 0;
 }
+
+.home .extra-demos {
+	background-color: white;
+}
+
+a.icon-box {
+	margin-top: 0.25rem;
+	align-items: center;
+	max-width: 64px;
+	font-size: 0.85rem;
+	display: inline-flex;
+	flex-direction: column;
+	text-align: center;
+	padding: 0.5rem;
+}
+
+a.icon-box img {
+	margin-bottom: 0.25rem;
+}
+
+.home h3 {
+	display: flex;
+	align-items: center;
+}
+
+.home h3 button.square {
+	width: 1.55rem;
+	height: 1.55rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 0.25rem;
+}
+
+.home h3 img {
+	width: 1rem;
+}

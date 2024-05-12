@@ -1,13 +1,15 @@
 import './Common.css';
 import './EditorEntry.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { onMessage, sendMessage } from './msg-bus';
+import { sendMessageFor } from './msg-bus';
 import EditorFile from './EditorFile';
 
 import fileIcon from './nomo-dark/file.svg';
 import folderOpen from './nomo-dark/folder.open.svg';
 import folderClose from './nomo-dark/folder.close.svg';
 import loader from './tail-spin.svg';
+
+const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 const pathStates = new Map();
 
@@ -29,11 +31,6 @@ export default function EditorFolder({path = '/', name = ''}) {
 		: (path === startPath.substr(0, path.length));
 
 	const [expanded, setExpanded] = useState(startOpened);
-
-	useEffect(() => {
-		navigator.serviceWorker.addEventListener('message', onMessage);
-		return () => navigator.serviceWorker.removeEventListener('message', onMessage);
-	}, []);
 
 	const onContext = event => {
 		event.preventDefault();

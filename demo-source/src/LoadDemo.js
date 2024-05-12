@@ -5,12 +5,14 @@ import loader from './tail-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
-import { onMessage, sendMessage } from './msg-bus';
+import { sendMessageFor } from './msg-bus';
 
 import NextIcon from './icons/forward-icon-32.png'
 import BackIcon from './icons/back-icon-32.png'
 import WwwIcon from './icons/www-icon-32.png'
 import editorIcon from './icons/editor-icon-32.png';
+
+const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 const packages = {
 	'drupal-7': {
@@ -214,10 +216,8 @@ export default function LoadDemo() {
 	const onStatus = event => setMessage(event.detail);
 
 	useEffect(() => {
-		navigator.serviceWorker.addEventListener('message', onMessage);
 		window.addEventListener('install-status', onStatus);
 		return () => {
-			navigator.serviceWorker.removeEventListener('message', onMessage);
 			window.removeEventListener('install-status', onStatus);
 		}
 	}, []);

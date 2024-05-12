@@ -13,11 +13,18 @@ import editorIcon from './icons/editor-icon-32.png';
 import donateIcon from './icons/donate-icon-32.png';
 import githubIcon from './icons/github-icon-32.png';
 
+import sunburstIcon from './icons/sunburst.png';
+import netscapeIcon from './icons/netscape.png';
+import mouseIcon from './icons/mouse.png';
+import downIcon from './icons/down.png';
+import upIcon from './icons/up.png';
+
 import { useEffect, useMemo, useState } from 'react';
 
 function Home() {
 	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
 	const [scrollState, setScrollState] = useState(1);
+	const [showMore, setShowMore] = useState(false);
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -57,7 +64,7 @@ function Home() {
 			<div className='home-menu bevel'>
 				<h1>Select a demo:</h1>
 				<div className='row'>
-					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded'}>
+					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded?demo=hello-world.php'}>
 						<div className = "big-icon embedded">
 							<img alt = "page showing php logo" src = {phpPageIcon} />
 						</div>
@@ -79,7 +86,7 @@ function Home() {
 						<p className='padded'>Spin up a CGI service worker and serve a demo from the framework of your choice.</p>
 					</a>
 				</div>
-				{/* <h2>Extras:</h2> */}
+
 				<div className = "inset button-bar">
 					<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor'}>
 						<img src = {editorIcon} className = "icon" alt = "Code Editor" />
@@ -98,6 +105,25 @@ function Home() {
 						Github
 					</button>
 				</div>
+
+				{/* <h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span>More...</span></h3>
+				{ showMore && ( <div className = "inset extra-demos">
+					<a target = "_blank" href = {process.env.PUBLIC_URL + '/forecast.html'} className="icon-box">
+						<img src = {sunburstIcon} alt = "CakePHP logo" />
+						<span>Inline FrontEnd PHP</span>
+					</a>
+
+					<a target = "_blank" href = "https://github.com/seanmorris/php-gtk" className="icon-box">
+						<img src = {netscapeIcon} alt = "CakePHP logo" />
+						<span>GTK PHP+Node Browser</span>
+					</a>
+
+					<a target = "_blank" href = "https://codepen.io/SeanMorris227/pen/NWoGMYp?editors=1010" className="icon-box">
+						<img src = {mouseIcon} alt = "CakePHP logo" />
+						<span>PHP Event Handlers</span>
+					</a>
+				</div> ) } */}
+
 				<div className = "inset right demo-bar">
 					<span>Demo powered by React</span> <img alt = "react-logo" src = {reactIcon} className='small-icon'/>
 				</div>

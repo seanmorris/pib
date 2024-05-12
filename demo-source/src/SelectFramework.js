@@ -7,10 +7,9 @@ import laravelIcon from './laravel-icon.svg';
 import laminasIcon from './laminas-icon.svg';
 import { useEffect, useState } from 'react';
 import Header from './Header';
-import { onMessage, sendMessage } from './msg-bus';
+import { sendMessageFor } from './msg-bus';
 
 import reactIcon from './react-icon.svg';
-
 import floppyIcon from './icons/floppy-icon-32.png';
 import nukeIcon from './icons/nuke-icon-32.png';
 import cabinetIcon from './icons/file-cabinet-icon-32.png';
@@ -18,6 +17,8 @@ import { Backup, Clear, Restore } from './Filesystem';
 import DoWithFile from './DoWithFile';
 import ErrorDialog from './ErrorDialog';
 import Confirm from './Confirm';
+
+const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 function SelectFramework() {
 
@@ -67,14 +68,10 @@ function SelectFramework() {
 		}
 	}
 
-	const _onMessage = event => onMessage(event);
-
 	useEffect(() => {
 		window.addEventListener('install-complete', onComplete);
-		navigator.serviceWorker.addEventListener('message', _onMessage);
 		return () => {
 			window.removeEventListener('install-complete', onComplete);
-			navigator.serviceWorker.removeEventListener('message', _onMessage);
 		}
 	}, []);
 
