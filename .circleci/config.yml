@@ -7,18 +7,18 @@ workflows:
 
   build-test-flow:
     jobs:
-    - make-test-8.3:
-      requires:
-      - make-archives
-    # - make-test-8.2:
-    #   requires:
-    #   - make-archives
-    # - make-test-8.1:
-    #   requires:
-    #   - make-archives
-    # - make-test-8.0:
-    #   requires:
-    #   - make-archives
+      - make-test-8.3:
+        requires:
+        - make-archives
+      # - make-test-8.2:
+      #   requires:
+      #   - make-archives
+      # - make-test-8.1:
+      #   requires:
+      #   - make-archives
+      # - make-test-8.0:
+      #   requires:
+      #   - make-archives
 
 jobs:
 
@@ -28,15 +28,15 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-    - checkout
-    - run: npm install
-    - run: cp .circleci/.env_8.3.ci .env
-    - run: make archives
-    - persist_to_workspace:
-      root: ~/project
-      paths:
-      - lib/
-      - third_party/
+      - checkout
+      - run: npm install
+      - run: cp .circleci/.env_8.3.ci .env
+      - run: make archives
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - lib/
+            - third_party/
 
   make-test-8.3:
     parallelism: 1
@@ -44,10 +44,10 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-    - attach_workspace:
-        at: ~/project
-    - run: cp .circleci/.env_8.3.ci .env
-    - run: make test
+      - attach_workspace:
+          at: ~/project
+      - run: cp .circleci/.env_8.3.ci .env
+      - run: make test
 
   # make-test-8.2:
   #   parallelism: 1
