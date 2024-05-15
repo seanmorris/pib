@@ -7,6 +7,7 @@ workflows:
 
   build-test-flow:
     jobs:
+      - make-archives
       - make-test-8-3:
           requires:
             - make-archives
