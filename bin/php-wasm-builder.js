@@ -69,16 +69,20 @@ const commands = {};
 	};
 
 	build.info = `Build php-wasm.`;
-	build.help = `Usage: php-wasm build ENV_NAME MODULE_TYPE
+	build.help = `Usage: php-wasm-builder build [ENV_NAME] [MODULE_TYPE] [BINARY_TYPE]
 
-	ENV_NAME: [web, node]
-	  web: build the web version (default)
-	  node: build the nodejs version
+  ENV_NAME: [web, node]
+    web:  build the web version (default)
+    node: build the nodejs version
 
-	MODULE_TYPE: [js, mjs]
-	  mjs: build an es6 module (default)
-	  js: build a common js module`;
+  MODULE_TYPE: [js, mjs]
+    mjs:  build an es6 module (default)
+    js:   build a common js module
 
+  BINARY_TYPE: [cli, cgi]
+    cli:  standard build (default)
+    cgi:  cgi build
+`;
 	commands.build = build;
 }
 
@@ -92,7 +96,7 @@ const commands = {};
 	// };
 
 	// run.info = 'Run a script in php-wasm.';
-	// run.help = `Usage: php-wasm run FILE
+	// run.help = `Usage: php-wasm-builder run FILE
 
 	// FILE - File containing the script to run.`
 
@@ -109,7 +113,7 @@ const commands = {};
 	};
 
 	image.info = 'Create the build environment docker image';
-	image.help = `Usage: php-wasm image`
+	image.help = `Usage: php-wasm-builder image`
 
 	commands.image = image;
 }
@@ -123,7 +127,7 @@ const commands = {};
 	};
 
 	clean.info = `Clear cached build resources`;
-	clean.help = `Usage: php-wasm clean`;
+	clean.help = `Usage: php-wasm-builder clean`;
 
 	commands.clean = clean;
 }
@@ -142,11 +146,9 @@ const commands = {};
 			return;
 		}
 
-		console.error('Usage:');
-		console.error('php-wasm [COMMAND] [ARG, ...]');
+		console.error('Usage: php-wasm-builder [COMMAND] [ARG, ...]');
 		console.error('');
 		console.error('Available commands');
-		console.error('');
 
 		for(const [commandName, command] of Object.entries(commands))
 		{
@@ -157,7 +159,7 @@ const commands = {};
 	};
 
 	help.info = 'Display helptext for a given command.';
-	help.help = `Usage: php-wasm help COMMAND
+	help.help = `Usage: php-wasm-builder help COMMAND
 
 	COMMAND - Command to print helptext for.`
 

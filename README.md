@@ -8,20 +8,21 @@ _PHP in WebAssembly, npm not required._
 
 find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
 
-### 🚀 v0.0.8 - Preparing for Lift-off
+### 🌟 v0.0.9 - Aiming for the Stars
 
-* Adding ESM & CDN Module support!
-* Adding stdin.
-* Buffering stdout/stderr in javascript.
-* Fixing `<script type = "text/php">` support.
-* Adding fetch support for `src` on above.
-* Adding support for libzip, iconv, & html-tidy
-* Adding support for NodeFS & IDBFS.
-* In-place builds.
-* Updating PHP to 8.2.11
-* Building with Emscripten 3.1.43
-* Modularizing dependencies.
-* Compressing assets.
+* Adding PHP-CGI support!
+* Implemented an httpd-like CGI wrapper.
+* libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
+* New "cgi" option for custom builds.
+* php-wasm, php-cgi-wasm, & php-wasm builder are now separate packages.
+* Demos for CodeIgniter, CakePHP, Laravel & Laminas.
+* Drupal & all other demos now use standard build + zip install.
+* Modules are now webpack-compatible out of the box.
+* Corrected a bug preventing custom in-place builds.
+* Exposing FS methods w/queueing & locking to sync files between tabs & workers.
+* Fixed the bug preventing POST requests from working under FireFox.
+* Adding support for PHP 8.3.7
+* Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -89,6 +90,114 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 	</td>
  </tr>
 </table>
+
+## 🎩 Introducing php-cgi-wasm!
+
+Version 0.0.9 adds `php-cgi-wasm` to the mix. This allows you to run php in web-server mode, similar to how it runs under apache or nginx. Running within a Service Worker, it can intercept and respond to HTTP requests just like a normal webserver. This means the browser can simply navigate to a URL, and PHP will generate the page, and everything will work as-normal, AJAX and all. From the perspective of the webpage, its just making HTTP requests. Its not worried about whether the PHP runs on the server or in a Service Worker.
+
+### Install the php-cgi-wasm package
+
+```bash
+$ npm install php-cgi-wasm
+```
+
+### Example Service Worker:
+
+```javascript
+import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker";
+
+// Spawn the PHP-CGI binary
+const php = new PhpCgi({
+	prefix: '/php-wasm'
+	, docroot: '/persist/www'
+	, types: {
+		jpeg: 'image/jpeg'
+		, jpg: 'image/jpeg'
+		, gif: 'image/gif'
+		, png: 'image/png'
+		, svg: 'image/svg+xml'
+	}
+});
+
+// Set up the event handlers
+self.addEventListener('install',  event => php.handleInstallEvent(event));
+self.addEventListener('activate', event => php.handleActivateEvent(event));
+self.addEventListener('fetch',    event => php.handleFetchEvent(event));
+self.addEventListener('message',  event => php.handleMessageEvent(event));
+```
+
+## 🛠️ Install & Use
+
+Install with npm:
+
+```sh
+$ npm install php-wasm
+```
+
+Include the module in your preferred format:
+
+### Common JS
+
+```javascript
+const { PhpWeb } = require('php-wasm/PhpWeb.js');
+const php = new PhpWeb;
+```
+
+### ESM
+
+```javascript
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+const php = new PhpWeb;
+```
+
+#### From a CDN:
+
+***Note: This does not require npm.***
+
+##### jsdelivr
+
+```javascript
+const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
+const php = new PhpWeb;
+```
+
+##### unpkg
+
+```javascript
+const { PhpWeb } = await import('https://www.unpkg.com/php-wasm/php-wasm/PhpWeb.mjs');
+const php = new PhpWeb;
+```
+
+#### Pre-Packaged Static Assets:
+
+***You won't need to use this if you use webpack, a custom build or a CDN.***
+
+The php-wasm package comes with pre-built binaries out of the box so you can get started quickly.
+
+**If you're not using webpack**, you'll need to add the following `postinstall` script entry to your package.json to ensure the static assets are available to your web application. Make sure to replace `public/` with the path to your public document root if necessary.
+
+```json
+{
+  "scripts": {
+    "postinstall": [
+      "cp node_modules/php-wasm/php-web.* public/"
+    ]
+  },
+}
+```
+
+If you're using another bundler, use the vendor's documentation to learn how to move the files matching the following pattern to your public directory:
+
+```bash
+./node_modules/php-wasm/php-web.*
+./node_modules/php-wasm/php-worker.* # If you're running the standard build in a worker
+```
+
+For php-cgi-wasm:
+```bash
+./node_modules/php-wasm/php-cgi-web.* # If you're running the cgi build in a page
+./node_modules/php-wasm/php-cgi-worker.*
+```
 
 ## 🍎 Quickstart
 
@@ -159,72 +268,6 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 ```html
 <script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.jsdelivr.mjs"></script>
 ``` -->
-
-## 🛠️ Install & Use
-
-Install with npm:
-
-```sh
-$ npm install php-wasm
-```
-
-Include the module in your preferred format:
-
-### Common JS
-
-```javascript
-const { PhpWeb } = require('php-wasm/PhpWeb.js');
-const php = new PhpWeb;
-```
-
-### ESM
-
-```javascript
-import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
-const php = new PhpWeb;
-```
-
-#### From a CDN:
-
-***Note: This does not require npm.***
-
-##### jsdelivr
-
-```javascript
-const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
-const php = new PhpWeb;
-```
-
-##### unpkg
-
-```javascript
-const { PhpWeb } = await import('https://www.unpkg.com/php-wasm/php-wasm/PhpWeb.mjs');
-const php = new PhpWeb;
-```
-
-#### Pre-Packaged Static Assets:
-
-***You won't need to use this if you build in-place or use a CDN.***
-
-The php-wasm package comes with pre-built binaries out of the box so you can get started quickly.
-
-You'll need to add the following `postinstall` script entry to your package.json to ensure the static assets are available to your web application. Make sure to replace `public/` with the path to your public document root if necessary.
-
-```json
-{
-  "scripts": {
-    "postinstall": [
-      "cp node_modules/php-wasm/php-web.* public/"
-    ]
-  },
-}
-```
-
-If you're using a more advanced bundler, use the vendor's documentation to learn how to move the files matching the following pattern to your public directory:
-
-```
-./node_modules/php-wasm/php-web.*
-```
 
 ## 🥤 Running PHP & Taking Output
 
@@ -302,36 +345,36 @@ const php = new PhpNode;
 let php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files'}});
 ```
 
-## 🏗️ Building in-place
+## 🏗️ Custom Builds
 
-To use the the in-place builder, first install php-wasm globally:
+To use the the in-place builder, first install php-wasm-builder globally:
 
 ***Requires docker, docker-compose & make.***
 
 ```sh
-$ npm install -g php-wasm
+$ npm install -g php-wasm-builder
 ```
 
 Create the build environment (can be run from anywhere):
 
 ```sh
-$ php-wasm image
+$ php-wasm-builder image
 ```
 
 Optionally clean up files from a previous build:
 
 ```sh
-$ php-wasm clean
+$ php-wasm-builder clean
 ```
 
 ### Build for web
 
-Then navigate to the directory you want the files to be built in, and run `php-wasm build`
+Then navigate to the directory you want the files to be built in, and run `php-wasm-builder build`
 
 ```sh
 $ cd ~/my-project
-$ php-wasm build
-# php-wasm build web
+$ php-wasm-builder build
+# php-wasm-builder build web
 #  "web" is the default here
 ```
 
@@ -339,7 +382,7 @@ $ php-wasm build
 
 ```sh
 $ cd ~/my-project
-$ php-wasm build node
+$ php-wasm-builder build node
 ```
 
 ### ESM Modules:
@@ -347,44 +390,31 @@ $ php-wasm build node
 Build ESM modules with:
 
 ```sh
-$ php-wasm build web mjs
-$ php-wasm build node mjs
+$ php-wasm-builder build web mjs
+$ php-wasm-builder build node mjs
 ```
 
-This will build the following files in the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
+### CGI Modules:
+
+Build CGI modules with:
 
 ```sh
-# php-wasm build web
-PhpWeb.js          # ⭐ require this module in your javascript if you want to use PHP in JS.
-php-web.js         # internal interface between WASM and javscript
-php-web.js.wasm    # binary php-wasm
-
-# php-wasm build node
-PhpNode.js         # ⭐ require this module in your scripts to use PHP in JS in node.
-php-node.js        # internal interface between WASM and javscript
-php-node.js.wasm   # binary php-wasm
-
-# php-wasm build web mjs
-PhpWeb.mjs         # ⭐ import this module in your javascript if you want to use PHP in JS.
-php-tags.local.mjs # ✨ include this with a script tag in your HTML if you want to use inline PHP
-php-web.mjs        # internal interface between WASM and javscript
-php-web.mjs.wasm   # Binary php-wasm
-
-# php-wasm build node mjs
-PhpNode.mjs        # ⭐ import this module in your scripts to use PHP in JS in node.
-php-node.mjs       # internal interface between WASM and javscript
-php-node.mjs.wasm  # binary php-wasm
-
-PhpBase.js         # All cjs builds depend on this file.
-PhpBase.mjs        # All mjs builds depend on this file.
+$ php-wasm-builder build web cgi mjs
+$ php-wasm-builder build worker cgi mjs
 ```
+
+This will build the package inside of the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
 
 ### .php-wasm-rc
 
 You can also create a `.php-wasm-rc` file in this directory to customize the build.
 
 ```make
-# Build to a directory other than the current one (absolute path)
+# Build the package to a directory other than the current one (absolute path)
+PHP_DIST_DIR=~/my-project/public
+
+# Build the CGI package to a directory other than the current one (absolute path)
+PHP_CGI_DIST_DIR
 PHP_DIST_DIR=~/my-project/public
 
 # Space separated list of files/directories (absolute paths)
@@ -400,20 +430,40 @@ ASSERTIONS=0
 # Select the optimization level
 OPTIMIZATION=3
 
-# Build with libXML
-WITH_LIBXML=1
+# Build with extensions
+WITH_GD=1
+WITH_LIBPNG=1
+WITH_LIBJPEG=1
+WITH_FREETYPE=1
+```
 
-# Build with Tidy
-WITH_TIDY=1
+The following options are availavle for building with various PHP extensions:
 
-# Build with Iconv
-WITH_ICONV=1
+```
+WITH_BCMATH    # Enabled by default
+WITH_CALENDAR  # Enabled by default
+WITH_CTYPE     # Enabled by default
+WITH_EXIF      # Enabled by default
+WITH_FILTER    # Enabled by default
+WITH_MBSTRING  # Enabled by default
+WITH_PHAR      # Enabled by default
+WITH_TOKENIZER # Enabled by default
 
-# Build with SQLite
-WITH_SQLITE=1
+WITH_ICONV     # Enabled by default
+WITH_LIBXML    # Enabled by default
+WITH_LIBZIP    # Enabled by default
+WITH_SQLITE    # Enabled by default
+WITH_VRZNO     # Enabled by default
+WITH_ZLIB      # Enabled by default
 
-# Build with VRZNO
-WITH_VRZNO=1
+WITH_OPENSSL
+WITH_GD
+WITH_LIBPNG
+WITH_LIBJPEG
+WITH_FREETYPE
+WITH_ICU
+WITH_TIDY
+WITH_EXIF
 ```
 
 ## 📦 Packaging files

@@ -2,7 +2,7 @@
 
 Changes
 
-## v0.0.9 - Proving Grounds
+## v0.0.9 - Aiming for the Stars
 
 * Adding PHP-CGI support!
 * Implemented an httpd-like CGI wrapper.
@@ -15,6 +15,8 @@ Changes
 * Corrected a bug preventing custom in-place builds.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
 * Fixed the bug preventing POST requests from working under FireFox.
+* Adding support for PHP 8.3.7
+* Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
 
 ## v0.0.8 - Preparing for Lift-off
 

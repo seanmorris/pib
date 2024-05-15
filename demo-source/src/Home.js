@@ -124,10 +124,10 @@ function Home() {
 						<span>PHP Event Handlers</span>
 					</a>
 
-					{/* <a target = "_blank" href = "https://php-cloud.pages.dev/wiki.php" className="icon-box">
+					<a target = "_blank" href = "https://php-cloud.pages.dev/" className="icon-box">
 						<img src = {dbIcon} alt = "CloudFlare D1 SQL PDO Connector" />
 						<span>CloudFlare D1 SQL PDO Connector</span>
-					</a> */}
+					</a>
 				</div> ) }
 
 				<div className = "inset right demo-bar">
