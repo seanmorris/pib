@@ -11,15 +11,15 @@ workflows:
       - make-test-8-3:
           requires:
             - make-archives
-      # - make-test-8-2:
-      #   requires:
-      #   - make-archives
-      # - make-test-8-1:
-      #   requires:
-      #   - make-archives
-      # - make-test-8-0:
-      #   requires:
-      #   - make-archives
+      - make-test-8-2:
+          requires:
+            - make-archives
+      - make-test-8-1:
+          requires:
+            - make-archives
+      - make-test-8-0:
+          requires:
+            - make-archives
 
 jobs:
 
@@ -34,10 +34,9 @@ jobs:
       - run: cp .circleci/.env_8.3.ci .env
       - run: make archives
       - persist_to_workspace:
-          root: ~/project
+          root: ~/
           paths:
-            - lib/
-            - third_party/
+            - project/
 
   make-test-8-3:
     parallelism: 1
@@ -46,42 +45,42 @@ jobs:
     resource_class: xlarge
     steps:
       - attach_workspace:
-          at: ~/project
+          at: ~/
       - run: cp .circleci/.env_8.3.ci .env
       - run: make test
 
-  # make-test-8-2:
-  #   parallelism: 1
-  #   machine:
-  #     image: ubuntu-2204:2023.10.1
-  #   resource_class: xlarge
-  #   steps:
-  #   - attach_workspace:
-  #       at: ~/project
-  #   - run: cp .circleci/.env_8.3.ci .env
-  #   - run: make test
+  make-test-8-2:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+            at: ~/
+      - run: cp .circleci/.env_8.2.ci .env
+      - run: make test
 
-  # make-test-8-1:
-  #   parallelism: 1
-  #   machine:
-  #     image: ubuntu-2204:2023.10.1
-  #   resource_class: xlarge
-  #   steps:
-  #   - attach_workspace:
-  #       at: ~/project
-  #   - run: cp .circleci/.env_8.3.ci .env
-  #   - run: make test
+  make-test-8-1:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+            at: ~/
+      - run: cp .circleci/.env_8.1.ci .env
+      - run: make test
 
-  # make-test-8-0:
-  #   parallelism: 1
-  #   machine:
-  #     image: ubuntu-2204:2023.10.1
-  #   resource_class: xlarge
-  #   steps:
-  #   - attach_workspace:
-  #       at: ~/project
-  #   - run: cp .circleci/.env_8.3.ci .env
-  #   - run: make test
+  make-test-8-0:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+            at: ~/
+      - run: cp .circleci/.env_8.0.ci .env
+      - run: make test
 
   # make-test-7.4:
   #   parallelism: 1
