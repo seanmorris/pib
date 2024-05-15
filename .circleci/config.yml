@@ -81,14 +81,3 @@ jobs:
             at: ~/
       - run: cp .circleci/.env_8.0.ci .env
       - run: make test
-
-  # make-test-7.4:
-  #   parallelism: 1
-  #   machine:
-  #     image: ubuntu-2204:2023.10.1
-  #   resource_class: xlarge
-  #   steps:
-  #   - checkout
-  #   - run: npm install
-  #   - run: cp .circleci/.env_8.3.ci .env
-  #   - run: make test
