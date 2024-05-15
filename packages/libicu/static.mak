@@ -1,39 +1,48 @@
 #!/usr/bin/env make
 
-ifeq (${WITH_ICU}, 1)
+ifeq (${WITH_ICU},1)
 
-LIBICU_TAG?=release-72-1
+LIBICU_VERSION=72-1
+LIBICU_DATFILE=lib/share/icu/72.1/icudt72l.dat
+
+ifeq (${PHP_VERSION},7.4)
+LIBICU_VERSION=69-1
+LIBICU_DATFILE=lib/share/icu/69.1/icudt69l.dat
+endif
+
+LIBICU_TAG?=release-${LIBICU_VERSION}
+
 EXTRA_FLAGS+= -DU_STATIC_IMPLEMENTATION
 ARCHIVES+= lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a
 CONFIGURE_FLAGS+= \
 	--enable-intl
 
-DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/libicu/icu4c/source emscripten-builder
-DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/libicu/libicu_alt/icu4c/source emscripten-builder
-PRELOAD_ASSETS+= lib/share/icu/72.1/icudt72l.dat
+DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
+DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source emscripten-builder
+PRELOAD_ASSETS+= ${LIBICU_DATFILE}
 PRE_JS_FILES+= packages/libicu/env.js
 TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
 
-third_party/libicu/.gitignore:
+third_party/libicu-${LIBICU_VERSION}/.gitignore:
 	@ echo -e "\e[33;4mDownloading LIBICU\e[0m"
-	${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu \
+	${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-${LIBICU_VERSION} \
 		--branch ${LIBICU_TAG} \
 		--single-branch     \
 		--depth 1;
-	${DOCKER_RUN} cp -rf /src/third_party/libicu /src/third_party/libicu_alt
-	${DOCKER_RUN} mv /src/third_party/libicu_alt /src/third_party/libicu
+	${DOCKER_RUN} cp -rf /src/third_party/libicu-${LIBICU_VERSION} /src/third_party/libicu_alt
+	${DOCKER_RUN} mv /src/third_party/libicu_alt /src/third_party/libicu-${LIBICU_VERSION}
 
-lib/share/icu/72.1/icudt72l.dat: lib/lib/libicudata.a
+${LIBICU_DATFILE}: lib/lib/libicudata.a
 
-lib/lib/libicudata.a: third_party/libicu/.gitignore
+lib/lib/libicudata.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
 	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
 	${DOCKER_RUN_IN_LIBICU_ALT} ./configure --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive ICU_DATA_FILTER_FILE=/src/packages/libicu/filter.json
 	${DOCKER_RUN_IN_LIBICU_ALT} make
 	${DOCKER_RUN_IN_LIBICU} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive  ICU_DATA_FILTER_FILE=/src/packages/libicu/filter.json
 	- ${DOCKER_RUN_IN_LIBICU} emmake make -j`nproc` CFLAGS='-fPIC -O${OPTIMIZE} '
-	${DOCKER_RUN_IN_LIBICU} rm -rf /src/third_party/libicu/icu4c/source/bin /src/third_party/libicu/icu4c/source/data/out/tmp/icudt* /src/third_party/libicu/icu4c/source/data/out/icudt*
-	${DOCKER_RUN_IN_LIBICU} cp -rfv /src/third_party/libicu/libicu_alt/icu4c/source/bin /src/third_party/libicu/icu4c/source/
-	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu/icu4c/source/bin/*'
+	${DOCKER_RUN_IN_LIBICU} rm -rf /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
+	${DOCKER_RUN_IN_LIBICU} cp -rfv /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
+	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
 	${DOCKER_RUN_IN_LIBICU} emmake make -j`nproc` CFLAGS='-fPIC -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_LIBICU} emmake make install
 

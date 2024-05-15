@@ -1,0 +1,156 @@
+diff --git a/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c
+index 6da7708..0d53a33 100644
+--- a/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c
++++ b/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c
+@@ -21,8 +21,8 @@
+ #include "php.h"
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+-#include "pdo/php_pdo.h"
+-#include "pdo/php_pdo_driver.h"
++#include "../pdo/php_pdo.h"
++#include "../pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ #include "zend_exceptions.h"
+diff --git a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c
+index c933c34..fbd0ba7 100644
+--- a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c
++++ b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c
+@@ -21,8 +21,8 @@
+ #include "php.h"
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+-#include "pdo/php_pdo.h"
+-#include "pdo/php_pdo_driver.h"
++#include "../pdo/php_pdo.h"
++#include "../pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ #include "zend_exceptions.h"
+diff --git a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c
+index c6b907f..c0804c8 100644
+--- a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c
++++ b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c
+@@ -21,8 +21,8 @@
+ #include "php.h"
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+-#include "pdo/php_pdo.h"
+-#include "pdo/php_pdo_driver.h"
++#include "../pdo/php_pdo.h"
++#include "../pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ 
+diff --git a/third_party/php8.3-src/ext/standard/credits.c b/third_party/php8.3-src/ext/standard/credits.c
+index 4e8722d..1343330 100644
+--- a/third_party/php8.3-src/ext/standard/credits.c
++++ b/third_party/php8.3-src/ext/standard/credits.c
+@@ -33,6 +33,11 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
+ 		PUTS("PHP Credits\n");
+ 	}
+ 
++	php_info_print_table_start();
++	php_info_print_table_header(1, "php-wasm");
++	php_info_print_table_row(1, "Sean Morris & Oraoto");
++	php_info_print_table_end();
++
+ 	if (flag & PHP_CREDITS_GROUP) {
+ 		/* Group */
+ 
+diff --git a/third_party/php8.3-src/ext/tokenizer/tokenizer.c b/third_party/php8.3-src/ext/tokenizer/tokenizer.c
+index 75cc99d..872164e 100644
+--- a/third_party/php8.3-src/ext/tokenizer/tokenizer.c
++++ b/third_party/php8.3-src/ext/tokenizer/tokenizer.c
+@@ -319,7 +319,7 @@ static void add_token(
+ 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
+ }
+ 
+-static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
++bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
+ {
+ 	zval source_zval;
+ 	zend_lex_state original_lex_state;
+diff --git a/third_party/php8.3-src/main/fastcgi.c b/third_party/php8.3-src/main/fastcgi.c
+index 88cfbc2..ec20428 100644
+--- a/third_party/php8.3-src/main/fastcgi.c
++++ b/third_party/php8.3-src/main/fastcgi.c
+@@ -553,6 +553,7 @@ void fcgi_shutdown(void)
+ {
+ 	if (is_initialized) {
+ 		zend_hash_destroy(&fcgi_mgmt_vars);
++		is_initialized = 0;
+ 	}
+ 	is_fastcgi = 0;
+ 	if (allowed_clients) {
+diff --git a/third_party/php8.3-src/sapi/cgi/cgi_main.c b/third_party/php8.3-src/sapi/cgi/cgi_main.c
+index 156599f..1404fea 100644
+--- a/third_party/php8.3-src/sapi/cgi/cgi_main.c
++++ b/third_party/php8.3-src/sapi/cgi/cgi_main.c
+@@ -18,7 +18,7 @@
+    |          Dmitry Stogov <dmitry@php.net>                              |
+    +----------------------------------------------------------------------+
+ */
+-
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1858,7 +1858,8 @@ int main(int argc, char *argv[])
+ 	SG(request_info).path_translated = NULL;
+ #endif
+ 
+-	cgi_sapi_module.executable_location = argv[0];
++	// cgi_sapi_module.executable_location = argv[0];
++	cgi_sapi_module.executable_location = NULL;
+ 	if (!cgi && !fastcgi && !bindpath) {
+ 		cgi_sapi_module.additional_functions = additional_functions;
+ 	}
+@@ -1934,8 +1935,10 @@ consult the installation file that came with this distribution, or visit \n\
+ 	}
+ 
+ 	/* make php call us to get _ENV vars */
+-	php_php_import_environment_variables = php_import_environment_variables;
+-	php_import_environment_variables = cgi_php_import_environment_variables;
++	if(php_import_environment_variables != cgi_php_import_environment_variables) {
++		php_php_import_environment_variables = php_import_environment_variables;
++		php_import_environment_variables = cgi_php_import_environment_variables;
++	}
+ 
+ 	if (fastcgi) {
+ 		/* How many times to run PHP scripts before dying */
+@@ -2655,3 +2658,18 @@ consult the installation file that came with this distribution, or visit \n\
+ 	return exit_status;
+ }
+ /* }}} */
++
++void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
++{
++	putenv("USE_ZEND_ALLOC=0");
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_getenv(char *name)
++{
++	return getenv(name);
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_putenv(char *name, char *value)
++{
++	return _sapi_cgi_putenv(name, strlen(name), value);
++}
+diff --git a/third_party/php8.3-src/sapi/embed/php_embed.c b/third_party/php8.3-src/sapi/embed/php_embed.c
+index 4626451..ba21863 100644
+--- a/third_party/php8.3-src/sapi/embed/php_embed.c
++++ b/third_party/php8.3-src/sapi/embed/php_embed.c
+@@ -242,8 +242,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
+ 		return FAILURE;
+ 	}
+ 
+-	SG(headers_sent) = 1;
+-	SG(request_info).no_headers = 1;
++	SG(headers_sent) = 0;
++	SG(request_info).no_headers = 0;
+ 	php_register_variable("PHP_SELF", "-", NULL);
+ 
+ 	return SUCCESS;

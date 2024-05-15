@@ -13,6 +13,8 @@
 #include "../json/php_json_encoder.h"
 #include "../json/php_json_parser.h"
 
+#include <stdbool.h>
+
 #ifdef WITH_VRZNO
 #include "../vrzno/php_vrzno.h"
 #endif

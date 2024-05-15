@@ -1,22 +1,25 @@
 #!/usr/bin/env make
 
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts third_party/preload test
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts third_party/preload test archives
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
+
+## Defaults:
 
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
+## Default libraries
 WITH_BCMATH  ?=1
 WITH_CALENDAR?=1
 WITH_CTYPE   ?=1
 WITH_EXIF    ?=1
 WITH_FILTER  ?=1
 WITH_MBSTRING?=1
-WITH_PHAR    ?=1
 WITH_SESSION ?=1
 WITH_TOKENIZER?=1
 
+## More libraries
 WITH_ICONV   ?=1
 WITH_LIBXML  ?=1
 WITH_LIBZIP  ?=1
@@ -24,18 +27,40 @@ WITH_SQLITE  ?=1
 WITH_VRZNO   ?=1
 WITH_ZLIB    ?=1
 
+## Even more libraries...
+WITH_PHAR    ?=0
 WITH_OPENSSL ?=0
 WITH_GD      ?=0
 WITH_LIBPNG  ?=0
 WITH_LIBJPEG ?=0
 WITH_FREETYPE?=0
 
+## Extra libraries...
 WITH_ICU   ?=0
 WITH_TIDY  ?=0
 WITH_EXIF  ?=0
 
+## Emscripten features...
+NODE_RAW_FS ?=0
+WITH_NETWORKING?=0
+
+## Compression
 GZIP       ?=0
 BROTLI     ?=0
+
+## PHP Version
+PHP_VERSION=8.3
+
+## More Options
+PHP_DIST_DIR?=./packages/php-wasm
+INITIAL_MEMORY ?=128MB
+MAXIMUM_MEMORY ?=4096MB
+ASSERTIONS     ?=0
+SYMBOLS        ?=0
+OPTIMIZE       ?=2
+RELEASE_SUFFIX ?=
+
+## End of defaults
 
 _UID:=$(shell id -u)
 _GID:=$(shell id -g)
@@ -43,20 +68,6 @@ UID?=${_UID}
 GID?=${_GID}
 
 SHELL=bash -euo pipefail
-
-PHP_DIST_DIR?=./packages/php-wasm
-
-ENVIRONMENT    ?=web
-INITIAL_MEMORY ?=64MB
-MAXIMUM_MEMORY ?=4096MB
-ASSERTIONS     ?=0
-SYMBOLS        ?=0
-OPTIMIZE       ?=2
-RELEASE_SUFFIX ?=
-
-PHP_VERSION    ?=8.2
-PHP_BRANCH     ?=php-8.2.11
-PHP_AR         ?=libphp
 
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
@@ -126,6 +137,32 @@ PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
 
 TEST_LIST=
 
+ifeq (${PHP_VERSION},8.3)
+PHP_BRANCH=php-8.3.7
+PHP_AR=libphp
+endif
+
+ifeq (${PHP_VERSION},8.2)
+PHP_BRANCH=php-8.2.11
+PHP_AR=libphp
+endif
+
+ifeq (${PHP_VERSION},8.1)
+PHP_BRANCH=php-8.1.28
+PHP_AR=libphp
+endif
+
+ifeq (${PHP_VERSION},8.0)
+PHP_BRANCH=php-8.0.30
+PHP_AR=libphp
+endif
+
+ifeq (${PHP_VERSION},7.4)
+PHP_BRANCH=php-7.4.28
+PHP_AR=libphp7
+EXTRA_FLAGS+= -s EMULATE_FUNCTION_POINTER_CASTS=1
+endif
+
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ifdef PRELOAD_ASSETS
@@ -160,39 +197,44 @@ third_party/php${PHP_VERSION}-src/ext/pib/pib.c: source/pib/pib.c
 
 ########### Build the objects. ###########
 
-ifeq (${WITH_BCMATH},1)
+
+ifneq (${WITH_NETWORKING},0)
+EXTRA_FLAGS+= -lwebsocket.js
+endif
+
+ifneq (${WITH_BCMATH},0)
 CONFIGURE_FLAGS+= --enable-bcmath
 endif
 
-ifeq (${WITH_CALENDAR},1)
+ifneq (${WITH_CALENDAR},0)
 CONFIGURE_FLAGS+= --enable-calendar
 endif
 
-ifeq (${WITH_CTYPE},1)
+ifneq (${WITH_CTYPE},0)
 CONFIGURE_FLAGS+= --enable-ctype
 endif
 
-ifeq (${WITH_EXIF},1)
+ifneq (${WITH_EXIF},0)
 CONFIGURE_FLAGS+= --enable-exif
 endif
 
-ifeq (${WITH_FILTER},1)
+ifneq (${WITH_FILTER},0)
 CONFIGURE_FLAGS+= --enable-filter
 endif
 
-ifeq (${WITH_MBSTRING},1)
+ifneq (${WITH_MBSTRING},0)
 CONFIGURE_FLAGS+= --enable-mbstring
 endif
 
-ifeq (${WITH_PHAR},1)
+ifneq (${WITH_PHAR},0)
 CONFIGURE_FLAGS+= --enable-phar
 endif
 
-ifeq (${WITH_SESSION},1)
+ifneq (${WITH_SESSION},0)
 CONFIGURE_FLAGS+= --enable-session
 endif
 
-ifeq (${WITH_TOKENIZER},1)
+ifneq (${WITH_TOKENIZER},0)
 CONFIGURE_FLAGS+= --enable-tokenizer
 endif
 
@@ -209,6 +251,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 		--enable-cli       \
 		--enable-embed=static \
 		--enable-pib       \
+		--enable-json      \
 		--disable-all      \
 		--disable-fiber-asm \
 		--disable-mbregex  \
@@ -249,7 +292,7 @@ WEB_FS_TYPE?=-lidbfs.js
 NODE_FS_TYPE?=-lnodefs.js
 WORKER_FS_TYPE?=${WEB_FS_TYPE}
 
-ifeq (${NODE_RAW_FS}, 1)
+ifneq (${NODE_RAW_FS},0)
 NODE_FS_TYPE+= -lnoderawfs.js
 endif
 
@@ -266,26 +309,24 @@ BUILD_FLAGS=-j`nproc`\
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
 	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
-	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion ${EXTRA_CFLAGS} -D ENVIRONMENT=${ENVIRONMENT} '\
+	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		-fPIC ${SYMBOL_FLAGS}                    \
 		-s EXPORTED_FUNCTIONS='\''[${EXPORTED_FUNCTIONS}]'\'' \
 		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS"]'\'' \
-		-D ENVIRONMENT=${ENVIRONMENT}             \
 		-s ENVIRONMENT=${ENVIRONMENT}            \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY}      \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY}      \
-		-s TOTAL_STACK=32MB                      \
 		-s ALLOW_MEMORY_GROWTH=1                 \
+		-s TOTAL_STACK=32MB                      \
 		-s ASSERTIONS=${ASSERTIONS}              \
 		-s ERROR_ON_UNDEFINED_SYMBOLS=0          \
-		-s FORCE_FILESYSTEM                      \
 		-s EXPORT_NAME="'PHP'"                   \
-		-s MODULARIZE=1                          \
-		-s INVOKE_RUN=0                          \
+		-s FORCE_FILESYSTEM                      \
 		-s EXIT_RUNTIME=1                        \
-		-s USE_ZLIB=1                            \
+		-s INVOKE_RUN=0                          \
+		-s MODULARIZE=1                          \
 		-s ASYNCIFY                              \
 		-I /src/third_party/php${PHP_VERSION}-src/ \
 		-I /src/third_party/php${PHP_VERSION}-src/Zend  \
@@ -466,7 +507,7 @@ ${PHP_DIST_DIR}/%.js: build/%.js
 ifneq (${PRELOAD_ASSETS},)
 	cp $^.data $@.data
 endif
-ifeq (${GZIP},1)
+ifneq (${GZIP},0)
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
 ifneq (${PRELOAD_ASSETS},)
@@ -474,7 +515,7 @@ ifneq (${PRELOAD_ASSETS},)
 	bash -c 'gzip -9 < $@.data > $@.data.gz'
 endif
 endif
-ifeq (${BROTLI},1)
+ifneq (${BROTLI},0)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
 	rm -f $@.br
@@ -491,7 +532,7 @@ ${PHP_DIST_DIR}/%.mjs: build/%.mjs
 ifneq (${PRELOAD_ASSETS},)
 	cp $^.data $@.data
 endif
-ifeq (${GZIP},1)
+ifneq (${GZIP},0)
 	rm -f $@.gz
 	bash -c 'gzip -9 < $@ > $@.gz'
 	rm -f $@.wasm.gz
@@ -501,7 +542,7 @@ ifneq (${PRELOAD_ASSETS},)
 	bash -c 'gzip -9 < $@.data > $@.data.gz'
 endif
 endif
-ifeq (${BROTLI},1)
+ifneq (${BROTLI},0)
 	rm -f $@.br
 	brotli -9 $@
 	rm -f $@.wasm.br
@@ -515,13 +556,13 @@ endif
 ${PHP_DIST_DIR}/php-worker.js: build/php-worker.js
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
-ifeq (${GZIP},1)
+ifneq (${GZIP},0)
 	rm -f $@.gz
 	bash -c 'gzip -9 < $@ > $@.gz'
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
 endif
-ifeq (${BROTLI},1)
+ifneq (${BROTLI},0)
 	rm -f $@.br
 	brotli -9 $@
 	rm -f $@.wasm.br
@@ -531,13 +572,13 @@ endif
 ${PHP_DIST_DIR}/php-worker.mjs: build/php-worker.mjs
 	cp $^ $@
 	cp $^.wasm* $(dir $@)
-ifeq (${GZIP},1)
+ifneq (${GZIP},0)
 	rm -f $@.gz
 	bash -c 'gzip -9 < $@.wasm > $@.gz'
 	rm -f $@.wasm.gz
 	bash -c 'gzip -9 < $@.wasm > $@.wasm.gz'
 endif
-ifeq (${BROTLI},1)
+ifneq (${BROTLI},0)
 	rm -f $@.br
 	brotli -9 $@
 	rm -f $@.wasm.br
@@ -548,6 +589,28 @@ endif
 
 ${ENV_FILE}:
 	touch ${ENV_FILE}
+
+archives: ${ARCHIVES}
+
+patch/php8.3.patch:
+	bash -c 'cd third_party/php8.3-src/ && git diff > ../../patch/php8.3.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php8.3-src/|g' ./patch/php8.3.patch
+
+patch/php8.2.patch:
+	bash -c 'cd third_party/php8.2-src/ && git diff > ../../patch/php8.2.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php8.2-src/|g' ./patch/php8.2.patch
+
+patch/php8.1.patch:
+	bash -c 'cd third_party/php8.1-src/ && git diff > ../../patch/php8.1.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php8.1-src/|g' ./patch/php8.1.patch
+
+patch/php8.0.patch:
+	bash -c 'cd third_party/php8.0-src/ && git diff > ../../patch/php8.0.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php8.0-src/|g' ./patch/php8.0.patch
+
+patch/php7.4.patch:
+	bash -c 'cd third_party/php7.4-src/ && git diff > ../../patch/php7.4.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php7.4-src/|g' ./patch/php7.4.patch
 
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.data *.br  *.gz
@@ -563,8 +626,8 @@ clean:
 php-clean:
 	${DOCKER_RUN_IN_PHP} rm -fv configured
 	${DOCKER_RUN_IN_PHP} rm -f /src/lib/lib/${PHP_AR}.a
-	rm -f third_party/php${PHP_VERSION}-src/sapi/cgi/*.wasm third_party/php${PHP_VERSION}-src/sapi/cgi/*.mjs third_party/php${PHP_VERSION}-src/sapi/cgi/*.js third_party/php${PHP_VERSION}-src/sapi/cgi/*.data
-	rm -f third_party/php${PHP_VERSION}-src/sapi/cli/*.wasm third_party/php${PHP_VERSION}-src/sapi/cli/*.mjs third_party/php${PHP_VERSION}-src/sapi/cli/*.js third_party/php${PHP_VERSION}-src/sapi/cli/*.data
+	${DOCKER_RUN_IN_PHP} rm -f /src/third_party/php${PHP_VERSION}-src/sapi/cgi/*.wasm third_party/php${PHP_VERSION}-src/sapi/cgi/*.mjs third_party/php${PHP_VERSION}-src/sapi/cgi/*.js third_party/php${PHP_VERSION}-src/sapi/cgi/*.data
+	${DOCKER_RUN_IN_PHP} rm -f /src/third_party/php${PHP_VERSION}-src/sapi/cli/*.wasm third_party/php${PHP_VERSION}-src/sapi/cli/*.mjs third_party/php${PHP_VERSION}-src/sapi/cli/*.js third_party/php${PHP_VERSION}-src/sapi/cli/*.data
 	${DOCKER_RUN_IN_PHP} make clean
 
 deep-clean:

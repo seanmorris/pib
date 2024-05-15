@@ -55,6 +55,14 @@ const packages = {
 		dir:   'laravel-11/public',
 		entry: 'index.php',
 	},
+	'wordpress-6': {
+		name:  'WordPress 6',
+		file:  '/backups/wordpress-6.zip',
+		path:  'wordpress-6',
+		vHost: 'wordpress-6',
+		dir:   'wordpress-6',
+		entry: 'index.php',
+	},
 };
 
 const installDemo = async (overwrite = false) => {

@@ -7,16 +7,88 @@ workflows:
 
   build-test-flow:
     jobs:
-      - make-test
+    - make-test-8.3:
+      requires:
+      - make-archives
+    # - make-test-8.2:
+    #   requires:
+    #   - make-archives
+    # - make-test-8.1:
+    #   requires:
+    #   - make-archives
+    # - make-test-8.0:
+    #   requires:
+    #   - make-archives
 
 jobs:
-  make-test:
+
+  make-archives:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
-      - checkout
-      - run: npm install
-      - run: cp .circleci/.env.ci .env
-      - run: make test
+    - checkout
+    - run: npm install
+    - run: cp .circleci/.env_8.3.ci .env
+    - run: make archives
+    - persist_to_workspace:
+      root: ~/project
+      paths:
+      - lib/
+      - third_party/
+
+  make-test-8.3:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+    - attach_workspace:
+        at: ~/project
+    - run: cp .circleci/.env_8.3.ci .env
+    - run: make test
+
+  # make-test-8.2:
+  #   parallelism: 1
+  #   machine:
+  #     image: ubuntu-2204:2023.10.1
+  #   resource_class: xlarge
+  #   steps:
+  #   - attach_workspace:
+  #       at: ~/project
+  #   - run: cp .circleci/.env_8.3.ci .env
+  #   - run: make test
+
+  # make-test-8.1:
+  #   parallelism: 1
+  #   machine:
+  #     image: ubuntu-2204:2023.10.1
+  #   resource_class: xlarge
+  #   steps:
+  #   - attach_workspace:
+  #       at: ~/project
+  #   - run: cp .circleci/.env_8.3.ci .env
+  #   - run: make test
+
+  # make-test-8.0:
+  #   parallelism: 1
+  #   machine:
+  #     image: ubuntu-2204:2023.10.1
+  #   resource_class: xlarge
+  #   steps:
+  #   - attach_workspace:
+  #       at: ~/project
+  #   - run: cp .circleci/.env_8.3.ci .env
+  #   - run: make test
+
+  # make-test-7.4:
+  #   parallelism: 1
+  #   machine:
+  #     image: ubuntu-2204:2023.10.1
+  #   resource_class: xlarge
+  #   steps:
+  #   - checkout
+  #   - run: npm install
+  #   - run: cp .circleci/.env_8.3.ci .env
+  #   - run: make test

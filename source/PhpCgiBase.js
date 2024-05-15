@@ -363,6 +363,8 @@ export class PhpCgiBase
 
 		++this.count;
 
+		console.log(this.error);
+
 		const parsedResponse = parseResponse(this.output);
 
 		let status = 200;

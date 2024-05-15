@@ -103,8 +103,9 @@ p.padded {
 a.icon-box {
 	margin-top: 0.25rem;
 	align-items: center;
-	max-width: 64px;
-	font-size: 0.85rem;
+	max-width: 96px;
+	font-size: 1.1rem;
+	letter-spacing: -1px;
 	display: inline-flex;
 	flex-direction: column;
 	text-align: center;
@@ -118,6 +119,10 @@ a.icon-box img {
 .home h3 {
 	display: flex;
 	align-items: center;
+}
+
+button {
+	letter-spacing: -1px;
 }
 
 .home h3 button.square {

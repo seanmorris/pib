@@ -9,13 +9,12 @@ PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 CONFIGURE_FLAGS+= \
 	--enable-vrzno
 
-DEPENDENCIES+= third_party/vrzno/vrzno.c
-
 PRE_JS_FILES+= third_party/vrzno/lib.js
+DEPENDENCIES+= third_party/vrzno/vrzno.c
 
 ifdef VRZNO_DEV_PATH
 
-DEPENDENCIES+=${VRZNO_DEV_PATH}/lib.js
+DEPENDENCIES+= ${VRZNO_DEV_PATH}/lib.js
 
 ${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js)
 	cat ${VRZNO_DEV_PATH}/js/WeakerMap.js \
