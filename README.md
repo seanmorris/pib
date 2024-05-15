@@ -14,7 +14,7 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 * Implemented an httpd-like CGI wrapper.
 * libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
 * New "cgi" option for custom builds.
-* php-wasm, php-cgi-wasm, & php-wasm builder are now separate packages.
+* php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
 * Modules are now webpack-compatible out of the box.
@@ -345,11 +345,30 @@ const php = new PhpNode;
 let php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files'}});
 ```
 
+## 📁 Filesystem Operations
+
+### Transactions
+
+#### php.startTransaction
+#### php.commitTransaction
+
+### Filesystem Methods
+
+#### php.analyzePath
+#### php.readdir
+#### php.readFile
+#### php.stat
+#### php.mkdir
+#### php.rmdir
+#### php.rename
+#### php.writeFile
+#### php.unlink
+
 ## 🏗️ Custom Builds
 
-To use the the in-place builder, first install php-wasm-builder globally:
+To use the the in-place builder, first install `php-wasm-builder` globally:
 
-***Requires docker, docker-compose & make.***
+***Requires docker, docker-compose, coreutils, wget, & make.***
 
 ```sh
 $ npm install -g php-wasm-builder
