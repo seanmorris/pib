@@ -36,9 +36,11 @@ WITH_LIBJPEG ?=0
 WITH_FREETYPE?=0
 
 ## Extra libraries...
+WITH_ONIGURUMA?=0
 WITH_ICU   ?=0
 WITH_TIDY  ?=0
 WITH_EXIF  ?=0
+WITH_YAML  ?=0
 
 ## Emscripten features...
 NODE_RAW_FS ?=0
@@ -49,7 +51,7 @@ GZIP       ?=0
 BROTLI     ?=0
 
 ## PHP Version
-PHP_VERSION=8.3
+PHP_VERSION?=8.3
 
 ## More Options
 PHP_DIST_DIR?=./packages/php-wasm
@@ -197,7 +199,6 @@ third_party/php${PHP_VERSION}-src/ext/pib/pib.c: source/pib/pib.c
 
 ########### Build the objects. ###########
 
-
 ifneq (${WITH_NETWORKING},0)
 EXTRA_FLAGS+= -lwebsocket.js
 endif
@@ -238,6 +239,10 @@ ifneq (${WITH_TOKENIZER},0)
 CONFIGURE_FLAGS+= --enable-tokenizer
 endif
 
+ifeq (${WITH_ONIGURUMA},0)
+CONFIGURE_FLAGS+= --disable-mbregex
+endif
+
 third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/pib/pib.c ${ARCHIVES}
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
@@ -254,7 +259,6 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${PHP_CONFIGURE_DEPS} 
 		--enable-json      \
 		--disable-all      \
 		--disable-fiber-asm \
-		--disable-mbregex  \
 		--disable-phpdbg   \
 		--disable-rpath    \
 		--without-pear     \
@@ -309,7 +313,7 @@ BUILD_FLAGS=-j`nproc`\
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
 	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
-	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
+	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion -Wimplicit-function-declaration ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		-fPIC ${SYMBOL_FLAGS}                    \
@@ -611,6 +615,26 @@ patch/php8.0.patch:
 patch/php7.4.patch:
 	bash -c 'cd third_party/php7.4-src/ && git diff > ../../patch/php7.4.patch'
 	perl -pi -w -e 's|([ab])/|\1/third_party/php7.4-src/|g' ./patch/php7.4.patch
+
+patch/php7.3.patch:
+	bash -c 'cd third_party/php7.3-src/ && git diff > ../../patch/php7.3.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php7.3-src/|g' ./patch/php7.3.patch
+
+patch/php7.2.patch:
+	bash -c 'cd third_party/php7.2-src/ && git diff > ../../patch/php7.2.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php7.2-src/|g' ./patch/php7.2.patch
+
+patch/php7.1.patch:
+	bash -c 'cd third_party/php7.1-src/ && git diff > ../../patch/php7.1.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php7.1-src/|g' ./patch/php7.1.patch
+
+patch/php7.0.patch:
+	bash -c 'cd third_party/php7.0-src/ && git diff > ../../patch/php7.0.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php7.0-src/|g' ./patch/php7.0.patch
+
+patch/php5.6.patch:
+	bash -c 'cd third_party/php5.6-src/ && git diff > ../../patch/php5.6.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php5.6-src/|g' ./patch/php5.6.patch
 
 clean:
 	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.data *.br  *.gz

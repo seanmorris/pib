@@ -5,7 +5,7 @@ ifeq (${WITH_LIBXML}, 1)
 LIBXML2_TAG?=v2.9.10
 ARCHIVES+= lib/lib/libxml2.a
 CONFIGURE_FLAGS+= \
-	--with-libxml \
+	--enable-libxml \
 	--enable-xml  \
 	--enable-dom  \
 	--enable-simplexml

@@ -567,6 +567,9 @@ This will build the package inside of the current directory (or in `PHP_DIST_DIR
 You can also create a `.php-wasm-rc` file in this directory to customize the build.
 
 ```make
+# Select a PHP version
+PHP_VERSION=8.2
+
 # Build the package to a directory other than the current one (absolute path)
 PHP_DIST_DIR=~/my-project/public
 

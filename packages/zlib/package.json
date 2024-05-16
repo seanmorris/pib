@@ -3,7 +3,7 @@
 	"description": "zlib for php-wasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9",
+	"version": "0.0.9-a",
 	"files": [
 		"LICENSE",
 		"NOTICE",
