@@ -17,21 +17,22 @@ third_party/libyaml/.gitignore:
 		--single-branch     \
 		--depth 1;
 
-third_party/yaml-2.2.3/config.m4:
-	@ echo -e "\e[33;4mDownloading ext-yaml\e[0m"
-	${DOCKER_RUN} wget -q https://pecl.php.net/get/yaml-2.2.3.tgz
-	${DOCKER_RUN} tar -C third_party -xvzf yaml-2.2.3.tgz yaml-2.2.3
-	${DOCKER_RUN} rm yaml-2.2.3.tgz
-
-third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/yaml-2.2.3/config.m4
-	@ echo -e "\e[33;4mImporting libyaml\e[0m"
-	${DOCKER_RUN} cp -rfv third_party/yaml-2.2.3 third_party/php${PHP_VERSION}-src/ext/yaml
-
 lib/lib/libyaml.a: third_party/libyaml/.gitignore
 	@ echo -e "\e[33;4mBuilding libyaml\e[0m"
 	${DOCKER_RUN_IN_YAML} emconfigure ./bootstrap
 	${DOCKER_RUN_IN_YAML} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
 	${DOCKER_RUN_IN_YAML} emmake make -j`nproc` EMCC_CFLAGS='-fPIC -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_YAML} emmake make install
+
+third_party/yaml-2.2.3/config.m4:
+	@ echo -e "\e[33;4mDownloading ext-yaml\e[0m"
+	${DOCKER_RUN} wget -q https://pecl.php.net/get/yaml-2.2.3.tgz
+	${DOCKER_RUN} tar -C third_party -xvzf yaml-2.2.3.tgz yaml-2.2.3
+	${DOCKER_RUN} rm yaml-2.2.3.tgz
+
+third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/yaml-2.2.3/config.m4 | third_party/php${PHP_VERSION}-src/patched
+	@ echo -e "\e[33;4mImporting libyaml\e[0m"
+	${DOCKER_RUN} cp -rfv third_party/yaml-2.2.3 third_party/php${PHP_VERSION}-src/ext/yaml
+
 
 endif
