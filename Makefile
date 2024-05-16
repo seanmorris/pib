@@ -347,7 +347,7 @@ BUILD_FLAGS=-j`nproc`\
 		${EXTRA_FLAGS} \
 	'
 
-DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES} third_party/php${PHP_VERSION}-src/configured
+DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${ENV_FILE} ${ARCHIVES}
 BUILD_TYPE ?=js
 
 ifneq (${PRE_JS_FILES},)
