@@ -54,8 +54,8 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 </table>
 
 <table>
- <tr>
-    <td width = "500px" border = "0">
+<tr>
+	<td width = "500px" border = "0">
 		<ul>
 			<li><a href = "https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250Aecho%2520%2522Hello%252C%2520World%21%2522%253B%250A&autorun=1&persist=0&single-expression=0&render-as=text">Hello World!</a></li>
 			<li><a href = "https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522html%2522%257D%250Aphpinfo%28%29%253B%250A&autorun=1&persist=0&single-expression=0&render-as=html">phpinfo();</a></li>
@@ -66,7 +66,7 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 			<li><a href = "https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520true%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%252F%252F%2520Only%2520%2522single%2522%2520expressions%2520can%2520return%2520strings%2520directly%250A%252F%252F%2520So%2520wrap%2520the%2520commands%2520in%2520an%2520IFFE.%250A%250A%28function%28%29%2520%257B%250A%2509global%2520%2524persist%253B%250A%250A%2509fwrite%28fopen%28%27php%253A%252F%252Fstdout%27%252C%2520%27w%27%29%252C%2520%2522standard%2520output%21%255Cn%2522%29%253B%250A%2509fwrite%28fopen%28%27php%253A%252F%252Fstdout%27%252C%2520%27w%27%29%252C%2520sprintf%28%250A%2509%2509%2522Ran%2520%2525d%2520times%21%255Cn%2522%252C%2520%252B%252B%2524persist%250A%2509%29%29%253B%250A%2509fwrite%28fopen%28%27php%253A%252F%252Fstderr%27%252C%2520%27w%27%29%252C%2520%27standard%2520error%21%27%29%253B%250A%250A%2509return%2520%27return%2520value%27%253B%250A%257D%29%28%29%253B%250A&autorun=1&persist=1&single-expression=1&render-as=text">StdOut, StdErr & Return</a></li>
 		</ul>
 	</td>
-    <td width = "500px">
+	<td width = "500px">
 		<ul>
 			<li><a href = "https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524db%2520%253D%2520new%2520SQLite3%28%27people.db%27%29%253B%250A%2524db-%253Equery%28%27CREATE%2520TABLE%2520IF%2520NOT%2520EXISTS%2520people%2520%28%250A%2509id%2520INTEGER%2520PRIMARY%2520KEY%252C%250A%2520%2520%2520%2509name%2520TEXT%2520NOT%2520NULL%250A%29%253B%27%29%253B%250A%250Afor%28%2524i%2520%253D%25200%253B%2520%2524i%2520%253C%2520100%253B%2520%2524i%252B%252B%29%2520%257B%250A%250A%2509%2524weirdName%2520%253D%2520str_repeat%28chr%28%2524i%252B64%29%252C%252010%29%253B%250A%2509%2524insert%2520%2520%2520%2520%253D%2520%2524db-%253Eprepare%28%27INSERT%2520INTO%2520people%2520%28name%29%2520VALUES%28%253Aname%29%27%29%253B%250A%250A%2509%2524insert-%253EbindValue%28%27%253Aname%27%252C%2520%2524weirdName%252C%2520SQLITE3_TEXT%29%253B%250A%250A%2509%2524insert-%253Eexecute%28%29%253B%250A%257D%250A%250A%2524results%2520%253D%2520%2524db-%253Equery%28%27SELECT%2520*%2520FROM%2520people%27%29%253B%250A%250A%2524rows%2520%253D%2520%255B%255D%253B%250A%250Awhile%2520%28%2524row%2520%253D%2520%2524results-%253EfetchArray%28%29%29%2520%257B%250A%2520%2520%2520%2520var_dump%28%2524row%29%253B%250A%257D%250A&autorun=1&persist=0&single-expression=0&render-as=text">Sqlite</a></li>
 			<li><a href = "https://seanmorris.github.io/php-wasm/?code=%253C%253Fphp%2520%252F%252F%2520%257B%2522autorun%2522%253Atrue%252C%2520%2522persist%2522%253Afalse%252C%2520%2522single-expression%2522%253A%2520false%252C%2520%2522render-as%2522%253A%2520%2522text%2522%257D%250A%250A%2524db%2520%253D%2520new%2520PDO%28%27sqlite%253Apeople.db%27%29%253B%250A%250A%2524db-%253Equery%28%27CREATE%2520TABLE%2520IF%2520NOT%2520EXISTS%2520people%2520%28%250A%2509id%2520INTEGER%2520PRIMARY%2520KEY%252C%250A%2520%2520%2520%2509name%2520TEXT%2520NOT%2520NULL%250A%29%253B%27%29%253B%250A%250Afor%28%2524i%2520%253D%25200%253B%2520%2524i%2520%253C%252010%253B%2520%2524i%252B%252B%29%2520%257B%250A%2509%2524weirdName%2520%253D%2520str_repeat%28chr%28%2524i%252B64%29%252C%252010%29%253B%250A%2509%2524insert%2520%2520%2520%2520%253D%2520%2524db-%253Eprepare%28%27INSERT%2520INTO%2520people%2520%28name%29%2520VALUES%28%253Aname%29%27%29%253B%250A%250A%2509%2524insert-%253EbindParam%28%27%253Aname%27%252C%2520%2524weirdName%252C%2520SQLITE3_TEXT%29%253B%250A%250A%2509%2524insert-%253Eexecute%28%29%253B%250A%257D%250A%250A%2524results%2520%253D%2520%2524db-%253Equery%28%27SELECT%2520*%2520FROM%2520people%27%29%253B%250A%250A%2524rows%2520%253D%2520%255B%255D%253B%250A%250Awhile%2520%28%2524row%2520%253D%2520%2524results-%253EfetchObject%28%29%29%2520%257B%250A%2520%2520%2520%2520print_r%28%2524row%29%253B%250A%257D%250A&autorun=1&persist=0&single-expression=0&render-as=text">Sqlite w/PDO</a></li>
@@ -179,9 +179,9 @@ The php-wasm package comes with pre-built binaries out of the box so you can get
 ```json
 {
   "scripts": {
-    "postinstall": [
-      "cp node_modules/php-wasm/php-web.* public/"
-    ]
+	"postinstall": [
+	  "cp node_modules/php-wasm/php-web.* public/"
+	]
   },
 }
 ```
@@ -237,15 +237,15 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 
 ```html
 <html>
-    <head>
-        <script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
-        <script id = "input" src = "/test-input.json" type = "text/json"></script>
-        <script type = "text/php" src = "/test.php" data-stdin = "#input" data-stdout = "#output" data-stderr = "#error"></script>
-    </head>
-    <body>
-        <div id = "output"></div>
-        <div id = "error"></div>
-    </body>
+	<head>
+		<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
+		<script id = "input" src = "/test-input.json" type = "text/json"></script>
+		<script type = "text/php" src = "/test.php" data-stdin = "#input" data-stdout = "#output" data-stderr = "#error"></script>
+	</head>
+	<body>
+		<div id = "output"></div>
+		<div id = "error"></div>
+	</body>
 </html>
 ```
 
@@ -446,7 +446,7 @@ The web and worker build use `navigator.locks.request` to request a lock named `
 
 The operations are enqueued asyncronously, **so if multiple requests are generated before one transaction closes, they will be batched automatically.** This also applies to multiple requests generated before the lock is acquired. There is generally no need to take explicit control of FS mirroring.
 
-To suppress this behavior and take explicit control of the FS mirroring, you can pass the `{autoTransaction: false}` to the constructor. Doing this will require you to call `php.startTransaction()` before any FS operations take place, and then`php.commitTransaction()` when you're done. **Using this incorrectly may leave your filesystem in a corrupted state.**
+To suppress this behavior and take explicit control of the FS mirroring, you can pass the `{autoTransaction: false}` option to the constructor. Doing this will require you to call `php.startTransaction()` before any FS operations take place, and then`php.commitTransaction()` when you're done. **Using this incorrectly may leave your filesystem in a corrupted state.**
 
 #### php.startTransaction
 
@@ -492,6 +492,14 @@ import { sendMessageFor } from `php-cgi-wasm/msg-bus`;
 const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
 
 const result = await sendMessage(methodName, [param, param, param]);
+```
+
+#### php.handleMessageEvent
+
+Once you've got the above set up, use `php.handleMessageEvent` to handle the `message` events on the service worker:
+
+```
+self.addEventListener('message',  event => php.handleMessageEvent(event));
 ```
 
 ## 🏗️ Custom Builds
