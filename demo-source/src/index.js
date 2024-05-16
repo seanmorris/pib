@@ -29,6 +29,10 @@ root.render(
 			<Route path = "/install-demo.html" element = { <InstallDemo /> } />
 			<Route path = "/code-editor.html" element = { <Editor /> } />
 			<Route
+				path = "/php-wasm/code-editor"
+				element = { <Navigate to = {process.env.PUBLIC_URL + '/code-editor.html' + window.location.search} />}
+			/>
+			<Route
 				path = "/php-wasm/code-editor.html"
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/code-editor.html' + window.location.search} />}
 			/>
