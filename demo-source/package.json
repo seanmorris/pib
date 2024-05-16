@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "npx webpack --config service-worker-dev.config.ts  && react-scripts start",
-    "build": "npx webpack --config service-worker-prod.config.ts && react-scripts build; cat aphex.txt >> build/index.html && cp build/index.html build/404.html && cp build/index.html build/home.html && cp build/index.html build/embedded-php.html && cp build/index.html build/select-framework.html && cp build/index.html build/install-demo.html && cp build/index.html build/code-editor.html && git add demo-source/build/static/js*",
+    "build": "npx webpack --config service-worker-prod.config.ts && react-scripts build; cat aphex.txt >> build/index.html && cp build/index.html build/404.html && cp build/index.html build/home.html && cp build/index.html build/embedded-php.html && cp build/index.html build/select-framework.html && cp build/index.html build/install-demo.html && cp build/index.html build/code-editor.html && git add docs/static/js/*",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

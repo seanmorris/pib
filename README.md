@@ -33,22 +33,22 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 <table>
  <tr>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=drupal-7">Drupal Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=drupal-7">Drupal Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=cakephp-5">CakePHP Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=cakephp-5">CakePHP Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=codeigniter-4">CodeIgniter Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=codeigniter-4">CodeIgniter Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=laravel-11">Laravel Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laravel-11">Laravel Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=laminas-3">Laminas Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laminas-3">Laminas Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/code-editor?path=/persist">Code Editor</a>
+		<a href = "https://seanmorris.github.io/php-wasm/code-editor.html?path=/persist">Code Editor</a>
 	</td>
 </tr>
 </table>
