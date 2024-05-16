@@ -67,6 +67,48 @@ function Embedded() {
 
 	const codeChanged = newValue => input.current = newValue;
 
+	const runCode = useCallback(() => {
+		setStatusMessage('Executing...');
+		setStdOut('');
+		setStdErr('');
+		setStdRet('');
+		setRunning(true);
+
+		const phpCode = editor.current.editor.getValue();
+
+		query.set('code', encodeURIComponent(phpCode));
+
+		window.history.replaceState({}, document.title, "?" + query.toString());
+
+		let code = input.current;
+
+		setTimeout(async () => {
+			if(single.current.checked)
+			{
+				code = code.replace(/^\s*<\?php/, '');
+				code = code.replace(/\?>\s*/, '');
+
+				const ret = await phpRef.current.exec(code)
+				setStdRet(ret);
+				persist.current.checked || phpRef.current.refresh();
+				setTimeout(() => {
+					setStatusMessage('php-wasm ready!')
+					setRunning(false);
+				}, 1);
+			}
+			else
+			{
+				const exitCode = await phpRef.current.run(code)
+				setExitCode(exitCode);
+				persist.current.checked || phpRef.current.refresh();
+				setTimeout(() => {
+					setStatusMessage('php-wasm ready!')
+					setRunning(false);
+				}, 1);
+			}
+		}, 1);
+	}, [query]);
+
 	const loadDemo = useCallback(demoName => {
 		if(demoName === 'drupal.php')
 		{
@@ -125,7 +167,7 @@ function Embedded() {
 
 			window.history.replaceState({}, document.title, "?" + query.toString());
 		});
-	}, [query, refreshPhp]);
+	}, [query, refreshPhp, runCode]);
 
 	useEffect(() => {
 		if(inputBox.current)
@@ -183,50 +225,39 @@ function Embedded() {
 			setTimeout(runCode, 16);
 		}
 
-		if(query.has('demo'))
+		if(editor.current && query.has('code'))
+		{
+			editor.current.editor.setValue(query.has('code'), -1);
+		}
+		else if(query.has('demo'))
 		{
 			loadDemo(query.get('demo'));
 			query.delete('demo');
 		}
 
-	}, [query, loadDemo]);
+	}, [query, loadDemo, runCode]);
 
 	const demoSelected = () => loadDemo(selectDemoBox.current.value);
 
-	const runCode = () => {
-		setStatusMessage('Executing...');
-		setStdOut('');
-		setStdErr('');
-		setStdRet('');
-		setRunning(true);
+	const onKeyDown = event => {
+		if(event.key === 'Enter' && event.ctrlKey)
+		{
+			runCode();
+			return;
+		}
+	};
 
-		let code = input.current;
+	useEffect(() => {
 
-		setTimeout(async () => {
-			if(single.current.checked)
-			{
-				code = code.replace(/^\s*<\?php/, '');
-				code = code.replace(/\?>\s*/, '');
+		window.addEventListener('keydown', onKeyDown);
+		return () => {
+			window.removeEventListener('keydown', onKeyDown);
+		}
+	}, []);
 
-				const ret = await phpRef.current.exec(code)
-				setStdRet(ret);
-				persist.current.checked || phpRef.current.refresh();
-				setTimeout(() => {
-					setStatusMessage('php-wasm ready!')
-					setRunning(false);
-				}, 1);
-			}
-			else
-			{
-				const exitCode = await phpRef.current.run(code)
-				setExitCode(exitCode);
-				persist.current.checked || phpRef.current.refresh();
-				setTimeout(() => {
-					setStatusMessage('php-wasm ready!')
-					setRunning(false);
-				}, 1);
-			}
-		}, 1);
+	const openFile = async event => {
+		const file = event.target.files[0];
+		editor.current.editor.setValue(await file.text(), -1);;
 	};
 
 	return (
@@ -300,7 +331,7 @@ function Embedded() {
 									<img src = "php.png" alt = "php" /> <span>PHP Code</span>
 								</label>
 								<label id = "openFile" className = "collapse"tabIndex="-1">
-									open file<input type = "file" accept=".php" />
+									open file<input type = "file" accept=".php" onChange = {openFile} />
 								</label>
 							</div>
 							<div className = "liquid" id = "input-box"></div>
