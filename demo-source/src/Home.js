@@ -107,7 +107,7 @@ function Home() {
 					</button>
 				</div>
 
-				<h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span>More...</span></h3>
+				<h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span onClick = { () => {setShowMore(!showMore)}}>More...</span></h3>
 				{ showMore && ( <div className = "inset extra-demos">
 					<a target = "_blank" href = {process.env.PUBLIC_URL + '/forecast.html'} className="icon-box">
 						<img src = {sunburstIcon} alt = "Inline FrontEnd PHP" />
