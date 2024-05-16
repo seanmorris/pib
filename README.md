@@ -347,22 +347,108 @@ let php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files
 
 ## 📁 Filesystem Operations
 
-### Transactions
-
-#### php.startTransaction
-#### php.commitTransaction
-
 ### Filesystem Methods
 
+The following EmscriptenFS methods are exposed via the php object:
+
 #### php.analyzePath
+
+Get information about a file or directory.
+
+```javascript
+await php.analyzePath(path);
+```
+
 #### php.readdir
+
+Get a list of files and folders in or directory.
+
+```javascript
+await php.readdir(path);
+```
+
 #### php.readFile
+
+Get the content of a file as a `Uint8Array` by default, or optionally as utf-8.
+
+```javascript
+await php.readFile(path);
+```
+
+```javascript
+await php.readFile(path, {encoding: 'utf8'});
+```
+
 #### php.stat
+
+Get information about a file or directory.
+
+```javascript
+await php.stat(path);
+```
+
 #### php.mkdir
+
+Create a directory.
+
+```javascript
+await php.mkdir(path);
+```
+
 #### php.rmdir
-#### php.rename
-#### php.writeFile
+
+Delete a directory (must be empty).
+
+```javascript
+await php.rmdir(path);
+```
+
 #### php.unlink
+
+Delete a file.
+
+```javascript
+await php.rmdir(path);
+```
+
+#### php.rename
+
+Rename a file or directory.
+
+```javascript
+await php.rename(path, newPath);
+```
+
+#### php.writeFile
+
+Create a new file. Content should be supplied as a `Uint8Array`, or optionally as a string of text.
+
+```javascript
+await php.writeFile(path, data);
+```
+
+```javascript
+await php.writeFile(path, data, {encoding: 'utf8'});
+```
+### Transactions
+
+**Web and Worker only!**
+
+The web and worker build use `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensure multiple tabs & the service worker can interact with the filesystem without overwriting eachother's work. Before any FS operation takes place, the entire FS is loaded from IDBFS, and before the lock is released, the entire FS is laoded BACK into IDBFS. The operations are enqueued asyncronously, so if multiple requests are generated before one transaction closes, **they will be batched automatically.**
+
+To suppress this behavior and take explicit control of the FS mirroring, you can pass the `{autoTransaction: false}` to the constructor. Doing this will require you to call `php.startTransaction()` before any FS operations take place, and then`php.commitTransaction()` when you're done.
+
+#### php.startTransaction
+
+```javascript
+await php.startTransaction();
+```
+
+#### php.commitTransaction
+
+```javascript
+await php.commitTransaction();
+```
 
 ## 🏗️ Custom Builds
 

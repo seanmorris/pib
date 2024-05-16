@@ -183,9 +183,9 @@ export class PhpBase extends EventTarget
 		return this._enqueue(fsOps.readdir, [this.binary, path]);
 	}
 
-	readFile(path)
+	readFile(path, options)
 	{
-		return this._enqueue(fsOps.readFile, [this.binary, path]);
+		return this._enqueue(fsOps.readFile, [this.binary, path, options]);
 	}
 
 	stat(path)
