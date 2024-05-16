@@ -25,7 +25,7 @@
 		"php-wasm-openssl": "^0.0.9",
 		"php-wasm-sqlite": "^0.0.9",
 		"php-wasm-tidy": "^0.0.9",
-		"php-wasm-yaml": "^0.0.9-b",
+		"php-wasm-yaml": "^0.0.9-c",
 		"php-wasm-zlib": "^0.0.9-a",
 		"vrzno": "^0.0.9-d"
 	},
