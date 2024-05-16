@@ -1,2 +1,4 @@
+.circleci/*
 demo-source/*
+packages/*
 docs/*

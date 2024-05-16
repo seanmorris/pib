@@ -30,8 +30,9 @@ ${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js)
 
 third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
 	@ echo -e "\e[33;4mImporting VRZNO\e[0m"
+	@ ${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) ./third_party/vrzno/
 	@ cp -prfv ${VRZNO_DEV_PATH} third_party/
-	${DOCKER_RUN} touch third_party/vrzno/vrzno.c
+	@ touch third_party/vrzno/vrzno.c
 else
 
 third_party/vrzno/lib.js: $(wildcard third_party/vrzno/js/*.js)
