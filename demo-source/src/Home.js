@@ -21,6 +21,7 @@ import downIcon from './icons/down.png';
 import upIcon from './icons/up.png';
 
 import { useEffect, useMemo, useState } from 'react';
+import Header from './Header';
 
 function Home() {
 	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
@@ -63,7 +64,8 @@ function Home() {
 	return (
 		<div className = "home">
 			<div className='home-menu bevel'>
-				<h1>Select a demo:</h1>
+				<Header />
+				<h2>Select a demo:</h2>
 				<div className='row'>
 					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded-php.html?demo=phpinfo.php'}>
 						<div className = "big-icon embedded">

@@ -116,6 +116,10 @@ button[data-run]::after {
 	padding: 0;
 }
 
+.Embedded [data-load-demo] {
+	min-width: 4rem;
+}
+
 .Embedded .row.toolbar.status > div {
 	padding: 0.25em;
 }
@@ -143,6 +147,11 @@ body > div {
 .collapse {
 	flex-grow: 0;
 	flex-shrink: 1;
+}
+
+.spread{
+	flex-grow: 1;
+	justify-content: space-around;
 }
 
 div.column {

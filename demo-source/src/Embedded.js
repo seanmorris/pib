@@ -292,13 +292,13 @@ function Embedded() {
 								<option value = "zend-benchmark.php">Zend Benchmark</option>
 								<option value = "drupal.php">Drupal 7</option>
 							</select>
-							<button data-install-demo onClick = {demoSelected}>load</button>
+							<button data-load-demo onClick = {demoSelected}>load</button>
 						</div>
 					</div>
 					<div className = "separator">
 					</div>
 					<div className = "row flex-end">
-						<div className = "row rows collapse">
+						<div className = "rows spread">
 							<label>
 								<span>text</span>
 								<input value = "text" type = "radio" name = "render-as" onChange = {formatSelected} ref = {textRadio} />
@@ -309,7 +309,7 @@ function Embedded() {
 							</label>
 						</div>
 						&nbsp;
-						<div className = "row rows collapse">
+						<div className = "rows spread">
 							<label>
 								<span>Persist Memory</span>
 								<input type = "checkbox" id = "persist" ref = { persist } />
