@@ -498,7 +498,7 @@ const result = await sendMessage(methodName, [param, param, param]);
 
 Once you've got the above set up, use `php.handleMessageEvent` to handle the `message` events on the service worker:
 
-```
+```javascript
 self.addEventListener('message',  event => php.handleMessageEvent(event));
 ```
 
