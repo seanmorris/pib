@@ -33,19 +33,19 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 <table>
  <tr>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=drupal-7">Drupal Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=drupal-7">Drupal Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=cakephp-5">CakePHP Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=cakephp-5">CakePHP Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=codeigniter-4">CodeIgniter Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=codeigniter-4">CodeIgniter Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=laravel-11">Laravel Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=laravel-11">Laravel Demo</a>
 	</td>
 	<td width = "500px">
-		<a href = "https://seanmorris.github.io/php-wasm/load-demo?framework=laminas-3">Laminas Demo</a>
+		<a href = "https://seanmorris.github.io/php-wasm/install-demo?framework=laminas-3">Laminas Demo</a>
 	</td>
 	<td width = "500px">
 		<a href = "https://seanmorris.github.io/php-wasm/code-editor?path=/persist">Code Editor</a>
@@ -351,6 +351,13 @@ let php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files
 
 The following EmscriptenFS methods are exposed via the php object:
 
+***Note:*** If you're using php-web in conjunction with php-cgi-worker to work on the filesystem, you'll need to `refresh` the filesystem in the worker. You can do that with the following call using `msg-bus` (see below).
+
+```javascript
+// Tell the worker that the FS has been updated
+await sendMessage('refresh');
+```
+
 #### php.analyzePath
 
 Get information about a file or directory.
@@ -430,13 +437,16 @@ await php.writeFile(path, data);
 ```javascript
 await php.writeFile(path, data, {encoding: 'utf8'});
 ```
+
 ### Transactions
 
 **Web and Worker only!**
 
-The web and worker build use `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensure multiple tabs & the service worker can interact with the filesystem without overwriting eachother's work. Before any FS operation takes place, the entire FS is loaded from IDBFS, and before the lock is released, the entire FS is laoded BACK into IDBFS. The operations are enqueued asyncronously, so if multiple requests are generated before one transaction closes, **they will be batched automatically.**
+The web and worker build use `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensure multiple tabs & the service worker can interact with the filesystem without overwriting eachother's work. Before any FS operation takes place, the entire FS is loaded from IDBFS, and before the lock is released, the entire FS is laoded BACK into IDBFS.
 
-To suppress this behavior and take explicit control of the FS mirroring, you can pass the `{autoTransaction: false}` to the constructor. Doing this will require you to call `php.startTransaction()` before any FS operations take place, and then`php.commitTransaction()` when you're done.
+The operations are enqueued asyncronously, **so if multiple requests are generated before one transaction closes, they will be batched automatically.** This also applies to multiple requests generated before the lock is acquired. There is generally no need to take explicit control of FS mirroring.
+
+To suppress this behavior and take explicit control of the FS mirroring, you can pass the `{autoTransaction: false}` to the constructor. Doing this will require you to call `php.startTransaction()` before any FS operations take place, and then`php.commitTransaction()` when you're done. **Using this incorrectly may leave your filesystem in a corrupted state.**
 
 #### php.startTransaction
 
@@ -448,6 +458,40 @@ await php.startTransaction();
 
 ```javascript
 await php.commitTransaction();
+```
+
+### msg-bus
+
+There is a `msg-bus` module supplied by `php-cgi-wasm` as a helper to communicate with php running inside a worker. The module exposes two functions: `sendMessageFor` and `onMessage`.
+
+This allows you to simply `await` the result of calls to file system methods (see above) on the service worker:
+
+```javascript
+const result = await sendMessage(methodName, [param, param, param]);
+```
+
+#### onMessage
+
+Use `onMessage` as an event handler for `message` events coming from the Service Worker:
+
+```javascript
+import { onMessage } from `php-cgi-wasm/msg-bus`;
+
+navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL);
+
+navigator.serviceWorker.addEventListener('message', onMessage);
+```
+
+#### sendMessageFor
+
+Use `sendMessageFor` to **GENERATE A FUNCTION** that you can use to send messages to your service worker:
+
+```javascript
+import { sendMessageFor } from `php-cgi-wasm/msg-bus`;
+
+const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
+
+const result = await sendMessage(methodName, [param, param, param]);
 ```
 
 ## 🏗️ Custom Builds

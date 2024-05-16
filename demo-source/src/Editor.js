@@ -3,7 +3,7 @@ import './Editor.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { sendMessageFor } from './msg-bus';
+import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 import EditorFolder from './EditorFolder';
 import Header from './Header';
 

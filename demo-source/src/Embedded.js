@@ -71,7 +71,7 @@ function Embedded() {
 		if(demoName === 'drupal.php')
 		{
 			setOverlay(<Confirm
-				onConfirm = { () => window.location = process.env.PUBLIC_URL + '/select-framework' }
+				onConfirm = { () => window.location = process.env.PUBLIC_URL + '/select-framework.html' }
 				onCancel = { () => setOverlay(null) }
 				message = {(
 					<span>The Drupal demo has been moved into the <b>php-cgi-wasm</b> demo. Would you like to go there now?</span>
@@ -261,7 +261,7 @@ function Embedded() {
 								<option value = "zend-benchmark.php">Zend Benchmark</option>
 								<option value = "drupal.php">Drupal 7</option>
 							</select>
-							<button data-load-demo onClick = {demoSelected}>load</button>
+							<button data-install-demo onClick = {demoSelected}>load</button>
 						</div>
 					</div>
 					<div className = "separator">

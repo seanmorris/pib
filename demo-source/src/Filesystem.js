@@ -1,13 +1,13 @@
 import './Common.css';
-import './LoadDemo.css';
+import './InstallDemo.css';
 
 import loader from './tail-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
-import { sendMessageFor } from './msg-bus';
+import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
-const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
+const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
 
 const backupSite = async () => {
 	const persistFile = await sendMessage('readdir', ['/persist']);
@@ -99,7 +99,7 @@ const makeComponent = (operation) => ({onComplete, onError, onFinally = () => {}
 		}
 	}, []);
 
-	return message && ( <div className = "load-demo">
+	return message && ( <div className = "install-demo">
 		<div className = "center">
 			<div className = "bevel">
 				<div className = "inset padded column center">

@@ -32,7 +32,7 @@ function Home() {
 	useEffect(() => {
 		if(query.has('code') || query.has('demo'))
 		{
-			window.location = process.env.PUBLIC_URL + '/embedded' + window.location.search;
+			window.location = process.env.PUBLIC_URL + '/embedded-php.html' + window.location.search;
 		}
 	}, [query]);
 
@@ -65,14 +65,14 @@ function Home() {
 			<div className='home-menu bevel'>
 				<h1>Select a demo:</h1>
 				<div className='row'>
-					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded?demo=hello-world.php'}>
+					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded-php.html?demo=phpinfo.php'}>
 						<div className = "big-icon embedded">
 							<img alt = "page showing php logo" src = {phpPageIcon} />
 						</div>
 						<span className = "title">PHP Embedded Demo</span>
 						<p className='padded'>View, edit & run PHP code right in the browser.</p>
 					</a>
-					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/select-framework'}>
+					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/select-framework.html'}>
 						<div className = "big-icon cgi" style={{'--offset': offset}} data-scroll-state = {scrollState}>
 							<div className = "offset-column">
 								<img src = {cakePhpIcon} alt = "CakePHP logo" />
@@ -89,7 +89,7 @@ function Home() {
 				</div>
 
 				<div className = "inset button-bar">
-					<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor'}>
+					<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor.html'}>
 						<img src = {editorIcon} className = "icon" alt = "Code Editor" />
 						Code Editor
 					</button>
