@@ -84,6 +84,19 @@ index 88cfbc2..ec20428 100644
  	}
  	is_fastcgi = 0;
  	if (allowed_clients) {
+diff --git a/third_party/php8.3-src/sapi/cgi/Makefile.frag b/third_party/php8.3-src/sapi/cgi/Makefile.frag
+index 79e2afe..0956f43 100644
+--- a/third_party/php8.3-src/sapi/cgi/Makefile.frag
++++ b/third_party/php8.3-src/sapi/cgi/Makefile.frag
+@@ -1,7 +1,7 @@
+ cgi: $(SAPI_CGI_PATH)
+ 
+ $(SAPI_CGI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_FASTCGI_OBJS) $(PHP_CGI_OBJS)
+-	$(BUILD_CGI)
++	$(BUILD_CGI) $(WASM_SHARED_LIBS)
+ 
+ install-cgi: $(SAPI_CGI_PATH)
+ 	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
 diff --git a/third_party/php8.3-src/sapi/cgi/cgi_main.c b/third_party/php8.3-src/sapi/cgi/cgi_main.c
 index 156599f..1404fea 100644
 --- a/third_party/php8.3-src/sapi/cgi/cgi_main.c
@@ -139,6 +152,19 @@ index 156599f..1404fea 100644
 +{
 +	return _sapi_cgi_putenv(name, strlen(name), value);
 +}
+diff --git a/third_party/php8.3-src/sapi/cli/Makefile.frag b/third_party/php8.3-src/sapi/cli/Makefile.frag
+index aa1d642..649533d 100644
+--- a/third_party/php8.3-src/sapi/cli/Makefile.frag
++++ b/third_party/php8.3-src/sapi/cli/Makefile.frag
+@@ -1,7 +1,7 @@
+ cli: $(SAPI_CLI_PATH)
+ 
+ $(SAPI_CLI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_CLI_OBJS)
+-	$(BUILD_CLI)
++	$(BUILD_CLI) $(WASM_SHARED_LIBS)
+ 
+ install-cli: $(SAPI_CLI_PATH)
+ 	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
 diff --git a/third_party/php8.3-src/sapi/embed/php_embed.c b/third_party/php8.3-src/sapi/embed/php_embed.c
 index 4626451..ba21863 100644
 --- a/third_party/php8.3-src/sapi/embed/php_embed.c

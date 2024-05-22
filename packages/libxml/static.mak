@@ -1,17 +1,29 @@
 #!/usr/bin/env make
 
-ifeq (${WITH_LIBXML}, 1)
-
 LIBXML2_TAG?=v2.9.10
-ARCHIVES+= lib/lib/libxml2.a
-CONFIGURE_FLAGS+= \
-	--with-libxml \
-	--enable-xml  \
-	--enable-dom  \
-	--enable-simplexml
+DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -w /src/third_party/libxml2/ emscripten-builder
 
-DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
+ifeq ($(filter ${WITH_LIBXML},0 1 shared static),)
+$(error WITH_LIBXML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+endif
+
+ifeq (${WITH_LIBXML},1)
+WITH_LIBXML=static
+endif
+
+ifeq (${WITH_LIBXML},static)
+ARCHIVES+= lib/lib/libxml2.a
+CONFIGURE_FLAGS+= --with-libxml --enable-xml --enable-dom --enable-simplexml
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
+endif
+
+ifeq (${WITH_LIBXML},shared)
+CONFIGURE_FLAGS+= --with-libxml=/src/lib/ --enable-xml --enable-dom --enable-simplexml
+SHARED_LIBS+= lib/lib/libxml2.so
+PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
+TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
+SKIP_LIBS+=- -lxml2
+endif
 
 third_party/libxml2/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibXML2\e[0m"
@@ -23,9 +35,11 @@ third_party/libxml2/.gitignore:
 lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33;4mBuilding LibXML2\e[0m"
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
-	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIBXML} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC  -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --prefix=/src/lib/ --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_LIBXML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} ' Z_LIBS=''
 	${DOCKER_RUN_IN_LIBXML} emmake make install
 
-endif
+packages/libxml/libxml2.so: lib/lib/libxml2.so
+	cp -L $^ $@
 
+lib/lib/libxml2.so: lib/lib/libxml2.a

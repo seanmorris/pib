@@ -1,14 +1,37 @@
 #!/usr/bin/env make
 
-ifeq (${WITH_YAML},1)
-
 LIBYAML_TAG?=0.2.5
-ARCHIVES+= lib/lib/libyaml.a
-DEPENDENCIES+= third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
-CONFIGURE_FLAGS+= --with-yaml
-
 DOCKER_RUN_IN_YAML=${DOCKER_ENV} -w /src/third_party/libyaml/ emscripten-builder
+
+ifeq ($(filter ${WITH_YAML},0 1 shared static),)
+$(error WITH_YAML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+endif
+
+ifeq (${WITH_YAML},1)
+WITH_YAML=static
+endif
+
+ifeq (${WITH_YAML},static)
+ARCHIVES+= lib/lib/libyaml.a
+CONFIGURE_FLAGS+= --with-yaml
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
+endif
+
+ifeq (${WITH_YAML},shared)
+SHARED_LIBS+= lib/lib/libyaml.so
+CONFIGURE_FLAGS+= --with-yaml
+PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
+TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
+SKIP_LIBS+=- -lyaml
+endif
+
+# lib/lib/php/20230831/yaml.so: ${PHPIZE} lib/lib/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
+# 	${DOCKER_RUN_IN_PHP} bash -euxc 'cd ext/yaml && { \
+# 		../../scripts/phpize; \
+# 		emconfigure ./configure --with-php-config=/src/lib/bin/php-config PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/; \
+# 		emmake make EXTRA_INCLUDES='-I/src/third_party/php8.3-src'; \
+# 		emmake make install; \
+# 	};'
 
 third_party/libyaml/.gitignore:
 	@ echo -e "\e[33;4mDownloading libyaml\e[0m"
@@ -20,8 +43,15 @@ third_party/libyaml/.gitignore:
 lib/lib/libyaml.a: third_party/libyaml/.gitignore
 	@ echo -e "\e[33;4mBuilding libyaml\e[0m"
 	${DOCKER_RUN_IN_YAML} emconfigure ./bootstrap
-	${DOCKER_RUN_IN_YAML} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_YAML} emmake make -j`nproc` EMCC_CFLAGS='-fPIC -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_YAML} emconfigure ./configure --prefix=/src/lib/ --enable-shared=yes --enable-static=yes --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_YAML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_YAML} emmake make install
+
+lib/lib/libyaml.so: third_party/libyaml/.gitignore
+	@ echo -e "\e[33;4mBuilding libyaml\e[0m"
+	${DOCKER_RUN_IN_YAML} emconfigure ./bootstrap
+	${DOCKER_RUN_IN_YAML} emconfigure ./configure --prefix=/src/lib/ --enable-shared=yes --enable-static=yes --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_YAML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_YAML} emmake make install
 
 third_party/yaml-2.2.3/config.m4:
@@ -34,5 +64,8 @@ third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/yaml-2.2.3/con
 	@ echo -e "\e[33;4mImporting libyaml\e[0m"
 	${DOCKER_RUN} cp -rfv third_party/yaml-2.2.3 third_party/php${PHP_VERSION}-src/ext/yaml
 
+packages/libyaml/libyaml.so: lib/lib/libyaml.so
+	cp $^ $@
 
-endif
+# packages/libyaml/php-yaml.so: lib/lib/php/20230831/yaml.so
+# 	cp $^ $@

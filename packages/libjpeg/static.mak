@@ -18,7 +18,7 @@ third_party/jpeg-9f/README:
 lib/lib/libjpeg.a: third_party/jpeg-9f/README
 	@ echo -e "\e[33;4mBuilding LIBJPEG\e[0m"
 	${DOCKER_RUN_IN_LIBJPEG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --disable-shared
-	${DOCKER_RUN_IN_LIBJPEG} emmake make -j`nproc` EXTRA_CFLAGS='-fPIC -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_LIBJPEG} emmake make -j`nproc` CFLAGS='-fPIC -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_LIBJPEG} emmake make install
 
 endif

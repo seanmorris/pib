@@ -1,14 +1,29 @@
 #!/usr/bin/env make
 
-ifeq (${WITH_LIBPNG}, 1)
-
 LIBPNG_TAG?=v1.6.41
-ARCHIVES+= lib/lib/libpng.a
-CONFIGURE_FLAGS+= \
-	--enable-png
-
 DOCKER_RUN_IN_LIBPNG=${DOCKER_ENV} -w /src/third_party/libpng/ emscripten-builder
+
+ifeq ($(filter ${WITH_LIBPNG},0 1 shared static),)
+$(error WITH_LIBPNG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+endif
+
+ifeq (${WITH_LIBPNG},1)
+WITH_LIBPNG=static
+endif
+
+ifeq (${WITH_LIBPNG},static)
+ARCHIVES+= lib/lib/libpng.a
+CONFIGURE_FLAGS+= --enable-png
 TEST_LIST+=$(shell ls packages/libpng/test/*.mjs)
+endif
+
+ifeq (${WITH_LIBPNG},shared)
+CONFIGURE_FLAGS+= --enable-png --with-png-dir=/src/lib
+SHARED_LIBS+= packages/libpng/libpng.so
+PHP_CONFIGURE_DEPS+= packages/libpng/libpng.so
+TEST_LIST+=$(shell ls packages/libpng/test/*.mjs)
+SKIP_LIBS+=- -lpng16
+endif
 
 third_party/libpng/.gitignore:
 	@ echo -e "\e[33;4mDownloading LIBPNG\e[0m"
@@ -22,11 +37,25 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -O${OPTIMIZE} " \
-		-DZLIB_LIBRARY="/src/lib/lib/" \
+		-DCMAKE_C_FLAGS="-fPIC -O${OPTIMIZE} " \
+		-DZLIB_LIBRARY="/src/lib/lib/libz.a" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
-		-DPNG_SHARED="OFF"
+		-DPNG_SHARED="ON"
 	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
-endif
+lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.a
+	@ echo -e "\e[33;4mBuilding LIBPNG\e[0m"
+	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
+		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
+		-DCMAKE_PROJECT_INCLUDE=/src/source/force-shared.cmake \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_C_FLAGS="-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE}" \
+		-DZLIB_LIBRARY="/src/lib/lib/libz.so" \
+		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
+		-DPNG_SHARED="ON"
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
+	${DOCKER_RUN_IN_LIBPNG} emmake make install;
+
+packages/libpng/libpng.so: lib/lib/libpng.so
+	cp -rL $^ $@

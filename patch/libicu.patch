@@ -1,0 +1,172 @@
+diff --git a/icu4c/source/configure b/icu4c/source/configure
+index 14da890..482906d 100755
+--- a/icu4c/source/configure
++++ b/icu4c/source/configure
+@@ -3210,44 +3210,44 @@ _ACEOF
+ ac_clean_files="$ac_clean_files conftest.out"
+ # Check that the compiler produces executables we can run.  If not, either
+ # the compiler is broken, or we cross compile.
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are cross compiling" >&5
+-$as_echo_n "checking whether we are cross compiling... " >&6; }
+-if test "$cross_compiling" != yes; then
+-  { { ac_try="$ac_link"
+-case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+-$as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+-  test $ac_status = 0; }
+-  if { ac_try='./conftest$ac_cv_exeext'
+-  { { case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+-$as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+-  test $ac_status = 0; }; }; then
+-    cross_compiling=no
+-  else
+-    if test "$cross_compiling" = maybe; then
+-	cross_compiling=yes
+-    else
+-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error $? "cannot run C compiled programs.
+-If you meant to cross compile, use \`--host'.
+-See \`config.log' for more details" "$LINENO" 5; }
+-    fi
+-  fi
+-fi
++# { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are cross compiling" >&5
++# $as_echo_n "checking whether we are cross compiling... " >&6; }
++# if test "$cross_compiling" != yes; then
++#   { { ac_try="$ac_link"
++# case "(($ac_try" in
++#   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
++#   *) ac_try_echo=$ac_try;;
++# esac
++# eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
++# $as_echo "$ac_try_echo"; } >&5
++#   (eval "$ac_link") 2>&5
++#   ac_status=$?
++#   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++#   test $ac_status = 0; }
++#   if { ac_try='./conftest$ac_cv_exeext'
++#   { { case "(($ac_try" in
++#   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
++#   *) ac_try_echo=$ac_try;;
++# esac
++# eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
++# $as_echo "$ac_try_echo"; } >&5
++#   (eval "$ac_try") 2>&5
++#   ac_status=$?
++#   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++#   test $ac_status = 0; }; }; then
++#     cross_compiling=no
++#   else
++#     if test "$cross_compiling" = maybe; then
++# 	cross_compiling=yes
++#     else
++# 	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
++# $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
++# as_fn_error $? "cannot run C compiled programs.
++# If you meant to cross compile, use \`--host'.
++# See \`config.log' for more details" "$LINENO" 5; }
++#     fi
++#   fi
++# fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cross_compiling" >&5
+ $as_echo "$cross_compiling" >&6; }
+ 
+@@ -7489,13 +7489,13 @@ cat >>confdefs.h <<_ACEOF
+ _ACEOF
+ 
+ 
+-U_SIZEOF_WCHAR_T=$ac_cv_sizeof_wchar_t
+-# We do this check to verify that everything is okay.
+-if test $U_SIZEOF_WCHAR_T = 0; then
+-    if test $U_HAVE_WCHAR_H=1; then
+-       as_fn_error $? "There is wchar.h but the size of wchar_t is 0" "$LINENO" 5
+-    fi
+-fi
++# U_SIZEOF_WCHAR_T=$ac_cv_sizeof_wchar_t
++# # We do this check to verify that everything is okay.
++# if test $U_SIZEOF_WCHAR_T = 0; then
++#     if test $U_HAVE_WCHAR_H=1; then
++#        as_fn_error $? "There is wchar.h but the size of wchar_t is 0" "$LINENO" 5
++#     fi
++# fi
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for UTF-16 string literal support" >&5
+ $as_echo_n "checking for UTF-16 string literal support... " >&6; }
+diff --git a/icu4c/source/configure.ac b/icu4c/source/configure.ac
+index 6a40312..838dce6 100644
+--- a/icu4c/source/configure.ac
++++ b/icu4c/source/configure.ac
+@@ -210,28 +210,28 @@ AC_PATH_PROGS(U_MAKE, gmake gnumake, make)
+ AC_SUBST(U_MAKE)
+ 
+ 
+-AC_ARG_WITH(cross-build,
+-	[  --with-cross-build=dir specify an absolute path to the build directory of an ICU built for the current platform [default=no cross dir]],
+-	[cross_buildroot="${withval}"],
+-        [cross_buildroot=""])
+-
+-if test "X$cross_buildroot" = "X"; then
+-    if test "$cross_compiling" = "yes"; then
+-        AC_MSG_ERROR([Error! Cross compiling but no --with-cross-build option specified - please supply the path to an executable ICU's build root])
+-	dnl '
+-    fi
+-else
+-    if test -f "${cross_buildroot}/config/icucross.mk"; then
+-        AC_MSG_RESULT([Using cross buildroot: $cross_buildroot])
+-    else
+-        if test -d "${cross_buildroot}"; then
+-            AC_MSG_ERROR([${cross_buildroot}/config/icucross.mk not found. Please build ICU in ${cross_buildroot} first.])
+-        else
+-            AC_MSG_ERROR([No such directory ${cross_buildroot} supplied as the argument to --with-cross-build. Use an absolute path.])
+-        fi
+-    fi
+-fi
+-AC_SUBST(cross_buildroot)
++# AC_ARG_WITH(cross-build,
++# 	[  --with-cross-build=dir specify an absolute path to the build directory of an ICU built for the current platform [default=no cross dir]],
++# 	[cross_buildroot="${withval}"],
++#         [cross_buildroot=""])
++
++# if test "X$cross_buildroot" = "X"; then
++#     if test "$cross_compiling" = "yes"; then
++#         AC_MSG_ERROR([Error! Cross compiling but no --with-cross-build option specified - please supply the path to an executable ICU's build root])
++# 	dnl '
++#     fi
++# else
++#     if test -f "${cross_buildroot}/config/icucross.mk"; then
++#         AC_MSG_RESULT([Using cross buildroot: $cross_buildroot])
++#     else
++#         if test -d "${cross_buildroot}"; then
++#             AC_MSG_ERROR([${cross_buildroot}/config/icucross.mk not found. Please build ICU in ${cross_buildroot} first.])
++#         else
++#             AC_MSG_ERROR([No such directory ${cross_buildroot} supplied as the argument to --with-cross-build. Use an absolute path.])
++#         fi
++#     fi
++# fi
++# AC_SUBST(cross_buildroot)
+ 
+ # Check for doxygen to generate documentation
+ AC_PATH_PROG(DOXYGEN,doxygen,,$PATH:/usr/local/bin:/usr/bin)
+@@ -663,7 +663,7 @@ sparc-*-solaris*)
+ ia64-*-hpux*)
+ # There has been some issues with building ICU data on HPUX ia64 aCC
+ # when using the assemble code setting below.  For now, build without
+-# assemble code for this platform.  This will increase the build time.   
++# assemble code for this platform.  This will increase the build time.
+ #    GENCCODE_ASSEMBLY="-a aCC-ia64"
+     ;;
+ esac

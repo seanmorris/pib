@@ -1,4 +1,4 @@
-FROM emscripten/emsdk:3.1.43
+FROM emscripten/emsdk:3.1.59
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
 SHELL ["/bin/bash", "-c"]
@@ -8,10 +8,6 @@ RUN set -euxo pipefail;\
 	DEBIAN_FRONTEND=noninteractive \
 	apt-get --no-install-recommends -y install \
 		build-essential \
-		libsqlite3-dev \
-		libxml2-dev \
-		libicu-dev \
-		tzdata \
 		automake \
 		autoconf \
 		autogen \
