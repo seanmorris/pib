@@ -4,7 +4,7 @@ FREETYPE_VERSION?=2.10.0
 DOCKER_RUN_IN_FREETYPE=${DOCKER_ENV} -w /src/third_party/freetype-${FREETYPE_VERSION}/build emscripten-builder
 
 ifeq ($(filter ${WITH_FREETYPE},0 1 shared static),)
-$(error WITH_FREETYPE MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+$(error WITH_FREETYPE MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_FREETYPE},1)
@@ -22,7 +22,7 @@ CONFIGURE_FLAGS+= --with-freetype --with-freetype-dir=/src/lib
 SHARED_LIBS+= packages/freetype/libfreetype.so
 PHP_CONFIGURE_DEPS+= packages/freetype/libfreetype.so
 TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
-SKIP_LIBS+=- -lfreetype
+SKIP_LIBS+= -lfreetype
 endif
 
 third_party/freetype-${FREETYPE_VERSION}/README:

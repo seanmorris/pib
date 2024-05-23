@@ -12,6 +12,12 @@
 		"LICENSE",
 		"NOTICE",
 		"README.md",
-		"static.mak"
+		"static.mak",
+		"libicudata.so",
+		"libicui18n.so",
+		"libicuio.so",
+		"libicutest.so",
+		"libicutu.so",
+		"libicuuc.so"
 	]
 }

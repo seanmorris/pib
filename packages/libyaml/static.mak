@@ -4,7 +4,7 @@ LIBYAML_TAG?=0.2.5
 DOCKER_RUN_IN_YAML=${DOCKER_ENV} -w /src/third_party/libyaml/ emscripten-builder
 
 ifeq ($(filter ${WITH_YAML},0 1 shared static),)
-$(error WITH_YAML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+$(error WITH_YAML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_YAML},1)
@@ -22,7 +22,7 @@ SHARED_LIBS+= lib/lib/libyaml.so
 CONFIGURE_FLAGS+= --with-yaml
 PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
-SKIP_LIBS+=- -lyaml
+SKIP_LIBS+= -lyaml
 endif
 
 # lib/lib/php/20230831/yaml.so: ${PHPIZE} lib/lib/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4

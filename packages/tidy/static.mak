@@ -4,7 +4,7 @@ TIDYHTML_TAG?=5.6.0
 DOCKER_RUN_IN_TIDY=${DOCKER_ENV} -w /src/third_party/tidy-html5/ emscripten-builder
 
 ifeq ($(filter ${WITH_TIDY},0 1 shared static),)
-$(error WITH_TIDY MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+$(error WITH_TIDY MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_TIDY},1)
@@ -13,7 +13,7 @@ endif
 
 ifneq ($(filter ${WITH_TIDY},1 shared static),)
 ifeq ($(filter ${WITH_LIBXML},1 shared static),)
-$(error TIDY REQUIRES WITH_LIBXML=[1|share|static]. PLEASE CHECK YOUR .env FILE.)
+$(error TIDY REQUIRES WITH_LIBXML=[1|share|static]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 endif
 
@@ -25,10 +25,10 @@ endif
 
 ifeq (${WITH_TIDY},shared)
 CONFIGURE_FLAGS+= --with-tidy=/src/lib
-PHP_CONFIGURE_DEPS+= lib/lib/libtidy.so
-SHARED_LIBS+= lib/lib/libtidy.so
+PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
+SHARED_LIBS+= packages/tidy/libtidy.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
-SKIP_LIBS+=- -ltidy
+SKIP_LIBS+= -ltidy
 endif
 
 third_party/tidy-html5/.gitignore:

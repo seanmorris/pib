@@ -16,6 +16,8 @@ RUN set -euxo pipefail;\
 		shtool \
 		brotli \
 		pkgconf \
+		gperf \
+		groff \
 		bison \
 		flex \
 		gzip \

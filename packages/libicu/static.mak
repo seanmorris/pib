@@ -14,7 +14,7 @@ LIBICU_DATFILE=lib/share/icu/69.1/icudt69l.dat
 endif
 
 ifeq ($(filter ${WITH_ICU},0 1 shared static),)
-$(error WITH_ICU MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+$(error WITH_ICU MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ICU},1)
@@ -30,10 +30,10 @@ endif
 
 ifeq (${WITH_ICU},shared)
 CONFIGURE_FLAGS+= --enable-intl
-PHP_CONFIGURE_DEPS+= lib/lib/libicudata.so
-SHARED_LIBS+= lib/lib/libicudata.so lib/lib/libicui18n.so lib/lib/libicuio.so lib/lib/libicutest.so lib/lib/libicutu.so lib/lib/libicuuc.so
+PHP_CONFIGURE_DEPS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
+SHARED_LIBS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
 DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -e CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE}' -e CXXFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE}' -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
-SKIP_LIBS+=- -licuio -licui18n -licuuc -licudata
+SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 endif
 
 TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
@@ -84,6 +84,24 @@ icu-clean:
 
 demo-source/public/%.so: lib/lib/%.so
 	cp -Lp $^ $@
+
+packages/libicu/libicui18n.so: lib/lib/libicui18n.so
+	cp $^ $@
+
+packages/libicu/libicuio.so: lib/lib/libicuio.so
+	cp $^ $@
+
+packages/libicu/libicutest.so: lib/lib/libicutest.so
+	cp $^ $@
+
+packages/libicu/libicutu.so: lib/lib/libicutu.so
+	cp $^ $@
+
+packages/libicu/libicuuc.so: lib/lib/libicuuc.so
+	cp $^ $@
+
+packages/libicu/libicudata.so: lib/lib/libicudata.so
+	cp $^ $@
 
 endif
 endif

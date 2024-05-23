@@ -1,12 +1,35 @@
 #!/usr/bin/env make
 
-ifeq (${WITH_ONIGURUMA},1)
-
 ONIGURUMA_TAG?=v6.9.9
+DOCKER_RUN_IN_ONIGURUMA=${DOCKER_ENV} -w /src/third_party/oniguruma/ emscripten-builder
+
+ifeq ($(filter ${WITH_ONIGURUMA},0 1 shared static),)
+$(error WITH_ONIGURUMA MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
+ifeq (${WITH_ONIGURUMA},1)
+WITH_ONIGURUMA=static
+endif
+
+ifeq (${WITH_ONIGURUMA},static)
 ARCHIVES+= lib/lib/libonig.a
 CONFIGURE_FLAGS+= --with-onig
+endif
 
-DOCKER_RUN_IN_ONIGURUMA=${DOCKER_ENV} -w /src/third_party/oniguruma/ emscripten-builder
+ifeq (${WITH_ONIGURUMA},shared)
+CONFIGURE_FLAGS+= --with-onig
+SHARED_LIBS+= packages/oniguruma/libonig.so
+PHP_CONFIGURE_DEPS+= packages/oniguruma/libonig.so
+SKIP_LIBS+= -lonig
+endif
+
+# lib/lib/php/20230831/mbstring.so: ${PHPIZE} lib/lib/libonig.so
+# 	${DOCKER_RUN_IN_PHP} bash -euxc 'cd ext/mbstring && { \
+# 		../../scripts/phpize; \
+# 		emconfigure ./configure --with-php-config=/src/lib/bin/php-config PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/; \
+# 		emmake make EXTRA_INCLUDES='-I/src/third_party/php8.3-src'; \
+# 		emmake make install; \
+# 	};'
 
 third_party/oniguruma/.gitignore:
 	@ echo -e "\e[33;4mDownloading ONIGURUMA\e[0m"
@@ -18,8 +41,14 @@ third_party/oniguruma/.gitignore:
 lib/lib/libonig.a: third_party/oniguruma/.gitignore
 	@ echo -e "\e[33;4mBuilding ONIGURUMA\e[0m"
 	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./autogen.sh
-	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_ONIGURUMA} emmake make -j`nproc` EMCC_CFLAGS='-fPIC -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./configure --prefix=/src/lib/ --enable-shared=yes --enable-static=yes --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_ONIGURUMA} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_ONIGURUMA} emmake make install
 
-endif
+lib/lib/libonig.so: lib/lib/libonig.a
+
+packages/oniguruma/libonig.so: lib/lib/libonig.so
+	cp $^ $@
+
+# packages/oniguruma/php-mbstring.so: lib/lib/php/20230831/mbstring.so
+# 	cp $^ $@

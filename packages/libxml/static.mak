@@ -4,7 +4,7 @@ LIBXML2_TAG?=v2.9.10
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -w /src/third_party/libxml2/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBXML},0 1 shared static),)
-$(error WITH_LIBXML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+$(error WITH_LIBXML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBXML},1)
@@ -19,10 +19,10 @@ endif
 
 ifeq (${WITH_LIBXML},shared)
 CONFIGURE_FLAGS+= --with-libxml=/src/lib/ --enable-xml --enable-dom --enable-simplexml
-SHARED_LIBS+= lib/lib/libxml2.so
+SHARED_LIBS+= packages/libxml/libxml2.so
 PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
-SKIP_LIBS+=- -lxml2
+SKIP_LIBS+= -lxml2
 endif
 
 third_party/libxml2/.gitignore:
@@ -39,7 +39,7 @@ lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	${DOCKER_RUN_IN_LIBXML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} ' Z_LIBS=''
 	${DOCKER_RUN_IN_LIBXML} emmake make install
 
+lib/lib/libxml2.so: lib/lib/libxml2.a
+
 packages/libxml/libxml2.so: lib/lib/libxml2.so
 	cp -L $^ $@
-
-lib/lib/libxml2.so: lib/lib/libxml2.a

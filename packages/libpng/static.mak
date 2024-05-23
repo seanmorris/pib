@@ -4,7 +4,7 @@ LIBPNG_TAG?=v1.6.41
 DOCKER_RUN_IN_LIBPNG=${DOCKER_ENV} -w /src/third_party/libpng/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBPNG},0 1 shared static),)
-$(error WITH_LIBPNG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+$(error WITH_LIBPNG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBPNG},1)
@@ -22,7 +22,7 @@ CONFIGURE_FLAGS+= --enable-png --with-png-dir=/src/lib
 SHARED_LIBS+= packages/libpng/libpng.so
 PHP_CONFIGURE_DEPS+= packages/libpng/libpng.so
 TEST_LIST+=$(shell ls packages/libpng/test/*.mjs)
-SKIP_LIBS+=- -lpng16
+SKIP_LIBS+= -lpng16
 endif
 
 third_party/libpng/.gitignore:

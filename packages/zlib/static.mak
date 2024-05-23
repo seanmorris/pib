@@ -4,7 +4,7 @@ ZLIB_TAG?=v1.3.1
 DOCKER_RUN_IN_ZLIB=${DOCKER_ENV} -w /src/third_party/zlib/ emscripten-builder
 
 ifeq ($(filter ${WITH_ZLIB},0 1 shared static),)
-$(error WITH_ZLIB MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR .env FILE.)
+$(error WITH_ZLIB MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ZLIB},1)
@@ -18,9 +18,11 @@ TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 endif
 
 ifeq (${WITH_ZLIB},shared)
-SHARED_LIBS+= lib/lib/libz.so
+CONFIGURE_FLAGS+= --with-zlib
+SHARED_LIBS+= packages/zlib/libz.so
+PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
-SKIP_LIBS+=- -lz
+SKIP_LIBS+= -lz
 endif
 
 third_party/zlib/.gitignore:
