@@ -32,3 +32,4 @@ configured
 /docs/*.map
 /.cache
 .env
+packages/**/*.so

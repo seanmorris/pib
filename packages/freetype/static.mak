@@ -23,6 +23,9 @@ SHARED_LIBS+= packages/freetype/libfreetype.so
 PHP_CONFIGURE_DEPS+= packages/freetype/libfreetype.so
 TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
 SKIP_LIBS+= -lfreetype
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libfreetype.so
+endif
 endif
 
 third_party/freetype-${FREETYPE_VERSION}/README:
@@ -60,4 +63,9 @@ lib/lib/libfreetype.so: third_party/freetype-${FREETYPE_VERSION}/README lib/lib/
 	${DOCKER_RUN_IN_FREETYPE} emmake make install
 
 packages/freetype/libfreetype.so: lib/lib/libfreetype.so
-	cp $^ $@
+	cp -Lp $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libfreetype.so: packages/freetype/libfreetype.so
+	cp -Lp $^ $@
+endif

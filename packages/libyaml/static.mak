@@ -22,7 +22,10 @@ SHARED_LIBS+= lib/lib/libyaml.so
 CONFIGURE_FLAGS+= --with-yaml
 PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
-SKIP_LIBS+= -lyaml
+SKIP_LIBS+=- -lyaml
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libyaml.so
+endif
 endif
 
 # lib/lib/php/20230831/yaml.so: ${PHPIZE} lib/lib/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
@@ -65,7 +68,12 @@ third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/yaml-2.2.3/con
 	${DOCKER_RUN} cp -rfv third_party/yaml-2.2.3 third_party/php${PHP_VERSION}-src/ext/yaml
 
 packages/libyaml/libyaml.so: lib/lib/libyaml.so
-	cp $^ $@
+	cp -Lp $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libyaml.so: packages/libyaml/libyaml.so
+	cp -Lp $^ $@
+endif
 
 # packages/libyaml/php-yaml.so: lib/lib/php/20230831/yaml.so
-# 	cp $^ $@
+# 	cp -Lp $^ $@

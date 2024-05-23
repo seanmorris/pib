@@ -23,6 +23,9 @@ SHARED_LIBS+= packages/iconv/libiconv.so
 PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 SKIP_LIBS+= -libiconv
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libiconv.so
+endif
 endif
 
 # lib/lib/php/20230831/iconv.so: ${PHPIZE} lib/lib/libiconv.so
@@ -43,7 +46,7 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33;4mBuilding Iconv\e[0m"
 	${DOCKER_RUN_IN_ICONV} autoconf
 	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_ICONV} emmake make -j`nproc` EMCC_CFLAGS='-fPIC -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_ICONV} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -O${OPTIMIZE} '
 	${DOCKER_RUN_IN_ICONV} emmake make install
 	${DOCKER_RUN_IN_ICONV} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 
@@ -51,4 +54,9 @@ lib/lib/libiconv.so: lib/lib/libiconv.a
 	${DOCKER_RUN_IN_ICONV} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/iconv/libiconv.so: lib/lib/libiconv.so
-	cp $^ $@
+	cp -Lp $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libiconv.so: packages/iconv/libiconv.so
+	cp -Lp $^ $@
+endif

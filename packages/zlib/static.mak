@@ -23,6 +23,9 @@ SHARED_LIBS+= packages/zlib/libz.so
 PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SKIP_LIBS+= -lz
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libz.so
+endif
 endif
 
 third_party/zlib/.gitignore:
@@ -42,4 +45,10 @@ lib/lib/libz.a: third_party/zlib/.gitignore
 lib/lib/libz.so: lib/lib/libz.a
 
 packages/zlib/libz.so: lib/lib/libz.so
-	cp $^ $@
+	cp -Lp $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libz.so: packages/zlib/libz.so
+	cp -Lp $^ $@
+endif
+

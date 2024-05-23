@@ -1,6 +1,6 @@
 #!/usr/bin/env make
 
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts third_party/preload test archives
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts third_party/preload test archives assets
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
@@ -230,6 +230,7 @@ endif
 EXTRA_CFLAGS=
 ZEND_EXTRA_LIBS=
 SKIP_LIBS=
+PHP_ASSET_LIST=
 
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
@@ -457,6 +458,7 @@ build/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|_setTempRet0|setTempRet0|g' $@
 
 build/php-worker.js: BUILD_TYPE=js
 build/php-worker.js: ENVIRONMENT=worker
@@ -747,6 +749,8 @@ deep-clean:
 		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
 		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
 		dist/* sqlite-* .cache/pre.js .cache/config-cache
+
+assets: ${PHP_ASSET_LIST}
 
 show-ports:
 	${DOCKER_RUN} emcc --show-ports

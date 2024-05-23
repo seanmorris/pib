@@ -23,6 +23,9 @@ SHARED_LIBS+= packages/libxml/libxml2.so
 PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libxml2.so
+endif
 endif
 
 third_party/libxml2/.gitignore:
@@ -43,3 +46,8 @@ lib/lib/libxml2.so: lib/lib/libxml2.a
 
 packages/libxml/libxml2.so: lib/lib/libxml2.so
 	cp -L $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libxml.so: packages/libxml/libxml2.so
+	cp -Lp $^ $@
+endif

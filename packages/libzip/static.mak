@@ -23,6 +23,9 @@ CONFIGURE_FLAGS+= --with-zip
 PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libzip.so
+endif
 endif
 
 third_party/libzip/.gitignore:
@@ -39,7 +42,7 @@ lib/lib/libzip.a: third_party/libzip/.gitignore lib/lib/libz.a
 		-DZLIB_LIBRARY=/src/lib/lib/libz.a \
 		-DZLIB_INCLUDE_DIR=/src/lib/include/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-fPIC"
+		-DCMAKE_C_FLAGS="-fPIC -O${OPTIMIZE}"
 	${DOCKER_RUN_IN_LIBZIP} emmake make -ej${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBZIP} emmake make install;
 
@@ -47,4 +50,9 @@ lib/lib/libzip.so: lib/lib/libzip.a
 	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/libzip/libzip.so: lib/lib/libzip.so
-	cp $^ $@
+	cp -Lp $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libzip.so: packages/libzip/libzip.so
+	cp -Lp $^ $@
+endif

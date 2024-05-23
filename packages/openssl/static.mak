@@ -24,6 +24,9 @@ PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -sSIDE_MODULE=1 -sSHARED_MEMORY -O${OPTIMIZE}' -eCXX='emcc -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE}' -w /src/third_party/openssl/ emscripten-builder
 TEST_LIST+=$(shell ls packages/openssl/test/*.mjs)
 SKIP_LIBS+= -lssl -lcrypto
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libssl.so ${PHP_ASSET_PATH}/libcrypto.so
+endif
 endif
 
 third_party/openssl/.gitignore:
@@ -46,7 +49,15 @@ lib/lib/libcrypto.so: lib/lib/libcrypto.a
 	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/openssl/libssl.so: lib/lib/libssl.so
-	cp $^ $@
+	cp -Lp $^ $@
 
 packages/openssl/libcrypto.so: lib/lib/libcrypto.so
-	cp $^ $@
+	cp -Lp $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libssl.so: packages/openssl/libssl.so
+	cp -Lp $^ $@
+
+${PHP_ASSET_PATH}/libcrypto.so: packages/openssl/libcrypto.so
+	cp -Lp $^ $@
+endif

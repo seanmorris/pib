@@ -29,6 +29,9 @@ PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
 SHARED_LIBS+= packages/tidy/libtidy.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -ltidy
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libtidy.so
+endif
 endif
 
 third_party/tidy-html5/.gitignore:
@@ -61,3 +64,8 @@ lib/lib/libtidy.so:  third_party/tidy-html5/.gitignore
 
 packages/tidy/libtidy.so: lib/lib/libtidy.so
 	cp -rL $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libtidy.so: packages/tidy/libtidy.so
+	cp -Lp $^ $@
+endif

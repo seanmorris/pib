@@ -22,6 +22,9 @@ SHARED_LIBS+= packages/libjpeg/libjpeg.so
 PHP_CONFIGURE_DEPS+= packages/libjpeg/libjpeg.so
 TEST_LIST+=$(shell ls packages/libjpeg/test/*.mjs)
 SKIP_LIBS+= -ljpeg
+ifdef PHP_ASSET_PATH
+PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libjpeg.so
+endif
 endif
 
 third_party/jpeg-9f/README:
@@ -40,3 +43,8 @@ lib/lib/libjpeg.so: lib/lib/libjpeg.a
 
 packages/libjpeg/libjpeg.so: lib/lib/libjpeg.so
 	cp -rL $^ $@
+
+ifdef PHP_ASSET_PATH
+${PHP_ASSET_PATH}/libjpeg.so: packages/libjpeg/libjpeg.so
+	cp -Lp $^ $@
+endif

@@ -8,6 +8,7 @@
 		"LICENSE",
 		"NOTICE",
 		"README.md",
-		"static.mak"
+		"static.mak",
+		"libz.so"
 	]
 }
