@@ -3,8 +3,8 @@
 LIBICU_VERSION=72-1
 LIBICU_TAG?=release-${LIBICU_VERSION}
 LIBICU_DATFILE=lib/share/icu/72.1/icudt72l.dat
-DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -e CFLAGS=-O0 -e CXXFLAGS=-O0 -w /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source emscripten-builder
-
+DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
+DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source emscripten-builder
 ifeq (${PHP_VERSION},7.4)
 LIBICU_VERSION=69-1
 LIBICU_DATFILE=lib/share/icu/69.1/icudt69l.dat
@@ -29,11 +29,9 @@ endif
 ifeq (${WITH_ICU},static)
 EXTRA_FLAGS+=-DU_STATIC_IMPLEMENTATION
 ARCHIVES+=lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a
-DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -e CFLAGS='-fPIC -O${SUB_OPTIMIZE}' -e CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
 endif
 
 ifeq (${WITH_ICU},shared)
-DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -e CFLAGS='-fPIC -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}' -e CXXFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}' -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 PHP_CONFIGURE_DEPS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
 SHARED_LIBS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
@@ -57,25 +55,25 @@ ICU_DATA_FILTER_FILE=/src/packages/libicu/filter.json
 lib/lib/libicudata.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
 	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
 	${DOCKER_RUN_IN_LIBICU_ALT} ./configure --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive
-	${DOCKER_RUN_IN_LIBICU_ALT} make -ej${CPU_COUNT} VERBOSE=1
+	${DOCKER_RUN_IN_LIBICU_ALT} make -ej${CPU_COUNT} VERBOSE=1 CFLAGS=-O0 CXXFLAGS=-O0
 	${DOCKER_RUN_IN_LIBICU} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive ICU_DATA_FILTER_FILE=${ICU_DATA_FILTER_FILE}
-	- ${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1
+	- ${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1 CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	${DOCKER_RUN_IN_LIBICU} rm -rf /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
 	${DOCKER_RUN_IN_LIBICU} cp -rfv /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
 	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
-	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1
+	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1 CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	${DOCKER_RUN_IN_LIBICU} emmake make install
 
 lib/lib/libicudata.so: third_party/libicu-${LIBICU_VERSION}/.gitignore
 	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
 	${DOCKER_RUN_IN_LIBICU_ALT} ./configure --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive
-	${DOCKER_RUN_IN_LIBICU_ALT} make -ej${CPU_COUNT} VERBOSE=1
+	${DOCKER_RUN_IN_LIBICU_ALT} make -ej${CPU_COUNT} VERBOSE=1 CFLAGS=-O0 CXXFLAGS=-O0
 	${DOCKER_RUN_IN_LIBICU} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --enable-shared --with-data-packaging=archive ICU_DATA_FILTER_FILE=${ICU_DATA_FILTER_FILE}
-	- ${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1
+	- ${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1 CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	${DOCKER_RUN_IN_LIBICU} rm -rf /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
 	${DOCKER_RUN_IN_LIBICU} cp -rfv /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
 	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
-	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1
+	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1 CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	${DOCKER_RUN_IN_LIBICU} emmake make install
 
 icu-clean:
