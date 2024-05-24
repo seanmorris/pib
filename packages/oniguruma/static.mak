@@ -14,6 +14,7 @@ endif
 ifeq (${WITH_ONIGURUMA},static)
 ARCHIVES+= lib/lib/libonig.a
 CONFIGURE_FLAGS+= --with-onig
+SKIP_LIBS+= -lonig
 endif
 
 ifeq (${WITH_ONIGURUMA},shared)
@@ -22,7 +23,7 @@ SHARED_LIBS+= packages/oniguruma/libonig.so
 PHP_CONFIGURE_DEPS+= packages/oniguruma/libonig.so
 SKIP_LIBS+= -lonig
 ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libonig.so
+PHP_ASSET_LIST+= libonig.so
 endif
 endif
 
@@ -45,18 +46,17 @@ lib/lib/libonig.a: third_party/oniguruma/.gitignore
 	@ echo -e "\e[33;4mBuilding ONIGURUMA\e[0m"
 	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./autogen.sh
 	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./configure --prefix=/src/lib/ --enable-shared=yes --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_ONIGURUMA} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_ONIGURUMA} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} '
 	${DOCKER_RUN_IN_ONIGURUMA} emmake make install
 
 lib/lib/libonig.so: lib/lib/libonig.a
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/oniguruma/libonig.so: lib/lib/libonig.so
 	cp -Lp $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libonig.so: packages/oniguruma/libonig.so
+$(addsuffix /libonig.so,$(sort ${SHARED_ASSET_PATHS})): packages/oniguruma/libonig.so
 	cp -Lp $^ $@
-endif
 
 # packages/oniguruma/php-mbstring.so: lib/lib/php/20230831/mbstring.so
 # 	cp -Lp $^ $@

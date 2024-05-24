@@ -120,6 +120,7 @@ MAXIMUM_MEMORY ?=4096MB
 ASSERTIONS     ?=0
 SYMBOLS        ?=0
 OPTIMIZE       ?=2
+SUB_OPTIMIZE   ?=OPTIMIZE
 RELEASE_SUFFIX ?=
 
 ## End of defaults
@@ -231,7 +232,15 @@ EXTRA_CFLAGS=
 ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
+PHP_ASSET_PATH?=${PHP_DIST_DIR}
+SHARED_ASSET_PATHS=${PHP_ASSET_PATH}
 
+
+ifneq (${PHP_ASSET_PATH},${PHP_DIST_DIR})
+PHP_ASSET_LIST+=
+endif
+
+-include packages/php-cgi-wasm/static.mak
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ifdef PRELOAD_ASSETS
@@ -390,8 +399,8 @@ BUILD_FLAGS=-f ../../php.mk -j${CPU_COUNT} \
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
 	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
-	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion -Wimplicit-function-declaration -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
-	EXTRA_CXXFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion -Wimplicit-function-declaration -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
+	EXTRA_CFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion -Wimplicit-function-declaration -fPIC -flto ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
+	EXTRA_CXXFLAGS='-Wno-incompatible-function-pointer-types -Wno-int-conversion -Wimplicit-function-declaration -fPIC -flto ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		-fPIC ${SYMBOL_FLAGS}                    \
@@ -411,6 +420,7 @@ BUILD_FLAGS=-f ../../php.mk -j${CPU_COUNT} \
 		-s MAIN_MODULE=2                         \
 		-s MODULARIZE=1                          \
 		-s ASYNCIFY                              \
+		-s ASYNCIFY_IGNORE_INDIRECT=1            \
 		-I /src/third_party/php${PHP_VERSION}-src/ \
 		-I /src/third_party/php${PHP_VERSION}-src/Zend  \
 		-I /src/third_party/php${PHP_VERSION}-src/main  \
@@ -427,7 +437,7 @@ ifneq (${PRE_JS_FILES},)
 DEPENDENCIES+= .cache/pre.js
 endif
 
-DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
+DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST})
 
 READ_ASYNC_OLD=readAsync=\(url,onload,onerror\)=>\{var xhr=new XMLHttpRequest\;xhr.open\("GET",url,true\)\;xhr.responseType="arraybuffer"\;xhr.onload=\(\)=>\{if\(xhr.status==200..xhr.status==0&&xhr.response\)\{onload\(xhr.response\)\;return\}onerror\(\)\}\;xhr.onerror=onerror\;xhr.send\(null\)\}
 READ_ASYNC_NEW=readAsync=(url, onload, onerror)  =>  {fetch(url).then(response => response.arrayBuffer()).then(onload).catch(onerror)};
@@ -615,6 +625,9 @@ ifneq (${PRELOAD_ASSETS},)
 	brotli -9 $@.data
 endif
 endif
+ifneq (${PHP_DIST_DIR},${PHP_ASSET_PATH})
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+endif
 
 ${PHP_DIST_DIR}/%.mjs: build/%.mjs
 	cp $^ $@
@@ -642,6 +655,9 @@ ifneq (${PRELOAD_ASSETS},)
 	brotli -9 $@.data
 endif
 endif
+ifneq (${PHP_DIST_DIR},${PHP_ASSET_PATH})
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+endif
 
 ${PHP_DIST_DIR}/php-worker.js: build/php-worker.js
 	cp $^ $@
@@ -658,6 +674,9 @@ ifneq (${BROTLI},0)
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
 endif
+ifneq (${PHP_DIST_DIR},${PHP_ASSET_PATH})
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+endif
 
 ${PHP_DIST_DIR}/php-worker.mjs: build/php-worker.mjs
 	cp $^ $@
@@ -673,6 +692,9 @@ ifneq (${BROTLI},0)
 	brotli -9 $@
 	rm -f $@.wasm.br
 	brotli -9 $@.wasm
+endif
+ifneq (${PHP_DIST_DIR},${PHP_ASSET_PATH})
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
 endif
 
 ########### Clerical stuff. ###########
@@ -716,41 +738,20 @@ patch/php8.0.patch:
 # 	bash -c 'cd third_party/libicu-72-1 && git diff > ../../patch/libicu.patch'
 # 	perl -pi -w -e 's|([ab])/|\1/third_party/libicu-72-1/|g' ./patch/libicu.patch
 
-clean:
-	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.data *.br  *.gz
-	${DOCKER_RUN} rm -rf lib/lib/${PHP_AR}.* lib/lib/php lib/include/php build/php* \
-		packages/php-wasm/*.js packages/php-wasm/*.mjs  packages/php-wasm/*.wasm  packages/php-wasm/*.data \
-		packages/php-wasm/*.br packages/php-wasm/*.gz \
-		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
-		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
-		third_party/preload .cache/pre.js .cache/config-cache
-	${DOCKER_RUN_IN_PHP} rm -fv configured
-	${DOCKER_RUN_IN_PHP} make clean
-
 php-clean:
-	${DOCKER_RUN_IN_PHP} rm -fv configured
-	${DOCKER_RUN_IN_PHP} rm -f /src/lib/lib/${PHP_AR}.a
-	${DOCKER_RUN_IN_PHP} rm -f /src/third_party/php${PHP_VERSION}-src/sapi/cgi/*.wasm third_party/php${PHP_VERSION}-src/sapi/cgi/*.mjs third_party/php${PHP_VERSION}-src/sapi/cgi/*.js third_party/php${PHP_VERSION}-src/sapi/cgi/*.data
-	${DOCKER_RUN_IN_PHP} rm -f /src/third_party/php${PHP_VERSION}-src/sapi/cli/*.wasm third_party/php${PHP_VERSION}-src/sapi/cli/*.mjs third_party/php${PHP_VERSION}-src/sapi/cli/*.js third_party/php${PHP_VERSION}-src/sapi/cli/*.data
 	${DOCKER_RUN_IN_PHP} make clean
 
-deep-clean:
-	${DOCKER_RUN} rm -fv  *.js *.mjs *.wasm *.wasm.map *.data *.br  *.gz
-	${DOCKER_RUN} rm -rfv \
-		third_party/php${PHP_VERSION}-src lib/* build/* \
-		third_party/libxml2 third_party/tidy-html5 \
-		third_party/libicu-src third_party/${SQLITE_DIR} third_party/libiconv-1.17 \
-		third_party/freetype-2.10.0 third_party/freetype third_party/libyaml* \
-		third_party/gd third_party/jpeg-9f third_party/libicu* third_party/oniguruma \
-		third_party/libjpeg third_party/libpng third_party/openssl third_party/zlib \
-		third_party/vrzno third_party/libzip third_party/preload \
-		packages/php-wasm/*.js packages/php-wasm/*.mjs  packages/php-wasm/*.wasm  packages/php-wasm/*.data \
-		packages/php-wasm/*.br packages/php-wasm/*.gz \
-		packages/php-cgi-wasm/*.js packages/php-cgi-wasm/*.mjs  packages/php-cgi-wasm/*.wasm  packages/php-cgi-wasm/*.data \
-		packages/php-cgi-wasm/*.br packages/php-cgi-wasm/*.gz \
-		dist/* sqlite-* .cache/pre.js .cache/config-cache
+clean deep-clean:
+	${DOCKER_RUN} rm -rf \
+		lib/* \
+		third_party/* \
+		packages/*/*.so \
+		packages/php-wasm/*.mjs \
+		packages/php-cgi-wasm/*.mjs \
+		packages/php-wasm/*.mjs* \
+		packages/php-cgi-wasm/*.mjs* \
 
-assets: ${PHP_ASSET_LIST}
+assets: $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST})
 
 show-ports:
 	${DOCKER_RUN} emcc --show-ports
@@ -785,9 +786,5 @@ NPM_PUBLISH_DRY?=--dry-run
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
 
-test: node-mjs
+test: ${TEST_LIST} node-mjs
 	node --test ${TEST_LIST} `ls test/*.mjs`
-
--include packages/php-cgi-wasm/static.mak
-
-lol:

@@ -24,7 +24,7 @@ PHP_CONFIGURE_DEPS+= packages/libpng/libpng.so
 TEST_LIST+=$(shell ls packages/libpng/test/*.mjs)
 SKIP_LIBS+= -lpng16
 ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libpng.so
+PHP_ASSET_LIST+= libpng.so
 endif
 endif
 
@@ -40,20 +40,20 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-fPIC -O${OPTIMIZE} " \
+		-DCMAKE_C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE} " \
 		-DZLIB_LIBRARY="/src/lib/lib/libz.a" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
 	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
-lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.a
+lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
 	@ echo -e "\e[33;4mBuilding LIBPNG\e[0m"
 	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_PROJECT_INCLUDE=/src/source/force-shared.cmake \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE}" \
+		-DCMAKE_C_FLAGS="-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}" \
 		-DZLIB_LIBRARY="/src/lib/lib/libz.so" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
@@ -63,7 +63,5 @@ lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.a
 packages/libpng/libpng.so: lib/lib/libpng.so
 	cp -rL $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libpng.so: packages/libpng/libpng.so
+$(addsuffix /libpng.so,$(sort ${SHARED_ASSET_PATHS})): packages/libpng/libpng.so
 	cp -Lp $^ $@
-endif

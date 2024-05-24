@@ -15,16 +15,16 @@ ifeq (${WITH_LIBJPEG},static)
 ARCHIVES+= lib/lib/libjpeg.a
 CONFIGURE_FLAGS+= --with-jpeg
 TEST_LIST+=$(shell ls packages/libjpeg/test/*.mjs)
+SKIP_LIBS+= -ljpeg
 endif
 
 ifeq (${WITH_LIBJPEG},shared)
+CONFIGURE_FLAGS+= --with-jpeg
 SHARED_LIBS+= packages/libjpeg/libjpeg.so
 PHP_CONFIGURE_DEPS+= packages/libjpeg/libjpeg.so
 TEST_LIST+=$(shell ls packages/libjpeg/test/*.mjs)
 SKIP_LIBS+= -ljpeg
-ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libjpeg.so
-endif
+PHP_ASSET_LIST+= libjpeg.so
 endif
 
 third_party/jpeg-9f/README:
@@ -36,15 +36,14 @@ third_party/jpeg-9f/README:
 lib/lib/libjpeg.a: third_party/jpeg-9f/README
 	@ echo -e "\e[33;4mBuilding LIBJPEG\e[0m"
 	${DOCKER_RUN_IN_LIBJPEG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIBJPEG} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_LIBJPEG} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} '
 	${DOCKER_RUN_IN_LIBJPEG} emmake make install
 
 lib/lib/libjpeg.so: lib/lib/libjpeg.a
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/libjpeg/libjpeg.so: lib/lib/libjpeg.so
 	cp -rL $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libjpeg.so: packages/libjpeg/libjpeg.so
+$(addsuffix /libjpeg.so,$(sort ${SHARED_ASSET_PATHS})): packages/libjpeg/libjpeg.so
 	cp -Lp $^ $@
-endif

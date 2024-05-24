@@ -14,8 +14,5 @@
 		"README.md",
 		"static.mak",
 		"libiconv.so"
-	],
-	"shared": [
-		"libiconv.so"
 	]
 }

@@ -15,6 +15,7 @@ ifeq (${WITH_LIBXML},static)
 ARCHIVES+= lib/lib/libxml2.a
 CONFIGURE_FLAGS+= --with-libxml --enable-xml --enable-dom --enable-simplexml
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
+SKIP_LIBS+= -lxml2
 endif
 
 ifeq (${WITH_LIBXML},shared)
@@ -24,7 +25,7 @@ PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
 ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libxml2.so
+PHP_ASSET_LIST+= libxml2.so
 endif
 endif
 
@@ -39,15 +40,14 @@ lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33;4mBuilding LibXML2\e[0m"
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIBXML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} ' Z_LIBS=''
+	${DOCKER_RUN_IN_LIBXML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} ' Z_LIBS=''
 	${DOCKER_RUN_IN_LIBXML} emmake make install
 
 lib/lib/libxml2.so: lib/lib/libxml2.a
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/libxml/libxml2.so: lib/lib/libxml2.so
 	cp -L $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libxml.so: packages/libxml/libxml2.so
+$(addsuffix /libxml2.so,$(sort ${SHARED_ASSET_PATHS})): packages/libxml/libxml2.so
 	cp -Lp $^ $@
-endif

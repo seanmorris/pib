@@ -600,30 +600,38 @@ WITH_FREETYPE=1
 The following options are availavle for building with various PHP extensions:
 
 ```
-WITH_BCMATH    # Enabled by default
-WITH_CALENDAR  # Enabled by default
-WITH_CTYPE     # Enabled by default
-WITH_EXIF      # Enabled by default
-WITH_FILTER    # Enabled by default
-WITH_MBSTRING  # Enabled by default
-WITH_PHAR      # Enabled by default
-WITH_TOKENIZER # Enabled by default
+WITH_BCMATH      # [0, 1] Enabled by default
+WITH_CALENDAR    # [0, 1] Enabled by default
+WITH_CTYPE       # [0, 1] Enabled by default
+WITH_EXIF        # [0, 1] Enabled by default
+WITH_FILTER      # [0, 1] Enabled by default
+WITH_MBSTRING    # [0, 1] Enabled by default
+WITH_PHAR        # [0, 1] Enabled by default
+WITH_TOKENIZER   # [0, 1] Enabled by default
+WITH_VRZNO       # [0, 1] Enabled by default
+```
 
-WITH_ICONV     # Enabled by default
-WITH_LIBXML    # Enabled by default
-WITH_LIBZIP    # Enabled by default
-WITH_SQLITE    # Enabled by default
-WITH_VRZNO     # Enabled by default
-WITH_ZLIB      # Enabled by default
+The following libraries may be compiled as static or shared libraries:
 
-WITH_OPENSSL
-WITH_GD
-WITH_LIBPNG
-WITH_LIBJPEG
-WITH_FREETYPE
-WITH_ICU
-WITH_TIDY
-WITH_EXIF
+```
+WITH_ICONV       # [0, 1, static, shared] Enabled (shared) by default
+WITH_LIBXML      # [0, 1, static, shared] Enabled (shared) by default
+WITH_LIBZIP      # [0, 1, static, shared] Enabled (shared) by default
+WITH_SQLITE      # [0, 1, static, shared] Enabled (shared) by default
+WITH_ZLIB        # [0, 1, static, shared] Enabled (shared) by default
+
+WITH_OPENSSL     # [0, 1, static, shared]
+WITH_GD          # [0, 1, static, shared]
+WITH_LIBPNG      # [0, 1, static, shared]
+WITH_LIBJPEG     # [0, 1, static, shared]
+WITH_FREETYPE    # [0, 1, static, shared]
+WITH_ICU         # [0, 1, static, shared]
+WITH_TIDY        # [0, 1, static, shared]
+
+WITH_YAML=1      # [0, 1, static, shared]
+WITH_TIDY=1      # [0, 1, static, shared]
+WITH_ONIGURUMA=1 # [0, 1, static, shared]
+
 ```
 
 ## 📦 Packaging files

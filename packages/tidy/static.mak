@@ -30,7 +30,7 @@ SHARED_LIBS+= packages/tidy/libtidy.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -ltidy
 ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libtidy.so
+PHP_ASSET_LIST+= libtidy.so
 endif
 endif
 
@@ -47,25 +47,15 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} "
-	${DOCKER_RUN_IN_TIDY} emmake make -j${CPU_COUNT};
+		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC "
+	${DOCKER_RUN_IN_TIDY} emmake make -j`nproc`;
 	${DOCKER_RUN_IN_TIDY} emmake make install;
 
-lib/lib/libtidy.so:  third_party/tidy-html5/.gitignore
-	@ echo -e "\e[33;4mBuilding LibTidy\e[0m"
-	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
-		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DBUILD_SHARED_LIB:BOOL=true \
-		-DCMAKE_PROJECT_INCLUDE=/src/source/force-shared.cmake \
-		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} "
-	${DOCKER_RUN_IN_TIDY} emmake make -j${CPU_COUNT};
-	${DOCKER_RUN_IN_TIDY} emmake make install;
+lib/lib/libtidy.so: lib/lib/libtidy.a
+	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/tidy/libtidy.so: lib/lib/libtidy.so
 	cp -rL $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libtidy.so: packages/tidy/libtidy.so
+$(addsuffix /libtidy.so,$(sort ${SHARED_ASSET_PATHS})): packages/tidy/libtidy.so
 	cp -Lp $^ $@
-endif

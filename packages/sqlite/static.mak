@@ -25,7 +25,7 @@ PHP_CONFIGURE_DEPS+= packages/sqlite/libsqlite3.so
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
 ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libsqlite3.so
+PHP_ASSET_LIST+= libsqlite3.so
 endif
 endif
 
@@ -40,16 +40,14 @@ third_party/${SQLITE_DIR}/sqlite3.c:
 lib/lib/libsqlite3.a: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33;4mBuilding LibSqlite3\e[0m"
 	${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_SQLITE} emmake make -j${CPU_COUNT} CFLAGS='-fPIC -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_SQLITE} emmake make -j${CPU_COUNT} CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} '
 	${DOCKER_RUN_IN_SQLITE} emmake make install
 
 lib/lib/libsqlite3.so: lib/lib/libsqlite3.a
-	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/sqlite/libsqlite3.so: lib/lib/libsqlite3.so
 	cp -Lp $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libsqlite3.so: packages/sqlite/libsqlite3.so
+$(addsuffix /libsqlite3.so,$(sort ${SHARED_ASSET_PATHS})): packages/sqlite/libsqlite3.so
 	cp -Lp $^ $@
-endif

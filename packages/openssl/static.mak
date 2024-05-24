@@ -1,6 +1,7 @@
 #!/usr/bin/env make
 
 OPENSSL_TAG?=OpenSSL_1_1_1-stable
+DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -flto -O${SUB_OPTIMIZE}' -eCXX='emcc -fPIC -O${SUB_OPTIMIZE}' -w /src/third_party/openssl/ emscripten-builder
 
 ifeq ($(filter ${WITH_OPENSSL},0 1 shared static),)
 $(error WITH_OPENSSL MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -10,23 +11,21 @@ ifeq (${WITH_OPENSSL},1)
 WITH_OPENSSL=static
 endif
 
-ifeq (${WITH_OPENSSL},static)
+ifneq ($(filter ${WITH_OPENSSL},shared static),)
+TEST_LIST+= packages/openssl/test/basic.mjs $(addprefix packages/openssl/test/,$(addsuffix .generated.mjs,openssl_digest_basic openssl_decrypt_basic))
 CONFIGURE_FLAGS+= --with-openssl
+endif
+
+ifeq (${WITH_OPENSSL},static)
 ARCHIVES+= lib/lib/libssl.a lib/lib/libcrypto.a
-DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -O${OPTIMIZE}' -eCXX='emcc -fPIC -O${OPTIMIZE}' -w /src/third_party/openssl/ emscripten-builder
-TEST_LIST+=$(shell ls packages/openssl/test/*.mjs)
 endif
 
 ifeq (${WITH_OPENSSL},shared)
+SKIP_LIBS+= -lssl -lcrypto
 CONFIGURE_FLAGS+= --with-openssl
 SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
-DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -sSIDE_MODULE=1 -sSHARED_MEMORY -O${OPTIMIZE}' -eCXX='emcc -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE}' -w /src/third_party/openssl/ emscripten-builder
-TEST_LIST+=$(shell ls packages/openssl/test/*.mjs)
-SKIP_LIBS+= -lssl -lcrypto
-ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libssl.so ${PHP_ASSET_PATH}/libcrypto.so
-endif
+PHP_ASSET_LIST+= libssl.so libcrypto.so
 endif
 
 third_party/openssl/.gitignore:
@@ -43,10 +42,10 @@ lib/lib/libssl.a: third_party/openssl/.gitignore
 	${DOCKER_RUN_IN_OPENSSL} emmake make install_sw
 
 lib/lib/libssl.so: lib/lib/libssl.a
-	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 lib/lib/libcrypto.so: lib/lib/libcrypto.a
-	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/openssl/libssl.so: lib/lib/libssl.so
 	cp -Lp $^ $@
@@ -54,10 +53,12 @@ packages/openssl/libssl.so: lib/lib/libssl.so
 packages/openssl/libcrypto.so: lib/lib/libcrypto.so
 	cp -Lp $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libssl.so: packages/openssl/libssl.so
+$(addsuffix /libcrypto.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libcrypto.so
 	cp -Lp $^ $@
 
-${PHP_ASSET_PATH}/libcrypto.so: packages/openssl/libcrypto.so
+$(addsuffix /libssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libssl.so
 	cp -Lp $^ $@
-endif
+
+packages/openssl/test/%.generated.mjs: third_party/php8.3-src/ext/openssl/tests/%.phpt
+	node bin/translate-test.js $^ > $@
+

@@ -68,11 +68,17 @@ function Embedded() {
 	const codeChanged = newValue => input.current = newValue;
 
 	const runCode = useCallback(() => {
-		setStatusMessage('Executing...');
-		setStdOut('');
-		setStdErr('');
-		setStdRet('');
 		setRunning(true);
+
+		setStatusMessage('Executing...');
+
+		if(!persist.current.checked)
+		{
+			setStdOut('');
+			setStdErr('');
+		}
+
+		setStdRet('');
 
 		const phpCode = editor.current.editor.getValue();
 
@@ -122,9 +128,15 @@ function Embedded() {
 			return;
 		}
 
+		setStdOut('');
+		setStdErr('');
+		setStdRet('');
+
 		fetch(process.env.PUBLIC_URL + '/scripts/' + demoName)
 		.then(response => response.text())
 		.then(async phpCode => {
+			editor.current.editor.setValue(phpCode, -1);
+
 			refreshPhp();
 
 			selectDemoBox.current.value = demoName;
@@ -132,8 +144,6 @@ function Embedded() {
 			await phpRef.current.binary;
 
 			document.querySelector('#example').innerHTML = '';
-
-			editor.current.editor.setValue(phpCode, -1);
 
 			const firstLine = String(phpCode.split(/\n/).shift());
 			const settings  = JSON.parse(firstLine.split('//').pop()) || {};
@@ -222,7 +232,7 @@ function Embedded() {
 
 		if(settings.autorun)
 		{
-			setTimeout(runCode, 16);
+			setTimeout(runCode, 1);
 		}
 
 		if(editor.current && query.has('code'))

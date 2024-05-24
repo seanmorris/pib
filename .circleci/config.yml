@@ -32,7 +32,7 @@ jobs:
       - checkout
       - run: npm install
       - run: cp .circleci/.env_8.3.ci .env
-      - run: make archives
+      - run: time make archives
       - persist_to_workspace:
           root: ~/
           paths:
@@ -47,7 +47,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.3.ci .env
-      - run: make test
+      - run: time make test
 
   make-test-8-2:
     parallelism: 1
@@ -58,7 +58,7 @@ jobs:
       - attach_workspace:
             at: ~/
       - run: cp .circleci/.env_8.2.ci .env
-      - run: make test
+      - run: time make test
 
   make-test-8-1:
     parallelism: 1
@@ -69,7 +69,7 @@ jobs:
       - attach_workspace:
             at: ~/
       - run: cp .circleci/.env_8.1.ci .env
-      - run: make test
+      - run: time make test
 
   make-test-8-0:
     parallelism: 1
@@ -80,4 +80,4 @@ jobs:
       - attach_workspace:
             at: ~/
       - run: cp .circleci/.env_8.0.ci .env
-      - run: make test
+      - run: time make test

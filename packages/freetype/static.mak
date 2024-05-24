@@ -24,7 +24,7 @@ PHP_CONFIGURE_DEPS+= packages/freetype/libfreetype.so
 TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
 SKIP_LIBS+= -lfreetype
 ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libfreetype.so
+PHP_ASSET_LIST+= libfreetype.so
 endif
 endif
 
@@ -40,7 +40,7 @@ lib/lib/libfreetype.a: third_party/freetype-${FREETYPE_VERSION}/README
 	${DOCKER_RUN} mkdir third_party/freetype-${FREETYPE_VERSION}/build
 	${DOCKER_RUN_IN_FREETYPE} emcmake cmake .. \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
-		-DCMAKE_C_FLAGS="-fPIC -O${OPTIMIZE}"
+		-DCMAKE_C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}"
 	${DOCKER_RUN_IN_FREETYPE} bash -c 'echo "" > /src/third_party/freetype-${FREETYPE_VERSION}/build/CMakeFiles/freetype.dir/linklibs.rsp'
 	${DOCKER_RUN_IN_FREETYPE} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_FREETYPE} emmake make install
@@ -57,7 +57,7 @@ lib/lib/libfreetype.so: third_party/freetype-${FREETYPE_VERSION}/README lib/lib/
 		-DPNG_PNG_INCLUDE_DIR=/src/lib/include \
 		-DZLIB_INCLUDE_DIR="/src/lib/include" \
 		-DCMAKE_PROJECT_INCLUDE=/src/source/force-shared.cmake \
-		-DCMAKE_C_FLAGS="-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE}" \
+		-DCMAKE_C_FLAGS="-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}" \
 		..
 	${DOCKER_RUN_IN_FREETYPE} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_FREETYPE} emmake make install
@@ -65,7 +65,5 @@ lib/lib/libfreetype.so: third_party/freetype-${FREETYPE_VERSION}/README lib/lib/
 packages/freetype/libfreetype.so: lib/lib/libfreetype.so
 	cp -Lp $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libfreetype.so: packages/freetype/libfreetype.so
+$(addsuffix /libfreetype.so,$(sort ${SHARED_ASSET_PATHS})): packages/freetype/libfreetype.so
 	cp -Lp $^ $@
-endif

@@ -23,9 +23,7 @@ SHARED_LIBS+= packages/zlib/libz.so
 PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SKIP_LIBS+= -lz
-ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libz.so
-endif
+PHP_ASSET_LIST+= libz.so
 endif
 
 third_party/zlib/.gitignore:
@@ -37,18 +35,16 @@ third_party/zlib/.gitignore:
 
 lib/lib/libz.a: third_party/zlib/.gitignore
 	@ echo -e "\e[33;4mBuilding ZLib\e[0m"
-	${DOCKER_RUN_IN_ZLIB} emconfigure ./configure --prefix=/src/lib/ --static --shared
-	${DOCKER_RUN_IN_ZLIB} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} '
+	${DOCKER_RUN_IN_ZLIB} emconfigure ./configure --prefix=/src/lib/ --static
+	${DOCKER_RUN_IN_ZLIB} emmake make -j${CPU_COUNT} CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} '
 	${DOCKER_RUN_IN_ZLIB} emmake make install
 	${DOCKER_RUN_IN_ZLIB} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 
 lib/lib/libz.so: lib/lib/libz.a
+	${DOCKER_RUN_IN_ZLIB} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/zlib/libz.so: lib/lib/libz.so
 	cp -Lp $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libz.so: packages/zlib/libz.so
+$(addsuffix /libz.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/libz.so
 	cp -Lp $^ $@
-endif
-

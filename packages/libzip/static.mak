@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 
 LIBZIP_TAG?=v1.10.1
-DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -O${OPTIMIZE}" -w /src/third_party/libzip/ emscripten-builder
+DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/libzip/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBZIP},0 1 shared static),)
 $(error WITH_LIBZIP MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -24,7 +24,7 @@ PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
 ifdef PHP_ASSET_PATH
-PHP_ASSET_LIST+= ${PHP_ASSET_PATH}/libzip.so
+PHP_ASSET_LIST+= libzip.so
 endif
 endif
 
@@ -42,17 +42,15 @@ lib/lib/libzip.a: third_party/libzip/.gitignore lib/lib/libz.a
 		-DZLIB_LIBRARY=/src/lib/lib/libz.a \
 		-DZLIB_INCLUDE_DIR=/src/lib/include/ \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-fPIC -O${OPTIMIZE}"
+		-DCMAKE_C_FLAGS="-fPIC -O${SUB_OPTIMIZE}"
 	${DOCKER_RUN_IN_LIBZIP} emmake make -ej${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBZIP} emmake make install;
 
 lib/lib/libzip.so: lib/lib/libzip.a
-	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/libzip/libzip.so: lib/lib/libzip.so
 	cp -Lp $^ $@
 
-ifdef PHP_ASSET_PATH
-${PHP_ASSET_PATH}/libzip.so: packages/libzip/libzip.so
+$(addsuffix /libzip.so,$(sort ${SHARED_ASSET_PATHS})): packages/libzip/libzip.so
 	cp -Lp $^ $@
-endif
