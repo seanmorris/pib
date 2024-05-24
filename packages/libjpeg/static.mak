@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 
 JPEG_VERSION=v9f
-DOCKER_RUN_IN_LIBJPEG=${DOCKER_ENV} -w /src/third_party/jpeg-9f/ emscripten-builder
+DOCKER_RUN_IN_LIBJPEG=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}' -w /src/third_party/jpeg-9f/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBJPEG},0 1 shared static),)
 $(error WITH_LIBJPEG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -36,7 +36,7 @@ third_party/jpeg-9f/README:
 lib/lib/libjpeg.a: third_party/jpeg-9f/README
 	@ echo -e "\e[33;4mBuilding LIBJPEG\e[0m"
 	${DOCKER_RUN_IN_LIBJPEG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIBJPEG} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} '
+	${DOCKER_RUN_IN_LIBJPEG} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBJPEG} emmake make install
 
 lib/lib/libjpeg.so: lib/lib/libjpeg.a

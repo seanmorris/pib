@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 
 LIBYAML_TAG?=0.2.5
-DOCKER_RUN_IN_YAML=${DOCKER_ENV} -w /src/third_party/libyaml/ emscripten-builder
+DOCKER_RUN_IN_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libyaml/ emscripten-builder
 
 ifeq ($(filter ${WITH_YAML},0 1 shared static),)
 $(error WITH_YAML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -38,7 +38,7 @@ lib/lib/libyaml.a: third_party/libyaml/.gitignore
 	@ echo -e "\e[33;4mBuilding libyaml\e[0m"
 	${DOCKER_RUN_IN_YAML} emconfigure ./bootstrap
 	${DOCKER_RUN_IN_YAML} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_YAML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} '
+	${DOCKER_RUN_IN_YAML} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_YAML} emmake make install
 
 lib/lib/libyaml.so: lib/lib/libyaml.a

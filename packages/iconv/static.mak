@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 
 ICONV_TAG?=v1.17
-DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -w /src/third_party/libiconv-1.17/ emscripten-builder
+DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libiconv-1.17/ emscripten-builder
 
 ifeq ($(filter ${WITH_ICONV},0 1 shared static),)
 $(error WITH_ICONV MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -37,7 +37,7 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	@ echo -e "\e[33;4mBuilding Iconv\e[0m"
 	${DOCKER_RUN_IN_ICONV} autoconf
 	${DOCKER_RUN_IN_ICONV} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_ICONV} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} '
+	${DOCKER_RUN_IN_ICONV} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_ICONV} emmake make install
 	${DOCKER_RUN_IN_ICONV} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 

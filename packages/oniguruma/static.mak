@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 
 ONIGURUMA_TAG?=v6.9.9
-DOCKER_RUN_IN_ONIGURUMA=${DOCKER_ENV} -w /src/third_party/oniguruma/ emscripten-builder
+DOCKER_RUN_IN_ONIGURUMA=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/oniguruma/ emscripten-builder
 
 ifeq ($(filter ${WITH_ONIGURUMA},0 1 shared static),)
 $(error WITH_ONIGURUMA MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -46,7 +46,7 @@ lib/lib/libonig.a: third_party/oniguruma/.gitignore
 	@ echo -e "\e[33;4mBuilding ONIGURUMA\e[0m"
 	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./autogen.sh
 	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./configure --prefix=/src/lib/ --enable-shared=yes --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_ONIGURUMA} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} '
+	${DOCKER_RUN_IN_ONIGURUMA} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_ONIGURUMA} emmake make install
 
 lib/lib/libonig.so: lib/lib/libonig.a

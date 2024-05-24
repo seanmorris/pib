@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 
 LIBXML2_TAG?=v2.9.10
-DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -w /src/third_party/libxml2/ emscripten-builder
+DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}' -w /src/third_party/libxml2/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBXML},0 1 shared static),)
 $(error WITH_LIBXML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -40,7 +40,7 @@ lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	@ echo -e "\e[33;4mBuilding LibXML2\e[0m"
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIBXML} emmake make -j${CPU_COUNT} EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} ' Z_LIBS=''
+	${DOCKER_RUN_IN_LIBXML} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBXML} emmake make install
 
 lib/lib/libxml2.so: lib/lib/libxml2.a
