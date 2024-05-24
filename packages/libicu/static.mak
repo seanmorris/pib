@@ -73,7 +73,7 @@ lib/lib/libicudata.so: third_party/libicu-${LIBICU_VERSION}/.gitignore
 	${DOCKER_RUN_IN_LIBICU} rm -rf /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
 	${DOCKER_RUN_IN_LIBICU} cp -rfv /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
 	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
-	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1 CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
+	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT} VERBOSE=1 CFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}' CXXFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}'
 	${DOCKER_RUN_IN_LIBICU} emmake make install
 
 icu-clean:
