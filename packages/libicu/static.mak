@@ -3,8 +3,8 @@
 LIBICU_VERSION=72-1
 LIBICU_TAG?=release-${LIBICU_VERSION}
 LIBICU_DATFILE=lib/share/icu/72.1/icudt72l.dat
-DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
-DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source emscripten-builder
+DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
+DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source emscripten-builder
 ifeq (${PHP_VERSION},7.4)
 LIBICU_VERSION=69-1
 LIBICU_DATFILE=lib/share/icu/69.1/icudt69l.dat
@@ -52,33 +52,65 @@ ${LIBICU_DATFILE}: lib/lib/libicudata.a
 
 ICU_DATA_FILTER_FILE=/src/packages/libicu/filter.json
 
-lib/lib/libicudata.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
+lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
 	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
-	${DOCKER_RUN_IN_LIBICU_ALT} ./configure --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive
+	${DOCKER_RUN_IN_LIBICU_ALT} ./configure \
+		--with-data-packaging=archive \
+		--without-assembly \
+		--disable-draft    \
+		--disable-extras   \
+		--disable-layoutex \
+		--disable-tests    \
+		--disable-samples  \
+		--enable-static    \
+		--disable-shared   \
+		CFLAGS='-O0' \
+		CXXFLAGS='-O0'
 	${DOCKER_RUN_IN_LIBICU_ALT} make -ej${CPU_COUNT}
-	${DOCKER_RUN_IN_LIBICU} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive ICU_DATA_FILTER_FILE=${ICU_DATA_FILTER_FILE}
-	- ${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT}
-	${DOCKER_RUN_IN_LIBICU} rm -rf /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
-	${DOCKER_RUN_IN_LIBICU} cp -rfv /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
+	${DOCKER_RUN_IN_LIBICU} emconfigure ./configure \
+		--prefix=/src/lib/ \
+		--cache-file=/tmp/config-cache \
+		--without-assembly \
+		--disable-draft    \
+		--disable-extras   \
+		--disable-layoutex \
+		--disable-tests    \
+		--disable-samples  \
+		--enable-static    \
+		--disable-shared   \
+		--with-data-packaging=archive \
+		ICU_DATA_FILTER_FILE=${ICU_DATA_FILTER_FILE} \
+		CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' \
+		CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
+	- ${DOCKER_RUN_IN_LIBICU} emmake make -j${CPU_COUNT}
+	${DOCKER_RUN_IN_LIBICU} rm -rf \
+		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin \
+		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* \
+		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
+	${DOCKER_RUN_IN_LIBICU} cp -rfv \
+		/src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin \
+		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
 	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
-	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT}
+	${DOCKER_RUN_IN_LIBICU} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBICU} emmake make install
 
-lib/lib/libicudata.so: third_party/libicu-${LIBICU_VERSION}/.gitignore
-	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
-	${DOCKER_RUN_IN_LIBICU_ALT} ./configure --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --disable-shared --with-data-packaging=archive
-	${DOCKER_RUN_IN_LIBICU_ALT} make -ej${CPU_COUNT}
-	${DOCKER_RUN_IN_LIBICU} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --without-assembly --disable-draft --disable-extras --disable-layoutex --disable-tests --disable-samples --enable-static --enable-shared --with-data-packaging=archive ICU_DATA_FILTER_FILE=${ICU_DATA_FILTER_FILE}
-	- ${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT}
-	${DOCKER_RUN_IN_LIBICU} rm -rf /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
-	${DOCKER_RUN_IN_LIBICU} cp -rfv /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
-	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
-	${DOCKER_RUN_IN_LIBICU} emmake make -ej${CPU_COUNT}
-	${DOCKER_RUN_IN_LIBICU} emmake make install
+lib/lib/libicui18n.so: lib/lib/libicui18n.a
+	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
-icu-clean:
-	${DOCKER_RUN_IN_LIBICU} make clean
-	${DOCKER_RUN} rm -rf lib/lib/libicu*
+lib/lib/libicuio.so: lib/lib/libicuio.a
+	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+
+lib/lib/libicutest.so: lib/lib/libicutest.a
+	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+
+lib/lib/libicutu.so: lib/lib/libicutu.a
+	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+
+lib/lib/libicuuc.so: lib/lib/libicuuc.a
+	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+
+lib/lib/libicudata.so: lib/lib/libicudata.a
+	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/libicu/libicui18n.so: lib/lib/libicui18n.so
 	cp -Lp $^ $@
