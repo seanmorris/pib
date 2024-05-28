@@ -414,9 +414,9 @@ export class PhpCgiBase
 		return this._enqueue(fsOps.readdir, [this.binary, path]);
 	}
 
-	readFile(path)
+	readFile(path, options)
 	{
-		return this._enqueue(fsOps.readFile, [this.binary, path]);
+		return this._enqueue(fsOps.readFile, [this.binary, path, options]);
 	}
 
 	stat(path)
@@ -429,24 +429,24 @@ export class PhpCgiBase
 		return this._enqueue(fsOps.mkdir, [this.binary, path]);
 	}
 
-	async rmdir(path)
+	rmdir(path)
 	{
 		return this._enqueue(fsOps.rmdir, [this.binary, path]);
 	}
 
-	async rename(path, newPath)
+	rename(path, newPath)
 	{
 		return this._enqueue(fsOps.rename, [this.binary, path, newPath]);
 	}
 
-	async writeFile(path, data, options)
+	writeFile(path, data, options)
 	{
 		return this._enqueue(fsOps.writeFile, [this.binary, path, data, options]);
 	}
 
-	async unlink(path)
+	unlink(path)
 	{
-		return this._enqueue(fsOps.unlink, [path]);
+		return this._enqueue(fsOps.unlink, [this.binary, path]);
 	}
 
 	async putEnv(name, value)

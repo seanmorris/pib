@@ -58,7 +58,7 @@ void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 
 					if(ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER)
 					{
-						FS.mount(IDBFS, {}, mountPath);
+						FS.mount(IDBFS, { autoPersist: false }, mountPath);
 					}
 					else if(ENVIRONMENT_IS_NODE)
 					{

@@ -39,7 +39,10 @@ export class PhpWeb extends PhpBase
 
 		const coordinator = new Promise((a,r) => [accept, reject] = [a, r]);
 
-		this.queue.push([callback, params, accept, reject]);
+		const _accept = result => {console.log(result); accept(result)};
+		const _reject = reason => {console.log(reason); reject(reason)};
+
+		this.queue.push([callback, params, _accept, _reject]);
 
 		navigator.locks.request('php-wasm-fs-lock', async () => {
 
@@ -56,7 +59,9 @@ export class PhpWeb extends PhpBase
 			{
 				const [callback, params, accept, reject] = this.queue.shift();
 				console.log(callback, params);
-				await callback(...params).then(accept).catch(reject);
+				const run = callback(...params);
+				run.then(accept).catch(reject);
+				await run;
 				// this.queue.length || await new Promise(a => setTimeout(a, 100));
 			} while(this.queue.length)
 

@@ -24,9 +24,7 @@ SHARED_LIBS+= packages/sqlite/libsqlite3.so
 PHP_CONFIGURE_DEPS+= packages/sqlite/libsqlite3.so
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
-ifdef PHP_ASSET_PATH
 PHP_ASSET_LIST+= libsqlite3.so
-endif
 endif
 
 third_party/${SQLITE_DIR}/sqlite3.c:

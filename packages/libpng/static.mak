@@ -23,9 +23,7 @@ SHARED_LIBS+= packages/libpng/libpng.so
 PHP_CONFIGURE_DEPS+= packages/libpng/libpng.so
 TEST_LIST+=$(shell ls packages/libpng/test/*.mjs)
 SKIP_LIBS+= -lpng16
-ifdef PHP_ASSET_PATH
 PHP_ASSET_LIST+= libpng.so
-endif
 endif
 
 third_party/libpng/.gitignore:

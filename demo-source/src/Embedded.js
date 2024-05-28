@@ -94,23 +94,47 @@ function Embedded() {
 				code = code.replace(/^\s*<\?php/, '');
 				code = code.replace(/\?>\s*/, '');
 
-				const ret = await phpRef.current.exec(code)
-				setStdRet(ret);
-				persist.current.checked || phpRef.current.refresh();
-				setTimeout(() => {
-					setStatusMessage('php-wasm ready!')
-					setRunning(false);
-				}, 1);
+				try
+				{
+					const ret = await phpRef.current.exec(code);
+					setStdRet(ret);
+					persist.current.checked || phpRef.current.refresh();
+				}
+				catch(error)
+				{
+					console.error(error);
+				}
+				finally
+				{
+					setTimeout(() => {
+						setStatusMessage('php-wasm ready!')
+						setRunning(false);
+					}, 1);
+				}
 			}
 			else
 			{
-				const exitCode = await phpRef.current.run(code)
-				setExitCode(exitCode);
-				persist.current.checked || phpRef.current.refresh();
-				setTimeout(() => {
-					setStatusMessage('php-wasm ready!')
-					setRunning(false);
-				}, 1);
+				try
+				{
+					console.log(321);
+					const run = phpRef.current.run(code);
+					console.log(run);
+					const exitCode = await run;
+					console.log(123);
+					setExitCode(exitCode);
+					persist.current.checked || phpRef.current.refresh();
+				}
+				catch(error)
+				{
+					console.error(error)
+				}
+				finally
+				{
+					setTimeout(() => {
+						setStatusMessage('php-wasm ready!')
+						setRunning(false);
+					}, 1);
+				}
 			}
 		}, 1);
 	}, [query]);

@@ -23,9 +23,7 @@ CONFIGURE_FLAGS+= --with-zip
 PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
-ifdef PHP_ASSET_PATH
 PHP_ASSET_LIST+= libzip.so
-endif
 endif
 
 third_party/libzip/.gitignore:

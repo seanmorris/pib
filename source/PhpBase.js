@@ -101,7 +101,10 @@ export class PhpBase extends EventTarget
 
 		const coordinator = new Promise((a,r) => [accept, reject] = [a, r]);
 
-		this.queue.push([callback, params, accept, reject]);
+		const _accept = result => {console.log(result); accept(result)};
+		const _reject = reason => {console.log(reason); reject(reason)};
+
+		this.queue.push([callback, params, _accept, _reject]);
 
 		if(!this.queue.length)
 		{
@@ -128,14 +131,25 @@ export class PhpBase extends EventTarget
 
 	async _run(phpCode)
 	{
-		return await (await this.binary).ccall(
-				'pib_run'
-				, NUM
-				, [STR]
-				, [`?>${phpCode}`]
-				, {async: true}
-		)
-		.finally(() => this.flush());
+		return this.binary.then(php => {
+			const run = php.ccall(
+					'pib_run'
+					, NUM
+					, [STR]
+					, [`?>${phpCode}`]
+					, {async: false}
+			);
+
+			this.flush();
+
+			console.log(run);
+
+			return run;
+		})
+
+		// run.finally(() => this.flush());
+
+		// return await run;
 	}
 
 	exec(phpCode)

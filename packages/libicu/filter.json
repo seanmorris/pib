@@ -1,4 +1,5 @@
 {
+	"collationUCAData": "implicithan",
 	"localeFilter": {
 		"filterType": "locale",
 		"whitelist": [

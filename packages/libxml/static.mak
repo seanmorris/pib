@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 
 LIBXML2_TAG?=v2.9.10
-DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}' -w /src/third_party/libxml2/ emscripten-builder
+DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libxml2/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBXML},0 1 shared static),)
 $(error WITH_LIBXML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -24,9 +24,7 @@ SHARED_LIBS+= packages/libxml/libxml2.so
 PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
-ifdef PHP_ASSET_PATH
 PHP_ASSET_LIST+= libxml2.so
-endif
 endif
 
 third_party/libxml2/.gitignore:

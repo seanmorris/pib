@@ -22,9 +22,7 @@ CONFIGURE_FLAGS+= --with-onig
 SHARED_LIBS+= packages/oniguruma/libonig.so
 PHP_CONFIGURE_DEPS+= packages/oniguruma/libonig.so
 SKIP_LIBS+= -lonig
-ifdef PHP_ASSET_PATH
 PHP_ASSET_LIST+= libonig.so
-endif
 endif
 
 # lib/lib/php/20230831/mbstring.so: ${PHPIZE} lib/lib/libonig.so

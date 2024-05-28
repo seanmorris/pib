@@ -1,10 +1,9 @@
 FROM emscripten/emsdk:3.1.59
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
-SHELL ["/bin/bash", "-c"]
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
-RUN set -euxo pipefail;\
-	apt-get update; \
+RUN apt-get update; \
 	DEBIAN_FRONTEND=noninteractive \
 	apt-get --no-install-recommends -y install \
 		build-essential \
@@ -27,3 +26,18 @@ RUN set -euxo pipefail;\
 		git \
 		sed \
 		pv
+
+RUN emsdk install tot; \
+	emsdk activate tot;
+
+RUN cd /emsdk/upstream && {\
+	rm -rf emscripten;\
+	# git clone https://github.com/seanmorris/emscripten.git emscripten --branch sm-worker-fetch --depth=1;\
+	# cd emscripten && ./bootstrap;\
+}
+
+COPY ./emscripten /emsdk/upstream/emscripten
+
+RUN cd /emsdk/upstream/emscripten && ./bootstrap;
+
+RUN emcc --check

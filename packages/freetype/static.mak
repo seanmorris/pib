@@ -23,9 +23,7 @@ SHARED_LIBS+= packages/freetype/libfreetype.so
 PHP_CONFIGURE_DEPS+= packages/freetype/libfreetype.so
 TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
 SKIP_LIBS+= -lfreetype
-ifdef PHP_ASSET_PATH
 PHP_ASSET_LIST+= libfreetype.so
-endif
 endif
 
 third_party/freetype-${FREETYPE_VERSION}/README:
