@@ -46,14 +46,15 @@ export class PhpBase extends EventTarget
 		const phpSettings = globalThis.phpSettings ?? {};
 
 		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(php => {
-			const retVal = php.ccall(
+			const ret = php.ccall(
 				'pib_init'
 				, NUM
 				, [STR]
 				, []
+				, {async: true}
 			);
 
-			return php;
+			return ret.then ? ret.then(() => php) : Promise.resolve(php);
 		});
 	}
 
@@ -131,25 +132,14 @@ export class PhpBase extends EventTarget
 
 	async _run(phpCode)
 	{
-		return this.binary.then(php => {
-			const run = php.ccall(
-					'pib_run'
-					, NUM
-					, [STR]
-					, [`?>${phpCode}`]
-					, {async: false}
-			);
-
-			this.flush();
-
-			console.log(run);
-
-			return run;
-		})
-
-		// run.finally(() => this.flush());
-
-		// return await run;
+		return await (await this.binary).ccall(
+			'pib_run'
+			, NUM
+			, [STR]
+			, [`?>${phpCode}`]
+			, {async: true}
+		)
+		.finally(() => this.flush());
 	}
 
 	exec(phpCode)

@@ -2,6 +2,7 @@
 
 TIDYHTML_TAG?=5.6.0
 DOCKER_RUN_IN_TIDY=${DOCKER_ENV} -w /src/third_party/tidy-html5/ emscripten-builder
+DOCKER_RUN_IN_EXT_TIDY=${DOCKER_ENV} -w /src/third_party/php-tidy/ emscripten-builder
 
 ifeq ($(filter ${WITH_TIDY},0 1 shared static),)
 $(error WITH_TIDY MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -24,12 +25,12 @@ TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 endif
 
 ifeq (${WITH_TIDY},shared)
-CONFIGURE_FLAGS+= --with-tidy=/src/lib
+# CONFIGURE_FLAGS+= --with-tidy=/src/lib
 PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
-SHARED_LIBS+= packages/tidy/libtidy.so
+# SHARED_LIBS+= packages/tidy/libtidy.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
-SKIP_LIBS+= -ltidy
-PHP_ASSET_LIST+= libtidy.so
+# SKIP_LIBS+= -ltidy
+PHP_ASSET_LIST+= libtidy.so php-tidy.so
 endif
 
 third_party/tidy-html5/.gitignore:
@@ -50,10 +51,25 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emmake make install;
 
 lib/lib/libtidy.so: lib/lib/libtidy.a
-	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_TIDY} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/tidy/libtidy.so: lib/lib/libtidy.so
 	cp -rL $^ $@
 
 $(addsuffix /libtidy.so,$(sort ${SHARED_ASSET_PATHS})): packages/tidy/libtidy.so
+	cp -Lp $^ $@
+
+third_party/php-tidy/config.m4: third_party/php${PHP_VERSION}-src/patched
+	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/tidy /src/third_party/php-tidy
+
+packages/tidy/php-tidy.so: ${PHPIZE} packages/tidy/libtidy.so third_party/php-tidy/config.m4
+	${DOCKER_RUN_IN_EXT_TIDY} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
+	${DOCKER_RUN_IN_EXT_TIDY} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
+	${DOCKER_RUN_IN_EXT_TIDY} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/bin/php-config --with-tidy=/src/lib;
+	${DOCKER_RUN_IN_EXT_TIDY} sed -i 's#-shared#-static#g' Makefile;
+	${DOCKER_RUN_IN_EXT_TIDY} sed -i 's#-export-dynamic##g' Makefile;
+	${DOCKER_RUN_IN_EXT_TIDY} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php8.3-src';
+	${DOCKER_RUN_IN_EXT_TIDY} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/tidy.a /src/packages/tidy/libtidy.so
+
+$(addsuffix /php-tidy.so,$(sort ${SHARED_ASSET_PATHS})): packages/tidy/php-tidy.so
 	cp -Lp $^ $@

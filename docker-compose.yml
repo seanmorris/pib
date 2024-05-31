@@ -7,6 +7,24 @@ services:
     user: "${UID:-0}:${GID:-0}"
     build:
       context: ./
+      target: patched
+      dockerfile: emscripten-builder.dockerfile
+    environment:
+      EMCC_CORES: 8
+      ENVIRONMENT: ${ENVIRONMENT:-web}
+    volumes:
+      - ./:/src
+      - /tmp/emsdk-cache:/emsdk/upstream/emscripten/cache/
+      - ./.cache:/emsdk_portable/.data/cache/asmjs/
+      - ${PHP_DIST_DIR:-./}:/src/
+    command: [bash]
+
+  emscripten-builder-3_1_60:
+    image: seanmorris/php-emscripten-builder
+    user: "${UID:-0}:${GID:-0}"
+    build:
+      context: ./
+      target: stock
       dockerfile: emscripten-builder.dockerfile
     environment:
       EMCC_CORES: 8

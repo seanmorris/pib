@@ -20,10 +20,10 @@ TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 endif
 
 ifeq (${WITH_YAML},shared)
+# CONFIGURE_FLAGS+= --with-yaml
 # SHARED_LIBS+= packages/libyaml/libyaml.so packages/libyaml/php-yaml.so
-CONFIGURE_FLAGS+= --with-yaml
 # PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
-PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so
+# PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so
 PHP_ASSET_LIST+= libyaml.so php-yaml.so
 SKIP_LIBS+= -lyaml
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
@@ -62,12 +62,10 @@ packages/libyaml/libyaml.so: lib/lib/libyaml.so
 $(addsuffix /libyaml.so,$(sort ${SHARED_ASSET_PATHS})): packages/libyaml/libyaml.so
 	cp -Lp $^ $@
 
-##########################################################
-
-packages/libyaml/php-yaml.so: ${PHPIZE} lib/lib/libyaml.so third_party/yaml-2.2.3/config.m4
+packages/libyaml/php-yaml.so: ${PHPIZE} packages/libyaml/libyaml.so third_party/yaml-2.2.3/config.m4
 	${DOCKER_RUN_IN_EXT_YAML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_YAML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_YAML} emconfigure ./configure --with-php-config=/src/lib/bin/php-config PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/;
+	${DOCKER_RUN_IN_EXT_YAML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/bin/php-config;
 	${DOCKER_RUN_IN_EXT_YAML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_YAML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_YAML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php8.3-src';
