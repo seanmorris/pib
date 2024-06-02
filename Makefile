@@ -348,7 +348,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		EXTENSION_DIR='/'  \
 		--prefix=/src/lib/ \
-		--with-config-file-path=/ \
+		--with-config-file-path=/php.ini \
 		--with-config-file-scan-dir='/config:/preload' \
 		--with-layout=GNU  \
 		--with-valgrind=no \

@@ -56,6 +56,8 @@ const packages = {
 	}
 };
 
+const sharedLibs = ['php-zip.so', 'php-zlib.so'];
+
 const installDemo = async (overwrite = false) => {
 
 	const query = new URLSearchParams(window.location.search);
@@ -85,7 +87,7 @@ const installDemo = async (overwrite = false) => {
 
 	const selectedFramework = packages[selectedFrameworkName];
 
-	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+	const php = new PhpWeb({sharedLibs, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 	await php.binary;
 

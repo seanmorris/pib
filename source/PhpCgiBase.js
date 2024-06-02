@@ -37,7 +37,7 @@ export class PhpCgiBase
 
 	queue = [];
 
-	constructor(PHP, {docroot, prefix, rewrite, entrypoint, cookies, types, onRequest, notFound, ...args} = {})
+	constructor(PHP, {docroot, prefix, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, ...args} = {})
 	{
 		this.PHP        = PHP;
 		this.docroot    = docroot    || this.docroot;
@@ -48,6 +48,7 @@ export class PhpCgiBase
 		this.types      = types      || this.types;
 		this.onRequest  = onRequest  || this.onRequest;
 		this.notFound   = notFound   || this.notFound;
+		this.sharedLibs = sharedLibs || this.sharedLibs;
 
 		this.phpArgs   = args;
 
@@ -158,9 +159,9 @@ export class PhpCgiBase
 		return coordinator;
 	}
 
-	async refresh()
+	refresh()
 	{
-		this.binary = new this.PHP({
+		const phpArgs = {
 			stdin: () =>  this.input
 				? String(this.input.shift()).charCodeAt(0)
 				: null
@@ -168,20 +169,47 @@ export class PhpCgiBase
 			, stderr: x => this.error.push(x)
 			, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
 			, ...this.phpArgs
+		};
+
+		this.binary = new this.PHP(phpArgs).then(async php => {
+			await php.ccall(
+				'pib_storage_init'
+				, NUM
+				, []
+				, []
+				, {async: true}
+			);
+
+			if(this.sharedLibs)
+			{
+				const iniLines = this.sharedLibs.map(lib => {
+					if(typeof lib === 'string')
+					{
+						return `extension=${lib}`;
+					}
+				});
+
+				await fsOps.writeFile(php, '/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
+			}
+
+			await php.ccall(
+				'wasm_sapi_cgi_init'
+				, 'number'
+				, []
+				, []
+				, {async: true}
+			);
+
+			await this.loadInit(php);
+
+			return php;
 		});
-
-		const php = await this.binary;
-
-		php.ccall('pib_storage_init',   'number' , [] , []);
-		php.ccall('wasm_sapi_cgi_init', 'number' , [] , []);
-
-		await this.loadInit();
 	}
 
-	_beforeRequest()
+	async _beforeRequest()
 	{}
 
-	_afterRequest()
+	async _afterRequest()
 	{}
 
 	async request(request)
@@ -336,7 +364,7 @@ export class PhpCgiBase
 		{
 			if(php._main() === 0) // PHP exited with code 0
 			{
-				this._afterRequest();
+				await this._afterRequest();
 			}
 		}
 		catch (error)
@@ -362,8 +390,6 @@ export class PhpCgiBase
 		}
 
 		++this.count;
-
-		console.log(this.error);
 
 		const parsedResponse = parseResponse(this.output);
 
@@ -493,21 +519,24 @@ export class PhpCgiBase
 	{
 		const settings = await this.getSettings();
 		const env = await this.getEnvs();
-		await this.writeFile('/config/init.json', JSON.stringify({settings, env}), {encoding: 'utf8'});
+		await this.writeFile(
+			'/config/init.json'
+			, JSON.stringify({settings, env}, null, 4)
+			, {encoding: 'utf8'}
+		);
 	}
 
-	async loadInit()
+	async loadInit(binary)
 	{
 		const initPath = '/config/init.json';
-		const php = (await this.binary);
-		const check = php.FS.analyzePath(initPath);
+		const check = await fsOps.analyzePath(binary, initPath);
 
 		if(!check.exists)
 		{
 			return;
 		}
 
-		const initJson = php.FS.readFile(initPath, {encoding: 'utf8'});
+		const initJson = await fsOps.readFile(binary, initPath, {encoding: 'utf8'});
 		const init = JSON.parse(initJson || '{}');
 		const {settings, env} = init;
 

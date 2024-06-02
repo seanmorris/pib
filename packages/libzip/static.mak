@@ -19,12 +19,12 @@ TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 endif
 
 ifeq (${WITH_LIBZIP},shared)
-SHARED_LIBS+= packages/libzip/libzip.so
-CONFIGURE_FLAGS+= --with-zip
+# CONFIGURE_FLAGS+= --with-zip
+# SHARED_LIBS+= packages/libzip/libzip.so
 PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
-PHP_ASSET_LIST+= libzip.so
+PHP_ASSET_LIST+= libzip.so php-zip.so
 endif
 
 third_party/libzip/.gitignore:

@@ -82,7 +82,6 @@ void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(void)
 {
 	putenv("USE_ZEND_ALLOC=0");
-	pib_storage_init();
 	return php_embed_init(0, NULL);
 }
 

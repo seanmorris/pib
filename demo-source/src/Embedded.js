@@ -7,6 +7,8 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
+const sharedLibs = ['php-zlib.so', 'php-zip.so'];
+
 let init = false;
 
 function Embedded() {
@@ -39,7 +41,7 @@ function Embedded() {
 
 	const refreshPhp = useCallback(() => {
 		// phpRef.current = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
-		phpRef.current = new PhpWeb();
+		phpRef.current = new PhpWeb({sharedLibs});
 
 		const php = phpRef.current;
 

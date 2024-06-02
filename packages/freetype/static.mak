@@ -18,8 +18,8 @@ TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
 endif
 
 ifeq (${WITH_FREETYPE},shared)
-CONFIGURE_FLAGS+= --with-freetype --with-freetype-dir=/src/lib
-SHARED_LIBS+= packages/freetype/libfreetype.so
+# CONFIGURE_FLAGS+= --with-freetype --with-freetype-dir=/src/lib
+# SHARED_LIBS+= packages/freetype/libfreetype.so
 PHP_CONFIGURE_DEPS+= packages/freetype/libfreetype.so
 TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
 SKIP_LIBS+= -lfreetype

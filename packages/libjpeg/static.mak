@@ -19,8 +19,8 @@ SKIP_LIBS+= -ljpeg
 endif
 
 ifeq (${WITH_LIBJPEG},shared)
-CONFIGURE_FLAGS+= --with-jpeg
-SHARED_LIBS+= packages/libjpeg/libjpeg.so
+# CONFIGURE_FLAGS+= --with-jpeg
+# SHARED_LIBS+= packages/libjpeg/libjpeg.so
 PHP_CONFIGURE_DEPS+= packages/libjpeg/libjpeg.so
 TEST_LIST+=$(shell ls packages/libjpeg/test/*.mjs)
 SKIP_LIBS+= -ljpeg

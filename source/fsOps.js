@@ -31,9 +31,9 @@ export class fsOps
 		return (await binary).FS.readdir(path);
 	}
 
-	static async readFile(binary, path)
+	static async readFile(binary, path, options)
 	{
-		return (await binary).FS.readFile(path);
+		return (await binary).FS.readFile(path, options);
 	}
 
 	static async stat(binary, path)

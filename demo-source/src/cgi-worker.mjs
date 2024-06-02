@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 
-// Log requests & send lines to all tabs
+// Log requests
 const onRequest = (request, response) => {
 	const url = new URL(request.url);
 	const logLine = `[${(new Date).toISOString()}]`
@@ -9,13 +9,6 @@ const onRequest = (request, response) => {
 		+ ` ${url.pathname}" - HTTP/1.1 ${response.status}`;
 
 	console.log(logLine);
-
-	// self.clients.matchAll({includeUncontrolled: true}).then(clients => {
-	// 	clients.forEach(client => client.postMessage({
-	// 		action: 'logRequest',
-	// 		params: [logLine, {status: response.status}],
-	// 	}))
-	// });
 };
 
 const notFound = request => {
@@ -25,9 +18,17 @@ const notFound = request => {
 	);
 };
 
+const sharedLibs = [
+	'php-zlib.so',
+	'php-zip.so',
+	'php-iconv.so',
+	'php-intl.so',
+	'php-ssl.so',
+];
+
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({
-	onRequest, notFound
+	onRequest, notFound, sharedLibs
 	, prefix: '/php-wasm/cgi-bin/'
 	, docroot: '/persist/www'
 	, types: {
@@ -39,12 +40,12 @@ const php = new PhpCgiWorker({
 	}
 });
 
-// Extras
-self.addEventListener('install', event => console.log('Install'));
-self.addEventListener('activate', event => console.log('Activate'));
-
 // Set up the event handlers
 self.addEventListener('install',  event => php.handleInstallEvent(event));
 self.addEventListener('activate', event => php.handleActivateEvent(event));
 self.addEventListener('fetch',    event => php.handleFetchEvent(event));
 self.addEventListener('message',  event => php.handleMessageEvent(event));
+
+// Extras
+self.addEventListener('install',  event => console.log('Install'));
+self.addEventListener('activate', event => console.log('Activate'));

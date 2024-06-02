@@ -26,6 +26,7 @@ export class PhpBase extends EventTarget
 
 		Object.freeze(this.buffers);
 
+		this.sharedLibs = args.sharedLibs || [];
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
@@ -45,16 +46,37 @@ export class PhpBase extends EventTarget
 
 		const phpSettings = globalThis.phpSettings ?? {};
 
-		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(php => {
-			const ret = php.ccall(
-				'pib_init'
+		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
+
+			await php.ccall(
+				'pib_storage_init'
 				, NUM
-				, [STR]
+				, []
 				, []
 				, {async: true}
 			);
 
-			return ret.then ? ret.then(() => php) : Promise.resolve(php);
+			if(this.sharedLibs)
+			{
+				const iniLines = this.sharedLibs.map(lib => {
+					if(typeof lib === 'string')
+					{
+						return `extension=${lib}`;
+					}
+				});
+
+				await fsOps.writeFile(php, '/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
+			}
+
+			await php.ccall(
+				'pib_init'
+				, NUM
+				, []
+				, []
+				, {async: true}
+			);
+
+			return php;
 		});
 	}
 
@@ -221,193 +243,4 @@ export class PhpBase extends EventTarget
 	{
 		return this._enqueue(fsOps.unlink, [this.binary, path]);
 	}
-
-	// analyzePath(path)
-	// {
-	// 	return this._enqueue(path => this._analyzePath(path), [path]);
-	// }
-
-	// _analyzePath(path)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.analyzePath(this.binary, path);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// readdir(path)
-	// {
-	// 	return this._enqueue(path => this._readdir(path), [path]);
-	// }
-
-	// _readdir(path)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.readdir(this.binary, path);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// readFile(path)
-	// {
-	// 	return this._enqueue(path => this._readFile(path), [path]);
-	// }
-
-	// _readFile(path)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.readFile(this.binary, path);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// stat(path)
-	// {
-	// 	return this._enqueue(path => this._stat(path), [path]);
-	// }
-
-	// _stat(path)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.stat(this.binary, path);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// mkdir(path)
-	// {
-	// 	return this._enqueue(path => this._mkdir(path), [path]);
-	// }
-
-	// _mkdir(path)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.mkdir(this.binary, path);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// rmdir(path)
-	// {
-	// 	return this._enqueue(path => this._rmdir(path), [path]);
-	// }
-
-	// _rmdir(path)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.rmdir(this.binary, path);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// rename(path, newPath)
-	// {
-	// 	return this._enqueue((path, newPath) => this._rename(path, newPath), [path, newPath]);
-	// }
-
-	// _rename(path, newPath)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.rename(this.binary, path, newPath);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// writeFile(path, data, options)
-	// {
-	// 	return this._enqueue((path, data, options) => this._writeFile(path, data, options), [path, data, options]);
-	// }
-
-	// _writeFile(path, data, options)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.writeFile(this.binary, path, data, options);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
-
-	// unlink(path)
-	// {
-	// 	return this._enqueue(path => this._unlink(path), [path]);
-	// }
-
-	// _unlink(path)
-	// {
-	// 	return this.binary.then(php => {
-	// 		const sync = this.autoTransaction
-	// 			? this.startTransaction()
-	// 			: Promise.resolve();
-
-	// 		const run = fsOps.unlink(this.binary, path);
-
-	// 		return this.autoTransaction
-	// 			? run.then(() => this.commitTransaction()).then(() => run)
-	// 			: run;
-	// 	})
-	// 	.finally(() => this.flush());
-	// }
 }
