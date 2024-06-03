@@ -66,7 +66,7 @@ packages/libxml/php${PHP_VERSION}-dom.so: ${PHPIZE} third_party/php${PHP_VERSION
 	${DOCKER_RUN_IN_EXT_DOM} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_DOM} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_DOM} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' php_dom.c;
-	${DOCKER_RUN_IN_EXT_DOM} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
+	${DOCKER_RUN_IN_EXT_DOM} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
 	${DOCKER_RUN_IN_EXT_DOM} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_DOM} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_DOM} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
@@ -79,7 +79,7 @@ packages/libxml/php${PHP_VERSION}-simplexml.so: ${PHPIZE} third_party/php${PHP_V
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' simplexml.c;
-	${DOCKER_RUN_IN_EXT_SIMPLEXML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
+	${DOCKER_RUN_IN_EXT_SIMPLEXML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
@@ -92,7 +92,7 @@ packages/libxml/php${PHP_VERSION}-xml.so: ${PHPIZE} third_party/php${PHP_VERSION
 	${DOCKER_RUN_IN_EXT_XML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_XML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_XML} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' xml.c;
-	${DOCKER_RUN_IN_EXT_XML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
+	${DOCKER_RUN_IN_EXT_XML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
 	${DOCKER_RUN_IN_EXT_XML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_XML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_XML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';

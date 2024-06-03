@@ -33,6 +33,8 @@ if(!$setup)
     $setup = true;
 
     echo "Initialized.\n";
+    fprintf(fopen('php://STDERR', 'w'), 'Open your JS console and run' . PHP_EOL);
+    fprintf(fopen('php://STDERR', 'w'), 'phpFuncA() or phpFuncB()' . PHP_EOL);
 }
 
 $window->phpFuncA();

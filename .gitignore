@@ -34,3 +34,4 @@ configured
 .env
 packages/**/*.so
 emscripten/
+**.generated.mjs

@@ -74,7 +74,7 @@ packages/openssl/php${PHP_VERSION}-ssl.so: ${PHPIZE} packages/openssl/libssl.so 
 	${DOCKER_RUN_IN_EXT_OPENSSL} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_OPENSSL} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#as_fn_error 77#echo#g' configure;
-	${DOCKER_RUN_IN_EXT_OPENSSL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_OPENSSL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_OPENSSL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';

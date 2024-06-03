@@ -326,7 +326,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 	${DOCKER_RUN_IN_PHP} ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
-		EXTENSION_DIR='/'  \
+		EXTENSION_DIR='./'  \
 		--prefix='/src/lib/php${PHP_VERSION}' \
 		--with-config-file-path=/php.ini \
 		--with-config-file-scan-dir='/config:/preload' \
@@ -335,6 +335,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 		--enable-cgi       \
 		--enable-cli       \
 		--enable-embed=static \
+		--enable-pdo       \
 		--enable-pib       \
 		--enable-json      \
 		--disable-all      \

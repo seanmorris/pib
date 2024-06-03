@@ -118,11 +118,7 @@ function Embedded() {
 			{
 				try
 				{
-					console.log(321);
-					const run = phpRef.current.run(code);
-					console.log(run);
-					const exitCode = await run;
-					console.log(123);
+					const exitCode = await phpRef.current.run(code);
 					setExitCode(exitCode);
 					persist.current.checked || phpRef.current.refresh();
 				}
@@ -331,9 +327,9 @@ function Embedded() {
 							<button data-load-demo onClick = {demoSelected}>load</button>
 						</div>
 					</div>
-					<div className = "separator">
-					</div>
+					<div className = "separator"></div>
 					<div className = "row flex-end">
+						<hr />
 						<div className = "rows spread">
 							<label>
 								<span>text</span>

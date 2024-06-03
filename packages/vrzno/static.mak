@@ -1,16 +1,18 @@
 #!/usr/bin/env make
 
-ifeq (${WITH_VRZNO}, 1)
+DOCKER_RUN_IN_EXT_VRZNO=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-vrzno/ emscripten-builder
 
+ifeq (${WITH_VRZNO}, 1)
 VRZNO_BRANCH?=sm-marshal-classes
 EXTRA_FLAGS+= -D WITH_VRZNO=1
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
 PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
-CONFIGURE_FLAGS+= \
-	--enable-vrzno
-
+CONFIGURE_FLAGS+= --enable-vrzno
 PRE_JS_FILES+= third_party/vrzno/lib.js
 DEPENDENCIES+= third_party/vrzno/vrzno.c
+endif
+
+# PHP_ASSET_LIST+= php${PHP_VERSION}-vrzno.so
 
 ifdef VRZNO_DEV_PATH
 
@@ -61,5 +63,3 @@ third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c t
 
 third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
 	@ ${DOCKER_RUN} cp -prf third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
-
-endif

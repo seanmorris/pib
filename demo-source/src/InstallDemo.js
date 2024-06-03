@@ -56,7 +56,7 @@ const packages = {
 	}
 };
 
-const sharedLibs = ['php-zip.so', 'php-zlib.so'];
+const sharedLibs = [`php${PhpWeb.phpVersion}-zip.so`, `php${PhpWeb.phpVersion}-zlib.so`];
 
 const installDemo = async (overwrite = false) => {
 
@@ -141,6 +141,7 @@ const installDemo = async (overwrite = false) => {
 
 		await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
 		await sendMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
+
 		console.log(await php.run(initPhpCode));
 
 		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));

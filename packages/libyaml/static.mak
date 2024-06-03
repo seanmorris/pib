@@ -66,7 +66,7 @@ $(addsuffix /libyaml.so,$(sort ${SHARED_ASSET_PATHS})): packages/libyaml/libyaml
 packages/libyaml/php${PHP_VERSION}-yaml.so: ${PHPIZE} packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-yaml/config.m4
 	${DOCKER_RUN_IN_EXT_YAML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_YAML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_YAML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-yaml=/src/lib;
+	${DOCKER_RUN_IN_EXT_YAML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-yaml=/src/lib;
 	${DOCKER_RUN_IN_EXT_YAML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_YAML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_YAML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';

@@ -19,12 +19,19 @@ const notFound = request => {
 };
 
 const sharedLibs = [
-	'php-zlib.so',
-	'php-zip.so',
-	'php-iconv.so',
-	'php-intl.so',
-	'php-ssl.so',
+	`php${PhpCgiWorker.phpVersion}-zlib.so`,
+	`php${PhpCgiWorker.phpVersion}-zip.so`,
+	`php${PhpCgiWorker.phpVersion}-iconv.so`,
+	`php${PhpCgiWorker.phpVersion}-intl.so`,
+	`php${PhpCgiWorker.phpVersion}-ssl.so`,
+	`php${PhpCgiWorker.phpVersion}-dom.so`,
+	`php${PhpCgiWorker.phpVersion}-mbstring.so`,
+	`php${PhpCgiWorker.phpVersion}-sqlite.so`,
+	`php${PhpCgiWorker.phpVersion}-pdo.so`,
+	`php${PhpCgiWorker.phpVersion}-pdo-sqlite.so`,
 ];
+
+console.log(sharedLibs);
 
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({

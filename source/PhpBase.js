@@ -57,7 +57,7 @@ export class PhpBase extends EventTarget
 				, {async: true}
 			);
 
-			if(this.sharedLibs)
+			if(this.sharedLibs.length)
 			{
 				const iniLines = this.sharedLibs.map(lib => {
 					if(typeof lib === 'string')

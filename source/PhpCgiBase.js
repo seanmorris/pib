@@ -336,7 +336,8 @@ export class PhpCgiBase
 
 		const selfUrl = new URL(globalThis.location);
 
-		putEnv(php, 'PHP_INI_SCAN_DIR', '/config');
+		putEnv(php, 'PHP_INI_SCAN_DIR', '/config:/preload');
+		putEnv(php, 'PHPRC', '/php.ini');
 
 		for(const [name, value] of Object.entries(this.env))
 		{
