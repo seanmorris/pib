@@ -1077,7 +1077,7 @@ const notFound = request => {
     }
   });
 };
-const sharedLibs = ['php-zlib.so', 'php-zip.so', 'php-intl.so', 'php-ssl.so'];
+const sharedLibs = ['php-zlib.so', 'php-zip.so', 'php-iconv.so', 'php-intl.so', 'php-ssl.so'];
 
 // Spawn the PHP-CGI binary
 const php = new php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker({

@@ -1,3 +1,4 @@
+import { phpVersion } from "./config";
 import { parseResponse } from './parseResponse';
 import { breakoutRequest } from './breakoutRequest';
 import { fsOps } from './fsOps';
@@ -544,3 +545,5 @@ export class PhpCgiBase
 		this.setEnvs(env);
 	}
 }
+
+PhpCgiBase.phpVersion = phpVersion;

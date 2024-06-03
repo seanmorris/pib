@@ -20,7 +20,7 @@ endif
 ifeq (${WITH_LIBPNG},shared)
 # CONFIGURE_FLAGS+= --enable-png --with-png-dir=/src/lib
 # SHARED_LIBS+= packages/libpng/libpng.so
-PHP_CONFIGURE_DEPS+= packages/libpng/libpng.so
+# PHP_CONFIGURE_DEPS+= packages/libpng/libpng.so
 TEST_LIST+=$(shell ls packages/libpng/test/*.mjs)
 SKIP_LIBS+= -lpng16
 PHP_ASSET_LIST+= libpng.so

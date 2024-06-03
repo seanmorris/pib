@@ -1,9 +1,16 @@
 const fs = require('node:fs');
 const readline = require('node:readline');
+const { parseArgs } = require('node:util');
+
+const parsedArgs = parseArgs({allowPositionals:true, options: {
+	file: { type: 'string' }
+	, phpVersion: { type: 'string' }
+	, buildType: { type: 'string', default: 'shared' }
+}}).values;
 
 async function translate()
 {
-	const input = fs.createReadStream(process.argv[2]);
+	const input = fs.createReadStream(parsedArgs.file);
 	const reader = readline.createInterface({input, crlfDelay: Infinity});
 	const sections = {};
 
@@ -31,7 +38,19 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test(${JSON.stringify(String(sections.TEST).trim())}, async () => {
-	const php = new PhpNode( { persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
+	const sharedLibs = [${parsedArgs.buildType !== 'static' ? `
+		'php${parsedArgs.phpVersion}-gd.so'
+		, 'php${parsedArgs.phpVersion}-zlib.so'
+		, 'php${parsedArgs.phpVersion}-iconv.so'
+		, 'php${parsedArgs.phpVersion}-intl.so'
+		, 'php${parsedArgs.phpVersion}-xml.so'
+		, 'php${parsedArgs.phpVersion}-dom.so'
+		, 'php${parsedArgs.phpVersion}-simplexml.so'
+		, 'php${parsedArgs.phpVersion}-mbstring.so'
+		, 'php${parsedArgs.phpVersion}-ssl.so'
+	` : ''}];
+
+	const php = new PhpNode( { sharedLibs, persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
 
 	let stdOut = '', stdErr = '';
 

@@ -7,7 +7,7 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
-const sharedLibs = ['php-zlib.so', 'php-zip.so'];
+const sharedLibs = [];
 
 let init = false;
 

@@ -2,7 +2,7 @@
 
 ZLIB_TAG?=v1.3.1
 DOCKER_RUN_IN_ZLIB=${DOCKER_ENV} -w /src/third_party/zlib/ emscripten-builder
-DOCKER_RUN_IN_EXT_ZLIB=${DOCKER_ENV} -w /src/third_party/php-zlib/ emscripten-builder
+DOCKER_RUN_IN_EXT_ZLIB=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-zlib/ emscripten-builder
 
 ifeq ($(filter ${WITH_ZLIB},0 1 shared static),)
 $(error WITH_ZLIB MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -21,10 +21,10 @@ endif
 ifeq (${WITH_ZLIB},shared)
 # CONFIGURE_FLAGS+= --with-zlib
 # SHARED_LIBS+= packages/zlib/libz.so
-PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
+# PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SKIP_LIBS+= -lz
-PHP_ASSET_LIST+= libz.so php-zlib.so
+PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
 endif
 
 third_party/zlib/.gitignore:
@@ -50,18 +50,18 @@ packages/zlib/libz.so: lib/lib/libz.so
 $(addsuffix /libz.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/libz.so
 	cp -Lp $^ $@
 
-third_party/php-zlib/config.m4: third_party/php${PHP_VERSION}-src/patched
-	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zlib /src/third_party/php-zlib
+third_party/php${PHP_VERSION}-zlib/config.m4: third_party/php${PHP_VERSION}-src/patched
+	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zlib /src/third_party/php${PHP_VERSION}-zlib
 
-packages/zlib/php-zlib.so: ${PHPIZE} packages/zlib/libz.so third_party/php-zlib/config.m4
+packages/zlib/php${PHP_VERSION}-zlib.so: ${PHPIZE} packages/zlib/libz.so third_party/php${PHP_VERSION}-zlib/config.m4
 	${DOCKER_RUN_IN_EXT_ZLIB} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ZLIB} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_ZLIB} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_ZLIB} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/bin/php-config --with-zlib=/src/lib;
+	${DOCKER_RUN_IN_EXT_ZLIB} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --with-zlib=/src/lib --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_ZLIB} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZLIB} sed -i 's#-export-dynamic##g' Makefile;
-	${DOCKER_RUN_IN_EXT_ZLIB} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php8.3-src';
+	${DOCKER_RUN_IN_EXT_ZLIB} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_ZLIB} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/zlib.a /src/packages/zlib/libz.so
 
-$(addsuffix /php-zlib.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/php-zlib.so
+$(addsuffix /php${PHP_VERSION}-zlib.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/php${PHP_VERSION}-zlib.so
 	cp -Lp $^ $@

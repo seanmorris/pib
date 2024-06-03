@@ -1,3 +1,4 @@
+import { phpVersion } from "./config";
 import { OutputBuffer } from "./OutputBuffer";
 import { _Event } from "./_Event";
 import { fsOps } from './fsOps';
@@ -124,8 +125,8 @@ export class PhpBase extends EventTarget
 
 		const coordinator = new Promise((a,r) => [accept, reject] = [a, r]);
 
-		const _accept = result => {console.log(result); accept(result)};
-		const _reject = reason => {console.log(reason); reject(reason)};
+		const _accept = result => accept(result);
+		const _reject = reason => reject(reason);
 
 		this.queue.push([callback, params, _accept, _reject]);
 
@@ -244,3 +245,5 @@ export class PhpBase extends EventTarget
 		return this._enqueue(fsOps.unlink, [this.binary, path]);
 	}
 }
+
+PhpBase.phpVersion = phpVersion;

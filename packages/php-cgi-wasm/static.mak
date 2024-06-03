@@ -36,7 +36,10 @@ shell-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiShell.js  b
 
 cgi: ${CGI_MJS} ${CGI_CJS}
 
-CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST})
+CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CGI_DIST_DIR}/config.mjs # $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST})
+
+${PHP_CGI_DIST_DIR}/config.mjs:
+	echo 'export const phpVersion = "${PHP_VERSION}";' > $@
 
 ${PHP_CGI_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_CGI_DIST_DIR}/

@@ -3,7 +3,8 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('GD Extension is enabled.', async () => {
-	const php = new PhpNode();
+	console.log(PhpNode.phpVersion);
+	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-gd.so`]});
 
 	let stdOut = '', stdErr = '';
 

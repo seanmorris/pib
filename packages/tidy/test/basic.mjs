@@ -3,7 +3,7 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('Tidy Extension is enabled.', async () => {
-	const php = new PhpNode();
+	const php = new PhpNode({sharedLibs:['php${PhpNode.phpVersion}-tidy.so']});
 
 	let stdOut = '', stdErr = '';
 

@@ -3,7 +3,7 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('Iconv Extension is enabled.', async () => {
-	const php = new PhpNode();
+	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-iconv.so`]});
 
 	let stdOut = '', stdErr = '';
 

@@ -2,7 +2,7 @@
 
 OPENSSL_TAG?=OpenSSL_1_1_1-stable
 DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -flto -O${SUB_OPTIMIZE}' -eCXX='emcc -fPIC -O${SUB_OPTIMIZE}' -w /src/third_party/openssl/ emscripten-builder
-DOCKER_RUN_IN_EXT_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -flto -O${SUB_OPTIMIZE}' -eCXX='emcc -fPIC -O${SUB_OPTIMIZE}' -w /src/third_party/php-openssl/ emscripten-builder
+DOCKER_RUN_IN_EXT_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -flto -O${SUB_OPTIMIZE}' -eCXX='emcc -fPIC -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-openssl/ emscripten-builder
 
 ifeq ($(filter ${WITH_OPENSSL},0 1 shared static),)
 $(error WITH_OPENSSL MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -13,7 +13,7 @@ WITH_OPENSSL=static
 endif
 
 ifneq ($(filter ${WITH_OPENSSL},shared static),)
-TEST_LIST+= packages/openssl/test/basic.mjs $(addprefix packages/openssl/test/,$(addsuffix .generated.mjs,openssl_digest_basic openssl_decrypt_basic))
+TEST_LIST+= packages/openssl/test/basic.mjs $(addprefix packages/openssl/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs,openssl_digest_basic openssl_decrypt_basic))
 endif
 
 ifeq (${WITH_OPENSSL},static)
@@ -26,7 +26,7 @@ SKIP_LIBS+= -lssl -lcrypto
 # CONFIGURE_FLAGS+= --with-openssl
 # SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 # PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
-PHP_ASSET_LIST+= libssl.so libcrypto.so php-ssl.so
+PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-ssl.so
 endif
 
 third_party/openssl/.gitignore:
@@ -60,22 +60,22 @@ $(addsuffix /libcrypto.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libcr
 $(addsuffix /libssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libssl.so
 	cp -Lp $^ $@
 
-$(addsuffix /php-ssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/php-ssl.so
+$(addsuffix /php${PHP_VERSION}-ssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/php${PHP_VERSION}-ssl.so
 	cp -Lp $^ $@
 
-packages/openssl/test/%.generated.mjs: third_party/php8.3-src/ext/openssl/tests/%.phpt
-	node bin/translate-test.js $^ > $@
+packages/openssl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/openssl/tests/%.phpt
+	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} > $@
 
-third_party/php-openssl/config.m4: third_party/php${PHP_VERSION}-src/patched
-	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/openssl /src/third_party/php-openssl
+third_party/php${PHP_VERSION}-openssl/config.m4: third_party/php${PHP_VERSION}-src/patched
+	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/openssl /src/third_party/php${PHP_VERSION}-openssl
 
-packages/openssl/php-ssl.so: ${PHPIZE} packages/openssl/libssl.so packages/openssl/libcrypto.so third_party/php-openssl/config.m4
+packages/openssl/php${PHP_VERSION}-ssl.so: ${PHPIZE} packages/openssl/libssl.so packages/openssl/libcrypto.so third_party/php${PHP_VERSION}-openssl/config.m4
 	${DOCKER_RUN_IN_EXT_OPENSSL} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_OPENSSL} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_OPENSSL} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#as_fn_error 77#echo#g' configure;
-	${DOCKER_RUN_IN_EXT_OPENSSL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/bin/php-config;
+	${DOCKER_RUN_IN_EXT_OPENSSL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-export-dynamic##g' Makefile;
-	${DOCKER_RUN_IN_EXT_OPENSSL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php8.3-src';
+	${DOCKER_RUN_IN_EXT_OPENSSL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/openssl.a /src/packages/openssl/libcrypto.so /src/packages/openssl/libssl.so

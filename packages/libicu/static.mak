@@ -4,7 +4,7 @@ LIBICU_VERSION=72-1
 LIBICU_TAG?=release-${LIBICU_VERSION}
 LIBICU_DATFILE=lib/share/icu/72.1/icudt72l.dat
 DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source emscripten-builder
-DOCKER_RUN_IN_EXT_INTL=${DOCKER_ENV} -w /src/third_party/php-intl emscripten-builder
+DOCKER_RUN_IN_EXT_INTL=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-intl emscripten-builder
 DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source emscripten-builder
 ifeq (${PHP_VERSION},7.4)
 LIBICU_VERSION=69-1
@@ -23,7 +23,7 @@ ifneq ($(filter ${WITH_ICU},shared static),)
 PRELOAD_ASSETS+=${LIBICU_DATFILE}
 PRE_JS_FILES+=packages/libicu/env.js
 # TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
-TEST_LIST+=packages/libicu/test/basic.mjs $(addprefix packages/libicu/test/,$(addsuffix .generated.mjs, badargs breakiter_clone_basic breakiter_first_basic breakiter_setText_basic calendar_add_basic calendar_get_basic))
+TEST_LIST+=packages/libicu/test/basic.mjs $(addprefix packages/libicu/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs, badargs breakiter_clone_basic breakiter_first_basic breakiter_setText_basic calendar_add_basic calendar_get_basic))
 endif
 
 ifeq (${WITH_ICU},static)
@@ -36,7 +36,7 @@ ifeq (${WITH_ICU},shared)
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 # PHP_CONFIGURE_DEPS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
 # SHARED_LIBS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
-PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php-intl.so
+PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so
 endif
 
 third_party/libicu-${LIBICU_VERSION}/.gitignore:
@@ -152,20 +152,19 @@ $(addsuffix /libicuuc.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/libicuu
 $(addsuffix /libicudata.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/libicudata.so
 	cp -Lp $^ $@
 
-packages/libicu/test/%.generated.mjs: third_party/php8.3-src/ext/intl/tests/%.phpt
-	node bin/translate-test.js $^ > $@
+packages/libicu/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/intl/tests/%.phpt
+	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} > $@
 
-third_party/php-intl/config.m4: third_party/php${PHP_VERSION}-src/patched
-	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/intl /src/third_party/php-intl
+third_party/php${PHP_VERSION}-intl/config.m4: third_party/php${PHP_VERSION}-src/patched
+	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/intl /src/third_party/php${PHP_VERSION}-intl
 
-packages/libicu/php-intl.so: ${PHPIZE} packages/libicu/libicudata.so third_party/php-intl/config.m4
+packages/libicu/php${PHP_VERSION}-intl.so: ${PHPIZE} packages/libicu/libicudata.so third_party/php${PHP_VERSION}-intl/config.m4
 	${DOCKER_RUN_IN_EXT_INTL} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_INTL} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	# ${DOCKER_RUN_IN_EXT_INTL} sed -i 's#as_fn_error 77#echo#g' configure;
-	${DOCKER_RUN_IN_EXT_INTL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/bin/php-config;
+	${DOCKER_RUN_IN_EXT_INTL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_INTL} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_INTL} sed -i 's#-export-dynamic##g' Makefile;
-	${DOCKER_RUN_IN_EXT_INTL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php8.3-src';
+	${DOCKER_RUN_IN_EXT_INTL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_INTL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/intl.a \
 		/src/packages/libicu/libicudata.so \
 		/src/packages/libicu/libicuuc.so \
@@ -174,5 +173,5 @@ packages/libicu/php-intl.so: ${PHPIZE} packages/libicu/libicudata.so third_party
 		/src/packages/libicu/libicutu.so \
 		/src/packages/libicu/libicutest.so
 
-$(addsuffix /php-intl.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/php-intl.so
+$(addsuffix /php${PHP_VERSION}-intl.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/php${PHP_VERSION}-intl.so
 	cp -Lp $^ $@

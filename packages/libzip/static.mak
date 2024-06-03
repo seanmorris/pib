@@ -2,7 +2,7 @@
 
 LIBZIP_TAG?=v1.10.1
 DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/libzip/ emscripten-builder
-DOCKER_RUN_IN_EXT_ZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/php-zip/ emscripten-builder
+DOCKER_RUN_IN_EXT_ZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/php${PHP_VERSION}-zip/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBZIP},0 1 shared static),)
 $(error WITH_LIBZIP MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -21,10 +21,10 @@ endif
 ifeq (${WITH_LIBZIP},shared)
 # CONFIGURE_FLAGS+= --with-zip
 # SHARED_LIBS+= packages/libzip/libzip.so
-PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
+# PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
-PHP_ASSET_LIST+= libzip.so php-zip.so
+PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
 endif
 
 third_party/libzip/.gitignore:
@@ -54,17 +54,17 @@ packages/libzip/libzip.so: lib/lib/libzip.so
 $(addsuffix /libzip.so,$(sort ${SHARED_ASSET_PATHS})): packages/libzip/libzip.so
 	cp -Lp $^ $@
 
-third_party/php-zip/config.m4: third_party/php${PHP_VERSION}-src/patched
-	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zip /src/third_party/php-zip
+third_party/php${PHP_VERSION}-zip/config.m4: third_party/php${PHP_VERSION}-src/patched
+	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zip /src/third_party/php${PHP_VERSION}-zip
 
-packages/libzip/php-zip.so: ${PHPIZE} packages/libzip/libzip.so third_party/php-zip/config.m4
+packages/libzip/php${PHP_VERSION}-zip.so: ${PHPIZE} packages/libzip/libzip.so third_party/php${PHP_VERSION}-zip/config.m4
 	${DOCKER_RUN_IN_EXT_ZIP} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ZIP} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_ZIP} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/bin/php-config;
+	${DOCKER_RUN_IN_EXT_ZIP} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/ --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_ZIP} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZIP} sed -i 's#-export-dynamic##g' Makefile;
-	${DOCKER_RUN_IN_EXT_ZIP} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php8.3-src';
+	${DOCKER_RUN_IN_EXT_ZIP} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_ZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/zip.a /src/packages/libzip/libzip.so
 
-$(addsuffix /php-zip.so,$(sort ${SHARED_ASSET_PATHS})): packages/libzip/php-zip.so
+$(addsuffix /php${PHP_VERSION}-zip.so,$(sort ${SHARED_ASSET_PATHS})): packages/libzip/php${PHP_VERSION}-zip.so
 	cp -Lp $^ $@
