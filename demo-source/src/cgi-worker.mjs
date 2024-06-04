@@ -27,11 +27,8 @@ const sharedLibs = [
 	`php${PhpCgiWorker.phpVersion}-dom.so`,
 	`php${PhpCgiWorker.phpVersion}-mbstring.so`,
 	`php${PhpCgiWorker.phpVersion}-sqlite.so`,
-	`php${PhpCgiWorker.phpVersion}-pdo.so`,
 	`php${PhpCgiWorker.phpVersion}-pdo-sqlite.so`,
 ];
-
-console.log(sharedLibs);
 
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({

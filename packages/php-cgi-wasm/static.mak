@@ -1,12 +1,14 @@
 PHP_CGI_DIST_DIR?=packages/php-cgi-wasm
 
 ifneq (${PHP_DIST_DIR},${PHP_ASSET_PATH})
-PHP_CGI_ASSET_PATH?=${PHP_CGI_DIST_DIR}
+PHP_CGI_ASSET_PATH?=${ENV_DIR}${PHP_ASSET_PATH}
 else
-PHP_CGI_ASSET_PATH?=${PHP_ASSET_PATH}
+PHP_CGI_ASSET_PATH?=${PHP_CGI_DIST_DIR}
 endif
 
+ifneq (${SHARED_ASSET_PATHS},${PHP_CGI_ASSET_PATH})
 SHARED_ASSET_PATHS+= ${PHP_CGI_ASSET_PATH}
+endif
 
 CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.mjs PhpCgiWebview.mjs PhpCgiNode.mjs PhpCgiShell.mjs PhpCgiWorker.mjs PhpCgiBase.mjs) \

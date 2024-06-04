@@ -41,7 +41,6 @@ const commands = {};
 
 		const buildTypeLower = String(buildType).toLowerCase();
 
-		console.log({cwd});
 		// return;
 
 		const options = [
@@ -56,10 +55,6 @@ const commands = {};
 		if(fs.existsSync(cwd + '/.php-wasm-rc'))
 		{
 			options.push(`ENV_FILE=${rcFile}`,);
-			child_process.spawn(`touch`, [rcFile], {
-				stdio: [ 'inherit', 'inherit', 'inherit' ],
-				cwd: __dirname + '/..',
-			});
 		}
 
 		child_process.spawn(`make`, options, {
@@ -130,6 +125,29 @@ const commands = {};
 	clean.help = `Usage: php-wasm-builder clean`;
 
 	commands.clean = clean;
+}
+
+{ // assets
+	const assets = () => {
+		const options = [`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`];
+
+		if(fs.existsSync(cwd + '/.php-wasm-rc'))
+		{
+			options.push(`ENV_FILE=${rcFile}`,`ENV_DIR=${cwd}/`);
+		}
+
+		options.push('assets');
+
+		const subprocess = child_process.spawn(`make`, options, {
+			stdio: [ 'inherit', 'inherit', 'inherit' ],
+			cwd: __dirname + '/..',
+		});
+	};
+
+	assets.info = `Copy shared libs & file packages to asset directory.`;
+	assets.help = `Usage: php-wasm-builder assets`;
+
+	commands.assets = assets;
 }
 
 { // help

@@ -29,9 +29,9 @@ export class PhpCgiWebBase extends PhpCgiBase
 					else    accept();
 				}));
 			});
-
-			this.initialized = true;
 		}
+
+		this.initialized = true;
 	}
 
 	async _afterRequest()
@@ -61,14 +61,6 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 			const php = await new this.PHP(phpArgs);
 
-			await php.ccall(
-				'pib_storage_init'
-				, NUM
-				, []
-				, []
-				, {async: true}
-			);
-
 			if(this.sharedLibs)
 			{
 				const iniLines = this.sharedLibs.map(lib => {
@@ -78,10 +70,16 @@ export class PhpCgiWebBase extends PhpCgiBase
 					}
 				});
 
-				await fsOps.writeFile(php, '/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
+				php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 			}
 
-			this.initialized = false;
+			await php.ccall(
+				'pib_storage_init'
+				, NUM
+				, []
+				, []
+				, {async: true}
+			);
 
 			await new Promise((accept, reject) => {
 				php.FS.syncfs(true, error => {

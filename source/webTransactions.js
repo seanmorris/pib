@@ -1,54 +1,54 @@
-export function startTransaction(wrapper)
+export async function startTransaction(wrapper)
 {
-	return wrapper.binary.then(php => {
-		if(wrapper.transactionStarted || !php.persist)
-		{
-			return Promise.resolve();
-		}
+	const php = await wrapper.binary;
 
-		return new Promise((accept, reject) => {
-			php.FS.syncfs(true, error => {
+	if(wrapper.transactionStarted || !php.persist)
+	{
+		return;
+	}
 
-				if(error)
-				{
-					reject(error);
-				}
-				else
-				{
-					wrapper.transactionStarted = true;
-					accept();
-				}
-			});
+	return await new Promise((accept, reject) => {
+		php.FS.syncfs(true, error => {
+
+			if(error)
+			{
+				reject(error);
+			}
+			else
+			{
+				wrapper.transactionStarted = true;
+				accept();
+			}
 		});
 	});
 }
 
-export function commitTransaction(wrapper)
+export async function commitTransaction(wrapper)
 {
-	return wrapper.binary.then(php => {
-		if(!php.persist)
-		{
-			return Promise.resolve();
-		}
+	const php = await wrapper.binary;
 
-		if(!wrapper.transactionStarted)
-		{
-			throw new Error('No transaction initialized.');
-		}
+	if(!php.persist)
+	{
+		return;
+	}
 
-		return new Promise((accept, reject) => {
-			php.FS.syncfs(false, error => {
+	if(!wrapper.transactionStarted)
+	{
+		throw new Error('No transaction initialized.');
+	}
 
-				if(error)
-				{
-					reject(error);
-				}
-				else
-				{
-					wrapper.transactionStarted = false;
-					accept();
-				}
+	return await new Promise((accept, reject) => {
+		php.FS.syncfs(false, error => {
+
+			if(error)
+			{
+				reject(error);
 			}
-		)});
-	});
+			else
+			{
+				wrapper.transactionStarted = false;
+				accept();
+			}
+		}
+	)});
 }

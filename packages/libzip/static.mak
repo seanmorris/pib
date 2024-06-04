@@ -14,6 +14,7 @@ endif
 
 ifeq (${WITH_LIBZIP},static)
 ARCHIVES+= lib/lib/libzip.a
+SKIP_LIBS+= -lzip
 CONFIGURE_FLAGS+= --with-zip
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 endif

@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/php-wasm/static/css/main.3c387d48.css",
-    "main.js": "/php-wasm/static/js/main.71af196c.js",
-    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.55034695a094dfdb7752.wasm",
+    "main.js": "/php-wasm/static/js/main.40ced46b.js",
+    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.89c50405bb299d9b49eb.wasm",
     "worker-xquery.js": "/php-wasm/16470d85f9e6b184411b622ce1783fd0.js",
     "worker-javascript.js": "/php-wasm/70896c45cb42a1a16168cef789116031.js",
     "mode-php_laravel_blade.js": "/php-wasm/e43564c89288d9dc205f894bb77f6254.js",
@@ -492,10 +492,10 @@
     "d.js": "/php-wasm/c98e74fc97b04fe8bf43dcdff549afcf.js",
     "mode-text.js": "/php-wasm/0ffb18fb70c87335edee31a479f58a43.js",
     "main.3c387d48.css.map": "/php-wasm/static/css/main.3c387d48.css.map",
-    "main.71af196c.js.map": "/php-wasm/static/js/main.71af196c.js.map"
+    "main.40ced46b.js.map": "/php-wasm/static/js/main.40ced46b.js.map"
   },
   "entrypoints": [
     "static/css/main.3c387d48.css",
-    "static/js/main.71af196c.js"
+    "static/js/main.40ced46b.js"
   ]
 }

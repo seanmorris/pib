@@ -26,7 +26,7 @@ export class PhpCgiBase
 	phpArgs    = {};
 
 	maxRequestAge    = 0;
-	staticCacheTime  = 0;
+	staticCacheTime  = 60_000;
 	dynamicCacheTime = 0;
 	vHosts = [];
 
@@ -56,9 +56,9 @@ export class PhpCgiBase
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
-		this.maxRequestAge    = args.maxRequestAge    || 0;
-		this.staticCacheTime  = args.staticCacheTime  || 0;
-		this.dynamicCacheTime = args.dynamicCacheTime || 0;
+		this.maxRequestAge    = args.maxRequestAge    || this.maxRequestAge;
+		this.staticCacheTime  = args.staticCacheTime  || this.staticCacheTime;
+		this.dynamicCacheTime = args.dynamicCacheTime || this.dynamicCacheTime;
 		this.vHosts = args.vHosts || [];
 
 		this.env = {};
@@ -173,6 +173,7 @@ export class PhpCgiBase
 		};
 
 		this.binary = new this.PHP(phpArgs).then(async php => {
+
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -190,7 +191,7 @@ export class PhpCgiBase
 					}
 				});
 
-				await fsOps.writeFile(php, '/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
+				php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 			}
 
 			await php.ccall(
@@ -222,6 +223,24 @@ export class PhpCgiBase
 			, post
 			, contentType
 		} = await breakoutRequest(request);
+
+		const cache  = await caches.open('static-v1');
+		const cached = await cache.match(url);
+
+		// this.maxRequestAge
+
+		if(cached)
+		{
+			const cacheTime = Number(cached.headers.get('x-php-wasm-cache-time'));
+
+			if(this.staticCacheTime > 0 && this.staticCacheTime > Date.now() - cacheTime)
+			{
+				this.onRequest(request, cached);
+				return cached;
+			}
+		}
+
+		const php = await this.binary;
 
 		await this._beforeRequest();
 
@@ -260,22 +279,7 @@ export class PhpCgiBase
 			scriptName = vHostPrefix + '/' + vHostEntrypoint;
 		}
 
-		const cache  = await caches.open('static-v1');
-		const cached = await cache.match(url);
 
-		// this.maxRequestAge
-
-		if(cached)
-		{
-			const cacheTime = Number(cached.headers.get('x-php-wasm-cache-time'));
-
-			if(this.staticCacheTime > 0 && this.staticCacheTime < Date.now() - cacheTime)
-			{
-				return cached;
-			}
-		}
-
-		const php = await this.binary;
 
 		let originalPath = url.pathname;
 
@@ -364,9 +368,22 @@ export class PhpCgiBase
 
 		try
 		{
-			if(php._main() === 0) // PHP exited with code 0
+			const exitCode = await php.ccall(
+				'main'
+				, 'number'
+				, ['number', 'string']
+				, []
+				, {async: true}
+			);
+
+			if(exitCode === 0)
 			{
-				await this._afterRequest();
+				this._afterRequest();
+			}
+			else
+			{
+				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
+				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
 			}
 		}
 		catch (error)

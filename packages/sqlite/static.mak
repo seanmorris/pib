@@ -17,6 +17,7 @@ endif
 
 ifeq (${WITH_SQLITE},static)
 ARCHIVES+= lib/lib/libsqlite3.a
+SKIP_LIBS+= lsqlite3
 CONFIGURE_FLAGS+= --with-sqlite3 --enable-pdo --with-pdo-sqlite=/src/lib
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 endif

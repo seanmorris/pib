@@ -19,6 +19,7 @@ endif
 ifeq (${WITH_ICONV},static)
 CONFIGURE_FLAGS+= --with-iconv=/src/lib
 ARCHIVES+= lib/lib/libiconv.a
+SKIP_LIBS+= -liconv
 endif
 
 ifeq (${WITH_ICONV},shared)

@@ -23,7 +23,7 @@ export class PhpWeb extends PhpBase
 	{
 		super.refresh();
 		const php = await this.binary;
-		await navigator.locks.request('php-wasm-fs-lock-1', async () => {
+		await navigator.locks.request('php-wasm-fs-lock', async () => {
 			return new Promise((accept, reject) => {
 				php.FS.syncfs(true, error => {
 					if(error) reject(error);
@@ -45,7 +45,6 @@ export class PhpWeb extends PhpBase
 		this.queue.push([callback, params, _accept, _reject]);
 
 		navigator.locks.request('php-wasm-fs-lock', async () => {
-
 			if(!this.queue.length)
 			{
 				return;
@@ -59,7 +58,6 @@ export class PhpWeb extends PhpBase
 				const run = callback(...params);
 				run.then(accept).catch(reject);
 				await run;
-				// this.queue.length || await new Promise(a => setTimeout(a, 100));
 			} while(this.queue.length)
 
 			await (this.autoTransaction ? this.commitTransaction() : Promise.resolve());

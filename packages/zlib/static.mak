@@ -14,6 +14,7 @@ endif
 
 ifeq (${WITH_ZLIB},static)
 ARCHIVES+= lib/lib/libz.a
+SKIP_LIBS+= -lz
 CONFIGURE_FLAGS+= --with-zlib
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 endif

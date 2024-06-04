@@ -9,6 +9,8 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
+ENV_DIR?=
+
 ## Default libraries
 WITH_BCMATH  ?=1
 WITH_CALENDAR?=1
@@ -130,15 +132,8 @@ PROGRESS=--progress auto
 CPU_COUNT=`nproc || echo 1`
 PRELOAD_ASSETS+=php.ini
 
-DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm \
-	-e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
-	-e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
-	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
-	-e ENVIRONMENT=${ENVIRONMENT}         \
-	-e PHP_BRANCH=${PHP_BRANCH}           \
-	-e EMCC_CORES=${CPU_COUNT}
-
-DOCKER_RUN       =${DOCKER_ENV} emscripten-builder
+DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e ENVIRONMENT=${ENVIRONMENT}
+DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -e CFLAGS="-I /src/lib/include" -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
 PHP_VERSION_DEFAULT=8.3
@@ -225,7 +220,7 @@ ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
 PHP_ASSET_PATH?=${PHP_DIST_DIR}
-SHARED_ASSET_PATHS=${PHP_ASSET_PATH}
+SHARED_ASSET_PATHS=${ENV_DIR}${PHP_ASSET_PATH}
 
 
 ifneq (${PHP_ASSET_PATH},${PHP_DIST_DIR})
@@ -650,8 +645,8 @@ archives: ${ARCHIVES}
 
 shared: ${SHARED_LIBS}
 
-assets: $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST})
-	@ echo $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST})
+assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
+#	 @ echo $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 
 ${PHPIZE}: third_party/php${PHP_VERSION}-src/scripts/phpize-built
 

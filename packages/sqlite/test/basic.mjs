@@ -20,7 +20,7 @@ test('Sqlite3 Extension is enabled.', async () => {
 });
 
 test('PDO Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:['php${PhpNode.phpVersion}-sqlite.so', 'php${PhpNode.phpVersion}-pdo.so']});
+	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '';
 
@@ -37,7 +37,7 @@ test('PDO Extension is enabled.', async () => {
 });
 
 test('PDO_Sqlite Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:['php${PhpNode.phpVersion}-sqlite.so', 'php${PhpNode.phpVersion}-pdo.so', 'php${PhpNode.phpVersion}-pdo-sqlite.so']});
+	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-sqlite.so`, `php${PhpNode.phpVersion}-pdo-sqlite.so`]});
 
 	let stdOut = '', stdErr = '';
 
