@@ -7,14 +7,10 @@ workflows:
 
   build-test-flow:
     jobs:
-      - make-test-8-3:
-          requires:
-      - make-test-8-2:
-          requires:
-      - make-test-8-1:
-          requires:
-      - make-test-8-0:
-          requires:
+      - make-test-8-3
+      - make-test-8-2
+      - make-test-8-1
+      - make-test-8-0
 
 jobs:
 
@@ -24,8 +20,6 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-      - attach_workspace:
-          at: ~/
       - run: cp .circleci/.env_8.3.ci .env
       - run: time make image test
 
@@ -35,8 +29,6 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-      - attach_workspace:
-            at: ~/
       - run: cp .circleci/.env_8.2.ci .env
       - run: time make image test
 
@@ -46,8 +38,6 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-      - attach_workspace:
-            at: ~/
       - run: cp .circleci/.env_8.1.ci .env
       - run: time make image test
 
@@ -57,7 +47,5 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-      - attach_workspace:
-            at: ~/
       - run: cp .circleci/.env_8.0.ci .env
       - run: time make image test
