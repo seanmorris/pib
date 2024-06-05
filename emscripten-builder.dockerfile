@@ -29,6 +29,8 @@ RUN apt-get update; \
 
 FROM stock as patched
 
+RUN echo "break-cache-0";
+
 # RUN emsdk install tot; \
 # 	emsdk activate tot;
 
