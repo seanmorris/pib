@@ -27,7 +27,7 @@
 		"php-wasm-tidy": "^0.0.9-b",
 		"php-wasm-yaml": "^0.0.9-e",
 		"php-wasm-zlib": "^0.0.9-c",
-		"vrzno": "^0.0.9-e"
+		"vrzno": "^0.0.9-f"
 	},
 	"contributors": [
 		{
