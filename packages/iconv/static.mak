@@ -4,30 +4,34 @@ ICONV_TAG?=v1.17
 DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libiconv-1.17/ emscripten-builder
 DOCKER_RUN_IN_EXT_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-iconv/ emscripten-builder
 
-ifeq ($(filter ${WITH_ICONV},0 1 shared static),)
-$(error WITH_ICONV MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_ICONV},0 1 shared static dynamic),)
+$(error WITH_ICONV MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ICONV},1)
 WITH_ICONV=static
 endif
 
-ifneq ($(filter ${WITH_ICONV},shared static),)
-TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
-endif
-
 ifeq (${WITH_ICONV},static)
 CONFIGURE_FLAGS+= --with-iconv=/src/lib
 ARCHIVES+= lib/lib/libiconv.a
 SKIP_LIBS+= -liconv
+TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 endif
 
 ifeq (${WITH_ICONV},shared)
+CONFIGURE_FLAGS+= --with-iconv=/src/lib
+PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
+TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
+SHARED_LIBS+= packages/iconv/libiconv.so
+PHP_ASSET_LIST+= libiconv.so
 SKIP_LIBS+= -liconv
-# CONFIGURE_FLAGS+= --with-iconv=/src/lib
-# SHARED_LIBS+= packages/iconv/libiconv.so
-# PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
+endif
+
+ifeq (${WITH_ICONV},dynamic)
 PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
+TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
+SKIP_LIBS+= -liconv
 endif
 
 third_party/libiconv-1.17/README:
@@ -57,9 +61,10 @@ third_party/php${PHP_VERSION}-iconv/config.m4: third_party/php${PHP_VERSION}-src
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/iconv /src/third_party/php${PHP_VERSION}-iconv
 
 packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so third_party/php${PHP_VERSION}-iconv/config.m4
+	@ echo -e "\e[33;4mBuilding php-iconv\e[0m"
 	${DOCKER_RUN_IN_EXT_ICONV} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ICONV} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_ICONV} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_ICONV} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --with-iconv=/src/lib --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';

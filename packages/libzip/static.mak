@@ -4,8 +4,8 @@ LIBZIP_TAG?=v1.10.1
 DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/libzip/ emscripten-builder
 DOCKER_RUN_IN_EXT_ZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/php${PHP_VERSION}-zip/ emscripten-builder
 
-ifeq ($(filter ${WITH_LIBZIP},0 1 shared static),)
-$(error WITH_LIBZIP MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBZIP},0 1 shared static dynamic),)
+$(error WITH_LIBZIP MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBZIP},1)
@@ -14,15 +14,21 @@ endif
 
 ifeq (${WITH_LIBZIP},static)
 ARCHIVES+= lib/lib/libzip.a
-SKIP_LIBS+= -lzip
 CONFIGURE_FLAGS+= --with-zip
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
+SKIP_LIBS+= -lzip
 endif
 
 ifeq (${WITH_LIBZIP},shared)
-# CONFIGURE_FLAGS+= --with-zip
-# SHARED_LIBS+= packages/libzip/libzip.so
-# PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
+CONFIGURE_FLAGS+= --with-zip
+PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
+TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
+SHARED_LIBS+= packages/libzip/libzip.so
+PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
+SKIP_LIBS+= -lzip
+endif
+
+ifeq (${WITH_LIBZIP},dynamic)
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
 PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
@@ -59,6 +65,7 @@ third_party/php${PHP_VERSION}-zip/config.m4: third_party/php${PHP_VERSION}-src/p
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zip /src/third_party/php${PHP_VERSION}-zip
 
 packages/libzip/php${PHP_VERSION}-zip.so: ${PHPIZE} packages/libzip/libzip.so third_party/php${PHP_VERSION}-zip/config.m4
+	@ echo -e "\e[33;4mBuilding php-zip\e[0m"
 	${DOCKER_RUN_IN_EXT_ZIP} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ZIP} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ZIP} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;

@@ -3,7 +3,9 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('OpenSSL Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-ssl.so`]});
+	const php = process.env.WITH_OPENSSL === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-ssl.so`]})
+		: new PhpNode;
 	let stdOut = '', stdErr = '';
 
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
@@ -19,20 +21,22 @@ test('OpenSSL Extension is enabled.', async () => {
 
 });
 
-// test('OpenSSL can generate SHA-256 hashes.', async () => {
-// 	const php = new PhpNode({sharedLibs:['php8.3-ssl.so']});
+test('OpenSSL can generate SHA-256 hashes.', async () => {
+	const php = process.env.WITH_OPENSSL === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-ssl.so`]})
+		: new PhpNode;
 
-// 	let stdOut = '', stdErr = '';
+	let stdOut = '', stdErr = '';
 
-// 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-// 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-// 	await php.binary;
+	await php.binary;
 
-// 	const exitCode = await php.run(`<?php var_dump(openssl_digest('Hello, world!', 'SHA256'));`);
+	const exitCode = await php.run(`<?php var_dump(openssl_digest('Hello, world!', 'SHA256'));`);
 
-// 	assert.equal(exitCode, 0);
-// 	assert.equal(stdOut, `string(64) "315f5bdb76d078c43b8ac0064e4a0164612b1fce77c869345bfc94c75894edd3"\n`);
-// 	assert.equal(stdErr, '');
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `string(64) "315f5bdb76d078c43b8ac0064e4a0164612b1fce77c869345bfc94c75894edd3"\n`);
+	assert.equal(stdErr, '');
 
-// });
+});

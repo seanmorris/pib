@@ -15,6 +15,7 @@ ifeq (${WITH_FREETYPE},static)
 CONFIGURE_FLAGS+= --with-freetype
 ARCHIVES+= lib/lib/libfreetype.a
 TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
+SKIP_LIBS+= -lfreetype
 endif
 
 ifeq (${WITH_FREETYPE},shared)
@@ -22,8 +23,8 @@ ifeq (${WITH_FREETYPE},shared)
 # SHARED_LIBS+= packages/freetype/libfreetype.so
 # PHP_CONFIGURE_DEPS+= packages/freetype/libfreetype.so
 TEST_LIST+=$(shell ls packages/freetype/test/*.mjs)
-SKIP_LIBS+= -lfreetype
 PHP_ASSET_LIST+= libfreetype.so
+SKIP_LIBS+= -lfreetype
 endif
 
 third_party/freetype-${FREETYPE_VERSION}/README:

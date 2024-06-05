@@ -2,8 +2,10 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
-test('GD Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-phar.so`]});
+test('Phar Extension is enabled.', async () => {
+	const php = process.env.WITH_PHAR === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-phar.so`]})
+		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
 
@@ -12,7 +14,7 @@ test('GD Extension is enabled.', async () => {
 
 	await php.binary;
 
-	const exitCode = await php.run(`<?php var_dump(extension_loaded('gd'));`);
+	const exitCode = await php.run(`<?php var_dump(extension_loaded('phar'));`);
 
 	assert.equal(exitCode, 0);
 	assert.equal(stdOut, `bool(true)\n`);

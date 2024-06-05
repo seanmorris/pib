@@ -4,8 +4,8 @@ LIBYAML_TAG?=0.2.5
 DOCKER_RUN_IN_LIB_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libyaml/ emscripten-builder
 DOCKER_RUN_IN_EXT_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-yaml/ emscripten-builder
 
-ifeq ($(filter ${WITH_YAML},0 1 shared static),)
-$(error WITH_YAML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_YAML},0 1 shared static dynamic),)
+$(error WITH_YAML MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_YAML},1)
@@ -13,20 +13,26 @@ WITH_YAML=static
 endif
 
 ifeq (${WITH_YAML},static)
-ARCHIVES+= lib/lib/libyaml.a
-# PHP_CONFIGURE_DEPS+= # third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
-CONFIGURE_FLAGS+= --with-yaml
+CONFIGURE_FLAGS+= --with-yaml=/src/lib
+PHP_CONFIGURE_DEPS+= lib/lib/libyaml.a third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
+ARCHIVES+= lib/lib/libyaml.a
+SKIP_LIBS+= -lyaml
 endif
 
 ifeq (${WITH_YAML},shared)
-# CONFIGURE_FLAGS+= --with-yaml
-# SHARED_LIBS+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
-# PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-src/ext/yaml/config.m4
-# PHP_CONFIGURE_DEPS+= packages/libyaml/libyaml.so
-PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
-SKIP_LIBS+= -lyaml
+CONFIGURE_FLAGS+= --with-yaml=/src/lib
+PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/yaml/config.m4 packages/libyaml/libyaml.so
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
+SHARED_LIBS+= packages/libyaml/libyaml.so
+PHP_ASSET_LIST+= libyaml.so
+SKIP_LIBS+= -lyaml
+endif
+
+ifeq (${WITH_YAML},dynamic)
+PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
+TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
+SKIP_LIBS+= -lyaml
 endif
 
 third_party/libyaml/.gitignore:
@@ -53,9 +59,9 @@ third_party/php${PHP_VERSION}-yaml/config.m4:
 	${DOCKER_RUN} mv third_party/yaml-2.2.3 third_party/php${PHP_VERSION}-yaml
 	${DOCKER_RUN} rm yaml-2.2.3.tgz
 
-# third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/php${PHP_VERSION}-yaml/config.m4 | third_party/php${PHP_VERSION}-src/patched
-# 	@ echo -e "\e[33;4mImporting ext-yaml\e[0m"
-# 	${DOCKER_RUN} cp -rfv third_party/php${PHP_VERSION}-yaml third_party/php${PHP_VERSION}-src/ext/yaml
+third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/php${PHP_VERSION}-yaml/config.m4 | third_party/php${PHP_VERSION}-src/patched
+	@ echo -e "\e[33;4mImporting ext-yaml\e[0m"
+	${DOCKER_RUN} cp -rfv third_party/php${PHP_VERSION}-yaml third_party/php${PHP_VERSION}-src/ext/yaml
 
 packages/libyaml/libyaml.so: lib/lib/libyaml.so
 	cp $^ $@
@@ -64,6 +70,7 @@ $(addsuffix /libyaml.so,$(sort ${SHARED_ASSET_PATHS})): packages/libyaml/libyaml
 	cp -Lp $^ $@
 
 packages/libyaml/php${PHP_VERSION}-yaml.so: ${PHPIZE} packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-yaml/config.m4
+	@ echo -e "\e[33;4mBuilding php-yaml\e[0m"
 	${DOCKER_RUN_IN_EXT_YAML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_YAML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_YAML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-yaml=/src/lib;

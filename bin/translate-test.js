@@ -38,17 +38,14 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test(${JSON.stringify(String(sections.TEST).trim())}, async () => {
-	const sharedLibs = [${parsedArgs.buildType !== 'static' ? `
-		'php${parsedArgs.phpVersion}-gd.so'
-		, 'php${parsedArgs.phpVersion}-zlib.so'
-		, 'php${parsedArgs.phpVersion}-iconv.so'
-		, 'php${parsedArgs.phpVersion}-intl.so'
-		, 'php${parsedArgs.phpVersion}-xml.so'
-		, 'php${parsedArgs.phpVersion}-dom.so'
-		, 'php${parsedArgs.phpVersion}-simplexml.so'
-		, 'php${parsedArgs.phpVersion}-mbstring.so'
-		, 'php${parsedArgs.phpVersion}-ssl.so'
-	` : ''}];
+	const sharedLibs = [];
+	process.env.WITH_ZLIB  === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-zlib.so');
+	process.env.WITH_GD    === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-gd.so');
+	process.env.WITH_ICONV === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-iconv.so');
+	process.env.WITH_ICU   === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-intl.so');
+	process.env.WITH_XML   === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-xml.so', 'php${parsedArgs.phpVersion}-dom.so', 'php${parsedArgs.phpVersion}-simplexml.so');
+	process.env.WITH_ONIGURUMA === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-mbstring.so');
+	process.env.WITH_OPENSSL   === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-ssl.so');
 
 	const php = new PhpNode( { sharedLibs, persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
 

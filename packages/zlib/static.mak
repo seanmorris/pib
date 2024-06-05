@@ -4,8 +4,8 @@ ZLIB_TAG?=v1.3.1
 DOCKER_RUN_IN_ZLIB=${DOCKER_ENV} -w /src/third_party/zlib/ emscripten-builder
 DOCKER_RUN_IN_EXT_ZLIB=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-zlib/ emscripten-builder
 
-ifeq ($(filter ${WITH_ZLIB},0 1 shared static),)
-$(error WITH_ZLIB MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_ZLIB},0 1 shared static dynamic),)
+$(error WITH_ZLIB MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ZLIB},1)
@@ -13,19 +13,25 @@ WITH_ZLIB=static
 endif
 
 ifeq (${WITH_ZLIB},static)
-ARCHIVES+= lib/lib/libz.a
-SKIP_LIBS+= -lz
 CONFIGURE_FLAGS+= --with-zlib
+ARCHIVES+= lib/lib/libz.a
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
+SKIP_LIBS+= -lz
 endif
 
 ifeq (${WITH_ZLIB},shared)
-# CONFIGURE_FLAGS+= --with-zlib
-# SHARED_LIBS+= packages/zlib/libz.so
-# PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
+CONFIGURE_FLAGS+= --with-zlib
+PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
-SKIP_LIBS+= -lz
+SHARED_LIBS+= packages/zlib/libz.so
 PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
+SKIP_LIBS+= -lz
+endif
+
+ifeq (${WITH_ZLIB},dynamic)
+TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
+PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
+SKIP_LIBS+= -lz
 endif
 
 third_party/zlib/.gitignore:
@@ -55,6 +61,7 @@ third_party/php${PHP_VERSION}-zlib/config.m4: third_party/php${PHP_VERSION}-src/
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zlib /src/third_party/php${PHP_VERSION}-zlib
 
 packages/zlib/php${PHP_VERSION}-zlib.so: ${PHPIZE} packages/zlib/libz.so third_party/php${PHP_VERSION}-zlib/config.m4
+	@ echo -e "\e[33;4mBuilding php-zlib\e[0m"
 	${DOCKER_RUN_IN_EXT_ZLIB} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ZLIB} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_ZLIB} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;

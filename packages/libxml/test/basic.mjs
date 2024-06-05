@@ -20,7 +20,9 @@ test('libXML Extension is enabled.', async () => {
 });
 
 test('DOM Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-dom.so`]});
+	const php = process.env.WITH_LIBXML === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-dom.so`]})
+		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
 
@@ -37,7 +39,9 @@ test('DOM Extension is enabled.', async () => {
 });
 
 test('SimpleXML Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-simplexml.so`]});
+	const php = process.env.WITH_LIBXML === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-simplexml.so`]})
+		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
 
@@ -54,7 +58,9 @@ test('SimpleXML Extension is enabled.', async () => {
 });
 
 test('XML Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-xml.so`]});
+	const php = process.env.WITH_LIBXML === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-xml.so`]})
+		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
 

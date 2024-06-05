@@ -7,8 +7,8 @@ DOCKER_RUN_IN_EXT_SQLITE=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-sql
 DOCKER_RUN_IN_EXT_PDO=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-pdo/ emscripten-builder
 DOCKER_RUN_IN_EXT_PDO_SQLITE=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-pdo-sqlite/ emscripten-builder
 
-ifeq ($(filter ${WITH_SQLITE},0 1 shared static),)
-$(error WITH_SQLITE MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_SQLITE},0 1 shared static dynamic),)
+$(error WITH_SQLITE MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_SQLITE},1)
@@ -16,20 +16,26 @@ WITH_SQLITE=static
 endif
 
 ifeq (${WITH_SQLITE},static)
+CONFIGURE_FLAGS+=  --enable-pdo --with-sqlite3 --with-pdo-sqlite
 ARCHIVES+= lib/lib/libsqlite3.a
-SKIP_LIBS+= lsqlite3
-CONFIGURE_FLAGS+= --with-sqlite3 --enable-pdo --with-pdo-sqlite=/src/lib
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
+SKIP_LIBS+= -lsqlite3
 endif
 
 ifeq (${WITH_SQLITE},shared)
-# CONFIGURE_FLAGS+= --with-sqlite3 --enable-pdo --with-pdo-sqlite=/src/lib
-# CONFIGURE_FLAGS+= --enable-pdo --with-pdo-sqlite=/src/lib
-# SHARED_LIBS+= packages/sqlite/libsqlite3.so
-# PHP_CONFIGURE_DEPS+= packages/sqlite/libsqlite3.so
+CONFIGURE_FLAGS+=  --enable-pdo --with-sqlite3 --with-pdo-sqlite=/src/lib
+PHP_CONFIGURE_DEPS+= packages/sqlite/libsqlite3.so
+TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
+SHARED_LIBS+= packages/sqlite/libsqlite3.so
+PHP_ASSET_LIST+= libsqlite3.so
+SKIP_LIBS+= -lsqlite3
+endif
+
+ifeq (${WITH_SQLITE},dynamic)
+CONFIGURE_FLAGS+=  --enable-pdo
+PHP_ASSET_LIST+= libsqlite3.so php${PHP_VERSION}-sqlite.so php${PHP_VERSION}-pdo-sqlite.so
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
-PHP_ASSET_LIST+= libsqlite3.so php${PHP_VERSION}-sqlite.so php${PHP_VERSION}-pdo-sqlite.so
 endif
 
 third_party/${SQLITE_DIR}/sqlite3.c:
@@ -59,6 +65,7 @@ third_party/php${PHP_VERSION}-sqlite/config.m4: third_party/php${PHP_VERSION}-sr
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/sqlite3 /src/third_party/php${PHP_VERSION}-sqlite
 
 packages/sqlite/php${PHP_VERSION}-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-sqlite/config.m4
+	@ echo -e "\e[33;4mBuilding php-sqlite\e[0m"
 	${DOCKER_RUN_IN_EXT_SQLITE} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_SQLITE} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_SQLITE} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
@@ -76,6 +83,7 @@ $(addsuffix /php${PHP_VERSION}-sqlite.so,$(sort ${SHARED_ASSET_PATHS})): package
 # 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/pdo /src/third_party/php${PHP_VERSION}-pdo
 
 # packages/sqlite/php${PHP_VERSION}-pdo.so: ${PHPIZE} third_party/php${PHP_VERSION}-pdo/config.m4
+# 	@ echo -e "\e[33;4mBuilding php-pdo\e[0m"
 # 	${DOCKER_RUN_IN_EXT_PDO} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 # 	${DOCKER_RUN_IN_EXT_PDO} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 # 	${DOCKER_RUN_IN_EXT_PDO} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' pdo.c;
@@ -96,6 +104,7 @@ third_party/php${PHP_VERSION}-pdo-sqlite/config.m4: third_party/php${PHP_VERSION
 	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php8.3-pdo-sqlite/sqlite_statement.c
 
 packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-pdo-sqlite/config.m4
+	@ echo -e "\e[33;4mBuilding php-pdo-sqlite\e[0m"
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' pdo_sqlite.c;

@@ -3,7 +3,9 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('Intl Extension is enabled.', async () => {
-	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-intl.so`]});
+	const php = process.env.WITH_ICU === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-intl.so`]})
+		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
 
@@ -21,7 +23,9 @@ test('Intl Extension is enabled.', async () => {
 });
 
 test('Intl can format numbers.', async () => {
-	const php = new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-intl.so`]});
+	const php = process.env.WITH_ICU === 'dynamic'
+		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-intl.so`]})
+		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
 

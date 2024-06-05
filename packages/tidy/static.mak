@@ -4,8 +4,8 @@ TIDYHTML_TAG?=5.6.0
 DOCKER_RUN_IN_TIDY=${DOCKER_ENV} -w /src/third_party/tidy-html5/ emscripten-builder
 DOCKER_RUN_IN_EXT_TIDY=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-tidy/ emscripten-builder
 
-ifeq ($(filter ${WITH_TIDY},0 1 shared static),)
-$(error WITH_TIDY MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_TIDY},0 1 shared static dynamic),)
+$(error WITH_TIDY MUST BE 0, 1, static, shared OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_TIDY},1)
@@ -19,18 +19,25 @@ endif
 endif
 
 ifeq (${WITH_TIDY},static)
-ARCHIVES+= lib/lib/libtidy.a
 CONFIGURE_FLAGS+= --with-tidy=/src/lib
+ARCHIVES+= lib/lib/libtidy.a
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
+SKIP_LIBS+= -ltidy
 endif
 
 ifeq (${WITH_TIDY},shared)
-# CONFIGURE_FLAGS+= --with-tidy=/src/lib
-# PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
-# SHARED_LIBS+= packages/tidy/libtidy.so
-TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
-# SKIP_LIBS+= -ltidy
+CONFIGURE_FLAGS+= --with-tidy=/src/lib
+PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
+TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
+SHARED_LIBS+= packages/tidy/libtidy.so
 PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
+SKIP_LIBS+= -ltidy
+endif
+
+ifeq (${WITH_TIDY},dynamic)
+PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
+TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
+SKIP_LIBS+= -ltidy
 endif
 
 third_party/tidy-html5/.gitignore:
@@ -63,6 +70,7 @@ third_party/php${PHP_VERSION}-tidy/config.m4: third_party/php${PHP_VERSION}-src/
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/tidy /src/third_party/php${PHP_VERSION}-tidy
 
 packages/tidy/php${PHP_VERSION}-tidy.so: ${PHPIZE} packages/tidy/libtidy.so third_party/php${PHP_VERSION}-tidy/config.m4
+	@ echo -e "\e[33;4mBuilding php-tidy\e[0m"
 	${DOCKER_RUN_IN_EXT_TIDY} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_TIDY} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_TIDY} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --with-tidy=/src/lib --cache-file=/tmp/config-cache;

@@ -3,7 +3,7 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../packages/php-wasm/PhpNode.mjs';
 
 test('Can run PHP', async () => {
-	const php = new PhpNode();
+	const php = new PhpNode({});
 
 	let stdOut = '', stdErr = '';
 
@@ -138,20 +138,3 @@ test('PIB extension is enabled.', async () => {
 	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
 });
-
-// test('Phar extension is enabled.', async () => {
-// 	const php = new PhpNode();
-
-// 	let stdOut = '', stdErr = '';
-
-// 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-// 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
-
-// 	await php.binary;
-
-// 	const exitCode = await php.run(`<?php var_dump(extension_loaded('phar'));`);
-
-// 	assert.equal(exitCode, 0);
-// 	assert.equal(stdOut, `bool(true)\n`);
-// 	assert.equal(stdErr, '');
-// });

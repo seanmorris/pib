@@ -6,8 +6,8 @@ DOCKER_RUN_IN_EXT_DOM =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flt
 DOCKER_RUN_IN_EXT_SIMPLEXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-simplexml/ emscripten-builder
 DOCKER_RUN_IN_EXT_XML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-xml/ emscripten-builder
 
-ifeq ($(filter ${WITH_LIBXML},0 1 shared static),)
-$(error WITH_LIBXML MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBXML},0 1 shared static dynamic),)
+$(error WITH_LIBXML MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBXML},1)
@@ -22,12 +22,21 @@ SKIP_LIBS+= -lxml2
 endif
 
 ifeq (${WITH_LIBXML},shared)
-CONFIGURE_FLAGS+= --with-libxml=/src/lib/
 SHARED_LIBS+= packages/libxml/libxml2.so
+CONFIGURE_FLAGS+= --with-libxml=/src/lib/ --enable-xml --enable-dom --enable-simplexml
 PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
+PHP_ASSET_LIST+= libxml2.so
 SKIP_LIBS+= -lxml2
+endif
+
+ifeq (${WITH_LIBXML},dynamic)
+SHARED_LIBS+= packages/libxml/libxml2.so
+CONFIGURE_FLAGS+= --with-libxml=/src/lib/
+PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
+TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 PHP_ASSET_LIST+= libxml2.so php${PHP_VERSION}-dom.so php${PHP_VERSION}-simplexml.so php${PHP_VERSION}-xml.so
+SKIP_LIBS+= -lxml2
 endif
 
 third_party/libxml2/.gitignore:
@@ -70,7 +79,7 @@ packages/libxml/php${PHP_VERSION}-dom.so: ${PHPIZE} third_party/php${PHP_VERSION
 	${DOCKER_RUN_IN_EXT_DOM} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_DOM} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_DOM} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_DOM} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/dom.a
+	${DOCKER_RUN_IN_EXT_DOM} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/dom.a /src/packages/libxml/libxml2.so
 
 $(addsuffix /php${PHP_VERSION}-dom.so,$(sort ${SHARED_ASSET_PATHS})): packages/libxml/php${PHP_VERSION}-dom.so
 	cp -Lp $^ $@
@@ -83,7 +92,7 @@ packages/libxml/php${PHP_VERSION}-simplexml.so: ${PHPIZE} third_party/php${PHP_V
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_SIMPLEXML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/simplexml.a
+	${DOCKER_RUN_IN_EXT_SIMPLEXML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/simplexml.a /src/packages/libxml/libxml2.so
 
 $(addsuffix /php${PHP_VERSION}-simplexml.so,$(sort ${SHARED_ASSET_PATHS})): packages/libxml/php${PHP_VERSION}-simplexml.so
 	cp -Lp $^ $@
@@ -96,7 +105,7 @@ packages/libxml/php${PHP_VERSION}-xml.so: ${PHPIZE} third_party/php${PHP_VERSION
 	${DOCKER_RUN_IN_EXT_XML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_XML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_XML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_XML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/xml.a
+	${DOCKER_RUN_IN_EXT_XML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/xml.a /src/packages/libxml/libxml2.so
 
 $(addsuffix /php${PHP_VERSION}-xml.so,$(sort ${SHARED_ASSET_PATHS})): packages/libxml/php${PHP_VERSION}-xml.so
 	cp -Lp $^ $@

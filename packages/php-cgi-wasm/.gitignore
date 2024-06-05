@@ -1,2 +1,7 @@
-*.mjs*
-*.js*
+*.mjs
+*.js
+*.br
+*.gz
+*.data
+*.wasm
+*.so

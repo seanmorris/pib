@@ -4,3 +4,4 @@
 *.gz
 *.data
 *.wasm
+*.so

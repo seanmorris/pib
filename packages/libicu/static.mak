@@ -11,15 +11,15 @@ LIBICU_VERSION=69-1
 LIBICU_DATFILE=lib/share/icu/69.1/icudt69l.dat
 endif
 
-ifeq ($(filter ${WITH_ICU},0 1 shared static),)
-$(error WITH_ICU MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_ICU},0 1 shared static dynamic),)
+$(error WITH_ICU MUST BE 0, 1, static, shared, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ICU},1)
 WITH_ICU=static
 endif
 
-ifneq ($(filter ${WITH_ICU},shared static),)
+ifneq ($(filter ${WITH_ICU},shared static dynamic),)
 PRELOAD_ASSETS+=${LIBICU_DATFILE}
 PRE_JS_FILES+=packages/libicu/env.js
 # TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
@@ -30,12 +30,19 @@ ifeq (${WITH_ICU},static)
 CONFIGURE_FLAGS+=--enable-intl
 EXTRA_FLAGS+=-DU_STATIC_IMPLEMENTATION
 ARCHIVES+=lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a
+SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 endif
 
 ifeq (${WITH_ICU},shared)
+CONFIGURE_FLAGS+=--enable-intl
+PHP_CONFIGURE_DEPS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
+SHARED_LIBS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
+PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
-# PHP_CONFIGURE_DEPS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
-# SHARED_LIBS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
+endif
+
+ifeq (${WITH_ICU},dynamic)
+SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so
 endif
 
@@ -48,6 +55,13 @@ third_party/libicu-${LIBICU_VERSION}/.gitignore:
 	${DOCKER_RUN} cp -rf /src/third_party/libicu-${LIBICU_VERSION} /src/third_party/libicu_alt
 	${DOCKER_RUN} mv /src/third_party/libicu_alt /src/third_party/libicu-${LIBICU_VERSION}
 	${DOCKER_RUN_IN_LIBICU} git apply --no-index ../../../../patch/libicu.patch
+
+third_party/llvm/.gitignore:
+	@ echo -e "\e[33;4mDownloading LLVM\e[0m"
+	${DOCKER_RUN} git clone https://github.com/emscripten-core/llvm-project.git third_party/llvm \
+		--branch main \
+		--single-branch     \
+		--depth 1;
 
 ${LIBICU_DATFILE}: lib/lib/libicudata.a
 
@@ -116,6 +130,9 @@ lib/lib/libicuuc.so: lib/lib/libicuuc.a
 lib/lib/libicudata.so: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
+lib/lib/libc++.so:
+	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/emscripten/cache/sysroot/lib/wasm32-emscripten/libc++.a
+
 packages/libicu/libicui18n.so: lib/lib/libicui18n.so
 	cp -Lp $^ $@
 
@@ -153,12 +170,13 @@ $(addsuffix /libicudata.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/libic
 	cp -Lp $^ $@
 
 packages/libicu/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/intl/tests/%.phpt
-	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} > $@
+	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} --buildType static > $@
 
 third_party/php${PHP_VERSION}-intl/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/intl /src/third_party/php${PHP_VERSION}-intl
 
 packages/libicu/php${PHP_VERSION}-intl.so: ${PHPIZE} packages/libicu/libicudata.so third_party/php${PHP_VERSION}-intl/config.m4
+	@ echo -e "\e[33;4mBuilding php-intl\e[0m"
 	${DOCKER_RUN_IN_EXT_INTL} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_INTL} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_INTL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;

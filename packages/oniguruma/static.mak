@@ -4,22 +4,36 @@ ONIGURUMA_TAG?=v6.9.9
 DOCKER_RUN_IN_ONIGURUMA=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/oniguruma/ emscripten-builder
 DOCKER_RUN_IN_EXT_MBSTRING=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-mbstring/ emscripten-builder
 
-# WITH_MBSTRING?=1
+WITH_MBSTRING?=1
 
-# ifeq ($(filter ${WITH_MBSTRING},0 1),)
-# $(error WITH_MBSTRING MUST BE 0 or 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
-# endif
+ifeq ($(filter ${WITH_MBSTRING},0 1 static dynamic),)
+$(error WITH_MBSTRING MUST BE 0, 1, static, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
 
-# ifneq (${WITH_MBSTRING},0)
-# CONFIGURE_FLAGS+= --enable-mbstring
-# endif
+ifeq (${WITH_MBSTRING},1)
+WITH_MBSTRING=static
+endif
 
-# ifeq ($(filter ${WITH_ONIGURUMA},0 1 shared static),)
-# $(error WITH_ONIGURUMA MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
-# endif
+ifeq (${WITH_MBSTRING},static)
+CONFIGURE_FLAGS+= --with-mbstring
+endif
+
+ifeq (${WITH_MBSTRING},dynamic)
+PHP_ASSET_LIST+= php${PHP_VERSION}-mbstring.so
+endif
+
+ifeq ($(filter ${WITH_ONIGURUMA},0 1 shared static dynamic),)
+$(error WITH_ONIGURUMA MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
 
 ifeq (${WITH_ONIGURUMA},1)
 WITH_ONIGURUMA=static
+endif
+
+ifeq (${WITH_MBSTRING},dynamic)
+ifeq ($(filter ${WITH_MBSTRING},shared dynamic),)
+$(error WITH_ONIGURUMA MUST BE 0 OR shared IF WITH_MBSTRING IS shared OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
 endif
 
 ifeq (${WITH_ONIGURUMA},static)
@@ -29,20 +43,17 @@ SKIP_LIBS+= -lonig
 endif
 
 ifeq (${WITH_ONIGURUMA},shared)
-# CONFIGURE_FLAGS+= --with-onig
-# SHARED_LIBS+= packages/oniguruma/libonig.so
-# PHP_CONFIGURE_DEPS+= packages/oniguruma/libonig.so
+CONFIGURE_FLAGS+= --with-onig
+PHP_CONFIGURE_DEPS+= packages/oniguruma/libonig.so
+SHARED_LIBS+= packages/oniguruma/libonig.so
+PHP_ASSET_LIST+= libonig.so
 SKIP_LIBS+= -lonig
-PHP_ASSET_LIST+= libonig.so php${PHP_VERSION}-mbstring.so
 endif
 
-# lib/lib/php/20230831/mbstring.so: ${PHPIZE} lib/lib/libonig.so
-# 	${DOCKER_RUN_IN_PHP} bash -euxc 'cd ext/mbstring && { \
-# 		../../scripts/phpize; \
-# 		emconfigure ./configure --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix=/src/lib/; \
-# 		emmake make EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src'; \
-# 		emmake make install; \
-# 	};'
+ifeq (${WITH_ONIGURUMA},dynamic)
+SKIP_LIBS+= -lonig
+PHP_ASSET_LIST+= libonig.so
+endif
 
 third_party/oniguruma/.gitignore:
 	@ echo -e "\e[33;4mDownloading ONIGURUMA\e[0m"
@@ -71,6 +82,7 @@ third_party/php${PHP_VERSION}-mbstring/config.m4: third_party/php${PHP_VERSION}-
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/mbstring /src/third_party/php${PHP_VERSION}-mbstring
 
 packages/oniguruma/php${PHP_VERSION}-mbstring.so: ${PHPIZE} third_party/php${PHP_VERSION}-mbstring/config.m4 packages/oniguruma/libonig.so
+	@ echo -e "\e[33;4mBuilding php-mbstring\e[0m"
 	${DOCKER_RUN_IN_EXT_MBSTRING} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_MBSTRING} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_MBSTRING} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;

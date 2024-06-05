@@ -1,18 +1,26 @@
 #!/usr/bin/env make
 
 OPENSSL_TAG?=OpenSSL_1_1_1-stable
-DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -flto -O${SUB_OPTIMIZE}' -eCXX='emcc -fPIC -O${SUB_OPTIMIZE}' -w /src/third_party/openssl/ emscripten-builder
-DOCKER_RUN_IN_EXT_OPENSSL =${DOCKER_ENV} -eCC='emcc -fPIC -flto -O${SUB_OPTIMIZE}' -eCXX='emcc -fPIC -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-openssl/ emscripten-builder
+DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} \
+	-eCC='emcc -fPIC -flto -O${OPTIMIZE} -sLINKABLE' \
+	-eCXX='emcc -fPIC -flto -O${OPTIMIZE} -sLINKABLE' \
+	-w /src/third_party/openssl/ \
+	emscripten-builder
+DOCKER_RUN_IN_EXT_OPENSSL =${DOCKER_ENV} \
+	-eCC='emcc -fPIC -flto -O${OPTIMIZE}' \
+	-eCXX='emcc -fPIC -O${OPTIMIZE}' \
+	-w /src/third_party/php${PHP_VERSION}-openssl/ \
+	emscripten-builder
 
-ifeq ($(filter ${WITH_OPENSSL},0 1 shared static),)
-$(error WITH_OPENSSL MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_OPENSSL},0 1 shared dynamic),)
+$(error WITH_OPENSSL MUST BE 0, 1, shared, or dynamic (cannot be static). PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_OPENSSL},1)
-WITH_OPENSSL=static
+WITH_OPENSSL=shared
 endif
 
-ifneq ($(filter ${WITH_OPENSSL},shared static),)
+ifneq ($(filter ${WITH_OPENSSL},shared dynamic),)
 TEST_LIST+= packages/openssl/test/basic.mjs $(addprefix packages/openssl/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs,openssl_digest_basic openssl_decrypt_basic))
 endif
 
@@ -22,11 +30,16 @@ ARCHIVES+= lib/lib/libssl.a lib/lib/libcrypto.a
 endif
 
 ifeq (${WITH_OPENSSL},shared)
-SKIP_LIBS+= -lssl -lcrypto
-# CONFIGURE_FLAGS+= --with-openssl
-# SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
-# PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
+CONFIGURE_FLAGS+= --with-openssl=/src/lib
+PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
+SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-ssl.so
+SKIP_LIBS+= -lssl -lcrypto
+endif
+
+ifeq (${WITH_OPENSSL},dynamic)
+PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-ssl.so
+SKIP_LIBS+= -lssl -lcrypto
 endif
 
 third_party/openssl/.gitignore:
@@ -38,7 +51,7 @@ third_party/openssl/.gitignore:
 
 lib/lib/libssl.a: third_party/openssl/.gitignore
 	@ echo -e "\e[33;4mBuilding OpenSSL\e[0m"
-	${DOCKER_RUN_IN_OPENSSL} ./config -fPIC --prefix=/src/lib/ no-shared no-asm no-engine no-dso no-dgram no-srtp no-stdio no-ui no-err no-ocsp no-psk no-stdio no-ts -DNO_FORK
+	${DOCKER_RUN_IN_OPENSSL} ./config -fPIC --prefix=/src/lib/ no-shared no-asm no-engine no-dso no-dgram no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts -DNO_FORK -static --static
 	${DOCKER_RUN_IN_OPENSSL} emmake make -j${CPU_COUNT} build_generated libssl.a libcrypto.a
 	${DOCKER_RUN_IN_OPENSSL} emmake make install_sw
 
@@ -64,16 +77,16 @@ $(addsuffix /php${PHP_VERSION}-ssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/o
 	cp -Lp $^ $@
 
 packages/openssl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/openssl/tests/%.phpt
-	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} > $@
+	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} --buildType static > $@
 
 third_party/php${PHP_VERSION}-openssl/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/openssl /src/third_party/php${PHP_VERSION}-openssl
 
 packages/openssl/php${PHP_VERSION}-ssl.so: ${PHPIZE} packages/openssl/libssl.so packages/openssl/libcrypto.so third_party/php${PHP_VERSION}-openssl/config.m4
+	@ echo -e "\e[33;4mBuilding php-openssl\e[0m"
 	${DOCKER_RUN_IN_EXT_OPENSSL} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_OPENSSL} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_OPENSSL} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#as_fn_error 77#echo#g' configure;
 	${DOCKER_RUN_IN_EXT_OPENSSL} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-export-dynamic##g' Makefile;
