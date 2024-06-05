@@ -7,14 +7,23 @@ workflows:
 
   build-test-flow:
     jobs:
-      - make-test-8-3
-      - make-test-8-2
-      - make-test-8-1
-      - make-test-8-0
+      - make-archives
+      - make-test-8-3:
+          requires:
+            - make-archives
+      - make-test-8-2:
+          requires:
+            - make-archives
+      - make-test-8-1:
+          requires:
+            - make-archives
+      - make-test-8-0:
+          requires:
+            - make-archives
 
 jobs:
 
-  make-test-8-3:
+  make-archives:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
@@ -23,7 +32,22 @@ jobs:
       - checkout
       - run: npm install
       - run: cp .circleci/.env_8.3.ci .env
-      - run: time make image test
+      - run: time make archives
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/
+
+  make-test-8-3:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.3.ci .env
+      - run: time make test
 
   make-test-8-2:
     parallelism: 1
@@ -31,10 +55,10 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-      - checkout
-      - run: npm install
+      - attach_workspace:
+            at: ~/
       - run: cp .circleci/.env_8.2.ci .env
-      - run: time make image test
+      - run: time make test
 
   make-test-8-1:
     parallelism: 1
@@ -42,10 +66,10 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-      - checkout
-      - run: npm install
+      - attach_workspace:
+            at: ~/
       - run: cp .circleci/.env_8.1.ci .env
-      - run: time make image test
+      - run: time make test
 
   make-test-8-0:
     parallelism: 1
@@ -53,7 +77,7 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: xlarge
     steps:
-      - checkout
-      - run: npm install
+      - attach_workspace:
+            at: ~/
       - run: cp .circleci/.env_8.0.ci .env
-      - run: time make image test
+      - run: time make test
