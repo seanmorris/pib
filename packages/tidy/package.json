@@ -3,12 +3,13 @@
 	"description": "tidy for phpwasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-a",
+	"version": "0.0.9-b",
 	"files": [
 		"test/basic.mjs",
 		"LICENSE",
 		"NOTICE",
 		"README.md",
-		"static.mak"
+		"static.mak",
+		"php8.3-tidy.so"
 	]
 }

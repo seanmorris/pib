@@ -6,7 +6,7 @@
 		"url": "git+https://github.com/seanmorris/php-wasm.git"
 	},
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-i",
+	"version": "0.0.9-j",
 	"files": [
 		"test/basic.mjs",
 		"env.js",
@@ -20,6 +20,7 @@
 		"libicuio.so",
 		"libicutest.so",
 		"libicutu.so",
-		"libicuuc.so"
+		"libicuuc.so",
+		"php8.3-intl.so"
 	]
 }

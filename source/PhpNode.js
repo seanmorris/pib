@@ -18,13 +18,7 @@ export class PhpNode extends PhpBase
 			dir = __dirname;
 		}
 
-		const locateFile = name => {
-			if(name[0] === '/')
-			{
-				name = name.substr(1);
-			}
-			return path.resolve(dir, name);
-		};
+		const locateFile = name => path.resolve(dir, name);
 
 		super(PhpBinary, {...args, locateFile});
 	}
