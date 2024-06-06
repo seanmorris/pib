@@ -11,7 +11,7 @@ endif
 ifeq (${WITH_GD}, static)
 CONFIGURE_FLAGS+= --enable-gd ${GD_FLAGS}
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
-TEST_LIST+=$(shell ls packages/gd/test/*.mjs)
+TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
 endif
 
 ifeq (${WITH_GD}, dynamic)

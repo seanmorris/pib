@@ -1,4 +1,4 @@
-FROM emscripten/emsdk:3.1.60 as stock
+FROM emscripten/emsdk:3.1.61 as stock
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]

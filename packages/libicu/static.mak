@@ -22,8 +22,8 @@ endif
 ifneq ($(filter ${WITH_ICU},shared static dynamic),)
 PRELOAD_ASSETS+=${LIBICU_DATFILE}
 PRE_JS_FILES+=packages/libicu/env.js
-# TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
-TEST_LIST+=packages/libicu/test/basic.mjs $(addprefix packages/libicu/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs, badargs breakiter_clone_basic breakiter_first_basic breakiter_setText_basic calendar_add_basic calendar_get_basic))
+TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
+# TEST_LIST+= packages/libicu/test/basic.mjs $(addprefix packages/libicu/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs, badargs breakiter_clone_basic breakiter_first_basic breakiter_setText_basic calendar_add_basic calendar_get_basic))
 endif
 
 ifeq (${WITH_ICU},static)

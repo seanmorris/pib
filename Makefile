@@ -743,7 +743,7 @@ NPM_PUBLISH_DRY?=--dry-run
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
 
-test: node-mjs ${TEST_LIST}
+test: node-mjs
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \

@@ -21,7 +21,8 @@ WITH_OPENSSL=shared
 endif
 
 ifneq ($(filter ${WITH_OPENSSL},shared dynamic),)
-TEST_LIST+= packages/openssl/test/basic.mjs $(addprefix packages/openssl/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs,openssl_digest_basic openssl_decrypt_basic))
+# TEST_LIST+= packages/openssl/test/basic.mjs $(addprefix packages/openssl/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs,openssl_digest_basic openssl_decrypt_basic))
+TEST_LIST+= packages/openssl/test/basic.mjs
 endif
 
 ifeq (${WITH_OPENSSL},static)

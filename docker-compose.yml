@@ -6,7 +6,6 @@ services:
     user: "${UID:-0}:${GID:-0}"
     build:
       context: ./
-      target: patched
       dockerfile: emscripten-builder.dockerfile
     environment:
       EMCC_CORES: 8

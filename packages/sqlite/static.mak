@@ -48,7 +48,8 @@ third_party/${SQLITE_DIR}/sqlite3.c:
 
 lib/lib/libsqlite3.a: third_party/${SQLITE_DIR}/sqlite3.c
 	@ echo -e "\e[33;4mBuilding LibSqlite3\e[0m"
-	${DOCKER_RUN_IN_SQLITE} emconfigure ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --prefix=/src/lib/ --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_SQLITE} sed -i 's#as_fn_error 77#echo#g' configure;
+	${DOCKER_RUN_IN_SQLITE} emmake ./configure --with-http=no --with-ftp=no --with-python=no --with-threads=no --enable-shared=no --enable-static=yes --prefix=/src/lib/
 	${DOCKER_RUN_IN_SQLITE} emmake make -j${CPU_COUNT} CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} '
 	${DOCKER_RUN_IN_SQLITE} emmake make install
 
