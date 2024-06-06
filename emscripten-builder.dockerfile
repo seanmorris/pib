@@ -1,4 +1,4 @@
-FROM emscripten/emsdk:3.1.61 as stock
+FROM emscripten/emsdk:3.1.61
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
@@ -27,18 +27,19 @@ RUN apt-get update; \
 		sed \
 		pv
 
-FROM stock as patched
-
-RUN echo "break-cache-0";
-
 # RUN emsdk install tot; \
 # 	emsdk activate tot;
 
-RUN cd /emsdk/upstream && {\
-	rm -rf emscripten;\
-	git clone https://github.com/seanmorris/emscripten.git emscripten --branch sm-updates --depth=1;\
-	cd emscripten && ./bootstrap;\
+RUN cd /emsdk/upstream && { \
+	rm -rf emscripten; \
+	git clone https://github.com/seanmorris/emscripten.git emscripten --branch sm-updates --depth=1; \
+	cd emscripten && ./bootstrap; \
 }
+
+RUN emsdk install node-18.20.3-64bit; \
+	emsdk activate node-18.20.3-64bit; \
+	emsdk update; \
+	source /emsdk/emsdk_env.sh;
 
 # COPY ./emscripten /emsdk/upstream/emscripten
 # RUN git config --global --add safe.directory /emsdk/upstream/emscripten

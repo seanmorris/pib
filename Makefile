@@ -130,7 +130,7 @@ PRELOAD_ASSETS+=php.ini
 
 DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
-DOCKER_RUN_IN_PHP=${DOCKER_ENV} -e CFLAGS="-I /src/lib/include" -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
+DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
 PHP_VERSION_DEFAULT=8.3
 
@@ -309,7 +309,8 @@ DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES}
 
 third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/pib/pib.c
 	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
-	${DOCKER_RUN_IN_PHP} ./buildconf --force
+	${DOCKER_RUN_IN_PHP} which autoconf
+	${DOCKER_RUN_IN_PHP} emconfigure ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 		EXTENSION_DIR='./'  \
@@ -331,7 +332,6 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 		--without-pcre-jit \
 		${CONFIGURE_FLAGS}
 	${DOCKER_RUN_IN_PHP} touch /src/third_party/php${PHP_VERSION}-src/configured
-
 
 SYMBOL_FLAGS=
 ifdef SYMBOLS
@@ -404,6 +404,7 @@ BUILD_FLAGS=-f ../../php.mk -j${CPU_COUNT} \
 		-I /src/third_party/php${PHP_VERSION}-src/main  \
 		-I /src/third_party/php${PHP_VERSION}-src/TSRM/ \
 		-I /src/third_party/php${PHP_VERSION}-src/ext/ \
+		-I /src/lib/include \
 		$(addprefix /src/,${ARCHIVES}) \
 		${FS_TYPE} \
 		${EXTRA_FILES} \
@@ -723,7 +724,7 @@ hooks:
 	git config core.hooksPath githooks
 
 image:
-	docker-compose build
+	docker-compose build --progress plain
 	# docker-compose --progress quiet build
 
 pull-image:
