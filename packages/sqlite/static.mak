@@ -100,9 +100,9 @@ $(addsuffix /php${PHP_VERSION}-sqlite.so,$(sort ${SHARED_ASSET_PATHS})): package
 
 third_party/php${PHP_VERSION}-pdo-sqlite/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/pdo_sqlite /src/third_party/php${PHP_VERSION}-pdo-sqlite
-	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php8.3-pdo-sqlite/pdo_sqlite.c
-	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php8.3-pdo-sqlite/sqlite_driver.c
-	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php8.3-pdo-sqlite/sqlite_statement.c
+	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/pdo_sqlite.c
+	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_driver.c
+	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_statement.c
 
 packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-pdo-sqlite/config.m4
 	@ echo -e "\e[33;4mBuilding php-pdo-sqlite\e[0m"
