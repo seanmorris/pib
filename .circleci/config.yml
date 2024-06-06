@@ -11,7 +11,19 @@ workflows:
       - make-test-8-3:
           requires:
             - make-archives
+      - make-test-8-3-shared:
+          requires:
+            - make-archives
+      - make-test-8-3-dynamic:
+          requires:
+            - make-archives
       - make-test-8-2:
+          requires:
+            - make-archives
+      - make-test-8-2-shared:
+          requires:
+            - make-archives
+      - make-test-8-2-dynamic:
           requires:
             - make-archives
       - make-test-8-1:
@@ -49,6 +61,28 @@ jobs:
       - run: cp .circleci/.env_8.3.ci .env
       - run: time make test
 
+  make-test-8-3-shared:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.3-shared.ci .env
+      - run: time make test
+
+  make-test-8-3-dynamic:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.3-dynamic.ci .env
+      - run: time make test
+
   make-test-8-2:
     parallelism: 1
     machine:
@@ -58,6 +92,28 @@ jobs:
       - attach_workspace:
             at: ~/
       - run: cp .circleci/.env_8.2.ci .env
+      - run: time make test
+
+  make-test-8-2-shared:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.2-shared.ci .env
+      - run: time make test
+
+  make-test-8-2-dynamic:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: time make test
 
   make-test-8-1:
