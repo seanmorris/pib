@@ -243,24 +243,26 @@ There are two ways to load extensions at runtime, using the `dl()` function or `
 
 ```php
 <?php
-dl('php-8.3-sqlite.so');
-dl('php-8.3-pdo-sqlite.so');
+dl('php-8.3-xml.so');
+dl('php-8.3-dom.so');
 ```
 
 or, pass an array as the `sharedLibs` argument to the constructor from Javascript to auto-generate an ini file that loads your extensions:
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	`php8.3-sqlite.so`,
-	`php8.3-pdo-sqlite.so`,
+	`php8.3-xml.so`,
+	`php8.3-dom.so`,
 ]});
 ```
+
+### Dynamic Libraries from Remote Servers:
 
 You can also load extension from remote servers with URLs:
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	`https://unpkg.com/php-wasm-iconv/php8.3-iconv.so`,
+	`https://unpkg.com/php-wasm-iconv/php8.3-xml.so`,
 ]});
 ```
 
@@ -269,10 +271,19 @@ The above is actually shorthand for the following code. Passing `ini: true` will
 ```javascript
 const php = new PhpWeb({sharedLibs: [
 	{
-		name:  'php8.3-iconv.so'
-		, url: `https://unpkg.com/php-wasm-iconv/php8.3-iconv.so`,
+		name:  'php8.3-xml.so'
+		, url: `https://unpkg.com/php-wasm-iconv/php8.3-xml.so`,
 		, ini: true
 	}
+]});
+```
+
+Some extensions require supporting libraries. You can provide URLs for those as `shareLibs` as well, just pass `ini: false`:
+
+```javascript
+const php = new PhpWeb({sharedLibs: [
+	{ url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so', ini: false },
+	{ url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true },
 ]});
 ```
 

@@ -25,16 +25,13 @@ const sharedLibs = [
 	{url: 'https://unpkg.com/php-wasm-libicu/libicuio.so'},
 	{url: 'https://unpkg.com/php-wasm-libicu/libicui18n.so'},
 	{url: 'https://unpkg.com/php-wasm-libicu/libicudata.so'},
-	{
-		url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so'
-		, ini: true
-	},
-	{url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so'},
+	{ url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so', ini: false },
+	{ url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true },
 ];
 
 const ini = `
-expose_php=0
-date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+	expose_php=0
+	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
 `
 
 let init = false;

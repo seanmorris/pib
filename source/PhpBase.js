@@ -107,7 +107,7 @@ export class PhpBase extends EventTarget
 					}
 				}).filter(x=>x);
 
-				args.ini && iniLines.push(args.ini);
+				args.ini && iniLines.push(args.ini.replace(/\n\s+/g, '\n'));
 
 				await fsOps.writeFile(php, '/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 			}
