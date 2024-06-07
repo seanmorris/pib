@@ -108,14 +108,14 @@ import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker";
 
 // Spawn the PHP-CGI binary
 const php = new PhpCgi({
-	prefix: '/php-wasm'
-	, docroot: '/persist/www'
-	, types: {
-		jpeg: 'image/jpeg'
-		, jpg: 'image/jpeg'
-		, gif: 'image/gif'
-		, png: 'image/png'
-		, svg: 'image/svg+xml'
+	prefix:  '/php-wasm',
+	docroot: '/persist/www',
+	types: {
+		jpg:  'image/jpeg',
+		jpeg: 'image/jpeg',
+		gif:  'image/gif',
+		png:  'image/png',
+		svg:  'image/svg+xml',
 	}
 });
 
@@ -170,33 +170,19 @@ const php = new PhpWeb;
 
 #### Pre-Packaged Static Assets:
 
-***You won't need to use this if you use webpack, a custom build or a CDN.***
-
-The php-wasm package comes with pre-built binaries out of the box so you can get started quickly.
-
-**If you're not using webpack**, you'll need to add the following `postinstall` script entry to your package.json to ensure the static assets are available to your web application. Make sure to replace `public/` with the path to your public document root if necessary.
-
-```json
-{
-  "scripts": {
-	"postinstall": [
-	  "cp node_modules/php-wasm/php-web.* public/"
-	]
-  },
-}
-```
-
-If you're using another bundler, use the vendor's documentation to learn how to move the files matching the following pattern to your public directory:
+If you're using a bundler, use the vendor's documentation to learn how to move the files matching the following pattern to your public directory:
 
 ```bash
-./node_modules/php-wasm/php-web.*
-./node_modules/php-wasm/php-worker.* # If you're running the standard build in a worker
+./node_modules/php-wasm/php-web.wasm
+./node_modules/php-wasm/php.data        # ONLY if your build has a preload FS associated with it
+./node_modules/php-wasm/php-worker.wasm # ONLY if you're running the standard build in a worker
 ```
 
 For php-cgi-wasm:
 ```bash
-./node_modules/php-wasm/php-cgi-web.* # If you're running the cgi build in a page
-./node_modules/php-wasm/php-cgi-worker.*
+./node_modules/php-cgi-wasm/php-cgi-worker.*
+./node_modules/php-cgi-wasm/php.data         # ONLY if your build has a preload FS, this can be renamed at build-time if need be.
+./node_modules/php-cgi-wasm/php-cgi-web.*    # ONLY if you're running the cgi build in a page
 ```
 
 ## Configuration
@@ -278,7 +264,7 @@ const php = new PhpWeb({sharedLibs: [
 ]});
 ```
 
-Some extensions require supporting libraries. You can provide URLs for those as `shareLibs` as well, just pass `ini: false`:
+Some extensions require supporting libraries. You can provide URLs for those as `sharedLibs` as well, just pass `ini: false`:
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
