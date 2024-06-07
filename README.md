@@ -351,6 +351,12 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 <script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.jsdelivr.mjs"></script>
 ``` -->
 
+## 📦 Packaging files
+
+Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
+
+These files will be available under `/preload` in the final package.
+
 ## 🥤 Running PHP & Taking Output
 
 Create a PHP instance:
@@ -850,23 +856,6 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 It will also add `/preload/icudt72l.dat` to `PRELOAD_ASSETS`, and cause `php.data` to be required as well.
 
 ---
-
-## 📦 Packaging files
-
-Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
-
-These files will be available under `/preload` in the final package.
-
-### Persistent Memory
-
-So long as `php.refresh()` is not called from Javascript, the instance will maintain its own persistent memory.
-
-```php
-<?php
-// Run this over and over again...
-print ++$x;
-
-```
 
 ## 🤝 php-wasm started as a fork of oraoto/PIB...
 
