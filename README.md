@@ -209,6 +209,7 @@ The `/config/php.ini` and `/preload/php.ini` files will also be loaded, if they 
 Options like the following may appear in these files. See the [PHP docs](https://www.php.net/manual/en/ini.list.php) for the full list.
 
 ```ini
+[php]
 expose_php=0
 ```
 
