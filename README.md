@@ -432,9 +432,8 @@ To use IDBFS in PhpWeb, pass a `persist` object with a `mountPath` key.
 
 ```javascript
 const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
-const php = new PhpWeb;
 
-let php = new PhpWeb({persist: {mountPath: '/persist'}});
+const php = new PhpWeb({persist: {mountPath: '/persist'}});
 ```
 
 ### NodeFS (NodeJS Only)
