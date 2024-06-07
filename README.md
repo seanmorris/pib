@@ -416,21 +416,11 @@ Provide some input data on STDIN if you need to:
 php.inputString('This is a string of data provided on STDIN.');
 ```
 
-Be sure to wait until your WASM is fully loaded, then run some PHP:
+... then run some PHP!
 
 ```javascript
 php.addEventListener('ready', () => {
-    php.run('<?php echo "Hello, world!";');
-});
-```
-
-Get the result code of your script with `then()`:
-
-```javascript
-php.addEventListener('ready', () => {
-    php.run('<?php echo "Hello, world!";').then(retVal => {
-        // retVal contains the return code.
-    });
+    const exitCode = await php.run('<?php echo "Hello, world!";');
 });
 ```
 
