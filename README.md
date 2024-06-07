@@ -368,7 +368,7 @@ Some extensions require supporting libraries. You can provide URLs for those as 
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	{ url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true },
+    { url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true },
     { url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',        ini: false },
 ]});
 ```
@@ -720,36 +720,36 @@ WITH_FREETYPE=1
 The following options are availavle for building static PHP extensions:
 
 ```
-WITH_BCMATH      # [0, 1] Enabled by default
-WITH_CALENDAR    # [0, 1] Enabled by default
-WITH_CTYPE       # [0, 1] Enabled by default
-WITH_EXIF        # [0, 1] Enabled by default
-WITH_FILTER      # [0, 1] Enabled by default
-WITH_TOKENIZER   # [0, 1] Enabled by default
-WITH_VRZNO       # [0, 1] Enabled by default
+WITH_BCMATH    # [0, 1] Enabled by default
+WITH_CALENDAR  # [0, 1] Enabled by default
+WITH_CTYPE     # [0, 1] Enabled by default
+WITH_EXIF      # [0, 1] Enabled by default
+WITH_FILTER    # [0, 1] Enabled by default
+WITH_TOKENIZER # [0, 1] Enabled by default
+WITH_VRZNO     # [0, 1] Enabled by default
 ```
 
 The following extension may be compiled as static, shared or dynamic:
 
 ```
-WITH_PHAR        # [0, 1, static, dynamic]
-WITH_LIBXML      # [0, 1, static, shared]
-WITH_LIBZIP      # [0, 1, static, shared, dynamic]
-WITH_ICONV       # [0, 1, static, shared, dynamic]
-WITH_SQLITE      # [0, 1, static, shared, dynamic]
+WITH_PHAR      # [0, 1, static, dynamic]
+WITH_LIBXML    # [0, 1, static, shared]
+WITH_LIBZIP    # [0, 1, static, shared, dynamic]
+WITH_ICONV     # [0, 1, static, shared, dynamic]
+WITH_SQLITE    # [0, 1, static, shared, dynamic]
 
-WITH_GD          # [0, 1, static, shared, dynamic]
-WITH_ZLIB        # [0, 1, static, shared, dynamic]
-WITH_LIBPNG      # [0, 1, static, shared]
-WITH_FREETYPE    # [0, 1, static, shared]
-WITH_LIBJPEG     # [0, 1, static, shared]
+WITH_GD        # [0, 1, static, shared, dynamic]
+WITH_ZLIB      # [0, 1, static, shared, dynamic]
+WITH_LIBPNG    # [0, 1, static, shared]
+WITH_FREETYPE  # [0, 1, static, shared]
+WITH_LIBJPEG   # [0, 1, static, shared]
 
-WITH_YAML        # [0, 1, static, shared, dynamic]
-WITH_TIDY        # [0, 1, static, shared, dynamic]
-WITH_MBSTRING    # [0, 1, static, dynamic]
-WITH_ONIGURUMA   # [0, 1, static, shared]
-WITH_OPENSSL     # [0, 1, shared, dynamic]
-WITH_ICU         # [0, 1, static, shared, dynamic]
+WITH_YAML      # [0, 1, static, shared, dynamic]
+WITH_TIDY      # [0, 1, static, shared, dynamic]
+WITH_MBSTRING  # [0, 1, static, dynamic]
+WITH_ONIGURUMA # [0, 1, static, shared]
+WITH_OPENSSL   # [0, 1, shared, dynamic]
+WITH_ICU       # [0, 1, static, shared, dynamic]
 ```
 
 ---
