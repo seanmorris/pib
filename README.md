@@ -770,7 +770,7 @@ When compiled as a set of `dynamic` extensions, this will produce the extensions
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libxml.so`.
 
-This actual `php-libxml` extension must be statically compiled.
+This actual `php-libxml` extension must be statically compiled, but `libxml` may be loaded as a shared library.
 
 ---
 
