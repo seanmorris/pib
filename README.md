@@ -197,9 +197,9 @@ If you're using a bundler, use the vendor's documentation to learn how to move t
 
 For php-cgi-wasm:
 ```bash
-./node_modules/php-cgi-wasm/php-cgi-worker.*
+./node_modules/php-cgi-wasm/php-cgi-worker.wasm
 ./node_modules/php-cgi-wasm/php.data         # ONLY if your build has a preload FS, this can be renamed at build-time if need be.
-./node_modules/php-cgi-wasm/php-cgi-web.*    # ONLY if you're running the cgi build in a page
+./node_modules/php-cgi-wasm/php-cgi-web.wasm # ONLY if you're running the cgi build in a page
 ```
 
 ## 🍎 Quickstart
