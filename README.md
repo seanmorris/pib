@@ -419,9 +419,7 @@ php.inputString('This is a string of data provided on STDIN.');
 ... then run some PHP!
 
 ```javascript
-php.addEventListener('ready', () => {
-    const exitCode = await php.run('<?php echo "Hello, world!";');
-});
+const exitCode = await php.run('<?php echo "Hello, world!";');
 ```
 
 ## 💾 Persistent Storage (IDBFS & NodeFS)
