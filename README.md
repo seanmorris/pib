@@ -716,9 +716,13 @@ WITH_OPENSSL     # [0, 1, shared, dynamic]
 WITH_ICU         # [0, 1, static, shared, dynamic]
 ```
 
+---
+
 ##### WITH_PHAR
 
 When compiled as a `dynamic` extension, this will produce the extension file `php8.x-phar.so`.
+
+---
 
 ##### WITH_LIBXML
 
@@ -726,11 +730,15 @@ static|shared|dynamic
 
 When compiled as a `shared` or `dynamic` extension, this will produce the library file `libxml.so`. This actual `php-libxml` extension must be statically compiled.
 
+---
+
 ##### WITH_LIBZIP
 
 static|shared|dynamic
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-zip.so` & the library file `libzip.so`. This extension depends on `zlib`.
+
+---
 
 ##### WITH_ICONV
 
@@ -738,11 +746,15 @@ static|shared|dynamic
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-iconv.so` & the library file `libiconv.so`.
 
+---
+
 ##### WITH_SQLITE
 
 static|shared|dynamic
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extensions `php-8.x-sqlite.so`, & `php-8.x-pdo-sqlite.so` as well as the library file `libsqlite3.so`.
+
+---
 
 ##### WITH_GD
 
@@ -750,11 +762,15 @@ static|dynamic
 
 When compiled as a `dynamic` extension, this will produce the extensions `php-8.x-gd.so`. This extenstion makes use of `freetype`, `libjpeg`, `libpng`, & `zlib`.
 
+---
+
 ##### WITH_ZLIB
 
 static|shared|dynamic
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-zlib.so` & the library file `libz.so`.
+
+---
 
 ##### WITH_LIBPNG
 
@@ -762,11 +778,15 @@ static|shared
 
 When compiled as a `shared` library, this will produce the library file `libpng.so`.
 
+---
+
 ##### WITH_FREETYPE
 
 static|shared
 
 When compiled as a `shared` library, this will produce the library file `libfreetype.so`.
+
+---
 
 ##### WITH_LIBJPEG
 
@@ -774,11 +794,15 @@ static|shared
 
 When compiled as a `shared` library, this will produce the library file `libjpeg.so`.
 
+---
+
 ##### WITH_YAML
 
 static|shared|dynamic
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-yaml.so` & the library file `libyaml.so`.
+
+---
 
 ##### WITH_TIDY
 
@@ -786,11 +810,15 @@ static|shared|dynamic
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-tidy.so` & the library file `libtidy.so`.
 
+---
+
 ##### WITH_MBSTRING
 
 static|dynamic
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-mbstring.so`.
+
+---
 
 ##### WITH_ONIGURUMA
 
@@ -801,6 +829,8 @@ Support library for `mbstring`.
 When compiled as a `dynamic` or `shared ` library, this will produce the library file `libonig.so`.
 
 If `WITH_MBSTRING` is `dynamic`, then loading will be deferred until after `mbstring` is loaded.
+
+---
 
 ##### WITH_OPENSSL
 
@@ -818,6 +848,8 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 * libicudata.so
 
 It will also add `/preload/icudt72l.dat` to `PRELOAD_ASSETS`, and cause `php.data` to be required as well.
+
+---
 
 ## 📦 Packaging files
 
