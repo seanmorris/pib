@@ -219,9 +219,9 @@ You can also pass in the `ini` property to the constructor to add lines to `/php
 
 ```javascript
 const php = new PhpWeb({ini: `
-	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
-	tidy.clean_output=1
-	expose_php=0
+    date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+    tidy.clean_output=1
+    expose_php=0
 `});
 ```
 
