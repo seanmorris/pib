@@ -30,19 +30,19 @@ RUN apt-get update; \
 # RUN emsdk install tot; \
 # 	emsdk activate tot;
 
-RUN cd /emsdk/upstream && { \
-	rm -rf emscripten; \
-	git clone https://github.com/seanmorris/emscripten.git emscripten --branch sm-updates --depth=1; \
-	cd emscripten && ./bootstrap; \
-}
+# RUN cd /emsdk/upstream && { \
+# 	rm -rf emscripten; \
+# 	git clone https://github.com/seanmorris/emscripten.git emscripten --branch sm-updates --depth=1; \
+# 	cd emscripten && ./bootstrap; \
+# }
 
 RUN emsdk install node-18.20.3-64bit; \
 	emsdk activate node-18.20.3-64bit; \
 	emsdk update; \
 	source /emsdk/emsdk_env.sh;
 
-# COPY ./emscripten /emsdk/upstream/emscripten
-# RUN git config --global --add safe.directory /emsdk/upstream/emscripten
-# RUN cd /emsdk/upstream/emscripten && ./bootstrap;
+COPY ./emscripten /emsdk/upstream/emscripten
+RUN git config --global --add safe.directory /emsdk/upstream/emscripten
+RUN cd /emsdk/upstream/emscripten && ./bootstrap;
 
 RUN emcc --check

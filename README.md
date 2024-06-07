@@ -11,8 +11,9 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 ### 🌟 v0.0.9 - Aiming for the Stars
 
 * Adding PHP-CGI support!
-* Implemented an httpd-like CGI wrapper.
+* Runtime extension loading!
 * libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
+* Implemented an httpd-like CGI wrapper.
 * New "cgi" option for custom builds.
 * php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
@@ -22,7 +23,6 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
 * Fixed the bug preventing POST requests from working under FireFox.
 * Adding support for PHP 8.3.7
-* Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -198,6 +198,91 @@ For php-cgi-wasm:
 ./node_modules/php-wasm/php-cgi-web.* # If you're running the cgi build in a page
 ./node_modules/php-wasm/php-cgi-worker.*
 ```
+
+## Configuration
+
+The `/config/php.ini` and `/preload/php.ini` files will also be loaded, if they exist.
+
+```ini
+extension=php8.3-iconv.so
+extension=php8.3-dom.so
+extension=php8.3-simplexml.so
+```
+
+You can also pass in the `ini` property to the constructor to add lines to `/php.ini`:
+
+```javascript
+const php = new PhpWeb({ini: `
+expose_php=0
+date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+`});
+```
+
+## Extensions
+
+### Loading extensions at runtime
+
+The following extensions may be loaded at runtime. This allows the shared extension & their dependencies to be cached, re-used, and selected a-la-carte for each application.
+
+* gd
+* iconv
+* intl
+* xml
+* dom
+* simplexml
+* yaml
+* zip
+* mbstring
+* openssl
+* phar
+* sqlite
+* pdo-sqlite
+* zlib
+
+There are two ways to load extensions at runtime, using the `dl()` function or `php.ini`.
+
+```php
+<?php
+dl('php-8.3-sqlite.so');
+dl('php-8.3-pdo-sqlite.so');
+```
+
+or, pass an array as the `sharedLibs` argument to the constructor from Javascript to auto-generate an ini file that loads your extensions:
+
+```javascript
+const php = new PhpWeb({sharedLibs: [
+	`php8.3-sqlite.so`,
+	`php8.3-pdo-sqlite.so`,
+]});
+```
+
+You can also load extension from remote servers with URLs:
+
+```javascript
+const php = new PhpWeb({sharedLibs: [
+	`https://unpkg.com/php-wasm-iconv/php8.3-iconv.so`,
+]});
+```
+
+The above is actually shorthand for the following code. Passing `ini: true` will automatically load the extension via `/php.ini`, passing `ini: false` will wait for a call to `dl()` to do the lookup.
+
+```javascript
+const php = new PhpWeb({sharedLibs: [
+	{
+		name:  'php8.3-iconv.so'
+		, url: `https://unpkg.com/php-wasm-iconv/php8.3-iconv.so`,
+		, ini: true
+	}
+]});
+```
+
+### Compiling extensions
+
+Extensions may be compiled as `dynamic`, `shared`, or `static`. See `Custom Builds` for more information on compiling php-wasm.
+
+* dynamic - these extensions may be loaded selectively at runtime
+* shared - these extensions will always be loaded at startup and can be cached and reused
+* static - these extensions will be built directly into the main wasm binary (may cause a huge filesize)
 
 ## 🍎 Quickstart
 

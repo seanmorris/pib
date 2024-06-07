@@ -18,7 +18,6 @@ ifeq (${WITH_LIBXML},static)
 ARCHIVES+= lib/lib/libxml2.a
 CONFIGURE_FLAGS+= --with-libxml --enable-xml --enable-dom --enable-simplexml
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
-SKIP_LIBS+= -lxml2
 endif
 
 ifeq (${WITH_LIBXML},shared)

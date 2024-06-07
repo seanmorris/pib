@@ -7,7 +7,35 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
-const sharedLibs = [];
+const sharedLibs = [
+	{
+		name:  'php8.3-iconv.so'
+		, url: 'https://unpkg.com/php-wasm-iconv/php8.3-iconv.so'
+		, ini: true
+	},
+	// 'https://unpkg.com/php-wasm-iconv/php8.3-iconv.so'
+	// 'php8.3-iconv.so'
+	{
+		url: 'https://unpkg.com/php-wasm-libicu/php8.3-intl.so'
+		, ini: true
+	},
+	{url: 'https://unpkg.com/php-wasm-libicu/libicuuc.so'},
+	{url: 'https://unpkg.com/php-wasm-libicu/libicutu.so'},
+	{url: 'https://unpkg.com/php-wasm-libicu/libicutest.so'},
+	{url: 'https://unpkg.com/php-wasm-libicu/libicuio.so'},
+	{url: 'https://unpkg.com/php-wasm-libicu/libicui18n.so'},
+	{url: 'https://unpkg.com/php-wasm-libicu/libicudata.so'},
+	{
+		url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so'
+		, ini: true
+	},
+	{url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so'},
+];
+
+const ini = `
+expose_php=0
+date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+`
 
 let init = false;
 
@@ -34,14 +62,14 @@ function Embedded() {
 	const [outputMode, setOutputMode] = useState('');
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
 
-	// phpRef.current =  phpRef.current || new PhpWeb();
-
 	const onOutput = event => setStdOut(stdOut => String(stdOut || '') + event.detail.join(''));
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
 		// phpRef.current = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
-		phpRef.current = new PhpWeb({sharedLibs});
+		phpRef.current = new PhpWeb({sharedLibs, ini, locateFile: (filename, dir) => {
+			console.log(filename);
+		}});
 
 		const php = phpRef.current;
 
