@@ -204,12 +204,12 @@ For php-cgi-wasm:
 
 ## Configuration
 
-The `/config/php.ini` and `/preload/php.ini` files will also be loaded, if they exist.
+The `/config/php.ini` and `/preload/php.ini` files will also be loaded, if they exist. Neither of these files will be created if they do not exists. They're left completely up to the programmer to create & populate.
+
+Options like the following may appear in these files. See the [PHP docs](https://www.php.net/manual/en/ini.list.php) for the full list.
 
 ```ini
-extension=php8.3-iconv.so
-extension=php8.3-dom.so
-extension=php8.3-simplexml.so
+expose_php=0
 ```
 
 You can also pass in the `ini` property to the constructor to add lines to `/php.ini`:
@@ -217,7 +217,6 @@ You can also pass in the `ini` property to the constructor to add lines to `/php
 ```javascript
 const php = new PhpWeb({ini: `
 	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
-	expose_php=0
 `});
 ```
 
