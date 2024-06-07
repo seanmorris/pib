@@ -26,6 +26,23 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
+Installing php-wasm:
+
+```sh
+$ npm i php-wasm
+```
+
+Installing php-cgi-wasm:
+
+```sh
+$ npm i php-wasm
+```
+Installing php-wasm-builder:
+
+```sh
+$ npm i php-wasm-builder
+```
+
 ## ☀️ Examples
 
 ### [[React + php-web/php-cgi-worker demo](https://seanmorris.github.io/php-wasm/)]
