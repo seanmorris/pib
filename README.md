@@ -446,9 +446,8 @@ To use NodeFS in PhpWeb, pass a `persist` object with `mountPath` & `localPath` 
 
 ```javascript
 const { PhpNode } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpNode.mjs');
-const php = new PhpNode;
 
-let php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files'}});
+const php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files'}});
 ```
 
 ## 📁 Filesystem Operations
