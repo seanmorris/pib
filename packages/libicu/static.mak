@@ -20,13 +20,14 @@ WITH_ICU=static
 endif
 
 ifneq ($(filter ${WITH_ICU},shared static dynamic),)
-PRELOAD_ASSETS+=${LIBICU_DATFILE}
+# PRELOAD_ASSETS+=${LIBICU_DATFILE}
 PRE_JS_FILES+=packages/libicu/env.js
 TEST_LIST+=$(shell ls packages/libicu/test/*.mjs)
 # TEST_LIST+= packages/libicu/test/basic.mjs $(addprefix packages/libicu/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs, badargs breakiter_clone_basic breakiter_first_basic breakiter_setText_basic calendar_add_basic calendar_get_basic))
 endif
 
 ifeq (${WITH_ICU},static)
+PRELOAD_ASSETS+=${LIBICU_DATFILE}
 CONFIGURE_FLAGS+=--enable-intl
 EXTRA_FLAGS+=-DU_STATIC_IMPLEMENTATION
 ARCHIVES+=lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a
@@ -34,10 +35,11 @@ SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 endif
 
 ifeq (${WITH_ICU},shared)
+PRELOAD_ASSETS+=${LIBICU_DATFILE}
 CONFIGURE_FLAGS+=--enable-intl
 PHP_CONFIGURE_DEPS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
 SHARED_LIBS+= packages/libicu/libicudata.so packages/libicu/libicui18n.so packages/libicu/libicuio.so packages/libicu/libicutest.so packages/libicu/libicutu.so packages/libicu/libicuuc.so
-PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so
+PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 endif
 
@@ -86,8 +88,9 @@ lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.
 		CXXFLAGS='-O0'
 	${DOCKER_RUN_IN_LIBICU_ALT} make -ej${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBICU} emconfigure ./configure \
-		--prefix=/src/lib/ \
 		--cache-file=/tmp/config-cache \
+		--with-data-packaging=archive \
+		--prefix=/src/lib/ \
 		--without-assembly \
 		--disable-draft    \
 		--disable-extras   \
@@ -96,7 +99,6 @@ lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.
 		--disable-samples  \
 		--enable-static    \
 		--disable-shared   \
-		--with-data-packaging=archive \
 		ICU_DATA_FILTER_FILE=${ICU_DATA_FILTER_FILE} \
 		CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' \
 		CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
@@ -130,9 +132,6 @@ lib/lib/libicuuc.so: lib/lib/libicuuc.a
 lib/lib/libicudata.so: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
-lib/lib/libc++.so:
-	${DOCKER_RUN_IN_LIBICU} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/emscripten/cache/sysroot/lib/wasm32-emscripten/libc++.a
-
 packages/libicu/libicui18n.so: lib/lib/libicui18n.so
 	cp -Lp $^ $@
 
@@ -151,6 +150,9 @@ packages/libicu/libicuuc.so: lib/lib/libicuuc.so
 packages/libicu/libicudata.so: lib/lib/libicudata.so
 	cp -Lp $^ $@
 
+packages/libicu/$(notdir ${LIBICU_DATFILE}): ${LIBICU_DATFILE}
+	cp -Lp $^ $@
+
 $(addsuffix /libicui18n.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/libicui18n.so
 	cp -Lp $^ $@
 
@@ -167,6 +169,9 @@ $(addsuffix /libicuuc.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/libicuu
 	cp -Lp $^ $@
 
 $(addsuffix /libicudata.so,$(sort ${SHARED_ASSET_PATHS})): packages/libicu/libicudata.so
+	cp -Lp $^ $@
+
+$(addsuffix /$(notdir ${LIBICU_DATFILE}),$(sort ${SHARED_ASSET_PATHS})): packages/libicu/$(notdir ${LIBICU_DATFILE})
 	cp -Lp $^ $@
 
 packages/libicu/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/intl/tests/%.phpt

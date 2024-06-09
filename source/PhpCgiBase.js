@@ -2,6 +2,7 @@ import { phpVersion } from "./config";
 import { parseResponse } from './parseResponse';
 import { breakoutRequest } from './breakoutRequest';
 import { fsOps } from './fsOps';
+import { resolveDependencies } from './resolveDependencies';
 
 const STR = 'string';
 const NUM = 'number';
@@ -162,14 +163,33 @@ export class PhpCgiBase
 
 	refresh()
 	{
+		const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
+
+		console.log(files, libs, urlLibs);
+
+		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
+
+		const locateFile = path => {
+			let located = userLocateFile(path);
+			if(located !== undefined)
+			{
+				return located;
+			}
+			if(urlLibs[path])
+			{
+				return urlLibs[path];
+			}
+		};
+
 		const phpArgs = {
-			stdin: () =>  this.input
+			persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
+			, ...this.phpArgs
+			, stdin: () =>  this.input
 				? String(this.input.shift()).charCodeAt(0)
 				: null
 			, stdout: x => this.output.push(x)
 			, stderr: x => this.error.push(x)
-			, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
-			, ...this.phpArgs
+			, locateFile
 		};
 
 		this.binary = new this.PHP(phpArgs).then(async php => {
@@ -182,17 +202,20 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
-			if(this.sharedLibs)
-			{
-				const iniLines = this.sharedLibs.map(lib => {
-					if(typeof lib === 'string')
-					{
-						return `extension=${lib}`;
-					}
-				});
+			files.forEach(fileDef => php.FS.createPreloadedFile(
+				fileDef.parent, fileDef.name, fileDef.url, true, false
+			));
 
-				php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
-			}
+			const iniLines = libs.map(lib => {
+				if(typeof lib === 'string')
+				{
+					return `extension=${lib}`;
+				}
+			});
+
+			args.ini && iniLines.push(args.ini.replace(/\n\s+/g, '\n'));
+
+			php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 
 			await php.ccall(
 				'wasm_sapi_cgi_init'

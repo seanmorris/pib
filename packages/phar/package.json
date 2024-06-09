@@ -6,13 +6,18 @@
 		"url": "git+https://github.com/seanmorris/php-wasm.git"
 	},
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-a",
+	"version": "0.0.9-b",
+	"main": "index.mjs",
 	"files": [
+		"index.mjs",
 		"test/basic.mjs",
 		"LICENSE",
 		"NOTICE",
 		"README.md",
 		"static.mak",
-		"php8.3-phar.so"
+		"php8.3-phar.so",
+		"php8.2-phar.so",
+		"php8.1-phar.so",
+		"php8.0-phar.so"
 	]
 }

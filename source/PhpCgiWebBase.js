@@ -1,6 +1,7 @@
 import { PhpCgiBase } from './PhpCgiBase';
 import { commitTransaction, startTransaction } from './webTransactions';
 import { fsOps } from './fsOps';
+import { resolveDependencies } from './resolveDependencies';
 
 const STR = 'string';
 const NUM = 'number';
@@ -47,31 +48,55 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	refresh()
 	{
+		console.log(this.sharedLibs);
+
+		const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
+
+		console.log(files, libs, urlLibs);
+
+		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
+
+		const locateFile = path => {
+			let located = userLocateFile(path);
+			if(located !== undefined)
+			{
+				return located;
+			}
+			if(urlLibs[path])
+			{
+				return urlLibs[path];
+			}
+		};
+
 		const phpArgs = {
-			stdin: () =>  this.input
+			persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
+			, ...this.phpArgs
+			, stdin: () =>  this.input
 				? String(this.input.shift()).charCodeAt(0)
 				: null
 			, stdout: x => this.output.push(x)
 			, stderr: x => this.error.push(x)
-			, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
-			, ...this.phpArgs
+			, locateFile
 		};
 
 		this.binary = navigator.locks.request('php-wasm-fs-lock', async () => {
 
 			const php = await new this.PHP(phpArgs);
 
-			if(this.sharedLibs)
-			{
-				const iniLines = this.sharedLibs.map(lib => {
-					if(typeof lib === 'string')
-					{
-						return `extension=${lib}`;
-					}
-				});
+			files.forEach(fileDef => php.FS.createPreloadedFile(
+				fileDef.parent, fileDef.name, fileDef.url, true, false
+			));
 
-				php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
-			}
+			const iniLines = libs.map(lib => {
+				if(typeof lib === 'string')
+				{
+					return `extension=${lib}`;
+				}
+			});
+
+			this.phpArgs.ini && iniLines.push(this.phpArgs.ini.replace(/\n\s+/g, '\n'));
+
+			php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 
 			await php.ccall(
 				'pib_storage_init'

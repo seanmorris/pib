@@ -884,7 +884,7 @@ If `WITH_MBSTRING` is `dynamic`, then loading will be deferred until after `mbst
 
 ##### WITH_OPENSSL
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-ssl.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.x-openssl`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the libraries `libssl.so` &  `libcrypto.so`.
 

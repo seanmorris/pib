@@ -3,8 +3,10 @@
 	"description": "openssl for php-wasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-c",
+	"version": "0.0.9-e",
+	"main": "index.mjs",
 	"files": [
+		"index.mjs",
 		"test/basic.mjs",
 		"LICENSE",
 		"NOTICE",
@@ -12,6 +14,6 @@
 		"static.mak",
 		"libcrypto.so",
 		"libssl.so",
-		"php8.3-ssl.so"
+		"php8.3-openssl.so"
 	]
 }

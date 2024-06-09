@@ -34,12 +34,12 @@ ifeq (${WITH_OPENSSL},shared)
 CONFIGURE_FLAGS+= --with-openssl=/src/lib
 PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
-PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-ssl.so
+PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
 SKIP_LIBS+= -lssl -lcrypto
 endif
 
 ifeq (${WITH_OPENSSL},dynamic)
-PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-ssl.so
+PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
 SKIP_LIBS+= -lssl -lcrypto
 endif
 
@@ -74,7 +74,7 @@ $(addsuffix /libcrypto.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libcr
 $(addsuffix /libssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libssl.so
 	cp -Lp $^ $@
 
-$(addsuffix /php${PHP_VERSION}-ssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/php${PHP_VERSION}-ssl.so
+$(addsuffix /php${PHP_VERSION}-openssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/php${PHP_VERSION}-openssl.so
 	cp -Lp $^ $@
 
 packages/openssl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/openssl/tests/%.phpt
@@ -83,7 +83,7 @@ packages/openssl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VE
 third_party/php${PHP_VERSION}-openssl/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/openssl /src/third_party/php${PHP_VERSION}-openssl
 
-packages/openssl/php${PHP_VERSION}-ssl.so: ${PHPIZE} packages/openssl/libssl.so packages/openssl/libcrypto.so third_party/php${PHP_VERSION}-openssl/config.m4
+packages/openssl/php${PHP_VERSION}-openssl.so: ${PHPIZE} packages/openssl/libssl.so packages/openssl/libcrypto.so third_party/php${PHP_VERSION}-openssl/config.m4
 	@ echo -e "\e[33;4mBuilding php-openssl\e[0m"
 	${DOCKER_RUN_IN_EXT_OPENSSL} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_OPENSSL} cp config0.m4 config.m4

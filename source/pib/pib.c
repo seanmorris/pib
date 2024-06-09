@@ -28,6 +28,9 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
+#define STRINGIFY_INTERNAL(MACRO) #MACRO
+#define STRINGIFY(MACRO)  STRINGIFY_INTERNAL(MACRO)
+
 int main(void) { return 0; }
 
 bool started = false;
@@ -160,9 +163,19 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 	return retVal;
 }
 
+char* EMSCRIPTEN_KEEPALIVE pib_php_version(void)
+{
+	return PHP_VERSION;
+}
+
+char* EMSCRIPTEN_KEEPALIVE pib_php_ext_api_version(void)
+{
+	return STRINGIFY(PHP_API_VERSION);
+}
+
 bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class);
 
-char *EMSCRIPTEN_KEEPALIVE pib_tokenize(char *code)
+char* EMSCRIPTEN_KEEPALIVE pib_tokenize(char *code)
 {
 	zval parsed;
 	zend_string *zCode = zend_string_init(code, strlen(code), 0);
@@ -200,7 +213,6 @@ int EMSCRIPTEN_KEEPALIVE del_callback(zend_function *fptr)
 	return NULL;
 }
 #endif
-
 
 /* pib extension for PHP */
 

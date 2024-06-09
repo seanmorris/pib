@@ -2,6 +2,7 @@ import { phpVersion } from "./config";
 import { OutputBuffer } from "./OutputBuffer";
 import { _Event } from "./_Event";
 import { fsOps } from './fsOps';
+import { resolveDependencies } from './resolveDependencies';
 
 const STR = 'string';
 const NUM = 'number';
@@ -27,7 +28,6 @@ export class PhpBase extends EventTarget
 
 		Object.freeze(this.buffers);
 
-		this.sharedLibs = args.sharedLibs || [];
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
@@ -44,33 +44,10 @@ export class PhpBase extends EventTarget
 		};
 
 		const fixed = { onRefresh: new Set };
-
 		const phpSettings = globalThis.phpSettings ?? {};
-
 		const userLocateFile = args.locateFile || (() => undefined);
 
-		const urlLibs = {};
-
-		if(args.sharedLibs)
-		{
-			args.sharedLibs.forEach(libDef => {
-				if(typeof libDef === 'string') {
-					if(libDef.substr(0, 1) == '/'
-						|| libDef.substr(0, 2) == './'
-						|| libDef.substr(0, 8) == 'https://'
-						|| libDef.substr(0, 7) == 'http://'
-					){
-						urlLibs[ libDef.split('/').pop() ] = libDef;
-					}
-				}
-				else if(typeof libDef === 'object') {
-					const name = libDef.name ?? libDef.url.split('/').pop();
-					urlLibs[ name ] = libDef.url;
-				}
-			});
-
-			console.log(urlLibs);
-		}
+		const {files, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
 
 		args.locateFile = path => {
 			let located = userLocateFile(path);
@@ -94,23 +71,29 @@ export class PhpBase extends EventTarget
 				, {async: true}
 			);
 
-			if(this.sharedLibs.length)
+			if(!php.FS.analyzePath('/preload').exists)
 			{
-				const iniLines = this.sharedLibs.map(lib => {
-					if(typeof lib === 'string')
-					{
-						return `extension=${lib}`;
-					}
-					else if(typeof lib === 'object' && lib.ini)
-					{
-						return `extension=${lib.url.split('/').pop()}`;
-					}
-				}).filter(x=>x);
-
-				args.ini && iniLines.push(args.ini.replace(/\n\s+/g, '\n'));
-
-				await fsOps.writeFile(php, '/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
+				php.FS.mkdir('/preload');
 			}
+
+			files.forEach(fileDef => php.FS.createPreloadedFile(
+				fileDef.parent, fileDef.name, fileDef.url, true, false
+			));
+
+			const iniLines = libs.map(lib => {
+				if(typeof lib === 'string' || lib instanceof URL)
+				{
+					return `extension=${lib}`;
+				}
+				else if(typeof lib === 'object' && lib.ini)
+				{
+					return `extension=${String(lib.url).split('/').pop()}`;
+				}
+			});
+
+			args.ini && iniLines.push(args.ini.replace(/\n\s+/g, '\n'));
+
+			php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 
 			await php.ccall(
 				'pib_init'

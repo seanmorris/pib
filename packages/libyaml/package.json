@@ -3,9 +3,10 @@
 	"description": "yaml for php-wasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-e",
+	"version": "0.0.9-f",
+	"main": "index.mjs",
 	"files": [
-		"LICENSE",
+		"index.mjs",
 		"NOTICE",
 		"README.md",
 		"static.mak",
