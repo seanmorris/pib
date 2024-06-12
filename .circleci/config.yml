@@ -71,6 +71,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.3.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-3-shared:
@@ -82,6 +83,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.3-shared.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-3-dynamic:
@@ -93,6 +95,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.3-dynamic.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-2:
@@ -104,6 +107,7 @@ jobs:
       - attach_workspace:
             at: ~/
       - run: cp .circleci/.env_8.2.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-2-shared:
@@ -115,6 +119,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.2-shared.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-2-dynamic:
@@ -126,6 +131,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.2-dynamic.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-1:
@@ -137,6 +143,7 @@ jobs:
       - attach_workspace:
             at: ~/
       - run: cp .circleci/.env_8.1.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-1-shared:
@@ -148,6 +155,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.1-shared.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-1-dynamic:
@@ -159,6 +167,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.1-dynamic.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-0:
@@ -170,6 +179,7 @@ jobs:
       - attach_workspace:
             at: ~/
       - run: cp .circleci/.env_8.0.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-0-shared:
@@ -181,6 +191,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.0-shared.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
   make-test-8-0-dynamic:
@@ -192,4 +203,5 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cp .circleci/.env_8.0-dynamic.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
