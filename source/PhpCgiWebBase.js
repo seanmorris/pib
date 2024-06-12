@@ -1,6 +1,5 @@
 import { PhpCgiBase } from './PhpCgiBase';
 import { commitTransaction, startTransaction } from './webTransactions';
-import { fsOps } from './fsOps';
 import { resolveDependencies } from './resolveDependencies';
 
 const STR = 'string';
@@ -48,11 +47,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	refresh()
 	{
-		console.log(this.sharedLibs);
-
 		const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
-
-		console.log(files, libs, urlLibs);
 
 		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
 
@@ -83,7 +78,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 			const php = await new this.PHP(phpArgs);
 
-			files.forEach(fileDef => php.FS.createPreloadedFile(
+			this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
 				fileDef.parent, fileDef.name, fileDef.url, true, false
 			));
 

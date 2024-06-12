@@ -47,7 +47,9 @@ export class PhpBase extends EventTarget
 		const phpSettings = globalThis.phpSettings ?? {};
 		const userLocateFile = args.locateFile || (() => undefined);
 
-		const {files, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
+		const files = args.files || [];
+
+		const {files: extraFiles, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
 
 		args.locateFile = path => {
 			let located = userLocateFile(path);
@@ -76,9 +78,9 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
-			files.forEach(fileDef => php.FS.createPreloadedFile(
-				fileDef.parent, fileDef.name, fileDef.url, true, false
-			));
+			await files.concat(extraFiles).forEach(
+				fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false)
+			);
 
 			const iniLines = libs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)

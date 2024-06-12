@@ -8,20 +8,20 @@ import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
 const sharedLibs = [
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-libzip@0.0.9-c'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-iconv@0.0.9-f'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-libicu@0.0.9-r'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-s'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-freetype@0.0.9-c'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-libpng@0.0.9-h'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-libjpeg@0.0.9-c'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-libxml@0.0.9-h'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-gd@0.0.9-c'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-openssl@0.0.9-e'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d'),
-	await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libzip@0.0.9-c'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-iconv@0.0.9-f'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libicu@0.0.9-r'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-s'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-freetype@0.0.9-c'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libpng@0.0.9-h'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libjpeg@0.0.9-c'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libxml@0.0.9-h'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-gd@0.0.9-c'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-openssl@0.0.9-e'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f'),
 ];
 
 // const sharedLibs = [
@@ -40,6 +40,8 @@ const sharedLibs = [
 // 	await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy'),
 // 	await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml'),
 // ];
+
+const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }];
 
 const ini = `
 	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
@@ -79,7 +81,7 @@ function Embedded() {
 		// phpRef.current = new PhpWeb({sharedLibs, ini, locateFile: filename => {
 		// 	console.log(filename);
 		// }});
-		phpRef.current = new PhpWeb({sharedLibs, ini});
+		phpRef.current = new PhpWeb({sharedLibs, files, ini});
 
 		const php = phpRef.current;
 

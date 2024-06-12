@@ -34,100 +34,6 @@ module.exports = __webpack_require__.p + "ca0859f91adf00b5fb50.wasm";
 
 /***/ }),
 
-/***/ "https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d":
-false,
-
-/***/ "./src/cgi-worker.mjs":
-/*!****************************!*\
-  !*** ./src/cgi-worker.mjs ***!
-  \****************************/
-/***/ ((__webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! php-cgi-wasm/PhpCgiWorker.mjs */ "../packages/php-cgi-wasm/PhpCgiWorker.mjs");
-/* harmony import */ var https_cdn_jsdelivr_net_npm_php_wasm_zlib_0_0_9_d__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d */ "https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([https_cdn_jsdelivr_net_npm_php_wasm_zlib_0_0_9_d__WEBPACK_IMPORTED_MODULE_1__]);
-https_cdn_jsdelivr_net_npm_php_wasm_zlib_0_0_9_d__WEBPACK_IMPORTED_MODULE_1__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
-/* eslint-disable no-restricted-globals */
-
-
-// import libzip from 'https://cdn.jsdelivr.net/npm/php-wasm-libzip@0.0.9-c';
-// import iconv from 'https://cdn.jsdelivr.net/npm/php-wasm-iconv@0.0.9-f';
-// import libicu from 'https://cdn.jsdelivr.net/npm/php-wasm-libicu@0.0.9-r';
-// import sqlite from 'https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-s';
-// import freetype from 'https://cdn.jsdelivr.net/npm/php-wasm-freetype@0.0.9-c';
-// import libpng from 'https://cdn.jsdelivr.net/npm/php-wasm-libpng@0.0.9-h';
-// import libjpeg from 'https://cdn.jsdelivr.net/npm/php-wasm-libjpeg@0.0.9-c';
-// import libxml from 'https://cdn.jsdelivr.net/npm/php-wasm-libxml@0.0.9-h';
-// import gd from 'https://cdn.jsdelivr.net/npm/php-wasm-gd@0.0.9-c';
-// import openssl from 'https://cdn.jsdelivr.net/npm/php-wasm-openssl@0.0.9-e';
-// import phar from 'https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b';
-// import tidy from 'https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d';
-// import yaml from 'https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f';
-
-// Log requests
-const onRequest = (request, response) => {
-  const url = new URL(request.url);
-  const logLine = `[${new Date().toISOString()}]` + `#${php.count} 127.0.0.1 - "${request.method}` + ` ${url.pathname}" - HTTP/1.1 ${response.status}`;
-  console.log(logLine);
-};
-const notFound = request => {
-  return new Response(`<body><h1>404</h1>${request.url} not found</body>`, {
-    status: 404,
-    headers: {
-      'Content-Type': 'text/html'
-    }
-  });
-};
-const sharedLibs = [`php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-zlib.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-zip.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-iconv.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-intl.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-openssl.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-dom.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-mbstring.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-sqlite.so`, `php${php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker.phpVersion}-pdo-sqlite.so`
-// zlib
-// , libzip
-// , iconv
-// , libicu
-// , sqlite
-// , freetype
-// , libpng
-// , libjpeg
-// , libxml
-// , gd
-// , openssl
-// , phar
-// , tidy
-// , yaml
-];
-
-// Spawn the PHP-CGI binary
-const php = new php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker({
-  onRequest,
-  notFound,
-  sharedLibs,
-  prefix: '/php-wasm/cgi-bin/',
-  docroot: '/persist/www',
-  types: {
-    jpeg: 'image/jpeg',
-    jpg: 'image/jpeg',
-    gif: 'image/gif',
-    png: 'image/png',
-    svg: 'image/svg+xml'
-  }
-});
-
-// Set up the event handlers
-self.addEventListener('install', event => php.handleInstallEvent(event));
-self.addEventListener('activate', event => php.handleActivateEvent(event));
-self.addEventListener('fetch', event => php.handleFetchEvent(event));
-self.addEventListener('message', event => php.handleMessageEvent(event));
-
-// Extras
-self.addEventListener('install', event => console.log('Install'));
-self.addEventListener('activate', event => console.log('Activate'));
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } });
-
-/***/ }),
-
 /***/ "../packages/php-cgi-wasm/PhpCgiBase.mjs":
 /*!***********************************************!*\
   !*** ../packages/php-cgi-wasm/PhpCgiBase.mjs ***!
@@ -160,6 +66,9 @@ class PhpCgiBase {
   cookies = null;
   types = {};
   onRequest = () => {};
+  notFound = () => {};
+  sharedLibs = [];
+  files = [];
   phpArgs = {};
   maxRequestAge = 0;
   staticCacheTime = 60_000;
@@ -181,6 +90,7 @@ class PhpCgiBase {
     onRequest,
     notFound,
     sharedLibs,
+    files,
     ...args
   } = {}) {
     this.PHP = PHP;
@@ -193,6 +103,7 @@ class PhpCgiBase {
     this.onRequest = onRequest || this.onRequest;
     this.notFound = notFound || this.notFound;
     this.sharedLibs = sharedLibs || this.sharedLibs;
+    this.files = files || this.files;
     this.phpArgs = args;
     this.autoTransaction = 'autoTransaction' in args ? args.autoTransaction : true;
     this.transactionStarted = false;
@@ -283,7 +194,6 @@ class PhpCgiBase {
       libs,
       urlLibs
     } = (0,_resolveDependencies_mjs__WEBPACK_IMPORTED_MODULE_4__.resolveDependencies)(this.sharedLibs, this);
-    console.log(files, libs, urlLibs);
     const userLocateFile = this.phpArgs.locateFile || (() => undefined);
     const locateFile = path => {
       let located = userLocateFile(path);
@@ -310,7 +220,7 @@ class PhpCgiBase {
       await php.ccall('pib_storage_init', NUM, [], [], {
         async: true
       });
-      files.forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
+      this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
       const iniLines = libs.map(lib => {
         if (typeof lib === 'string') {
           return `extension=${lib}`;
@@ -422,6 +332,7 @@ class PhpCgiBase {
     this.output = [];
     this.error = [];
     const selfUrl = new URL(globalThis.location);
+    putEnv(php, 'PHP_VERSION', _config_mjs__WEBPACK_IMPORTED_MODULE_0__.phpVersion);
     putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
     putEnv(php, 'PHPRC', '/php.ini');
     for (const [name, value] of Object.entries(this.env)) {
@@ -635,13 +546,11 @@ class PhpCgiWebBase extends _PhpCgiBase_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiB
     });
   }
   refresh() {
-    console.log(this.sharedLibs);
     const {
       files,
       libs,
       urlLibs
     } = (0,_resolveDependencies_mjs__WEBPACK_IMPORTED_MODULE_3__.resolveDependencies)(this.sharedLibs, this);
-    console.log(files, libs, urlLibs);
     const userLocateFile = this.phpArgs.locateFile || (() => undefined);
     const locateFile = path => {
       let located = userLocateFile(path);
@@ -666,7 +575,7 @@ class PhpCgiWebBase extends _PhpCgiBase_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiB
     };
     this.binary = navigator.locks.request('php-wasm-fs-lock', async () => {
       const php = await new this.PHP(phpArgs);
-      files.forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
+      this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
       const iniLines = libs.map(lib => {
         if (typeof lib === 'string') {
           return `extension=${lib}`;
@@ -1095,75 +1004,6 @@ async function commitTransaction(wrapper) {
 /******/ 	__webpack_require__.m = __webpack_modules__;
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/async module */
-/******/ 	(() => {
-/******/ 		var webpackQueues = typeof Symbol === "function" ? Symbol("webpack queues") : "__webpack_queues__";
-/******/ 		var webpackExports = typeof Symbol === "function" ? Symbol("webpack exports") : "__webpack_exports__";
-/******/ 		var webpackError = typeof Symbol === "function" ? Symbol("webpack error") : "__webpack_error__";
-/******/ 		var resolveQueue = (queue) => {
-/******/ 			if(queue && queue.d < 1) {
-/******/ 				queue.d = 1;
-/******/ 				queue.forEach((fn) => (fn.r--));
-/******/ 				queue.forEach((fn) => (fn.r-- ? fn.r++ : fn()));
-/******/ 			}
-/******/ 		}
-/******/ 		var wrapDeps = (deps) => (deps.map((dep) => {
-/******/ 			if(dep !== null && typeof dep === "object") {
-/******/ 				if(dep[webpackQueues]) return dep;
-/******/ 				if(dep.then) {
-/******/ 					var queue = [];
-/******/ 					queue.d = 0;
-/******/ 					dep.then((r) => {
-/******/ 						obj[webpackExports] = r;
-/******/ 						resolveQueue(queue);
-/******/ 					}, (e) => {
-/******/ 						obj[webpackError] = e;
-/******/ 						resolveQueue(queue);
-/******/ 					});
-/******/ 					var obj = {};
-/******/ 					obj[webpackQueues] = (fn) => (fn(queue));
-/******/ 					return obj;
-/******/ 				}
-/******/ 			}
-/******/ 			var ret = {};
-/******/ 			ret[webpackQueues] = x => {};
-/******/ 			ret[webpackExports] = dep;
-/******/ 			return ret;
-/******/ 		}));
-/******/ 		__webpack_require__.a = (module, body, hasAwait) => {
-/******/ 			var queue;
-/******/ 			hasAwait && ((queue = []).d = -1);
-/******/ 			var depQueues = new Set();
-/******/ 			var exports = module.exports;
-/******/ 			var currentDeps;
-/******/ 			var outerResolve;
-/******/ 			var reject;
-/******/ 			var promise = new Promise((resolve, rej) => {
-/******/ 				reject = rej;
-/******/ 				outerResolve = resolve;
-/******/ 			});
-/******/ 			promise[webpackExports] = exports;
-/******/ 			promise[webpackQueues] = (fn) => (queue && fn(queue), depQueues.forEach(fn), promise["catch"](x => {}));
-/******/ 			module.exports = promise;
-/******/ 			body((deps) => {
-/******/ 				currentDeps = wrapDeps(deps);
-/******/ 				var fn;
-/******/ 				var getResult = () => (currentDeps.map((d) => {
-/******/ 					if(d[webpackError]) throw d[webpackError];
-/******/ 					return d[webpackExports];
-/******/ 				}))
-/******/ 				var promise = new Promise((resolve) => {
-/******/ 					fn = () => (resolve(getResult));
-/******/ 					fn.r = 0;
-/******/ 					var fnQueue = (q) => (q !== queue && !depQueues.has(q) && (depQueues.add(q), q && !q.d && (fn.r++, q.push(fn))));
-/******/ 					currentDeps.map((dep) => (dep[webpackQueues](fnQueue)));
-/******/ 				});
-/******/ 				return fn.r ? promise : getResult();
-/******/ 			}, (err) => ((err ? reject(promise[webpackError] = err) : outerResolve(exports)), resolveQueue(queue)));
-/******/ 			queue && queue.d < 0 && (queue.d = 0);
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -1246,12 +1086,97 @@ async function commitTransaction(wrapper) {
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module used 'module' so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/cgi-worker.mjs");
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+/*!****************************!*\
+  !*** ./src/cgi-worker.mjs ***!
+  \****************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! php-cgi-wasm/PhpCgiWorker.mjs */ "../packages/php-cgi-wasm/PhpCgiWorker.mjs");
+/* eslint-disable no-restricted-globals */
+
+
+// import zlib from 'https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d';
+// import libzip from 'https://cdn.jsdelivr.net/npm/php-wasm-libzip@0.0.9-c';
+// import iconv from 'https://cdn.jsdelivr.net/npm/php-wasm-iconv@0.0.9-f';
+// import libicu from 'https://cdn.jsdelivr.net/npm/php-wasm-libicu@0.0.9-r';
+// import sqlite from 'https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-s';
+// import freetype from 'https://cdn.jsdelivr.net/npm/php-wasm-freetype@0.0.9-c';
+// import libpng from 'https://cdn.jsdelivr.net/npm/php-wasm-libpng@0.0.9-h';
+// import libjpeg from 'https://cdn.jsdelivr.net/npm/php-wasm-libjpeg@0.0.9-c';
+// import libxml from 'https://cdn.jsdelivr.net/npm/php-wasm-libxml@0.0.9-h';
+// import gd from 'https://cdn.jsdelivr.net/npm/php-wasm-gd@0.0.9-c';
+// import openssl from 'https://cdn.jsdelivr.net/npm/php-wasm-openssl@0.0.9-e';
+// import phar from 'https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b';
+// import tidy from 'https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d';
+// import yaml from 'https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f';
+
+// Log requests
+const onRequest = (request, response) => {
+  const url = new URL(request.url);
+  const logLine = `[${new Date().toISOString()}]` + `#${php.count} 127.0.0.1 - "${request.method}` + ` ${url.pathname}" - HTTP/1.1 ${response.status}`;
+  console.log(logLine);
+};
+const notFound = request => {
+  return new Response(`<body><h1>404</h1>${request.url} not found</body>`, {
+    status: 404,
+    headers: {
+      'Content-Type': 'text/html'
+    }
+  });
+};
+const sharedLibs = [`php\${PHP_VERSION}-zlib.so`, `php\${PHP_VERSION}-zip.so`, `php\${PHP_VERSION}-iconv.so`, `php\${PHP_VERSION}-intl.so`, `php\${PHP_VERSION}-openssl.so`, `php\${PHP_VERSION}-dom.so`, `php\${PHP_VERSION}-mbstring.so`, `php\${PHP_VERSION}-sqlite.so`, `php\${PHP_VERSION}-pdo-sqlite.so`
+// zlib
+// , libzip
+// , iconv
+// , libicu
+// , sqlite
+// , freetype
+// , libpng
+// , libjpeg
+// , libxml
+// , gd
+// , openssl
+// , phar
+// , tidy
+// , yaml
+];
+const files = [{
+  parent: '/preload/',
+  name: 'icudt72l.dat',
+  url: '/icudt72l.dat'
+}];
+
+// Spawn the PHP-CGI binary
+const php = new php_cgi_wasm_PhpCgiWorker_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiWorker({
+  onRequest,
+  notFound,
+  sharedLibs,
+  files,
+  prefix: '/php-wasm/cgi-bin/',
+  docroot: '/persist/www',
+  types: {
+    jpeg: 'image/jpeg',
+    jpg: 'image/jpeg',
+    gif: 'image/gif',
+    png: 'image/png',
+    svg: 'image/svg+xml'
+  }
+});
+
+// Set up the event handlers
+self.addEventListener('install', event => php.handleInstallEvent(event));
+self.addEventListener('activate', event => php.handleActivateEvent(event));
+self.addEventListener('fetch', event => php.handleFetchEvent(event));
+self.addEventListener('message', event => php.handleMessageEvent(event));
+
+// Extras
+self.addEventListener('install', event => console.log('Install'));
+self.addEventListener('activate', event => console.log('Activate'));
+})();
+
 /******/ })()
 ;
 //# sourceMappingURL=cgi-worker.js.map

@@ -272,121 +272,6 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 <script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.jsdelivr.mjs"></script>
 ``` -->
 
-## ⚙️ Configuration
-
-The `/config/php.ini` and `/preload/php.ini` files will also be loaded, if they exist. Neither of these files will be created if they do not exists. They're left completely up to the programmer to create & populate.
-
-Options like the following may appear in these files. See the [PHP docs](https://www.php.net/manual/en/ini.list.php) for the full list.
-
-```ini
-[php]
-date.timezone=UTC
-tidy.clean_output=1
-expose_php=0
-```
-
-You can also pass in the `ini` property to the constructor to add lines to `/php.ini`:
-
-```javascript
-const php = new PhpWeb({ini: `
-    date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
-    tidy.clean_output=1
-    expose_php=0
-`});
-```
-
-## 🔌 Extensions
-
-### Loading extensions at runtime
-
-The following extensions may be loaded at runtime. This allows the shared extension & their dependencies to be cached, re-used, and selected a-la-carte for each application.
-
-* gd
-* iconv
-* intl
-* xml
-* dom
-* simplexml
-* yaml
-* zip
-* mbstring
-* openssl
-* phar
-* sqlite
-* pdo-sqlite
-* zlib
-
-There are two ways to load extensions at runtime, using the `dl()` function or `php.ini`.
-
-```php
-<?php
-dl('php-8.3-xml.so');
-dl('php-8.3-dom.so');
-```
-
-or, pass an array as the `sharedLibs` argument to the constructor from Javascript to auto-generate an ini file that loads your extensions:
-
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    `php8.3-xml.so`,
-    `php8.3-dom.so`,
-]});
-```
-
-### Dynamic Libraries from Remote Servers:
-
-You can also load extension from remote servers with URLs:
-
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    `https://unpkg.com/php-wasm-iconv/php8.3-phar.so`,
-]});
-```
-
-Strings starting with `/`, `./`, `http://` or `https://` will be treated as URLs:
-
-
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    `./php8.3-phar.so`,
-]});
-```
-
-The above is actually shorthand for the following code. Passing `ini: true` will automatically load the extension via `/php.ini`, passing `ini: false` will wait for a call to `dl()` to do the lookup.
-
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    {
-        name: `php8.3-xml.so`,
-        url:  `https://unpkg.com/php-wasm-iconv/php8.3-xml.so`,
-        ini:  true
-    }
-]});
-```
-
-Some extensions require supporting libraries. You can provide URLs for those as `sharedLibs` as well, just pass `ini: false`:
-
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    { url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true },
-    { url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',        ini: false },
-]});
-```
-
-### Compiling extensions
-
-Extensions may be compiled as `dynamic`, `shared`, or `static`. See `Custom Builds` for more information on compiling php-wasm.
-
-* dynamic - these extensions may be loaded selectively at runtime.
-* shared - these extensions will always be loaded at startup and can be cached and reused.
-* static - these extensions will be built directly into the main wasm binary (may cause a huge filesize).
-
-## 📦 Packaging files
-
-Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
-
-These files will be available under `/preload` in the final package.
-
 ## 🥤 Running PHP & Taking Output
 
 Create a PHP instance:
@@ -420,6 +305,202 @@ php.inputString('This is a string of data provided on STDIN.');
 
 ```javascript
 const exitCode = await php.run('<?php echo "Hello, world!";');
+```
+
+## ⚙️ Configuration
+
+The `/config/php.ini` and `/preload/php.ini` files will also be loaded, if they exist. Neither of these files will be created if they do not exist. They're left completely up to the programmer to create & populate.
+
+Options like the following may appear in these files. See the [PHP docs](https://www.php.net/manual/en/ini.list.php) for the full list.
+
+```ini
+[php]
+date.timezone=UTC
+tidy.clean_output=1
+expose_php=0
+```
+
+You can also pass in the `ini` property to the constructor to add lines to `/php.ini`:
+
+```javascript
+const php = new PhpWeb({ini: `
+    date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+    tidy.clean_output=1
+    expose_php=0
+`});
+```
+
+### Writing an INI for multiple PHP versions
+
+PHP will replace strings in INI files in the form `${ENVIRONMENT_VARIABLE}` with the env value of `ENVIRONMENT_VARIABLE`. The `PHP_VERSION` environment variable is available to allow loading of the extension compatible with the currently running version of PHP:
+
+```ini
+[php]
+extension=php${PHP_VERSION}-phar.so
+```
+
+Remember to correctly escape the `$` if you're supplying the INI from Javascript with &#96;`backtics`&#96;:
+
+```javascript
+const php = new PhpWeb({ini: `
+    extension=php\${PHP_VERSION}-phar.so
+    date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+`});
+```
+
+## 🔌 Extensions
+
+### Loading extensions at runtime
+
+The following extensions may be loaded at runtime. This allows the shared extension & their dependencies to be cached, re-used, and selected a-la-carte for each application.
+
+* gd
+* iconv
+* intl
+* xml
+* dom
+* simplexml
+* yaml
+* zip
+* mbstring
+* openssl
+* phar
+* sqlite
+* pdo-sqlite
+* zlib
+
+There are two ways to load extensions at runtime, using the `dl()` function or `php.ini`.
+
+```php
+<?php
+dl('php-8.3-xml.so');
+dl('php-8.3-dom.so');
+```
+
+or, pass an array as the `extensions` argument to the constructor from Javascript to auto-generate an ini file that loads your extensions:
+
+```javascript
+const php = new PhpWeb({extensions: [
+    `php8.3-xml.so`,
+    `php8.3-dom.so`,
+]});
+```
+
+The class used to load PHP (`PhpWeb` here) also implements a phpVersion property to ensure libs can be loaded for any compatible version:
+
+```javascript
+const php = new PhpWeb({extensions: [
+    `php${PhpWeb.phpVersion}-xml.so`,
+    `php${PhpWeb.phpVersion}-dom.so`,
+]});
+```
+
+### Dynamic Extensions from Remote Servers:
+
+You can also load extension from remote servers with URLs:
+
+```javascript
+const php = new PhpWeb({extensions: [`https://unpkg.com/php-wasm-iconv/php8.3-phar.so`]});
+```
+
+The above is actually shorthand for the following code. Passing `ini: true` will automatically load the extension via `/php.ini`, passing `ini: false` will wait for a call to `dl()` to do the lookup.
+
+```javascript
+const php = new PhpWeb({extensions: [
+    {
+        name: `php8.3-xml.so`,
+        url:  `https://unpkg.com/php-wasm-iconv/php8.3-xml.so`,
+        ini:  true,
+    }
+]});
+```
+
+Strings starting with `/`, `./`, `http://` or `https://` will be treated as URLs:
+
+```javascript
+const php = new PhpWeb({extensions: [
+    `./php8.3-phar.so`
+]});
+```
+
+Some extensions require supporting libraries. You can provide URLs for those as `extensions` as well, just pass `ini: false`:
+
+```javascript
+const php = new PhpWeb({extensions: [
+    { url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true  },
+    { url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',        ini: false },
+]});
+```
+
+### Loading Dynamic Extensions as JS Modules:
+
+Dynamic extensions can be loaded as modules: So long as the main file of the module defines a `getLibs` and `getFiles` method, extensions may be loaded like so:
+
+```javascript
+new PhpNode({sharedLibs:[ await import('php-wasm-libicu') ]})
+```
+
+Dynamic extensions can also be loaded as modules from any static HTTP server with an ESM directory structure.
+
+```javascript
+// This will load both sqlite.so & php8.x-sqlite.so:
+const php = new PhpWeb({extensions: [ await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite') ]});
+```
+
+Sadly, this notation is not available for Service Workers, since they do not yet support dynamic `imports()`. Hopefully this will change soon.
+
+### Compiling extensions
+
+Extensions may be compiled as `dynamic`, `shared`, or `static`. See `Custom Builds` for more information on compiling php-wasm.
+
+* dynamic - these extensions may be loaded selectively at runtime.
+* shared - these extensions will always be loaded at startup and can be cached and reused.
+* static - these extensions will be built directly into the main wasm binary (may cause a huge filesize).
+
+## 📦 Loading Files
+
+### Loading single files at runtime
+
+When spawning a new instance of PHP, a `files` array can be provided to be loaded into the filesystem. For example, the `php-intl` extension requires us to load `icudt72l.dat` into the  `/preload` directory.
+
+```javascript
+const extensions = [`https://unpkg.com/php-wasm-iconv/php\${PHP_VERSION}-intl.so`];
+
+const files = [
+    {
+        name: 'icudt72l.dat',
+        parent: '/preload/',
+        url: 'https://unpkg.com/php-wasm-libicu/icudt72l.dat'
+    }
+];
+
+const php = new PhpWeb({extensions, files});
+```
+
+For PhpNode, use the `path` key where you'd use `url` in `PhpWeb`:
+
+```javascript
+const files = [
+    {
+        name: 'icudt72l.dat',
+        parent: '/preload/',
+        path: 'node_modules/php-wasm-libicu/icudt72l.dat'
+    }
+];
+
+const php = new PhpNode({extensions, files});
+```
+
+### Preloaded FS
+
+Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.
+
+The files and directories will be collected into a single directory. Individual files & directories will appear in the top level, while directories will maintain their internal structure.
+
+These files & directories will be available under `/preload` in the final package, packaged into the `.data` file that is built along with the `.wasm` file.
+
+```bash
+PRELOAD_ASSETS='/path/to/file.txt /some/directory /path/to/other_file.txt /some/other/directory'
 ```
 
 ## 💾 Persistent Storage (IDBFS & NodeFS)
@@ -574,26 +655,21 @@ This allows you to simply `await` the result of calls to file system methods (se
 const result = await sendMessage(methodName, [param, param, param]);
 ```
 
-#### onMessage
+#### onMessage & sendMessageFor
 
-Use `onMessage` as an event handler for `message` events coming from the Service Worker:
+* Use `onMessage` as an event handler for `message` events coming from the Service Worker.
+* Use `sendMessageFor` to **GENERATE A FUNCTION** that you can use to send messages to your service worker.
 
 ```javascript
-import { onMessage } from `php-cgi-wasm/msg-bus`;
+import { onMessage, sendMessageFor } from `php-cgi-wasm/msg-bus`;
+
+const SERVICE_WORKER_SCRIPT_URL = '/cgi-worker.mjs';
 
 navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL);
 
-navigator.serviceWorker.addEventListener('message', onMessage);
-```
-
-#### sendMessageFor
-
-Use `sendMessageFor` to **GENERATE A FUNCTION** that you can use to send messages to your service worker:
-
-```javascript
-import { sendMessageFor } from `php-cgi-wasm/msg-bus`;
-
 const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
+
+navigator.serviceWorker.addEventListener('message', onMessage);
 
 const result = await sendMessage(methodName, [param, param, param]);
 ```
@@ -702,6 +778,12 @@ WITH_FREETYPE=1
 ```
 
 #### Extensions
+
+As stated above, extensions may be compiled as `dynamic`, `shared`, or `static`.
+
+* dynamic - these extensions may be loaded selectively at runtime.
+* shared - these extensions will always be loaded at startup and can be cached and reused.
+* static - these extensions will be built directly into the main wasm binary (may cause a huge filesize).
 
 The following options are availavle for building static PHP extensions:
 
@@ -899,7 +981,7 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 * libicui18n.so
 * libicudata.so
 
-It will also add `/preload/icudt72l.dat` to `PRELOAD_ASSETS`, and cause `php.data` to be required.
+If compiles as `static` or `shared`, it will also add `/preload/icudt72l.dat` to `PRELOAD_ASSETS`, and cause `php.data` to be required.
 
 ---
 

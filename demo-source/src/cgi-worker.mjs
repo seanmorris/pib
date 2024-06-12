@@ -34,15 +34,15 @@ const notFound = request => {
 };
 
 const sharedLibs = [
-	`php${PhpCgiWorker.phpVersion}-zlib.so`,
-	`php${PhpCgiWorker.phpVersion}-zip.so`,
-	`php${PhpCgiWorker.phpVersion}-iconv.so`,
-	`php${PhpCgiWorker.phpVersion}-intl.so`,
-	`php${PhpCgiWorker.phpVersion}-openssl.so`,
-	`php${PhpCgiWorker.phpVersion}-dom.so`,
-	`php${PhpCgiWorker.phpVersion}-mbstring.so`,
-	`php${PhpCgiWorker.phpVersion}-sqlite.so`,
-	`php${PhpCgiWorker.phpVersion}-pdo-sqlite.so`,
+	`php\${PHP_VERSION}-zlib.so`,
+	`php\${PHP_VERSION}-zip.so`,
+	`php\${PHP_VERSION}-iconv.so`,
+	`php\${PHP_VERSION}-intl.so`,
+	`php\${PHP_VERSION}-openssl.so`,
+	`php\${PHP_VERSION}-dom.so`,
+	`php\${PHP_VERSION}-mbstring.so`,
+	`php\${PHP_VERSION}-sqlite.so`,
+	`php\${PHP_VERSION}-pdo-sqlite.so`,
 	// zlib
 	// , libzip
 	// , iconv
@@ -59,9 +59,11 @@ const sharedLibs = [
 	// , yaml
 ];
 
+const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }];
+
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({
-	onRequest, notFound, sharedLibs
+	onRequest, notFound, sharedLibs, files
 	, prefix: '/php-wasm/cgi-bin/'
 	, docroot: '/persist/www'
 	, types: {

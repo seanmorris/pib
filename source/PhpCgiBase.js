@@ -24,6 +24,9 @@ export class PhpCgiBase
 	cookies    = null;
 	types      = {};
 	onRequest  = () => {};
+	notFound   = () => {};
+	sharedLibs = [];
+	files      = [];
 	phpArgs    = {};
 
 	maxRequestAge    = 0;
@@ -39,7 +42,7 @@ export class PhpCgiBase
 
 	queue = [];
 
-	constructor(PHP, {docroot, prefix, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, ...args} = {})
+	constructor(PHP, {docroot, prefix, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, files, ...args} = {})
 	{
 		this.PHP        = PHP;
 		this.docroot    = docroot    || this.docroot;
@@ -51,6 +54,7 @@ export class PhpCgiBase
 		this.onRequest  = onRequest  || this.onRequest;
 		this.notFound   = notFound   || this.notFound;
 		this.sharedLibs = sharedLibs || this.sharedLibs;
+		this.files      = files      || this.files;
 
 		this.phpArgs   = args;
 
@@ -165,8 +169,6 @@ export class PhpCgiBase
 	{
 		const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
 
-		console.log(files, libs, urlLibs);
-
 		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
 
 		const locateFile = path => {
@@ -202,7 +204,7 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
-			files.forEach(fileDef => php.FS.createPreloadedFile(
+			this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
 				fileDef.parent, fileDef.name, fileDef.url, true, false
 			));
 
@@ -361,6 +363,7 @@ export class PhpCgiBase
 
 		const selfUrl = new URL(globalThis.location);
 
+		putEnv(php, 'PHP_VERSION', phpVersion);
 		putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
 		putEnv(php, 'PHPRC', '/php.ini');
 
