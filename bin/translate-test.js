@@ -47,7 +47,10 @@ test(${JSON.stringify(String(sections.TEST).trim())}, async () => {
 	process.env.WITH_ONIGURUMA === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-mbstring.so');
 	process.env.WITH_OPENSSL   === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-openssl.so');
 
-	const php = new PhpNode( { sharedLibs, persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
+	const files = [];
+	process.env.WITH_ICU === 'dynamic' && files.push({parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-libicu/icudt72l.dat'});
+
+	const php = new PhpNode( { sharedLibs, files, persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
 
 	let stdOut = '', stdErr = '';
 

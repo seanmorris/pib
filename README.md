@@ -476,21 +476,6 @@ const files = [
 
 const php = new PhpWeb({sharedLibs, files});
 ```
-
-For PhpNode, use the `path` key where you'd use `url` in `PhpWeb`:
-
-```javascript
-const files = [
-    {
-        name: 'icudt72l.dat',
-        parent: '/preload/',
-        path: 'node_modules/php-wasm-libicu/icudt72l.dat'
-    }
-];
-
-const php = new PhpNode({sharedLibs, files});
-```
-
 ### Preloaded FS
 
 Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of files and directories to include by default.

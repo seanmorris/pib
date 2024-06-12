@@ -41,7 +41,9 @@ const sharedLibs = [
 // 	await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml'),
 // ];
 
-const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }];
+const files = [
+	// { parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }
+];
 
 const ini = `
 	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
