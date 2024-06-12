@@ -41,8 +41,8 @@ RUN cd /emsdk/upstream && { \
 # 	emsdk update; \
 # 	source /emsdk/emsdk_env.sh;
 
-COPY ./emscripten /emsdk/upstream/emscripten
-RUN git config --global --add safe.directory /emsdk/upstream/emscripten
-RUN cd /emsdk/upstream/emscripten && ./bootstrap;
+# COPY ./emscripten /emsdk/upstream/emscripten
+# RUN git config --global --add safe.directory /emsdk/upstream/emscripten
+# RUN cd /emsdk/upstream/emscripten && ./bootstrap;
 
 RUN emcc --check
