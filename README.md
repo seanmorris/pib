@@ -380,7 +380,7 @@ dl('php-8.3-dom.so');
 or, pass an array as the `extensions` argument to the constructor from Javascript to auto-generate an ini file that loads your extensions:
 
 ```javascript
-const php = new PhpWeb({extensions: [
+const php = new PhpWeb({sharedLibs: [
     `php8.3-xml.so`,
     `php8.3-dom.so`,
 ]});
@@ -389,7 +389,7 @@ const php = new PhpWeb({extensions: [
 The class used to load PHP (`PhpWeb` here) also implements a phpVersion property to ensure libs can be loaded for any compatible version:
 
 ```javascript
-const php = new PhpWeb({extensions: [
+const php = new PhpWeb({sharedLibs: [
     `php${PhpWeb.phpVersion}-xml.so`,
     `php${PhpWeb.phpVersion}-dom.so`,
 ]});
@@ -400,13 +400,13 @@ const php = new PhpWeb({extensions: [
 You can also load extension from remote servers with URLs:
 
 ```javascript
-const php = new PhpWeb({extensions: [`https://unpkg.com/php-wasm-iconv/php8.3-phar.so`]});
+const php = new PhpWeb({sharedLibs: [`https://unpkg.com/php-wasm-iconv/php8.3-phar.so`]});
 ```
 
 The above is actually shorthand for the following code. Passing `ini: true` will automatically load the extension via `/php.ini`, passing `ini: false` will wait for a call to `dl()` to do the lookup.
 
 ```javascript
-const php = new PhpWeb({extensions: [
+const php = new PhpWeb({sharedLibs: [
     {
         name: `php8.3-xml.so`,
         url:  `https://unpkg.com/php-wasm-iconv/php8.3-xml.so`,
@@ -418,7 +418,7 @@ const php = new PhpWeb({extensions: [
 Strings starting with `/`, `./`, `http://` or `https://` will be treated as URLs:
 
 ```javascript
-const php = new PhpWeb({extensions: [
+const php = new PhpWeb({sharedLibs: [
     `./php8.3-phar.so`
 ]});
 ```
@@ -426,7 +426,7 @@ const php = new PhpWeb({extensions: [
 Some extensions require supporting libraries. You can provide URLs for those as `extensions` as well, just pass `ini: false`:
 
 ```javascript
-const php = new PhpWeb({extensions: [
+const php = new PhpWeb({sharedLibs: [
     { url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true  },
     { url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',        ini: false },
 ]});
@@ -444,7 +444,7 @@ Dynamic extensions can also be loaded as modules from any static HTTP server wit
 
 ```javascript
 // This will load both sqlite.so & php8.x-sqlite.so:
-const php = new PhpWeb({extensions: [ await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite') ]});
+const php = new PhpWeb({sharedLibs: [ await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite') ]});
 ```
 
 Sadly, this notation is not available for Service Workers, since they do not yet support dynamic `imports()`. Hopefully this will change soon.
@@ -464,7 +464,7 @@ Extensions may be compiled as `dynamic`, `shared`, or `static`. See `Custom Buil
 When spawning a new instance of PHP, a `files` array can be provided to be loaded into the filesystem. For example, the `php-intl` extension requires us to load `icudt72l.dat` into the  `/preload` directory.
 
 ```javascript
-const extensions = [`https://unpkg.com/php-wasm-iconv/php\${PHP_VERSION}-intl.so`];
+const sharedLibs = [`https://unpkg.com/php-wasm-iconv/php\${PHP_VERSION}-intl.so`];
 
 const files = [
     {
@@ -474,7 +474,7 @@ const files = [
     }
 ];
 
-const php = new PhpWeb({extensions, files});
+const php = new PhpWeb({sharedLibs, files});
 ```
 
 For PhpNode, use the `path` key where you'd use `url` in `PhpWeb`:
@@ -488,7 +488,7 @@ const files = [
     }
 ];
 
-const php = new PhpNode({extensions, files});
+const php = new PhpNode({sharedLibs, files});
 ```
 
 ### Preloaded FS
