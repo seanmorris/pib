@@ -330,6 +330,10 @@ tidy.clean_output=1
 expose_php=0
 ```
 
+### CGI Configuration
+
+When running in CGI mode, php will look for a `php.ini` file in the document root directory, and load it along with the files listed above.
+
 ### Writing an INI for multiple PHP versions
 
 PHP will replace strings in INI files in the form `${ENVIRONMENT_VARIABLE}` with the env value of `ENVIRONMENT_VARIABLE`. The `PHP_VERSION` environment variable is available to allow loading of the extension compatible with the currently running version of PHP:
