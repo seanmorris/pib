@@ -309,6 +309,16 @@ const exitCode = await php.run('<?php echo "Hello, world!";');
 
 ## ⚙️ Configuration
 
+You can pass in the `ini` property to the constructor to add lines to `/php.ini`:
+
+```javascript
+const php = new PhpWeb({ini: `
+    date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+    tidy.clean_output=1
+    expose_php=0
+`});
+```
+
 The `/config/php.ini` and `/preload/php.ini` files will also be loaded, if they exist. Neither of these files will be created if they do not exist. They're left completely up to the programmer to create & populate.
 
 Options like the following may appear in these files. See the [PHP docs](https://www.php.net/manual/en/ini.list.php) for the full list.
@@ -318,16 +328,6 @@ Options like the following may appear in these files. See the [PHP docs](https:/
 date.timezone=UTC
 tidy.clean_output=1
 expose_php=0
-```
-
-You can also pass in the `ini` property to the constructor to add lines to `/php.ini`:
-
-```javascript
-const php = new PhpWeb({ini: `
-    date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
-    tidy.clean_output=1
-    expose_php=0
-`});
 ```
 
 ### Writing an INI for multiple PHP versions
@@ -397,7 +397,7 @@ const php = new PhpWeb({sharedLibs: [
 
 ### Dynamic Extensions from Remote Servers:
 
-You can also load extension from remote servers with URLs:
+You can also load extensions from remote servers with URLs:
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [`https://unpkg.com/php-wasm-iconv/php8.3-phar.so`]});
@@ -423,7 +423,7 @@ const php = new PhpWeb({sharedLibs: [
 ]});
 ```
 
-Some extensions require supporting libraries. You can provide URLs for those as `extensions` as well, just pass `ini: false`:
+Some extensions require supporting libraries. You can provide URLs for those as `sharedLibs` as well, just pass `ini: false`:
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
@@ -434,7 +434,7 @@ const php = new PhpWeb({sharedLibs: [
 
 ### Loading Dynamic Extensions as JS Modules:
 
-Dynamic extensions can be loaded as modules: So long as the main file of the module defines a `getLibs` and `getFiles` method, extensions may be loaded like so:
+Dynamic extensions can be loaded as modules: So long as the main file of the module defines the `getLibs` and `getFiles` methods, extensions may be loaded like so:
 
 ```javascript
 new PhpNode({sharedLibs:[ await import('php-wasm-libicu') ]})
@@ -464,7 +464,7 @@ Extensions may be compiled as `dynamic`, `shared`, or `static`. See `Custom Buil
 When spawning a new instance of PHP, a `files` array can be provided to be loaded into the filesystem. For example, the `php-intl` extension requires us to load `icudt72l.dat` into the  `/preload` directory.
 
 ```javascript
-const sharedLibs = [`https://unpkg.com/php-wasm-iconv/php\${PHP_VERSION}-intl.so`];
+const sharedLibs = [`https://unpkg.com/php-wasm-libicu/php\${PHP_VERSION}-intl.so`];
 
 const files = [
     {
@@ -652,9 +652,9 @@ const SERVICE_WORKER_SCRIPT_URL = '/cgi-worker.mjs';
 
 navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL);
 
-const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
-
 navigator.serviceWorker.addEventListener('message', onMessage);
+
+const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
 
 const result = await sendMessage(methodName, [param, param, param]);
 ```

@@ -1,0 +1,11 @@
+name = Color
+description = Allows administrators to change the color scheme of compatible themes.
+package = Core
+version = VERSION
+core = 7.x
+files[] = color.test
+
+; Information added by Drupal.org packaging script on 2023-03-15
+version = "7.95"
+project = "drupal"
+datestamp = "1678902530"

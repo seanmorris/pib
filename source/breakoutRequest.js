@@ -30,6 +30,16 @@ export const breakoutRequest = request => {
 			buffer => [...new Uint8Array(buffer)].map(x => String.fromCharCode(x)).join('')
 		);
 	}
+	else if(request.on)
+	{
+		getPost = new Promise(accept => {
+			let body = [];
+			request.on('data', chunk => body.push(chunk));
+			request.on('end', () => accept(
+				[...new Uint8Array(Buffer.concat(body))].map(x => String.fromCharCode(x)).join(''))
+			);
+		});
+	}
 
 	const url = new URL(request.url);
 
@@ -39,7 +49,7 @@ export const breakoutRequest = request => {
 		, get: url.search ? url.search.substr(1) : ''
 		, post: request.method === 'POST' ? post : null
 		, contentType: request.method === 'POST'
-			? (request.headers.get('Content-Type') ?? 'application/x-www-form-urlencoded')
+			? (request.headers && (request.headers.get('Content-Type')) || 'application/x-www-form-urlencoded')
 			: null
 	}));
 };

@@ -179,7 +179,7 @@ export class PhpCgiBase
 			}
 			if(urlLibs[path])
 			{
-				return urlLibs[path];
+				return String(urlLibs[path]);
 			}
 		};
 
@@ -204,18 +204,27 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
-			this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
-				fileDef.parent, fileDef.name, fileDef.url, true, false
-			));
+			if(!php.FS.analyzePath('/preload').exists)
+			{
+				php.FS.mkdir('/preload');
+			}
+
+			await this.files.concat(files).forEach(
+				fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false)
+			);
 
 			const iniLines = libs.map(lib => {
-				if(typeof lib === 'string')
+				if(typeof lib === 'string' || lib instanceof URL)
 				{
 					return `extension=${lib}`;
 				}
+				else if(typeof lib === 'object' && lib.ini)
+				{
+					return `extension=${String(lib.url).split('/').pop()}`;
+				}
 			});
 
-			args.ini && iniLines.push(args.ini.replace(/\n\s+/g, '\n'));
+			this.phpArgs.ini && iniLines.push(this.phpArgs.ini.replace(/\n\s+/g, '\n'));
 
 			php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 
@@ -249,19 +258,22 @@ export class PhpCgiBase
 			, contentType
 		} = await breakoutRequest(request);
 
-		const cache  = await caches.open('static-v1');
-		const cached = await cache.match(url);
-
-		// this.maxRequestAge
-
-		if(cached)
+		if(globalThis.caches)
 		{
-			const cacheTime = Number(cached.headers.get('x-php-wasm-cache-time'));
+			const cache  = await caches.open('static-v1');
+			const cached = await cache.match(url);
 
-			if(this.staticCacheTime > 0 && this.staticCacheTime > Date.now() - cacheTime)
+			// this.maxRequestAge
+
+			if(cached)
 			{
-				this.onRequest(request, cached);
-				return cached;
+				const cacheTime = Number(cached.headers.get('x-php-wasm-cache-time'));
+
+				if(this.staticCacheTime > 0 && this.staticCacheTime > Date.now() - cacheTime)
+				{
+					this.onRequest(request, cached);
+					return cached;
+				}
 			}
 		}
 
@@ -321,7 +333,11 @@ export class PhpCgiBase
 				{
 					response.headers.append('Content-type', this.types[extension]);
 				}
-				cache.put(url, response.clone());
+				if(globalThis.caches)
+				{
+					const cache  = await caches.open('static-v1');
+					cache.put(url, response.clone());
+				}
 				this.onRequest(request, response);
 				return response;
 			}
@@ -361,7 +377,7 @@ export class PhpCgiBase
 		this.output = [];
 		this.error  = [];
 
-		const selfUrl = new URL(globalThis.location);
+		const selfUrl = new URL(globalThis.location || request.url);
 
 		putEnv(php, 'PHP_VERSION', phpVersion);
 		putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
@@ -372,7 +388,7 @@ export class PhpCgiBase
 			putEnv(php, name, value);
 		}
 
-		putEnv(php, 'SERVER_SOFTWARE', navigator.userAgent);
+		putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
 		putEnv(php, 'REQUEST_METHOD', method);
 		putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
 		putEnv(php, 'HTTP_HOST', selfUrl.host);
@@ -457,9 +473,11 @@ export class PhpCgiBase
 			this.cookies.set(key, value,);
 		}
 
-		const headers = {
-			'Content-Type': parsedResponse.headers["Content-Type"] ?? 'text/html; charset=utf-8'
-		};
+		const headers = {...parsedResponse.headers};
+
+		// delete headers['Set-Cookie'];
+
+		headers["Content-type"] = headers["Content-type"] ?? 'text/html; charset=utf-8';
 
 		if(parsedResponse.headers.Location)
 		{

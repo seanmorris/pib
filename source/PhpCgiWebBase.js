@@ -76,23 +76,6 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 		this.binary = navigator.locks.request('php-wasm-fs-lock', async () => {
 
-			const php = await new this.PHP(phpArgs);
-
-			this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
-				fileDef.parent, fileDef.name, fileDef.url, true, false
-			));
-
-			const iniLines = libs.map(lib => {
-				if(typeof lib === 'string')
-				{
-					return `extension=${lib}`;
-				}
-			});
-
-			this.phpArgs.ini && iniLines.push(this.phpArgs.ini.replace(/\n\s+/g, '\n'));
-
-			php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
-
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -100,6 +83,30 @@ export class PhpCgiWebBase extends PhpCgiBase
 				, []
 				, {async: true}
 			);
+
+			if(!php.FS.analyzePath('/preload').exists)
+			{
+				php.FS.mkdir('/preload');
+			}
+
+			await this.files.concat(files).forEach(
+				fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false)
+			);
+
+			const iniLines = libs.map(lib => {
+				if(typeof lib === 'string' || lib instanceof URL)
+				{
+					return `extension=${lib}`;
+				}
+				else if(typeof lib === 'object' && lib.ini)
+				{
+					return `extension=${String(lib.url).split('/').pop()}`;
+				}
+			});
+
+			this.phpArgs.ini && iniLines.push(this.phpArgs.ini.replace(/\n\s+/g, '\n'));
+
+			php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {encoding: 'utf8'});
 
 			await new Promise((accept, reject) => {
 				php.FS.syncfs(true, error => {

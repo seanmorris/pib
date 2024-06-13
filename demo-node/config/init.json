@@ -1,0 +1,16 @@
+{
+    "settings": {
+        "docroot": "/persist/www",
+        "maxRequestAge": 0,
+        "staticCacheTime": 60000,
+        "dynamicCacheTime": 0,
+        "vHosts": [
+            {
+                "pathPrefix": "/php-wasm/cgi-bin/drupal",
+                "directory": "/persist/drupal-7.95",
+                "entrypoint": "index.php"
+            }
+        ]
+    },
+    "env": {}
+}

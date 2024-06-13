@@ -1,0 +1,11 @@
+name = Anonymous user unblock action tests
+description = Support module for anonymous user unblock action testing.
+package = Testing
+version = VERSION
+core = 7.x
+hidden = TRUE
+
+; Information added by Drupal.org packaging script on 2023-03-15
+version = "7.95"
+project = "drupal"
+datestamp = "1678902530"

@@ -1,0 +1,11 @@
+name = PSR-4 Test cases
+description = Test classes to be discovered by simpletest.
+core = 7.x
+
+hidden = TRUE
+package = Testing
+
+; Information added by Drupal.org packaging script on 2023-03-15
+version = "7.95"
+project = "drupal"
+datestamp = "1678902530"
