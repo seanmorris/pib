@@ -1212,27 +1212,14 @@ __webpack_require__.r(__webpack_exports__);
 /* eslint-disable no-restricted-globals */
 
 
-// import zlib from 'https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d';
-// import libzip from 'https://cdn.jsdelivr.net/npm/php-wasm-libzip@0.0.9-c';
-// import iconv from 'https://cdn.jsdelivr.net/npm/php-wasm-iconv@0.0.9-f';
-// import libicu from 'https://cdn.jsdelivr.net/npm/php-wasm-libicu@0.0.9-r';
-// import sqlite from 'https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-s';
-// import freetype from 'https://cdn.jsdelivr.net/npm/php-wasm-freetype@0.0.9-c';
-// import libpng from 'https://cdn.jsdelivr.net/npm/php-wasm-libpng@0.0.9-h';
-// import libjpeg from 'https://cdn.jsdelivr.net/npm/php-wasm-libjpeg@0.0.9-c';
-// import libxml from 'https://cdn.jsdelivr.net/npm/php-wasm-libxml@0.0.9-h';
-// import gd from 'https://cdn.jsdelivr.net/npm/php-wasm-gd@0.0.9-c';
-// import openssl from 'https://cdn.jsdelivr.net/npm/php-wasm-openssl@0.0.9-e';
-// import phar from 'https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b';
-// import tidy from 'https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d';
-// import yaml from 'https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f';
-
 // Log requests
 const onRequest = (request, response) => {
   const url = new URL(request.url);
   const logLine = `[${new Date().toISOString()}]` + `#${php.count} 127.0.0.1 - "${request.method}` + ` ${url.pathname}" - HTTP/1.1 ${response.status}`;
   console.log(logLine);
 };
+
+// Formatted 404s
 const notFound = request => {
   return new Response(`<body><h1>404</h1>${request.url} not found</body>`, {
     status: 404,
@@ -1241,22 +1228,7 @@ const notFound = request => {
     }
   });
 };
-const sharedLibs = [`php\${PHP_VERSION}-zlib.so`, `php\${PHP_VERSION}-zip.so`, `php\${PHP_VERSION}-iconv.so`, `php\${PHP_VERSION}-intl.so`, `php\${PHP_VERSION}-openssl.so`, `php\${PHP_VERSION}-dom.so`, `php\${PHP_VERSION}-mbstring.so`, `php\${PHP_VERSION}-sqlite.so`, `php\${PHP_VERSION}-pdo-sqlite.so`
-// zlib
-// , libzip
-// , iconv
-// , libicu
-// , sqlite
-// , freetype
-// , libpng
-// , libjpeg
-// , libxml
-// , gd
-// , openssl
-// , phar
-// , tidy
-// , yaml
-];
+const sharedLibs = [`php\${PHP_VERSION}-zlib.so`, `php\${PHP_VERSION}-zip.so`, `php\${PHP_VERSION}-gd.so`, `php\${PHP_VERSION}-iconv.so`, `php\${PHP_VERSION}-intl.so`, `php\${PHP_VERSION}-openssl.so`, `php\${PHP_VERSION}-dom.so`, `php\${PHP_VERSION}-mbstring.so`, `php\${PHP_VERSION}-sqlite.so`, `php\${PHP_VERSION}-pdo-sqlite.so`, `php\${PHP_VERSION}-xml.so`, `php\${PHP_VERSION}-simplexml.so`];
 const files = [{
   parent: '/preload/',
   name: 'icudt72l.dat',

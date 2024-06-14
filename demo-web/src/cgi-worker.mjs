@@ -22,6 +22,7 @@ const notFound = request => {
 const sharedLibs = [
 	`php\${PHP_VERSION}-zlib.so`,
 	`php\${PHP_VERSION}-zip.so`,
+	`php\${PHP_VERSION}-gd.so`,
 	`php\${PHP_VERSION}-iconv.so`,
 	`php\${PHP_VERSION}-intl.so`,
 	`php\${PHP_VERSION}-openssl.so`,
@@ -29,6 +30,8 @@ const sharedLibs = [
 	`php\${PHP_VERSION}-mbstring.so`,
 	`php\${PHP_VERSION}-sqlite.so`,
 	`php\${PHP_VERSION}-pdo-sqlite.so`,
+	`php\${PHP_VERSION}-xml.so`,
+	`php\${PHP_VERSION}-simplexml.so`,
 ];
 
 const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }];
