@@ -1,21 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 
-// import zlib from 'https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d';
-// import libzip from 'https://cdn.jsdelivr.net/npm/php-wasm-libzip@0.0.9-c';
-// import iconv from 'https://cdn.jsdelivr.net/npm/php-wasm-iconv@0.0.9-f';
-// import libicu from 'https://cdn.jsdelivr.net/npm/php-wasm-libicu@0.0.9-r';
-// import sqlite from 'https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-s';
-// import freetype from 'https://cdn.jsdelivr.net/npm/php-wasm-freetype@0.0.9-c';
-// import libpng from 'https://cdn.jsdelivr.net/npm/php-wasm-libpng@0.0.9-h';
-// import libjpeg from 'https://cdn.jsdelivr.net/npm/php-wasm-libjpeg@0.0.9-c';
-// import libxml from 'https://cdn.jsdelivr.net/npm/php-wasm-libxml@0.0.9-h';
-// import gd from 'https://cdn.jsdelivr.net/npm/php-wasm-gd@0.0.9-c';
-// import openssl from 'https://cdn.jsdelivr.net/npm/php-wasm-openssl@0.0.9-e';
-// import phar from 'https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b';
-// import tidy from 'https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d';
-// import yaml from 'https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f';
-
 // Log requests
 const onRequest = (request, response) => {
 	const url = new URL(request.url);
@@ -26,6 +11,7 @@ const onRequest = (request, response) => {
 	console.log(logLine);
 };
 
+// Formatted 404s
 const notFound = request => {
 	return new Response(
 		`<body><h1>404</h1>${request.url} not found</body>`,
@@ -43,27 +29,14 @@ const sharedLibs = [
 	`php\${PHP_VERSION}-mbstring.so`,
 	`php\${PHP_VERSION}-sqlite.so`,
 	`php\${PHP_VERSION}-pdo-sqlite.so`,
-	// zlib
-	// , libzip
-	// , iconv
-	// , libicu
-	// , sqlite
-	// , freetype
-	// , libpng
-	// , libjpeg
-	// , libxml
-	// , gd
-	// , openssl
-	// , phar
-	// , tidy
-	// , yaml
 ];
 
 const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }];
 
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({
-	onRequest, notFound, sharedLibs, files
+	onRequest, notFound
+	, sharedLibs, files
 	, prefix: '/php-wasm/cgi-bin/'
 	, docroot: '/persist/www'
 	, types: {

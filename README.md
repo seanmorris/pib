@@ -8,21 +8,20 @@ _PHP in WebAssembly, npm not required._
 
 find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
 
-## 🌟 v0.0.9 - Aiming for the Stars
+## 🌟 v0.0.9 - Aiming for the (GitHub) Stars
 
 * Adding PHP-CGI support!
 * Runtime extension loading!
 * libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
 * Implemented an httpd-like CGI wrapper.
-* New "cgi" option for custom builds.
 * php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
 * Modules are now webpack-compatible out of the box.
-* Corrected a bug preventing custom in-place builds.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
-* Fixed the bug preventing POST requests from working under FireFox.
+* Fixed the bug with POST requests under FireFox.
 * Adding support for PHP 8.3.7
+* Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -48,26 +47,26 @@ $ npm i php-wasm-builder
 ### [[React + php-web/php-cgi-worker demo](https://seanmorris.github.io/php-wasm/)]
 
 <table>
- <tr>
-    <td width = "500px">
-        <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=drupal-7">Drupal Demo</a>
-    </td>
-    <td width = "500px">
-        <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=cakephp-5">CakePHP Demo</a>
-    </td>
-    <td width = "500px">
-        <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=codeigniter-4">CodeIgniter Demo</a>
-    </td>
-    <td width = "500px">
-        <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laravel-11">Laravel Demo</a>
-    </td>
-    <td width = "500px">
-        <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laminas-3">Laminas Demo</a>
-    </td>
-    <td width = "500px">
-        <a href = "https://seanmorris.github.io/php-wasm/code-editor.html?path=/persist">Code Editor</a>
-    </td>
-</tr>
+    <tr>
+        <td width = "500px">
+            <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=drupal-7">Drupal Demo</a>
+        </td>
+        <td width = "500px">
+            <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=cakephp-5">CakePHP Demo</a>
+        </td>
+        <td width = "500px">
+            <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=codeigniter-4">CodeIgniter Demo</a>
+        </td>
+        <td width = "500px">
+            <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laravel-11">Laravel Demo</a>
+        </td>
+        <td width = "500px">
+            <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laminas-3">Laminas Demo</a>
+        </td>
+        <td width = "500px">
+            <a href = "https://seanmorris.github.io/php-wasm/code-editor.html?path=/persist">Code Editor</a>
+        </td>
+    </tr>
 </table>
 
 <table>
@@ -143,7 +142,7 @@ self.addEventListener('fetch',    event => php.handleFetchEvent(event));
 self.addEventListener('message',  event => php.handleMessageEvent(event));
 ```
 
-You can see examples of php-cgi-wasm running in a service worker and nodejs in `demo-web/src/cgi-worker.mjs` & `demo-node/index.mjs` respectively.
+You can see examples of php-cgi-wasm running in a service worker and nodejs in [`demo-web/src/cgi-worker.mjs`](demo-web/src/cgi-worker.mjs) & [`demo-node/index.mjs`](demo-node/index.mjs) respectively.
 
 ***Note:*** `php-cgi-wasm` & `php-wasm` are separate packages. One "embeds" php right into your javascript, the other runs in "cgi-mode," just like php would under apache or nginx.
 
@@ -198,14 +197,12 @@ If you're using a bundler, use the vendor's documentation to learn how to move t
 ```bash
 node_modules/php-wasm/php-web.mjs.wasm
 node_modules/php-wasm/php-worker.mjs.wasm # ONLY if you're running the standard build in a worker
-node_modules/php-wasm/php.data            # ONLY if your build has a preload FS associated with it
 ```
 
 For php-cgi-wasm:
 ```bash
-./node_modules/php-cgi-wasm/php-cgi-worker.mjs.wasm
-./node_modules/php-cgi-wasm/php-cgi-web.mjs.wasm # ONLY if you're running the cgi build in a page
-./node_modules/php-cgi-wasm/php.data             # ONLY if your build has a preload FS associated with it
+node_modules/php-cgi-wasm/php-cgi-worker.mjs.wasm
+node_modules/php-cgi-wasm/php-cgi-web.mjs.wasm # ONLY if you're running the cgi build in a page
 ```
 
 ## 🍎 Quickstart

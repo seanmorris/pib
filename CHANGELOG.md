@@ -2,19 +2,17 @@
 
 Changes
 
-## v0.0.9 - Aiming for the Stars
+## v0.0.9 - Aiming for the (GitHub) Stars
 
 * Adding PHP-CGI support!
 * Implemented an httpd-like CGI wrapper.
 * libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
-* New "cgi" option for custom builds.
-* php-wasm, php-cgi-wasm, & php-wasm builder are now separate packages.
+* php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
 * Modules are now webpack-compatible out of the box.
-* Corrected a bug preventing custom in-place builds.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
-* Fixed the bug preventing POST requests from working under FireFox.
+* Fixed the bug with POST requests under FireFox.
 * Adding support for PHP 8.3.7
 * Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
 
