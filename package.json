@@ -19,7 +19,7 @@
 		"php-wasm-libicu": "^0.0.9-s",
 		"php-wasm-libjpeg": "^0.0.9-c",
 		"php-wasm-libpng": "^0.0.9-h",
-		"php-wasm-libxml": "^0.0.9-i",
+		"php-wasm-libxml": "^0.0.9-j",
 		"php-wasm-libzip": "^0.0.9-d",
 		"php-wasm-oniguruma": "^0.0.9-c",
 		"php-wasm-openssl": "^0.0.9-f",
