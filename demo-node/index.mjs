@@ -26,7 +26,7 @@ const php = new PhpCgiNode({
 	}
 });
 
-console.log('Open "http://localhost:3003/php-wasm/cgi-bin" in your browser...');
+console.error('Open "\x1b[33mhttp://localhost:3003/php-wasm/cgi-bin\x1b[0m" in your browser...');
 
 const server = http.createServer(async (request, response) => {
 	const result = await php.request(request);

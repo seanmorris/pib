@@ -2,6 +2,7 @@
 	<head>
 		<style>
 			body {
+				font-family: sans;
 				display: flex;
 				flex-direction: column;
 				justify-content: center;
