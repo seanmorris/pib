@@ -994,6 +994,8 @@ If compiles as `static` or `shared`, it will also add `/preload/icudt72l.dat` to
 
 ## 🤝 php-wasm started as a fork of oraoto/PIB...
 
+The repository [pib-legacy](https://github.com/seanmorris/pib-legacy) was created to preserve the original state of the project.
+
 https://github.com/oraoto/pib
 
 ## 🍻 Licensed under the Apache License, Version 2.0
