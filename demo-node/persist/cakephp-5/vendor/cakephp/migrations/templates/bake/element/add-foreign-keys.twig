@@ -1,0 +1,39 @@
+{% set statement = Migration.tableStatement(table, true) %}
+{% set hasProcessedConstraint = false %}
+{% for constraintName, constraint in constraints %}
+{%     set constraintColumns = constraint['columns']|sort %}
+{%     if constraint['type'] != 'unique' %}
+{%         set hasProcessedConstraint = true %}
+{%         set columnsList = '\'' ~ constraint['columns'][0] ~ '\'' %}
+{%         if constraint['columns']|length > 1 %}
+{%             set columnsList = '[' ~ Migration.stringifyList(constraint['columns'], {'indent': 5}) ~ ']' %}
+{%         endif %}
+{%         set record = Migration.storeReturnedData(table, columnsList) %}
+{%         if constraint['references'][1] is iterable %}
+{%             set columnsReference = '[' ~ Migration.stringifyList(constraint['references'][1], {'indent': 5}) ~ ']' %}
+{%         else %}
+{%             set columnsReference = '\'' ~ constraint['references'][1] ~ '\'' %}
+{%         endif %}
+{%         if statement is not defined %}
+{%             set statement = Migration.tableStatement(table) %}
+{%         endif %}
+{%         if statement is not empty %}
+
+        {{ statement | raw }}
+{%             set statement = null %}
+{%         endif %}
+            ->addForeignKey(
+                {{ columnsList  | raw }},
+                '{{ constraint['references'][0] }}',
+                {{ columnsReference | raw }},
+                [
+                    'update' => '{{ Migration.formatConstraintAction(constraint['update']) | raw }}',
+                    'delete' => '{{ Migration.formatConstraintAction(constraint['delete']) | raw }}',
+                    'constraint' => '{{ constraintName }}'
+                ]
+            )
+{%     endif %}
+{% endfor %}
+{% if Migration.wasTableStatementGeneratedFor(table) and hasProcessedConstraint %}
+            ->update();
+{% endif -%}

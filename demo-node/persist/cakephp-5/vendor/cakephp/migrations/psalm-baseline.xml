@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.20.0@3f284e96c9d9be6fe6b15c79416e1d1903dcfef4">
+  <file src="src/Command/Phinx/Create.php">
+    <PossiblyUndefinedArrayOffset>
+      <code>$phinxName</code>
+    </PossiblyUndefinedArrayOffset>
+  </file>
+  <file src="src/Command/Phinx/Seed.php">
+    <PossiblyNullReference>
+      <code>setInput</code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/TableFinderTrait.php">
+    <PossiblyUndefinedArrayOffset>
+      <code>$split[0]</code>
+      <code>$splitted[0]</code>
+    </PossiblyUndefinedArrayOffset>
+  </file>
+  <file src="src/Util/ColumnParser.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseColumn]]></code>
+      <code><![CDATA[$this->regexpParseField]]></code>
+    </ArgumentTypeCoercion>
+    <TypeDoesNotContainType>
+      <code>empty($indexes[$indexName])</code>
+    </TypeDoesNotContainType>
+  </file>
+</files>

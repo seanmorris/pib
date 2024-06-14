@@ -1,0 +1,4 @@
+<?php
+declare(strict_types=1);
+{{- namespace ? "\n\nnamespace #{namespace};" : '' }}
+{{- Bake.concat('\n', [Bake.classUses(classImports ?? []), Bake.functionUses(functionImports ?? []), Bake.constUses(constImports ?? [])], '\n\n') }}

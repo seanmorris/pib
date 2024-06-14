@@ -1,0 +1,75 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         3.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+{% set constraints = [] %}
+{% set foreignKeys = [] %}
+{% set dropForeignKeys = [] %}
+{% if autoId and Migration.hasAutoIdIncompatiblePrimaryKey(tables) %}
+{%     set autoId = false %}
+{% endif %}
+<?php
+declare(strict_types=1);
+
+use Migrations\AbstractMigration;
+
+class {{ name }} extends AbstractMigration
+{
+{% if not autoId  %}
+    public bool $autoId = false;
+
+{% endif %}
+    /**
+     * Up Method.
+     *
+     * More information on this method is available here:
+     * https://book.cakephp.org/phinx/0/en/migrations.html#the-up-method
+     * @return void
+     */
+    public function up(): void
+    {
+{{~ element('Migrations.create-tables', {
+    tables: tables,
+    autoId: autoId,
+    useSchema: false
+})
+}}    }
+
+    /**
+     * Down Method.
+     *
+     * More information on this method is available here:
+     * https://book.cakephp.org/phinx/0/en/migrations.html#the-down-method
+     * @return void
+     */
+    public function down(): void
+    {
+{%  set returnedData = Migration.getReturnedData() %}
+{%  if returnedData and returnedData['dropForeignKeys'] is not empty %}
+{%      for table, columnsList in Migration.returnedData['dropForeignKeys'] %}
+{%          set maxKey = columnsList|length - 1 %}
+        $this->table('{{ table }}')
+{%          for key, columns in columnsList %}
+            ->dropForeignKey(
+                {{ columns|raw }}
+            ){{ (key == maxKey) ? '->save();' : '' }}
+{%          endfor %}
+
+{%      endfor %}
+{%  endif %}
+{%      for table in tables %}
+        $this->table('{{ table }}')->drop()->save();
+{%      endfor %}
+    }
+}

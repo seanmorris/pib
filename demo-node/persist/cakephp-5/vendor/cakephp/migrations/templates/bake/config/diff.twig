@@ -1,0 +1,209 @@
+{#
+/**
+* CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+* Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+*
+* Licensed under The MIT License
+* For full copyright and license information, please see the LICENSE.txt
+* Redistributions of files must retain the above copyright notice.
+*
+* @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+* @link          https://cakephp.org CakePHP(tm) Project
+* @since         3.0.0
+* @license       https://www.opensource.org/licenses/mit-license.php MIT License
+*/
+#}
+{% set tables = data['fullTables'] %}
+{# unset($data['fullTables']) #}
+{% set constraints = [] %}
+{% set autoId = not Migration.hasAutoIdIncompatiblePrimaryKey(tables['add'] + tables['remove']) %}
+<?php
+declare(strict_types=1);
+
+use Migrations\AbstractMigration;
+
+class {{ name }} extends AbstractMigration
+{
+{% if not autoId %}
+    public bool $autoId = false;
+
+{% endif %}
+    /**
+     * Up Method.
+     *
+     * More information on this method is available here:
+     * https://book.cakephp.org/phinx/0/en/migrations.html#the-up-method
+     * @return void
+     */
+    public function up(): void
+    {
+{%    for tableName, tableDiff in data %}
+{%        set hasRemoveFK = tableDiff['constraints']['remove'] is not empty or tableDiff['indexes']['remove'] is
+not empty %}
+{%        if hasRemoveFK %}
+        $this->table('{{ tableName }}')
+{%        endif %}
+{%        if tableDiff['constraints']['remove'] is not empty %}
+{%            for constraintName, constraintDefinition in tableDiff['constraints']['remove'] %}
+            ->dropForeignKey([], '{{ constraintName }}')
+{%            endfor %}
+{%        endif %}
+{%        if tableDiff['indexes']['remove'] is not empty %}
+{%            for indexName, indexDefinition in tableDiff['indexes']['remove'] %}
+            ->removeIndexByName('{{ indexName  }}')
+{%            endfor %}
+{%        endif %}
+{%        if hasRemoveFK %}
+            ->update();
+{%        endif %}
+{%        if tableDiff['columns']['remove'] is not empty or tableDiff['columns']['changed'] is not empty %}
+
+        {{ Migration.tableStatement(tableName, true) | raw }}
+{%            if tableDiff['columns']['remove'] is not empty  %}
+{%                for columnName, columnDefinition in tableDiff['columns']['remove'] %}
+            ->removeColumn('{{ columnName }}')
+{%                endfor %}
+{%            endif %}
+{%            if tableDiff['columns']['changed'] is not empty  %}
+{%                for columnName, columnAttributes in tableDiff['columns']['changed'] %}
+{%                    set type = columnAttributes['type'] %}
+{%                    set columnAttributes = Migration.getColumnOption(columnAttributes) %}
+{%                    set columnAttributes = Migration.stringifyList(columnAttributes, {'indent': 4, 'remove':
+    ['type']}) %}
+            ->changeColumn('{{ columnName }}', '{{ type }}', [{{ columnAttributes | raw }}])
+{%                endfor %}
+{%            endif -%}
+{%            if Migration.wasTableStatementGeneratedFor(tableName) %}
+            ->update();
+{%            endif %}
+{%        endif %}
+{%    endfor %}
+{%    if tables['add'] is not empty %}
+{{        Migration.element('Migrations.create-tables', {'tables': tables['add'], 'autoId': autoId, 'useSchema':
+    true}) | raw -}}
+{%    endif %}
+{%    for tableName, tableDiff in data  %}
+{%        if tableDiff['columns']['add'] is not empty or tableDiff['indexes']['add'] is not empty %}
+
+        {{ Migration.tableStatement(tableName, true) | raw }}
+{%            if tableDiff['columns']['add'] is not empty %}
+{{                Migration.element('Migrations.add-columns', {'columns': tableDiff['columns']['add']}) | raw -}}
+{%            endif -%}
+{%            if tableDiff['indexes']['add'] is not empty %}
+{{                Migration.element('Migrations.add-indexes', {'indexes': tableDiff['indexes']['add']}) | raw -}}
+{%            endif -%}
+{%            if Migration.wasTableStatementGeneratedFor(tableName) %}
+            ->update();
+{%            endif -%}
+{%        endif -%}
+{%    endfor -%}
+{%    for tableName, tableDiff in data -%}
+{%        if tableDiff['constraints']['add'] is not empty -%}
+
+{{ Migration.element(
+                'Migrations.add-foreign-keys',
+                {'constraints': tableDiff['constraints']['add'], 'table': tableName}
+            ) | raw -}}
+{%        endif -%}
+{%    endfor -%}
+{%    if tables['remove'] is not empty %}
+{%       for tableName, table in tables['remove'] %}
+
+        $this->table('{{ tableName }}')->drop()->save();
+{%        endfor %}
+{%     endif %}
+    }
+
+    /**
+     * Down Method.
+     *
+     * More information on this method is available here:
+     * https://book.cakephp.org/phinx/0/en/migrations.html#the-down-method
+     * @return void
+     */
+    public function down(): void
+    {
+{%  set returnedData = Migration.getReturnedData() %}
+{%  set constraints = [] %}
+{%  set emptyLine = false %}
+{%  if returnedData['dropForeignKeys'] is not empty %}
+{%      for table, columnsList in returnedData['dropForeignKeys'] %}
+{%              set maxKey = columnsList | length - 1 %}
+{%              if emptyLine %}
+
+{%              else %}
+{%                 set emptyLine = true %}
+{%              endif %}
+        $this->table('{{ table }}')
+{%              for key, columns in columnsList %}
+            ->dropForeignKey(
+                {{ columns | raw }}
+            ){{ (key == maxKey) ? '->save();' : '' }}
+{%              endfor -%}
+{%      endfor -%}
+{%  endif -%}
+{%  if tables['remove'] is not empty -%}
+{{      Migration.element('Migrations.create-tables', {
+          'tables': tables['remove'],
+          'autoId': autoId,
+          'useSchema': true
+        }) |  raw -}}
+{%  endif -%}
+{%  for tableName, tableDiff in data -%}
+{%  do Migration.resetTableStatementGenerationFor(tableName) %}
+{%      if tableDiff['indexes']['add'] is not empty %}
+
+        $this->table('{{ tableName }}')
+{%          for indexName, index in tableDiff['indexes']['add'] %}
+            ->removeIndexByName('{{ indexName }}')
+{%          endfor %}
+            ->update();
+{%      endif %}
+{%      if (tableDiff['columns']['remove'] is not empty or
+            tableDiff['columns']['changed'] is not empty or
+            tableDiff['columns']['add'] is not empty or
+            tableDiff['indexes']['remove'] is not empty) %}
+
+        {{ Migration.tableStatement(tableName, true) | raw}}
+{%      endif %}
+{%      if tableDiff['columns']['remove'] is not empty -%}
+{{          Migration.element('Migrations.add-columns', {'columns': tableDiff['columns']['remove']}) | raw -}}
+{%      endif -%}
+{%      if tableDiff['columns']['changed'] is not empty -%}
+{%          set oldTableDef = dumpSchema[tableName] -%}
+{%          for columnName, columnAttributes in tableDiff['columns']['changed'] -%}
+{%              set columnAttributes = oldTableDef.getColumn(columnName) -%}
+{%              set type = columnAttributes['type'] -%}
+{%              set columnAttributes = Migration.getColumnOption(columnAttributes) -%}
+{%              set columnAttributes = Migration.stringifyList(columnAttributes, {'indent': 4, 'remove': ['type']}) %}
+            ->changeColumn('{{ columnName }}', '{{ type }}', [{{ columnAttributes | raw }}])
+{%          endfor -%}
+{%      endif -%}
+{%      if tableDiff['columns']['add'] is not empty %}
+{%          for columnName, columnAttributes in tableDiff['columns']['add'] %}
+            ->removeColumn('{{ columnName }}')
+{%          endfor -%}
+{%      endif -%}
+{%      if tableDiff['indexes']['remove'] is not empty -%}
+{{         Migration.element('Migrations.add-indexes', {'indexes': tableDiff['indexes']['remove']}) | raw -}}
+{%      endif -%}
+{%      if Migration.wasTableStatementGeneratedFor(tableName) %}
+            ->update();
+{%      endif %}
+{%  endfor %}
+{%  for tableName, tableDiff in data  %}
+{%      if tableDiff['constraints']['remove'] is not empty %}
+{{          Migration.element(
+                'Migrations.add-foreign-keys',
+                {'constraints': tableDiff['constraints']['remove'], 'table': tableName}
+            ) | raw -}}
+{%      endif %}
+{%  endfor %}
+{%  if tables['add'] is not empty %}
+
+{%      for tableName, table in tables['add'] %}
+        $this->table('{{ tableName }}')->drop()->save();
+{%      endfor %}
+{%  endif %}
+    }
+}

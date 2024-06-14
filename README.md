@@ -190,16 +190,16 @@ const php = new PhpWeb;
 If you're using a bundler, use the vendor's documentation to learn how to move the files matching the following pattern to your public directory:
 
 ```bash
-./node_modules/php-wasm/php-web.wasm
-./node_modules/php-wasm/php.data        # ONLY if your build has a preload FS associated with it
-./node_modules/php-wasm/php-worker.wasm # ONLY if you're running the standard build in a worker
+node_modules/php-wasm/php-web.mjs.wasm
+node_modules/php-wasm/php-worker.mjs.wasm # ONLY if you're running the standard build in a worker
+node_modules/php-wasm/php.data            # ONLY if your build has a preload FS associated with it
 ```
 
 For php-cgi-wasm:
 ```bash
-./node_modules/php-cgi-wasm/php-cgi-worker.wasm
-./node_modules/php-cgi-wasm/php.data         # ONLY if your build has a preload FS, this can be renamed at build-time if need be.
-./node_modules/php-cgi-wasm/php-cgi-web.wasm # ONLY if you're running the cgi build in a page
+./node_modules/php-cgi-wasm/php-cgi-worker.mjs.wasm
+./node_modules/php-cgi-wasm/php-cgi-web.mjs.wasm # ONLY if you're running the cgi build in a page
+./node_modules/php-cgi-wasm/php.data             # ONLY if your build has a preload FS associated with it
 ```
 
 ## 🍎 Quickstart
@@ -490,6 +490,18 @@ These files & directories will be available under `/preload` in the final packag
 
 ```bash
 PRELOAD_ASSETS='/path/to/file.txt /some/directory /path/to/other_file.txt /some/other/directory'
+```
+
+### locateFile
+
+You can provide the `locateFile` option to php-wasm as a callback to map the names of files to URLs where they're loaded from. `undefined` can be returned as a fallback to default.
+
+You can use this if your static assets are served from a different directory than your javascript.
+
+This applies to `.wasm` files, shared libraries, single files and preloaded FS packages in `.data` files.
+
+```javascript
+const php = new PhpWeb({locateFile: filename => `/my/static/path/${filename}`});
 ```
 
 ## 💾 Persistent Storage (IDBFS & NodeFS)

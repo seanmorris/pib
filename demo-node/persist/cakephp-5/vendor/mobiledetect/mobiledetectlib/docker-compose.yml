@@ -1,0 +1,55 @@
+services:
+  setup:
+    image: composer:latest
+    command: >
+      /bin/sh -c "
+      rm -rf vendor && 
+      rm -f composer.lock composer.phar &&
+      set -xe && composer install &&
+      composer -v &&
+      ls -al"
+    working_dir: /app
+    volumes:
+      - .:/app
+
+  runUnitTests:
+    depends_on: ['setup']
+    image: php:8.3-rc-alpine3.18
+    working_dir: /app
+    command: >
+      /bin/sh -c "vendor/bin/phpunit -v -c tests/phpunit.xml --coverage-text --strict-coverage --stop-on-risky"
+    volumes:
+      - .:/app
+
+  runPerfTests:
+    depends_on: ['setup']
+    image: php:8.3-rc-alpine3.18
+    working_dir: /app
+    command: >
+      /bin/sh -c "vendor/bin/phpbench run tests/Benchmark/MobileDetectBench.php --retry-threshold=1 --iterations=10 --revs=1000 --report=aggregate"
+    volumes:
+      - .:/app
+
+  runLinting:
+    depends_on: ['setup']
+    image: php:8.3-rc-alpine3.18
+    working_dir: /app
+    command: >
+      /bin/sh -c "vendor/bin/phpcs; vendor/bin/phpcbf"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+  generateModel:
+    depends_on: ['setup', 'runUnitTests', 'runPerfTests', 'runLinting']
+    image: php:8.3-rc-alpine3.18
+    working_dir: /app
+    command: >
+      /bin/sh -c "php ./scripts/export_to_json.php"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+

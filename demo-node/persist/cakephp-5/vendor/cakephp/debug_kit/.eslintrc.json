@@ -1,0 +1,26 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "jquery": true
+    },
+    "extends": [
+        "airbnb-base"
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "rules": {
+        "strict": 0,
+        "max-len": ["error", { "code": 150 }],
+        "no-underscore-dangle":  ["error", {
+            "allow": ["__cakeDebugBlockInit", "_arguments"]
+        }],
+        "import/extensions": [0, { "<js>": "always" }],
+        "no-param-reassign": 0,
+        "no-plusplus": 0,
+        "class-methods-use-this": 0,
+        "prefer-rest-params": 0
+    }
+}

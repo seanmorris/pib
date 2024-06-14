@@ -1,0 +1,41 @@
+{
+    "name": "doctrine/sql-formatter",
+    "description": "a PHP SQL highlighting library",
+    "homepage": "https://github.com/doctrine/sql-formatter/",
+    "keywords": ["sql", "highlight"],
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^7.1 || ^8.0"
+    },
+    "require-dev": {
+        "bamarni/composer-bin-plugin": "^1.4"
+    },
+    "authors": [
+        {
+            "name": "Jeremy Dorn",
+            "email": "jeremy@jeremydorn.com",
+            "homepage": "https://jeremydorn.com/"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Doctrine\\SqlFormatter\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Doctrine\\SqlFormatter\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        },
+        "sort-packages": true,
+        "platform": {
+            "php": "7.1.0"
+        }
+    },
+    "bin": ["bin/sql-formatter"]
+}

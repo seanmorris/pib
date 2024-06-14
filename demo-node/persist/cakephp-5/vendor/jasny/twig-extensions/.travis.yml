@@ -1,0 +1,26 @@
+language: php
+
+addons:
+  apt:
+    packages:
+      - language-pack-nl
+
+php:
+  - 7.2
+  - 7.3
+  - 7.4
+
+branches:
+  only:
+    - master
+
+install:
+  - composer install
+  - wget https://scrutinizer-ci.com/ocular.phar -O "$HOME/ocular.phar"
+
+script:
+  - vendor/bin/phpunit --coverage-clover cache/logs/clover.xml
+
+after_success:
+  - php "$HOME/ocular.phar" code-coverage:upload --format=php-clover cache/logs/clover.xml
+

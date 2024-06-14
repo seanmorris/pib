@@ -45,7 +45,7 @@ endif
 
 ifeq (${WITH_ICU},dynamic)
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
-PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so
+PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
 endif
 
 third_party/libicu-${LIBICU_VERSION}/.gitignore:

@@ -126,7 +126,7 @@ PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 INTERACTIVE=
 PROGRESS=--progress auto
 CPU_COUNT=`nproc || echo 1`
-PRELOAD_ASSETS+=php.ini
+# PRELOAD_ASSETS+=php.ini
 
 DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose ${PROGRESS} -p phpwasm run ${INTERACTIVE} --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
@@ -246,7 +246,7 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-.cache/preload-collected: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS}
+.cache/preload-collected: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} ${ENV_FILE}
 	 ${DOCKER_RUN} rm -rf /src/third_party/preload
 ifdef PRELOAD_ASSETS
 	@ mkdir -p third_party/preload

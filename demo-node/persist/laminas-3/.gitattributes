@@ -1,0 +1,3 @@
+/.github/ export-ignore
+/bin/remove-package-artifacts.php export-ignore
+/laminas-ci.json export-ignore

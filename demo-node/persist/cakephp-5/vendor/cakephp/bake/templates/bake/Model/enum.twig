@@ -1,0 +1,38 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         3.1.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+{{ element('Bake.file_header', {
+    namespace: "#{namespace}\\Model\\Enum",
+    classImports: [
+        'Cake\\Database\\Type\\EnumLabelInterface',
+        'Cake\\Utility\\Inflector',
+    ],
+}) }}
+
+{{ DocBlock.classDescription(name, 'Enum', [])|raw }}
+enum {{ name }}: {{ backingType }} implements EnumLabelInterface
+{
+{% if cases %}
+    {{ Bake.concat('\n    ', cases) }}
+
+{% endif %}
+    /**
+     * @return string
+     */
+    public function label(): string
+    {
+        return Inflector::humanize(Inflector::underscore($this->name));
+    }
+}

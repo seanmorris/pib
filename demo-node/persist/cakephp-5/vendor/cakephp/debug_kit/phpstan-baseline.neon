@@ -1,0 +1,31 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to function file_get_contents\\(\\) on a separate line has no effect\\.$#"
+			count: 1
+			path: src/Command/BenchmarkCommand.php
+
+		-
+			message: "#^Method DebugKit\\\\Mailer\\\\Transport\\\\DebugKitTransport\\:\\:send\\(\\) should return array\\{headers\\: string, message\\: string\\} but returns array\\{headers\\: non\\-empty\\-array\\<string\\>, message\\: array\\{text\\: string, html\\: string\\}\\}\\.$#"
+			count: 1
+			path: src/Mailer/Transport/DebugKitTransport.php
+
+		-
+			message: "#^Parameter \\#1 \\$request of method DebugKit\\\\ToolbarService\\:\\:saveData\\(\\) expects Cake\\\\Http\\\\ServerRequest, Psr\\\\Http\\\\Message\\\\ServerRequestInterface given\\.$#"
+			count: 1
+			path: src/Middleware/DebugKitMiddleware.php
+
+		-
+			message: "#^Call to an undefined method Cake\\\\ORM\\\\Locator\\\\LocatorInterface\\:\\:genericInstances\\(\\)\\.$#"
+			count: 1
+			path: src/Panel/SqlLogPanel.php
+
+		-
+			message: "#^Dead catch \\- Cake\\\\Core\\\\Exception\\\\CakeException is never thrown in the try block\\.$#"
+			count: 1
+			path: src/ToolbarService.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: src/ToolbarService.php

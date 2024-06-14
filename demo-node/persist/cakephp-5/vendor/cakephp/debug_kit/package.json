@@ -1,0 +1,29 @@
+{
+    "name": "debug_kit",
+    "version": "1.0.0",
+    "description": "CakePHP Debug Kit",
+    "author": "CakePHP Team",
+    "license": "MIT",
+    "homepage": "https://github.com/cakephp/debug_kit#readme",
+    "bugs": {
+        "url": "https://github.com/cakephp/debug_kit/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cakephp/debug_kit.git"
+    },
+    "keywords": [
+        "cakephp",
+        "debug",
+        "kit"
+    ],
+    "devDependencies": {
+        "eslint": "^8.17.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-plugin-import": "^2.26.0"
+    },
+    "scripts": {
+        "cs-check": "npx eslint webroot/js/main.js webroot/js/inject-iframe.js webroot/js/modules/*.js",
+        "cs-fix": "npx eslint webroot/js/main.js webroot/js/inject-iframe.js webroot/js/modules/*.js --fix"
+    }
+}

@@ -1,0 +1,398 @@
+2024-04-25 09:23:33 warning: DebugKit not enabled. You need to either install pdo_sqlite, or define the "debug_kit" connection name.
+2024-04-25 09:23:33 error: [Cake\Database\Exception\MissingExtensionException] Database driver `Cake\Database\Driver\Sqlite` cannot be used due to a missing PHP extension or unmet dependency. Requested by connection `test` in /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Database/Connection.php on line 172
+Exception Attributes: array (
+  'driver' => 'Cake\\Database\\Driver\\Sqlite',
+  'name' => 'test',
+)
+Stack Trace:
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Database/Connection.php:126
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Datasource/ConnectionRegistry.php:82
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Core/ObjectRegistry.php:112
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Datasource/ConnectionManager.php:212
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/debug_kit/src/Panel/SqlLogPanel.php:54
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:233
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:58
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /home/sean/software/php-wasm-samples/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /home/sean/software/php-wasm-samples/cakephp-5/webroot/index.php:37
+- /home/sean/software/php-wasm-samples/cakephp-5/index.php:16
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:56:30 error: [Error] Class "IntlDateFormatter" not found in /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/DateTime.php on line 71
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Database/Type/DateTimeType.php:313
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:79
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:217
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Table.php:2950
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:289
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /persist/cakephp-5/webroot/index.php:37
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:56:30 error: [Cake\Error\FatalErrorException] Fatal Error: Uncaught Cake\Error\FatalErrorException: [Error] Class "Locale" not found (/persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/I18n.php:257) in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:377
+Stack trace:
+#0 [internal function]: Cake\Error\ErrorTrap->handleError(256, '[Error] Class "...', '/persist/cakeph...', 377)
+#1 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(377): trigger_error('[Error] Class "...', 256)
+#2 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(241): Cake\Error\ExceptionTrap->logInternalError(Object(Error))
+#3 [internal function]: Cake\Error\ExceptionTrap->handleException(Object(Error))
+#4 {main}
+  thrown in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php on line 377
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:277
+- [internal]:??
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:56:31 warning: Unable to emit headers. Headers sent in file= line=0
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 65
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:56:31 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 159
+Cake\Http\ResponseEmitter->emitStatusLine() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 68
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:56:31 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 192
+Cake\Http\ResponseEmitter->emitHeaders() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 69
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:03 error: [Error] Class "IntlDateFormatter" not found in /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/DateTime.php on line 71
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Database/Type/DateTimeType.php:313
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:79
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:217
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Table.php:2950
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:289
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /persist/cakephp-5/webroot/index.php:37
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:03 error: [Cake\Error\FatalErrorException] Fatal Error: Uncaught Cake\Error\FatalErrorException: [Error] Class "Locale" not found (/persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/I18n.php:257) in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:377
+Stack trace:
+#0 [internal function]: Cake\Error\ErrorTrap->handleError(256, '[Error] Class "...', '/persist/cakeph...', 377)
+#1 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(377): trigger_error('[Error] Class "...', 256)
+#2 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(241): Cake\Error\ExceptionTrap->logInternalError(Object(Error))
+#3 [internal function]: Cake\Error\ExceptionTrap->handleException(Object(Error))
+#4 {main}
+  thrown in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php on line 377
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:277
+- [internal]:??
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:03 warning: Unable to emit headers. Headers sent in file= line=0
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 65
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:03 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 159
+Cake\Http\ResponseEmitter->emitStatusLine() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 68
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:03 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 192
+Cake\Http\ResponseEmitter->emitHeaders() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 69
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:12 error: [Error] Class "IntlDateFormatter" not found in /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/DateTime.php on line 71
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Database/Type/DateTimeType.php:313
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:79
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:217
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Table.php:2950
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:289
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /persist/cakephp-5/webroot/index.php:37
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:12 error: [Cake\Error\FatalErrorException] Fatal Error: Uncaught Cake\Error\FatalErrorException: [Error] Class "Locale" not found (/persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/I18n.php:257) in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:377
+Stack trace:
+#0 [internal function]: Cake\Error\ErrorTrap->handleError(256, '[Error] Class "...', '/persist/cakeph...', 377)
+#1 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(377): trigger_error('[Error] Class "...', 256)
+#2 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(241): Cake\Error\ExceptionTrap->logInternalError(Object(Error))
+#3 [internal function]: Cake\Error\ExceptionTrap->handleException(Object(Error))
+#4 {main}
+  thrown in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php on line 377
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:277
+- [internal]:??
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:12 warning: Unable to emit headers. Headers sent in file= line=0
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 65
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:12 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 159
+Cake\Http\ResponseEmitter->emitStatusLine() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 68
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:12 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 192
+Cake\Http\ResponseEmitter->emitHeaders() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 69
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:43 error: [Error] Class "IntlDateFormatter" not found in /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/DateTime.php on line 71
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Database/Type/DateTimeType.php:313
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:79
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:217
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Table.php:2950
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:289
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /persist/cakephp-5/webroot/index.php:37
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:43 error: [Cake\Error\FatalErrorException] Fatal Error: Uncaught Cake\Error\FatalErrorException: [Error] Class "Locale" not found (/persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/I18n.php:257) in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:377
+Stack trace:
+#0 [internal function]: Cake\Error\ErrorTrap->handleError(256, '[Error] Class "...', '/persist/cakeph...', 377)
+#1 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(377): trigger_error('[Error] Class "...', 256)
+#2 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(241): Cake\Error\ExceptionTrap->logInternalError(Object(Error))
+#3 [internal function]: Cake\Error\ExceptionTrap->handleException(Object(Error))
+#4 {main}
+  thrown in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php on line 377
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:277
+- [internal]:??
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:43 warning: Unable to emit headers. Headers sent in file= line=0
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 65
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:43 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 159
+Cake\Http\ResponseEmitter->emitStatusLine() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 68
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:43 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 192
+Cake\Http\ResponseEmitter->emitHeaders() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 69
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:50 error: [Error] Class "IntlDateFormatter" not found in /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/DateTime.php on line 71
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Database/Type/DateTimeType.php:313
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:79
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Marshaller.php:217
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/ORM/Table.php:2950
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:289
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /persist/cakephp-5/webroot/index.php:37
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:50 error: [Cake\Error\FatalErrorException] Fatal Error: Uncaught Cake\Error\FatalErrorException: [Error] Class "Locale" not found (/persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/I18n.php:257) in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:377
+Stack trace:
+#0 [internal function]: Cake\Error\ErrorTrap->handleError(256, '[Error] Class "...', '/persist/cakeph...', 377)
+#1 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(377): trigger_error('[Error] Class "...', 256)
+#2 /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php(241): Cake\Error\ExceptionTrap->logInternalError(Object(Error))
+#3 [internal function]: Cake\Error\ExceptionTrap->handleException(Object(Error))
+#4 {main}
+  thrown in /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php on line 377
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php:277
+- [internal]:??
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 15:57:50 warning: Unable to emit headers. Headers sent in file= line=0
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 65
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:50 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 159
+Cake\Http\ResponseEmitter->emitStatusLine() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 68
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:57:50 warning: Cannot modify header information - headers already sent
+Request URL: /
+Client IP: 127.0.0.1
+Trace:
+/persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 192
+Cake\Http\ResponseEmitter->emitHeaders() /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 69
+Cake\Http\ResponseEmitter->emit() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/Renderer/WebExceptionRenderer.php, line 307
+Cake\Error\Renderer\WebExceptionRenderer->write() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 239
+Cake\Error\ExceptionTrap->handleException() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 326
+Cake\Error\ExceptionTrap->handleFatalError() /persist/cakephp-5/vendor/cakephp/cakephp/src/Error/ExceptionTrap.php, line 277
+Cake\Error\ExceptionTrap->handleShutdown() [internal], line ??
+[main]
+
+2024-06-14 15:58:28 error: [IntlException] Constructor failed in /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/Number.php on line 347
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/Number.php:347
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/Number.php:87
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Panel/TimerPanel.php:125
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:305
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /persist/cakephp-5/webroot/index.php:37
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1
+2024-06-14 16:00:01 error: [IntlException] Constructor failed in /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/Number.php on line 347
+Stack Trace:
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/Number.php:347
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/I18n/Number.php:87
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Panel/TimerPanel.php:125
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/ToolbarService.php:305
+- /persist/cakephp-5/vendor/cakephp/debug_kit/src/Middleware/DebugKitMiddleware.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:82
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Runner.php:67
+- /persist/cakephp-5/vendor/cakephp/cakephp/src/Http/Server.php:103
+- /persist/cakephp-5/webroot/index.php:40
+- [main]:
+
+Request URL: /
+Client IP: 127.0.0.1

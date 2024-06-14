@@ -1,0 +1,10 @@
+{% for columnName, columnAttributes in columns %}
+{%     set type = columnAttributes['type'] %}
+{%     set columnAttributes = Migration.getColumnOption(columnAttributes) %}
+{%     set columnAttributes = Migration.stringifyList(columnAttributes, {'indent': 4, 'remove': ['type']}) %}
+{%     if columnAttributes is not empty %}
+            ->addColumn('{{ columnName }}', '{{ type }}', [{{ columnAttributes | raw }}])
+{%     else %}
+            ->addColumn('{{ columnName }}', '{{ type }}')
+{%     endif -%}
+{% endfor -%}

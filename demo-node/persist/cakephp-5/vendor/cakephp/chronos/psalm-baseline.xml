@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
+  <file src="src/Chronos.php">
+    <ImpureFunctionCall>
+      <code>array_filter</code>
+      <code>date_default_timezone_get</code>
+      <code>date_default_timezone_get</code>
+      <code>iterator_to_array</code>
+    </ImpureFunctionCall>
+    <ImpureMethodCall>
+      <code>diffForHumans</code>
+      <code>diffFormatter</code>
+      <code>format</code>
+      <code>format</code>
+      <code>format</code>
+      <code>format</code>
+      <code>format</code>
+      <code>format</code>
+      <code>getTimestamp</code>
+      <code>getTimezone</code>
+      <code>getWeekendDays</code>
+      <code>hasTestNow</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>safeCreateDateTimeZone</code>
+      <code>toDateString</code>
+      <code>toDateString</code>
+      <code>toDateString</code>
+      <code>toDateString</code>
+      <code>toDateString</code>
+      <code>toDateString</code>
+      <code>toDateString</code>
+      <code>tomorrow</code>
+      <code>yesterday</code>
+    </ImpureMethodCall>
+    <ImpureStaticProperty>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$weekEndsAt</code>
+      <code>static::$weekEndsAt</code>
+      <code>static::$weekStartsAt</code>
+      <code>static::$weekStartsAt</code>
+    </ImpureStaticProperty>
+    <ImpureStaticVariable>
+      <code><![CDATA[static $formats = [
+            'year' => 'Y',
+            'yearIso' => 'o',
+            'month' => 'n',
+            'day' => 'j',
+            'hour' => 'G',
+            'minute' => 'i',
+            'second' => 's',
+            'micro' => 'u',
+            'microsecond' => 'u',
+            'dayOfWeek' => 'N',
+            'dayOfYear' => 'z',
+            'weekOfYear' => 'W',
+            'daysInMonth' => 't',
+            'timestamp' => 'U',
+        ];]]></code>
+    </ImpureStaticVariable>
+    <InaccessibleProperty>
+      <code><![CDATA[$instance->f]]></code>
+    </InaccessibleProperty>
+    <MissingImmutableAnnotation>
+      <code>public static function createFromFormat(</code>
+    </MissingImmutableAnnotation>
+  </file>
+  <file src="src/ChronosDate.php">
+    <ImpureFunctionCall>
+      <code>array_filter</code>
+      <code>date_default_timezone_get</code>
+      <code>iterator_to_array</code>
+    </ImpureFunctionCall>
+    <ImpureMethodCall>
+      <code>diffForHumans</code>
+      <code>diffFormatter</code>
+      <code>format</code>
+      <code>getTestNow</code>
+      <code>getWeekEndsAt</code>
+      <code>getWeekEndsAt</code>
+      <code>getWeekStartsAt</code>
+      <code>getWeekStartsAt</code>
+      <code>getWeekendDays</code>
+      <code>hasTestNow</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>now</code>
+      <code>tomorrow</code>
+      <code>yesterday</code>
+    </ImpureMethodCall>
+    <ImpureStaticProperty>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+      <code>static::$days</code>
+    </ImpureStaticProperty>
+    <ImpureStaticVariable>
+      <code><![CDATA[static $formats = [
+            'year' => 'Y',
+            'yearIso' => 'o',
+            'month' => 'n',
+            'day' => 'j',
+            'dayOfWeek' => 'N',
+            'dayOfYear' => 'z',
+            'weekOfYear' => 'W',
+            'daysInMonth' => 't',
+        ];]]></code>
+    </ImpureStaticVariable>
+  </file>
+</files>

@@ -1,0 +1,62 @@
+{#
+/**
+* CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+* Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+*
+* Licensed under The MIT License
+* For full copyright and license information, please see the LICENSE.txt
+* Redistributions of files must retain the above copyright notice.
+*
+* @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+* @link          https://cakephp.org CakePHP(tm) Project
+* @since         2.0.0
+* @license       https://www.opensource.org/licenses/mit-license.php MIT License
+*/
+#}
+{{ element('Bake.file_header', {
+    namespace: "#{namespace}\\Form",
+    classImports: [
+        'Cake\\Form\\Form',
+        'Cake\\Form\\Schema',
+        'Cake\\Validation\\Validator',
+    ],
+}) }}
+
+/**
+ * {{ name }} Form.
+ */
+class {{ name }}Form extends Form
+{
+    /**
+     * Builds the schema for the modelless form
+     *
+     * @param \Cake\Form\Schema $schema From schema
+     * @return \Cake\Form\Schema
+     */
+    protected function _buildSchema(Schema $schema): Schema
+    {
+        return $schema;
+    }
+
+    /**
+     * Form validation builder
+     *
+     * @param \Cake\Validation\Validator $validator to use against the form
+     * @return \Cake\Validation\Validator
+     */
+    public function validationDefault(Validator $validator): Validator
+    {
+        return $validator;
+    }
+
+    /**
+     * Defines what to execute once the Form is processed
+     *
+     * @param array $data Form data.
+     * @return bool
+     */
+    protected function _execute(array $data): bool
+    {
+        return true;
+    }
+}

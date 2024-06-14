@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<psalm
+    cacheDirectory="./.psalm-cache"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorLevel="1"
+    findUnusedPsalmSuppress="true"
+    findUnusedCode="true"
+    findUnusedBaselineEntry="true"
+>
+
+    <projectFiles>
+        <directory name="module" />
+        <directory name="config" />
+
+        <file name="public/index.php" />
+
+        <ignoreFiles>
+            <directory name="vendor" />
+            <directory name="data" />
+            <directory name="bin" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <InternalMethod>
+            <errorLevel type="suppress">
+                <referencedMethod name="PHPUnit\Framework\MockObject\Builder\InvocationMocker::method"/>
+            </errorLevel>
+            <errorLevel type="suppress">
+                <referencedMethod name="PHPUnit\Framework\MockObject\Builder\InvocationMocker::willReturn"/>
+            </errorLevel>
+            <errorLevel type="suppress">
+                <referencedMethod name="PHPUnit\Framework\MockObject\Builder\InvocationMocker::with"/>
+            </errorLevel>
+        </InternalMethod>
+    </issueHandlers>
+
+    <stubs>
+        <file name=".psalm-stubs.phpstub"/>
+    </stubs>
+
+    <plugins>
+        <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+    </plugins>
+</psalm>

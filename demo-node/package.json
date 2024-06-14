@@ -8,6 +8,10 @@
   },
   "dependencies": {
     "php-cgi-wasm": "^0.0.0",
+    "php-wasm-libicu": "^0.0.9-r",
+    "php-wasm-libxml": "^0.0.9-h",
+    "php-wasm-oniguruma": "^0.0.9-b",
+    "php-wasm-phar": "^0.0.9-b",
     "php-wasm-sqlite": "^0.0.9-t"
   }
 }

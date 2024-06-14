@@ -8,7 +8,7 @@ export class PhpCgiNode extends PhpCgiBase
 		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args});
 	}
 
-	request(request)
+	async request(request)
 	{
 		const protocol = request.connection.encrypted ? 'https://' : 'http://';
 
@@ -16,6 +16,10 @@ export class PhpCgiNode extends PhpCgiBase
 
 		request.headers = new Map(Object.entries(request.headers));
 
-		return super.request(request);
+		const response = await super.request(request);
+
+		console.error(`[${new Date().toLocaleString()}] [HTTP ${response.status}] ${String(request.method).padStart(5,' ')} ${request.url}`);
+
+		return response;
 	}
 }

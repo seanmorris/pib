@@ -1,0 +1,693 @@
+@charset "UTF-8";
+
+:root {
+    --cake-red: #D33C43;
+    --cake-gray: #404041;
+    --cake-blue: #428BCA;
+    --cake-dark-blue: #2A6496;
+    --cake-light-gray: #ECECE9;
+
+    --btn-text: #fff;
+    --btn-bg: var(--cake-blue);
+    --btn-border: var(--cake-dark-blue);
+    --btn-shadow: var(--cake-dark-blue);
+    --duplicate-route: #FFEA96;
+
+    --checkbox-label: #666;
+
+    --table-th-border: var(--cake-blue);
+    --table-th-text: #111;
+    --table-seperator: #ccc;
+
+    --loader-bg: rgba(0, 0, 0, 0.3);
+
+    --toolbar-bg: var(--cake-red);
+
+    --panel-container-bg: #fff;
+    --panel-tab-seperator: rgba(0, 0, 0, 0.075);
+    --panel-active-bg: #fff;
+    --panel-active-text: var(--cake-red);
+    --panel-text: #fff;
+    --panel-active-btn-bg: var(--cake-red);
+
+    --panel-title-bg: var(--cake-red);
+    --panel-summary: rgba(60, 60, 60, 0.3);
+    --panel-history-bg: #ab47bc;
+
+    --panel-close-bg: rgba(0, 0, 0, 0.3);
+    --panel-close-bg-hover: rgba(0, 0, 0, 0.5);
+    --panel-close: #fff;
+
+    --flash-bg: #fff;
+    --flash-success: #66de66;
+    --flash-warning: #f2dede;
+    --flash-info: #d9edf7;
+
+    --graph-bg: #ddd;
+    --graph-value-bg: var(--cake-blue);
+
+    --history-link: #222;
+    --history-border: #ccc;
+    --history-bubble: #eee;
+
+    --highlighted: #e7e9fd;
+
+    --packages-version: var(--cake-light-gray);
+    --packages-terminal: #1a1a1a;
+    --packages-section-header: var(--cake-blue);
+    --packages-highlight: var(--cake-red);
+    --packages-text: #ffffff;
+    --packages-warning: #ffcc00;
+    --packages-link: #000;
+
+    --routes-btn-active-bg: #fff;
+    --routes-btn-active-text: #555;
+    --routes-btn-active-border: #6f6f6f;
+
+    --mail-border: #ccc;
+}
+
+/**
+ * CakePHP Debug Kit SCSS
+ */
+html {
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Helvetica-Neue", Helvetica, Arial, sans-serif;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border: 0;
+    clear: both;
+    margin: 10px 0;
+    border-spacing: 0;
+}
+
+table td,
+table th {
+    text-align: left;
+    border: 0;
+    padding: 9px;
+    margin: 0;
+}
+
+table td {
+    border-bottom: 1px solid var(--table-seperator);
+}
+
+table th {
+    border-bottom: 3px solid var(--table-th-border);
+    color: var(--table-th-text);
+    font-weight: bold;
+    line-height: 16px;
+}
+
+pre {
+    font-family: Monaco, Consolas, monospace;
+}
+
+@font-face {
+    font-family: "CakeFont";
+    src: url("./raleway-medium.eot");
+    src: url("./raleway-regular.eot?#iefix") format("embedded-opentype"),
+    url("./raleway-regular.woff") format("woff"),
+    url("./raleway-regular.ttf") format("truetype"),
+    url("./raleway-regular.svg#ralewayregular") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: "CakeFont", sans-serif;
+    margin: 15px 0;
+    font-weight: 300;
+    line-height: 20px;
+    text-rendering: optimizelegibility;
+}
+
+h1,
+h2,
+h3 {
+    line-height: 40px;
+}
+
+h1 {
+    font-size: 38.5px;
+}
+
+h2 {
+    font-size: 31.5px;
+}
+
+h3 {
+    font-size: 24.5px;
+}
+
+h4 {
+    font-size: 17.5px;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+strong {
+    font-weight: bold;
+}
+
+.o-button {
+    font-size: 14px;
+    border: 1px solid var(--btn-border);
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+    border-radius: 4px;
+    box-shadow: 0 2px 0 var(--btn-shadow);
+    padding: 4px 10px;
+}
+
+.o-button:active {
+    box-shadow: none;
+    position: relative;
+    top: 2px;
+}
+
+.o-button:hover {
+    cursor: pointer;
+}
+
+.o-checkbox label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--checkbox-label);
+}
+
+.o-checkbox input {
+    vertical-align: middle;
+    margin-top: 0;
+}
+
+.o-list {
+    list-style: disc;
+    margin: 10px 0 10px 20px;
+}
+
+.o-list li {
+    margin: 10px 0;
+}
+
+.o-list--deprecation-list li {
+    font-family: Monaco, Consolas, monospace;
+}
+
+.o-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--loader-bg);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.o-loader.is-loading {
+    opacity: 1;
+    visibility: visible;
+}
+
+.o-loader__indicator {
+    -webkit-animation: spin 4s linear infinite;
+    animation: spin 4s linear infinite;
+}
+
+@-webkit-keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.c-cache-panel__messages p {
+    padding: 5px;
+    background: var(--flash-success);
+}
+
+.c-debug-table td {
+    font-family: Monaco, Consolas, monospace;
+}
+
+/* X column tables have the 2nd+ cell right aligned */
+.c-debug-table th:nth-child(n+2),
+.c-debug-table td:nth-child(n+2) {
+    text-align: right;
+}
+
+.c-debug-table td:nth-child(n+2) {
+    word-wrap: break-word;
+    word-break: break-all;
+    word-break: break-word; /* Not standard for webkit */
+}
+
+.c-debug-table th.u-text-left,
+.c-debug-table td.u-text-left {
+    text-align: left;
+}
+
+.c-debug-table .duplicate-route td {
+    background: var(--duplicate-route);
+}
+
+.c-debug-table .highlighted td {
+    background: var(--highlighted);
+}
+
+.c-flash {
+    position: relative;
+    padding: 10px 10px 10px 50px;
+    font-size: 14px;
+}
+
+.c-flash:before {
+    padding: 8px;
+    line-height: 12px;
+    font-size: 20px;
+    font-family: "CakeFont";
+    font-weight: bold;
+    height: 12px;
+    width: 12px;
+    border-radius: 15px;
+    background-color: var(--flash-bg);
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    text-align: center;
+    vertical-align: middle;
+    display: inline-block;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.c-flash--warning {
+    background: var(--flash-warning);
+}
+
+.c-flash--warning:before {
+    color: var(--flash-warning);
+    content: "!";
+}
+
+.c-flash--info {
+    background: var(--flash-info);
+}
+
+.c-flash--info:before {
+    color: var(--flash-info);
+    content: "i";
+}
+
+.c-graph-bar,
+.c-graph-bar__value {
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+    height: 14px;
+}
+
+.c-graph-bar {
+    background: var(--graph-bg);
+}
+
+.c-graph-bar__value {
+    background: var(--graph-value-bg);
+}
+
+.c-history-panel__list li {
+    padding-left: 10px;
+    border-bottom: 1px solid var(--history-border);
+    position: relative;
+}
+
+.c-history-panel__list .is-active:before {
+    content: "•";
+    font-size: 40px;
+    color: var(--flash-success);
+    line-height: 12px;
+    position: absolute;
+    top: 38%;
+    left: 0;
+    vertical-align: middle;
+}
+
+.c-history-panel__list li:last-child {
+    border-bottom: 0;
+}
+
+.c-history-panel__list li:hover {
+    background-color: var(--highlighted);
+}
+
+.c-history-panel__link {
+    color: var(--history-link);
+    display: block;
+    text-decoration: none;
+    padding: 6px;
+}
+
+.c-history-panel__bubble {
+    font-size: 12px;
+    line-height: 14px;
+    display: inline-block;
+    background: var(--history-bubble);
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.c-history-panel__xhr {
+    background: var(--flash-success);
+}
+
+.c-history-panel__time {
+    font-size: 12px;
+    display: block;
+}
+
+.c-history-panel__url {
+    font-size: 14px;
+    font-family: Monaco, Consolas, monospace;
+}
+
+.c-packages-panel__section-wrapper {
+    display: flex;
+}
+
+.c-packages-panel__section-wrapper > section {
+    width: 50%;
+    max-width: 50%;
+    min-width: 50%;
+}
+
+.c-packages-panel__version {
+    background: var(--packages-version);
+    border-radius: 4px;
+    line-height: 20px;
+    display: inline-block;
+    white-space: nowrap;
+    padding: 2px 1px;
+}
+
+.c-packages-panel__link {
+    color: var(--packages-link);
+    text-decoration: none;
+}
+
+.c-packages-panel__terminal {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: var(--packages-terminal);
+    color: var(--packages-text);
+    line-height: 1.4;
+    display: none;
+}
+
+.c-packages-panel__terminal .c-packages-panel__section-header {
+    color: var(--packages-section-header);
+}
+
+.c-packages-panel__section-header:nth-of-type(1) {
+    margin-top: 0;
+}
+
+.c-packages-panel__terminal highlight {
+    color: var(--packages-highlight);
+}
+
+.c-packages-panel__terminal .indicator {
+    vertical-align: middle;
+    width: 30px;
+    height: 30px;
+    -webkit-animation: spin 4s linear infinite;
+    animation: spin 4s linear infinite;
+}
+
+.c-packages-panel__warning-message {
+    color: var(--packages-warning);
+}
+
+.c-packages-panel__success-message {
+    color: var(--flash-success);
+}
+
+.c-panel {
+    position: relative;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    cursor: pointer;
+    border-left: 1px solid var(--panel-tab-seperator);
+    padding: 0 9px;
+}
+
+.c-panel.is-active {
+    background: var(--panel-active-bg);
+    color: var(--panel-active-text);
+    transition: background-color 300ms linear;
+}
+
+.c-panel__button {
+    color: var(--panel-text);
+    font-family: CakeFont, Helvetica, Arial, sans-serif;
+}
+
+.c-panel.is-active .c-panel__button {
+    color: var(--panel-active-btn-bg);
+}
+
+.c-panel__summary {
+    background: var(--panel-summary);
+    color: var(--panel-text);
+    font-size: 12px;
+    line-height: 20px;
+    padding: 4px;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.c-panel__title {
+    color: var(--panel-text);
+    font-family: CakeFont, sans-serif;
+    font-weight: normal;
+    background: var(--panel-title-bg);
+    padding: 10px;
+    margin: 0;
+    transition: background-color 300ms linear;
+}
+
+.is-history-mode .c-panel__title {
+    background: var(--panel-history-bg);
+}
+
+.c-panel__content {
+    padding: 10px;
+}
+
+.c-panel-content-container {
+    background: var(--panel-container-bg);
+    position: absolute;
+    top: 100%;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    transition: top 0.25s ease-out;
+}
+
+.c-panel-content-container.is-active {
+    top: 0;
+}
+
+.c-panel-content-container__close {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--panel-close-bg);
+    height: 1.5em;
+    width: 1.5em;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.c-panel-content-container__close:hover {
+    background: var(--panel-close-bg-hover);
+}
+
+.c-panel-content-container__close:before,
+.c-panel-content-container__close:after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: block;
+    width: 50%;
+    height: 2px;
+    background: var(--panel-close);
+    transform-origin: 50% 50%;
+}
+
+.c-panel-content-container__close:before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.c-panel-content-container__close:after {
+    transform: translate(-50%, -50%) rotate(315deg);
+}
+
+.is-active .o-loader.is-active {
+    display: block;
+}
+
+.c-panel-content-container__content {
+    height: 100%;
+}
+
+.c-panel-content-container__content .o-loader {
+    display: none;
+}
+
+.c-routes-panel__button-wrapper {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin: 0 -5px;
+}
+
+.c-routes-panel__button-wrapper .is-active {
+    background-color: var(--routes-btn-active-bg);
+    color: var(--routes-btn-active-text);
+    border-color: var(--routes-btn-active-border);
+    box-shadow: 0 2px 0 var(--routes-btn-active-border);
+}
+
+.c-toolbar {
+    display: flex;
+    background: var(--toolbar-bg);
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.is-active .c-toolbar {
+    width: 100%;
+    border-radius: 0;
+    overflow: hidden;
+    padding-right: 40px;
+}
+
+.c-toolbar__inner-wrapper {
+    display: none;
+    flex: 1;
+}
+
+.is-active .c-toolbar__inner-wrapper {
+    display: block;
+}
+
+.c-toolbar__inner-ul {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.c-toolbar__button {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: var(--toolbar-bg);
+}
+
+.c-toolbar__button img {
+    display: block;
+}
+
+.c-toolbar__scroll-button {
+    display: none;
+    font-size: 1.25em;
+    cursor: pointer;
+}
+
+.is-active .c-toolbar__scroll-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.c-toolbar__scroll-button--right {
+    margin-left: 20px;
+}
+
+.c-mail-panel__wrapper {
+    display: flex;
+}
+
+.c-mail-panel__table-wrapper {
+    width: 300px;
+}
+
+.c-mail-panel__iframe {
+    height: calc(100vh - 128px);
+    flex: 1;
+    margin-left: 20px;
+    padding-left: 10px;
+    border-left: 1px solid var(--mail-border);
+}
+
+.u-text-center {
+    text-align: center;
+}
+
+.u-text-right {
+    text-align: right;
+}
+
+.u-text-left {
+    text-align: left;
+}
+
+.is-hidden {
+    display: none;
+}

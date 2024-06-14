@@ -1,0 +1,80 @@
+{
+    "name": "cakephp/migrations",
+    "description": "Database Migration plugin for CakePHP based on Phinx",
+    "license": "MIT",
+    "type": "cakephp-plugin",
+    "keywords": [
+        "cakephp",
+        "migrations"
+    ],
+    "authors": [
+        {
+            "name": "CakePHP Community",
+            "homepage": "https://github.com/cakephp/migrations/graphs/contributors"
+        }
+    ],
+    "homepage": "https://github.com/cakephp/migrations",
+    "support": {
+        "issues": "https://github.com/cakephp/migrations/issues",
+        "forum": "https://stackoverflow.com/tags/cakephp",
+        "irc": "irc://irc.freenode.org/cakephp",
+        "source": "https://github.com/cakephp/migrations"
+    },
+    "require": {
+        "php": ">=8.1",
+        "cakephp/cache": "^5.0",
+        "cakephp/orm": "^5.0",
+        "robmorgan/phinx": "^0.15.3 || ^0.16.0"
+    },
+    "require-dev": {
+        "cakephp/bake": "^3.0",
+        "cakephp/cakephp": "^5.0",
+        "cakephp/cakephp-codesniffer": "^5.0",
+        "phpunit/phpunit": "^10.1.0"
+    },
+    "suggest": {
+        "cakephp/bake": "If you want to generate migrations.",
+        "dereuromark/cakephp-ide-helper": "If you want to have IDE suggest/autocomplete when creating migrations."
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Migrations\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cake\\Test\\": "./vendor/cakephp/cakephp/tests/",
+            "Migrations\\Test\\": "tests/",
+            "SimpleSnapshot\\": "tests/test_app/Plugin/SimpleSnapshot/src/",
+            "TestApp\\": "tests/test_app/App/",
+            "TestBlog\\": "tests/test_app/Plugin/TestBlog/src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@stan",
+            "@test"
+        ],
+        "cs-check": "phpcs -p",
+        "cs-fix": "phpcbf -p",
+        "phpstan": "tools/phpstan analyse",
+        "psalm": "tools/psalm --show-info=false",
+        "psalm-baseline": "tools/psalm  --set-baseline=psalm-baseline.xml",
+        "stan": [
+            "@phpstan",
+            "@psalm"
+        ],
+        "stan-baseline": "tools/phpstan --generate-baseline",
+        "stan-setup": "phive install",
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-clover=clover.xml"
+    }
+}

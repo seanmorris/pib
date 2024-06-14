@@ -76,6 +76,8 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 		this.binary = navigator.locks.request('php-wasm-fs-lock', async () => {
 
+			const php = await new this.PHP(phpArgs);
+
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -130,7 +132,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 		});
 	}
 
-	_enqueue(callback, params = [])
+	async _enqueue(callback, params = [])
 	{
 		let accept, reject;
 

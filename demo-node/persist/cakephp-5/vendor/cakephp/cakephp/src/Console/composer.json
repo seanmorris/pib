@@ -1,0 +1,41 @@
+{
+    "name": "cakephp/console",
+    "description": "Build beautiful console applications with CakePHP",
+    "type": "library",
+    "keywords": [
+        "cakephp",
+        "console",
+        "cli",
+        "framework"
+    ],
+    "homepage": "https://cakephp.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "CakePHP Community",
+            "homepage": "https://github.com/cakephp/cache/graphs/contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/cakephp/cakephp/issues",
+        "forum": "https://stackoverflow.com/tags/cakephp",
+        "irc": "irc://irc.freenode.org/cakephp",
+        "source": "https://github.com/cakephp/console"
+    },
+    "require": {
+        "php": ">=8.1",
+        "cakephp/core": "^5.0",
+        "cakephp/event": "^5.0",
+        "cakephp/log": "^5.0",
+        "cakephp/utility": "^5.0"
+    },
+    "suggest": {
+        "cakephp/datasource": "To use the Command base classes",
+        "cakephp/orm": "To use the Command base classes"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cake\\Console\\": "."
+        }
+    }
+}

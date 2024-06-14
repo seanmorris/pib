@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.20.0@3f284e96c9d9be6fe6b15c79416e1d1903dcfef4">
+  <file src="src/Cache/Engine/DebugEngine.php">
+    <RiskyTruthyFalsyComparison>
+      <code>$key</code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Controller/MailPreviewController.php">
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[$this->findPart($email, $partType)]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Database/Log/DebugLog.php">
+    <InternalMethod>
+      <code>jsonSerialize</code>
+    </InternalMethod>
+  </file>
+  <file src="src/DebugInclude.php">
+    <PossiblyNullArrayOffset>
+      <code><![CDATA[$this->_composerPaths]]></code>
+      <code><![CDATA[$this->_pluginPaths]]></code>
+    </PossiblyNullArrayOffset>
+  </file>
+  <file src="src/DebugMemory.php">
+    <RiskyTruthyFalsyComparison>
+      <code>!$message</code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/DebugSql.php">
+    <InternalMethod>
+      <code>bindings</code>
+    </InternalMethod>
+    <RiskyTruthyFalsyComparison>
+      <code>$file</code>
+      <code>$file</code>
+      <code>$file</code>
+      <code>$line</code>
+      <code>$line</code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/DebugTimer.php">
+    <PossiblyNullArrayOffset>
+      <code>self::$_timers</code>
+    </PossiblyNullArrayOffset>
+    <RiskyTruthyFalsyComparison>
+      <code>!$message</code>
+      <code>!$name</code>
+      <code>!$name</code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Mailer/MailPreview.php">
+    <PossiblyFalseOperand>
+      <code>$pos</code>
+    </PossiblyFalseOperand>
+  </file>
+  <file src="src/Mailer/PreviewResult.php">
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[!$mailer->viewBuilder()->getTemplate()]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Mailer/Transport/DebugKitTransport.php">
+    <InvalidReturnStatement>
+      <code>$result</code>
+    </InvalidReturnStatement>
+    <MoreSpecificReturnType>
+      <code>array</code>
+    </MoreSpecificReturnType>
+    <NullArgument>
+      <code><![CDATA[$this->emailLog]]></code>
+    </NullArgument>
+  </file>
+  <file src="src/Model/Table/LazyTableTrait.php">
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[strpos($e->getMessage(), 'unable to open')]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Panel/DeprecationsPanel.php">
+    <RiskyTruthyFalsyComparison>
+      <code>$pluginName</code>
+      <code>$vendorName</code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Panel/IncludePanel.php">
+    <RiskyTruthyFalsyComparison>
+      <code>$pluginName</code>
+      <code>$vendorName</code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Panel/LogPanel.php">
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[Log::getConfig('debug_kit_log_panel')]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Panel/PanelRegistry.php">
+    <LessSpecificImplementedReturnType>
+      <code>string|null</code>
+    </LessSpecificImplementedReturnType>
+    <UnsafeInstantiation>
+      <code>new $class($this, $config)</code>
+    </UnsafeInstantiation>
+  </file>
+  <file src="src/Panel/SqlLogPanel.php">
+    <UndefinedInterfaceMethod>
+      <code>genericInstances</code>
+    </UndefinedInterfaceMethod>
+  </file>
+  <file src="src/ToolbarService.php">
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[!$GLOBALS['FORCE_DEBUGKIT_TOOLBAR']]]></code>
+      <code>$enabled</code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/View/Helper/ToolbarHelper.php">
+    <InternalClass>
+      <code>new HtmlFormatter()</code>
+      <code>new HtmlFormatter()</code>
+    </InternalClass>
+    <InternalMethod>
+      <code>dump</code>
+      <code>dump</code>
+      <code>new HtmlFormatter()</code>
+      <code>new HtmlFormatter()</code>
+    </InternalMethod>
+  </file>
+</files>

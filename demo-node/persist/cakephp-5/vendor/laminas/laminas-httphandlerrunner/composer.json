@@ -1,0 +1,72 @@
+{
+    "name": "laminas/laminas-httphandlerrunner",
+    "description": "Execute PSR-15 RequestHandlerInterface instances and emit responses they generate.",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "components",
+        "mezzio",
+        "psr-7",
+        "psr-15"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-httphandlerrunner/",
+        "issues": "https://github.com/laminas/laminas-httphandlerrunner/issues",
+        "source": "https://github.com/laminas/laminas-httphandlerrunner",
+        "rss": "https://github.com/laminas/laminas-httphandlerrunner/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.99"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+        "laminas": {
+            "config-provider": "Laminas\\HttpHandlerRunner\\ConfigProvider"
+        }
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "psr/http-message": "^1.0 || ^2.0",
+        "psr/http-message-implementation": "^1.0 || ^2.0",
+        "psr/http-server-handler": "^1.0"
+    },
+    "require-dev": {
+        "laminas/laminas-coding-standard": "~2.5.0",
+        "laminas/laminas-diactoros": "^3.3.0",
+        "phpunit/phpunit": "^10.5.5",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "vimeo/psalm": "^5.18"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\HttpHandlerRunner\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\HttpHandlerRunner\\": "test/"
+        },
+        "files": [
+            "test/TestAsset/HeadersSent.php"
+        ]
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
+        "static-analysis": "psalm --shepherd --stats"
+    }
+}

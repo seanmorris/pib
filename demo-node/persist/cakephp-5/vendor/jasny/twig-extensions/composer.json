@@ -1,0 +1,42 @@
+{
+    "name": "jasny/twig-extensions",
+    "description": "A set of useful Twig filters",
+    "keywords": ["templating", "PCRE", "preg", "regex", "date", "time", "datetime", "text", "array"],
+    "license": "MIT",
+    "homepage": "http://github.com/jasny/twig-extensions#README",
+    "authors": [
+        {
+            "name": "Arnold Daniels",
+            "email": "arnold@jasny.net",
+            "homepage": "http://www.jasny.net"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/jasny/twig-extensions/issues",
+        "source": "https://github.com/jasny/twig-extensions"
+    },
+    "require": {
+        "php": ">=7.0.0",
+        "twig/twig": "^2.0 | ^3.0"
+    },
+    "suggest": {
+        "ext-intl": "Required for the use of the LocalDate Twig extension",
+        "ext-pcre": "Required for the use of the PCRE Twig extension"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jasny\\Twig\\": "src/"
+        }
+    },
+    "require-dev": {
+        "php": ">=7.2.0",
+        "ext-intl": "*",
+        "ext-pcre": "*",
+        "jasny/php-code-quality": "^2.5"
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/support/"
+        ]
+    }
+}

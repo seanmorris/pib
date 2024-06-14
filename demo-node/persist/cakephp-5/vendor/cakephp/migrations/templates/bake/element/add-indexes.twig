@@ -1,0 +1,10 @@
+{% for indexName, index in indexes %}
+            ->addIndex(
+                [{{ Migration.stringifyList(index['columns'], {'indent': 5}) | raw }}],
+{%     set params = {'name': indexName} %}
+{%     if index['type'] == 'unique' %}
+{%         set params = params|merge({'unique': true}) %}
+{%     endif %}
+                [{{ Migration.stringifyList(params, {'indent': 5}) | raw }}]
+            )
+{% endfor %}

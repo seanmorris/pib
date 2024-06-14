@@ -1,0 +1,91 @@
+{
+    "name": "robmorgan/phinx",
+    "type": "library",
+    "description": "Phinx makes it ridiculously easy to manage the database migrations for your PHP app.",
+    "keywords": [
+        "phinx",
+        "migrations",
+        "database",
+        "db",
+        "database migrations"
+    ],
+    "homepage": "https://phinx.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rob Morgan",
+            "email": "robbym@gmail.com",
+            "homepage": "https://robmorgan.id.au",
+            "role": "Lead Developer"
+        },
+        {
+            "name": "Woody Gilk",
+            "email": "woody.gilk@gmail.com",
+            "homepage": "https://shadowhand.me",
+            "role": "Developer"
+        },
+        {
+            "name": "Richard Quadling",
+            "email": "rquadling@gmail.com",
+            "role": "Developer"
+        },
+        {
+            "name": "CakePHP Community",
+            "role": "Developer",
+            "homepage": "https://github.com/cakephp/phinx/graphs/contributors"
+        }
+    ],
+    "require": {
+        "php-64bit": ">=8.1",
+        "cakephp/database": "^5.0.2",
+        "psr/container": "^1.1|^2.0",
+        "symfony/console": "^6.0|^7.0",
+        "symfony/config": "^3.4|^4.0|^5.0|^6.0|^7.0"
+    },
+    "require-dev": {
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "phpunit/phpunit": "^9.5.19",
+        "cakephp/cakephp": "^5.0.2",
+        "cakephp/cakephp-codesniffer": "^5.0",
+        "symfony/yaml": "^3.4|^4.0|^5.0|^6.0|^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phinx\\": "src/Phinx/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\Phinx\\": "tests/Phinx/"
+        }
+    },
+    "suggest": {
+        "ext-json": "Install if using JSON configuration format",
+        "ext-pdo": "PDO extension is needed",
+        "symfony/yaml": "Install if using YAML configuration format"
+    },
+    "scripts": {
+        "check": [
+            "@test",
+            "@cs-check"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "stan": "phpstan analyse",
+        "stan-setup": "cp composer.json composer.backup && composer require --dev phpstan/phpstan:~1.9.0 && mv composer.backup composer.json",
+        "lowest": "validate-prefer-lowest",
+        "lowest-setup": "composer update --prefer-lowest --prefer-stable --prefer-dist --no-interaction && cp composer.json composer.backup && composer require --dev dereuromark/composer-prefer-lowest && mv composer.backup composer.json",
+        "test": "phpunit --colors=always"
+    },
+    "bin": [
+        "bin/phinx"
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

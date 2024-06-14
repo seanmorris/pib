@@ -22,27 +22,28 @@ const sharedLibs = [
 	// await import('https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b'),
 	// await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d'),
 	// await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f'),
+
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-zlib'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libzip'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-iconv'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libicu'),
+	// await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-t'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-freetype'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libpng'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libjpeg'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libxml'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-gd'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-openssl'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-phar'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy'),
+	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml'),
+
+	// await import('php-wasm-sqlite')
+	// await import('php-wasm-libicu')
 ];
 
-// const sharedLibs = [
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-zlib'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libzip'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-iconv'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libicu'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-t'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-freetype'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libpng'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libjpeg'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libxml'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-gd'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-openssl'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-phar'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy'),
-// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml'),
-// ];
-
 const files = [
-	// { parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }
+	{ parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }
 ];
 
 const ini = `
@@ -180,6 +181,10 @@ function Embedded() {
 	}, [query]);
 
 	const loadDemo = useCallback(demoName => {
+		if(!demoName)
+		{
+			return;
+		}
 		if(demoName === 'drupal.php')
 		{
 			setOverlay(<Confirm
@@ -346,7 +351,7 @@ function Embedded() {
 							<h1><a href = { process.env.PUBLIC_URL || "/" }>php-wasm</a></h1>
 							<hr />
 							<select data-select-demo ref = {selectDemoBox}>
-								<option value>Select a Demo</option>
+								<option value = "">Select a Demo</option>
 								<option value = "hello-world.php">Hello, World!</option>
 								<option value = "callbacks.php">Javascript Callbacks</option>
 								<option value = "import.php">Import Javascript Modules</option>

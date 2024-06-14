@@ -1,0 +1,66 @@
+{
+    "name": "josegonzalez/dotenv",
+    "type": "library",
+    "description": "dotenv file parsing for PHP",
+    "keywords": ["php", "dotenv", "configuration"],
+    "homepage": "https://github.com/josegonzalez/php-dotenv",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jose Diaz-Gonzalez",
+            "email": "dotenv@josegonzalez.com",
+            "homepage": "http://josediazgonzalez.com",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.0",
+        "m1/env": "2.*"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "~2.9||~3.7",
+        "php-coveralls/php-coveralls": "~2.0",
+        "php-mock/php-mock-phpunit": "~1.1||~2.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "josegonzalez\\Dotenv": ["src", "tests"]
+        }
+    },
+    "scripts": {
+        "ci": [
+            "@cs-check",
+            "@test",
+            "@coverage-clover"
+        ],
+        "test-5.5": "@test-5",
+        "test-5.6": "@test-5",
+        "test-7.0": "@test-7",
+        "test-7.1": "@test-7",
+        "test-7.2": "@test-7",
+        "test-7.4": "@test-7",
+        "test-8.0": "@test-8",
+        "test-8.1": "@test-8",
+        "test-8.2": "@test-8",
+        "coverage-5.5": "@coverage-5",
+        "coverage-5.6": "@coverage-5",
+        "coverage-7.0": "@coverage-7",
+        "coverage-7.1": "@coverage-7",
+        "coverage-7.2": "@coverage-7",
+        "coverage-7.4": "@coverage-7",
+        "coverage-8.0": "@coverage-8",
+        "coverage-8.1": "@coverage-8",
+        "coverage-8.2": "@coverage-8",
+        "cs-check": "php -d memory_limit=-1 ./vendor/bin/phpcs --standard=psr2 --exclude=Generic.Files.LineLength ./src ./tests",
+        "cs-checkstyle": "php -d memory_limit=-1 ./vendor/bin/phpcs --standard=psr2 --report=checkstyle ./src ./tests",
+        "cs-fix": "php -d memory_limit=-1 ./vendor/bin/phpcbf --standard=psr2 ./src ./tests",
+        "test": "@test-8",
+        "test-5": "php -d memory_limit=-1 ./vendor/bin/phpunit -c phpunit.5.xml --colors=always --log-junit unitreport.xml --testdox",
+        "test-7": "php -d memory_limit=-1 ./vendor/bin/phpunit -c phpunit.7.xml --colors=always --log-junit unitreport.xml --testdox",
+        "test-8": "php -d memory_limit=-1 ./vendor/bin/phpunit -c phpunit.8.xml --colors=always --log-junit unitreport.xml --testdox",
+        "coverage-5": "php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit -c phpunit.5.xml --coverage-text --coverage-clover=./tmp/coverage.xml --testdox",
+        "coverage-7": "php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit -c phpunit.7.xml --coverage-text --coverage-clover=./tmp/coverage.xml --testdox",
+        "coverage-8": "php -d memory_limit=-1 -d xdebug.mode=coverage ./vendor/bin/phpunit -c phpunit.8.xml --coverage-text --coverage-clover=./tmp/coverage.xml --testdox",
+        "coveralls": "php -d memory_limit=-1 ./vendor/bin/vendor/bin/coveralls -v"
+    }
+}

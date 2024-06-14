@@ -1,0 +1,75 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         3.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+{% set wantedOptions = {'length': '', 'limit': '', 'default': '', 'unsigned': '', 'null': '', 'comment': '', 'autoIncrement': '', 'precision': '', 'scale': ''} %}
+{% set tableMethod = Migration.tableMethod(action) %}
+{% set columnMethod = Migration.columnMethod(action) %}
+{% set indexMethod = Migration.indexMethod(action) %}
+<?php
+declare(strict_types=1);
+
+use Migrations\AbstractMigration;
+
+class {{ name }} extends AbstractMigration
+{
+{% if tableMethod == 'create' and columns['primaryKey'] %}
+    public bool $autoId = false;
+
+{% endif %}
+    /**
+     * Change Method.
+     *
+     * More information on this method is available here:
+     * https://book.cakephp.org/phinx/0/en/migrations.html#the-change-method
+     * @return void
+     */
+    public function change(): void
+    {
+{% for table in tables %}
+        $table = $this->table('{{ table }}');
+{% if tableMethod != 'drop' %}
+{% if columnMethod == 'removeColumn' %}
+{% for column, config in columns['fields'] %}
+        $table->{{ columnMethod }}('{{ column }}');
+{% endfor %}
+{% for column, config in columns['indexes'] %}
+        $table->{{ indexMethod }}([{{
+            Migration.stringifyList(config['columns'])  | raw
+        }}]);
+{% endfor %}
+{% else %}
+{% for column, config in columns['fields'] %}
+        $table->{{ columnMethod }}('{{ column }}', '{{ config['columnType'] }}', [{{
+            Migration.stringifyList(config['options'], {'indent': 3}, wantedOptions) | raw
+        }}]);
+{% endfor %}
+{% for column, config in columns['indexes'] %}
+        $table->{{ indexMethod }}([{{
+             Migration.stringifyList(config['columns'], {'indent': 3}) | raw }}
+            ], [{{
+                Migration.stringifyList(config['options'], {'indent': 3})  | raw
+        }}]);
+{% endfor %}
+{% if tableMethod == 'create' and columns['primaryKey'] is not empty %}
+        $table->addPrimaryKey([{{
+            Migration.stringifyList(columns['primaryKey'], {'indent': 3}) | raw
+        }}]);
+{% endif %}
+{% endif %}
+{% endif %}
+        $table->{{ tableMethod }}(){% if tableMethod == 'drop' %}->save(){% endif %};
+{% endfor %}
+    }
+}

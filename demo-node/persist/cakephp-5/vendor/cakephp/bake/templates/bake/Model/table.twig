@@ -1,0 +1,173 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+{% set annotations = DocBlock.buildTableAnnotations(associations, associationInfo, behaviors, entity, namespace) %}
+{% set generatedFunctions = ['initialize'] %}
+{{ element('Bake.file_header', {
+    namespace: fileBuilder.namespace,
+    classImports: fileBuilder.classImports(['Cake\\ORM\\Query\\SelectQuery', 'Cake\\ORM\\RulesChecker', 'Cake\\ORM\\Table', 'Cake\\Validation\\Validator']),
+}) }}
+
+{{ DocBlock.classDescription(name, 'Model', annotations)|raw }}
+class {{ name }}Table extends Table{{ fileBuilder.classBuilder.implements ? ' implements ' ~ fileBuilder.classBuilder.implements|join(', ') : '' }}
+{
+{% set userConstants = fileBuilder.classBuilder.userConstants([]) %}
+{% if userConstants %}
+    {{~ Bake.concat('\n\n', userConstants) }}
+
+{% endif %}
+{% set userProperties = fileBuilder.classBuilder.userProperties([]) %}
+{% if userProperties %}
+    {{~ Bake.concat('\n\n', userProperties) }}
+
+{% endif %}
+    /**
+     * Initialize method
+     *
+     * @param array<string, mixed> $config The configuration for the Table.
+     * @return void
+     */
+    public function initialize(array $config): void
+    {
+        parent::initialize($config);
+
+{% if table %}
+        $this->setTable('{{ table }}');
+{% endif %}
+
+{%- if displayField %}
+        $this->setDisplayField({{ (displayField is iterable ? Bake.exportArray(displayField) : Bake.exportVar(displayField))|raw }});
+{% endif %}
+
+{%- if primaryKey %}
+    {%- if primaryKey is iterable and primaryKey|length > 1 %}
+        $this->setPrimaryKey({{ Bake.exportArray(primaryKey)|raw }});
+        {{- "\n" }}
+    {%- else %}
+        $this->setPrimaryKey('{{ primaryKey|as_array|first }}');
+        {{- "\n" }}
+    {%- endif %}
+{% endif %}
+
+{%- if enums %}
+
+{% endif %}
+
+{%- if enums %}
+
+{%- for name, className in enums %}
+        $this->getSchema()->setColumnType('{{ name }}', \Cake\Database\Type\EnumType::from(\{{ className }}::class));
+{% endfor %}
+{% endif %}
+
+{%- if behaviors %}
+
+{% endif %}
+
+{%- for behavior, behaviorData in behaviors %}
+        $this->addBehavior('{{ behavior }}'{{ (behaviorData ? (", " ~ Bake.exportArray(behaviorData, 2)|raw ~ '') : '')|raw }});
+{% endfor %}
+
+{%- if associations.belongsTo or associations.hasMany or associations.belongsToMany %}
+
+{% endif %}
+
+{%- for type, assocs in associations %}
+    {%- for assoc in assocs %}
+        {%- set assocData = [] %}
+        {%- for key, val in assoc %}
+            {%- if key is not same as('alias') %}
+                {%- set assocData = assocData|merge({(key): val}) %}
+            {%- endif %}
+        {%- endfor %}
+        $this->{{ type }}('{{ assoc.alias }}', {{ Bake.exportArray(assocData, 2)|raw }});
+        {{- "\n" }}
+    {%- endfor %}
+{% endfor %}
+    }
+{{- "\n" }}
+
+{%- if validation %}
+{% set generatedFunctions = generatedFunctions|merge(['validationDefault']) %}
+
+    /**
+     * Default validation rules.
+     *
+     * @param \Cake\Validation\Validator $validator Validator instance.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationDefault(Validator $validator): Validator
+    {
+{% for field, rules in validation %}
+{% set validationMethods = Bake.getValidationMethods(field, rules) %}
+{% if validationMethods %}
+        $validator
+{% for validationMethod in validationMethods %}
+{% if loop.last %}
+{% set validationMethod = validationMethod ~ ';' %}
+{% endif %}
+            {{ validationMethod|raw }}
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+        return $validator;
+    }
+{% endif %}
+
+{%- if rulesChecker %}
+{% set generatedFunctions = generatedFunctions|merge(['buildRules']) %}
+
+    /**
+     * Returns a rules checker object that will be used for validating
+     * application integrity.
+     *
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
+    public function buildRules(RulesChecker $rules): RulesChecker
+    {
+{% for rule in rulesChecker %}
+{% set fields = Bake.exportArray(rule.fields) %}
+{% set options = '' %}
+{% for optionName, optionValue in rule.options %}
+    {%~ set options = (loop.first ? '[' : options) ~ "'#{optionName}' => " ~ Bake.exportVar(optionValue) ~ (loop.last ? ']' : ', ') %}
+{% endfor %}
+        $rules->add($rules->{{ rule.name }}({{ fields|raw }}{{ (rule.extra|default ? ", '#{rule.extra}'" : '')|raw }}{{ (options ? ', ' ~ options : '')|raw }}), ['errorField' => '{{ rule.fields[0] }}']);
+{% endfor %}
+
+        return $rules;
+    }
+{% endif %}
+
+{%- if connection is not same as('default') %}
+{% set generatedFunctions = generatedFunctions|merge(['defaultConnectionName']) %}
+
+    /**
+     * Returns the database connection name to use by default.
+     *
+     * @return string
+     */
+    public static function defaultConnectionName(): string
+    {
+        return '{{ connection }}';
+    }
+{% endif %}
+{% set userFunctions = fileBuilder.classBuilder.userFunctions(generatedFunctions) %}
+{% if userFunctions %}
+
+    {{~ Bake.concat('\n\n', userFunctions) }}
+{% endif %}
+}

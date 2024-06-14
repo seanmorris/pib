@@ -1,0 +1,45 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+{% set compact = ["'#{singularName}'"] %}
+    /**
+     * Add method
+     *
+     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
+     */
+    public function add()
+    {
+        ${{ singularName }} = $this->{{ currentModelName }}->newEmptyEntity();
+        if ($this->request->is('post')) {
+            ${{ singularName }} = $this->{{ currentModelName }}->patchEntity(${{ singularName }}, $this->request->getData());
+            if ($this->{{ currentModelName }}->save(${{ singularName }})) {
+                $this->Flash->success(__('The {{ singularHumanName|lower }} has been saved.'));
+
+                return $this->redirect(['action' => 'index']);
+            }
+            $this->Flash->error(__('The {{ singularHumanName|lower }} could not be saved. Please, try again.'));
+        }
+{% set associations = Bake.aliasExtractor(modelObj, 'BelongsTo') %}
+{% set associations = associations|merge(Bake.aliasExtractor(modelObj, 'BelongsToMany')) %}
+
+{%- for assoc in associations %}
+    {%- set otherName = Bake.getAssociatedTableAlias(modelObj, assoc) %}
+    {%- set otherPlural = otherName|variable %}
+        ${{ otherPlural }} = $this->{{ currentModelName }}->{{ otherName }}->find('list', limit: 200)->all();
+        {{- "\n" }}
+    {%- set compact = compact|merge(["'#{otherPlural}'"]) %}
+{% endfor %}
+        $this->set(compact({{ compact|join(', ')|raw }}));
+    }

@@ -1,0 +1,10 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+    level: 6
+    checkMissingIterableValueType: false
+    paths:
+        - src/
+    bootstrapFiles:
+        - tests/bootstrap.php

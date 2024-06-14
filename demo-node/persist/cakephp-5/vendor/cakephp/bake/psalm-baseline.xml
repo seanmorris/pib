@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
+  <file src="src/Command/PluginCommand.php">
+    <InternalClass>
+      <code>new Filesystem()</code>
+    </InternalClass>
+    <InternalMethod>
+      <code>findRecursive</code>
+    </InternalMethod>
+  </file>
+  <file src="src/Command/TestCommand.php">
+    <InternalClass>
+      <code>new Filesystem()</code>
+    </InternalClass>
+    <InternalMethod>
+      <code>find</code>
+    </InternalMethod>
+  </file>
+</files>

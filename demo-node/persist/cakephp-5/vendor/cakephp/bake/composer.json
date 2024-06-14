@@ -1,0 +1,73 @@
+{
+    "name": "cakephp/bake",
+    "description": "Bake plugin for CakePHP",
+    "license": "MIT",
+    "type": "cakephp-plugin",
+    "keywords": [
+        "cakephp",
+        "bake"
+    ],
+    "authors": [
+        {
+            "name": "CakePHP Community",
+            "homepage": "https://github.com/cakephp/bake/graphs/contributors"
+        }
+    ],
+    "homepage": "https://github.com/cakephp/bake",
+    "support": {
+        "issues": "https://github.com/cakephp/bake/issues",
+        "forum": "https://stackoverflow.com/tags/cakephp",
+        "source": "https://github.com/cakephp/bake"
+    },
+    "require": {
+        "php": ">=8.1",
+        "brick/varexporter": "^0.4.0",
+        "cakephp/cakephp": "^5.0.3",
+        "cakephp/twig-view": "^2.0.0",
+        "nikic/php-parser": "^4.13.2 || ^5.0.0"
+    },
+    "require-dev": {
+        "cakephp/cakephp-codesniffer": "^5.0.0",
+        "cakephp/debug_kit": "^5.0.0",
+        "phpunit/phpunit": "^10.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bake\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BakeTest\\": "tests/test_app/Plugin/BakeTest/src/",
+            "Bake\\Test\\": "tests/",
+            "Bake\\Test\\App\\": "tests/test_app/App/",
+            "Company\\Pastry\\": "tests/test_app/Plugin/Company/Pastry/src/",
+            "WithBakeSubFolder\\": "tests/test_app/Plugin/WithBakeSubFolder/src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "cakephp/plugin-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "check": [
+            "@test",
+            "@cs-check"
+        ],
+        "cs-check": "phpcs --parallel=16 -p src/ tests/",
+        "cs-fix": "phpcbf --parallel=16 -p src/ tests/",
+        "phpstan": "tools/phpstan analyse",
+        "psalm": "tools/psalm --show-info=false",
+        "psalm-baseline": "tools/psalm --set-baseline=psalm-baseline.xml",
+        "stan": [
+            "@phpstan",
+            "@psalm"
+        ],
+        "stan-baseline": "tools/phpstan --generate-baseline",
+        "stan-setup": "phive install",
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-clover=clover.xml"
+    }
+}

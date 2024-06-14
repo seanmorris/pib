@@ -1,0 +1,139 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Collection/Iterator/NestIterator.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Collection/Iterator/NoChildrenIterator.php
+
+		-
+			message: "#^Property Cake\\\\Console\\\\ConsoleInput\\:\\:\\$_input \\(resource\\) in isset\\(\\) is not nullable\\.$#"
+			count: 1
+			path: src/Console/ConsoleInput.php
+		-
+			message: "#^Property Cake\\\\Console\\\\ConsoleOutput\\:\\:\\$_output \\(resource\\) in isset\\(\\) is not nullable\\.$#"
+			count: 2
+			path: src/Console/ConsoleOutput.php
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 2
+			path: src/Console/ConsoleOptionParser.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 8
+			path: src/Database/Expression/QueryExpression.php
+
+		-
+			message: "#^Template type T of method Cake\\\\Datasource\\\\QueryInterface\\:\\:all\\(\\) is not referenced in a parameter\\.$#"
+			count: 1
+			path: src/Datasource/QueryInterface.php
+
+		-
+			message: "#^Constructor of class Cake\\\\Error\\\\Renderer\\\\ConsoleExceptionRenderer has an unused parameter \\$request\\.$#"
+			count: 1
+			path: src/Error/Renderer/ConsoleExceptionRenderer.php
+
+		-
+			message: "#^Method Cake\\\\Event\\\\EventManager\\:\\:dispatch\\(\\) should return Cake\\\\Event\\\\EventInterface\\<TSubject of object\\> but returns Cake\\\\Event\\\\Event\\<object\\>\\|Cake\\\\Event\\\\EventInterface\\<TSubject of object\\>\\.$#"
+			count: 2
+			path: src/Event/EventManager.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Event/EventManager.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Http/Client.php
+
+		-
+			message: "#^Constructor of class Cake\\\\Http\\\\Client\\\\Auth\\\\Digest has an unused parameter \\$options\\.$#"
+			count: 1
+			path: src/Http/Client/Auth/Digest.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Http/Cookie/Cookie.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 2
+			path: src/Http/Cookie/CookieCollection.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Http/Session.php
+
+		-
+			message: "#^Call to an undefined method Cake\\\\I18n\\\\Date\\|Cake\\\\I18n\\\\DateTime\\:\\:setTimezone\\(\\)\\.$#"
+			count: 1
+			path: src/I18n/RelativeTimeFormatter.php
+
+		-
+			message: "#^Method Cake\\\\ORM\\\\Behavior\\\\TreeBehavior\\:\\:_scope\\(\\) should return T of Cake\\\\ORM\\\\Query\\\\DeleteQuery\\|Cake\\\\ORM\\\\Query\\\\SelectQuery\\|Cake\\\\ORM\\\\Query\\\\UpdateQuery but returns Cake\\\\ORM\\\\Query\\\\DeleteQuery\\|Cake\\\\ORM\\\\Query\\\\SelectQuery\\|Cake\\\\ORM\\\\Query\\\\UpdateQuery\\.$#"
+			count: 1
+			path: src/ORM/Behavior/TreeBehavior.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 2
+			path: src/ORM/EagerLoader.php
+
+		-
+			message: "#^Method Cake\\\\ORM\\\\Query\\\\SelectQuery\\:\\:find\\(\\) should return static\\(Cake\\\\ORM\\\\Query\\\\SelectQuery\\<TSubject of array\\|Cake\\\\Datasource\\\\EntityInterface\\>\\) but returns Cake\\\\ORM\\\\Query\\\\SelectQuery\\<TSubject of array\\|Cake\\\\Datasource\\\\EntityInterface\\>\\.$#"
+			count: 1
+			path: src/ORM/Query/SelectQuery.php
+
+		-
+			message: "#^PHPDoc tag @return with type Cake\\\\ORM\\\\Query\\\\SelectQuery\\<TSubject of array\\|Cake\\\\Datasource\\\\EntityInterface\\> is not subtype of native type static\\(Cake\\\\ORM\\\\Query\\\\SelectQuery\\<TSubject of array\\|Cake\\\\Datasource\\\\EntityInterface\\>\\)\\.$#"
+			count: 1
+			path: src/ORM/Query/SelectQuery.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Routing/RouteBuilder.php
+
+		-
+			message: "#^Parameter \\#1 \\$methods of method PHPUnit\\\\Framework\\\\MockObject\\\\MockBuilder\\<Cake\\\\ORM\\\\Table\\>\\:\\:addMethods\\(\\) expects array\\<int, non\\-empty\\-string\\>, non\\-empty\\-array\\<int, string\\> given\\.$#"
+			count: 1
+			path: src/TestSuite/TestCase.php
+
+		-
+			message: "#^Parameter \\#1 \\$methods of method PHPUnit\\\\Framework\\\\MockObject\\\\MockBuilder\\<Cake\\\\ORM\\\\Table\\>\\:\\:onlyMethods\\(\\) expects array\\<int, non\\-empty\\-string\\>, array\\<int, string\\> given\\.$#"
+			count: 1
+			path: src/TestSuite/TestCase.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: src/TestSuite/TestCase.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/View/Form/ContextFactory.php
+
+		-
+			message: "#^Constructor of class Cake\\\\View\\\\Form\\\\NullContext has an unused parameter \\$context\\.$#"
+			count: 1
+			path: src/View/Form/NullContext.php
+
+		-
+			message: "#^Call to an undefined method DateTimeInterface\\:\\:setTimezone\\(\\)\\.$#"
+			count: 1
+			path: src/View/Helper/TimeHelper.php
+
+		-
+			message: "#^Call to an undefined method Cake\\\\Chronos\\\\ChronosDate\\|DateTime\\|DateTimeImmutable\\:\\:setTimezone\\(\\)\\.$#"
+			count: 1
+			path: src/View/Widget/DateTimeWidget.php

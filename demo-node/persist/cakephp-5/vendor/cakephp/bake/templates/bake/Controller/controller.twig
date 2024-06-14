@@ -1,0 +1,62 @@
+{#
+/**
+ * Controller bake template file
+ *
+ * Allows templating of Controllers generated from bake.
+ *
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+{{ element('Bake.file_header', {
+    namespace: "#{namespace}\\Controller#{prefix}",
+    classImports: (plugin or prefix) ? ["#{baseNamespace}\\Controller\\AppController"] : [],
+}) }}
+
+/**
+ * {{ name }} Controller
+ *
+{% if defaultModel %}
+ * @property \{{ defaultModel }} ${{ name }}
+{% endif %}
+
+{%- for component in components %}
+{% set classInfo = Bake.classInfo(component, 'Controller/Component', 'Component') %}
+ * @property {{ classInfo.fqn }} ${{ classInfo.name }}
+{% endfor %}
+ */
+class {{ name }}Controller extends AppController
+{
+{% if components or helpers %}
+    /**
+     * Initialize controller
+     *
+     * @return void
+     */
+    public function initialize(): void
+    {
+        parent::initialize();
+
+{% for component in components %}
+        $this->loadComponent('{{ component }}');
+{% endfor %}
+{% if helpers %}
+        $this->viewBuilder()->setHelpers({{ Bake.exportArray(helpers)|raw }});
+{% endif %}
+    }
+{% if actions|length %}{{ "\n" }}{% endif %}
+{% endif %}
+{%- for action in actions %}
+{% if loop.index > 1 %}{{ "\n" }}{% endif %}
+    {{- element('Bake.Controller/' ~ action) -}}
+{% endfor %}
+}

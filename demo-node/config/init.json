@@ -6,8 +6,28 @@
         "dynamicCacheTime": 0,
         "vHosts": [
             {
+                "pathPrefix": "/php-wasm/cgi-bin/cakephp-5",
+                "directory": "/persist/cakephp-5/webroot",
+                "entrypoint": "index.php"
+            },
+            {
+                "pathPrefix": "/php-wasm/cgi-bin/codeigniter-4",
+                "directory": "/persist/codeigniter-4/public",
+                "entrypoint": "index.php"
+            },
+            {
                 "pathPrefix": "/php-wasm/cgi-bin/drupal",
                 "directory": "/persist/drupal-7.95",
+                "entrypoint": "index.php"
+            },
+            {
+                "pathPrefix": "/php-wasm/cgi-bin/laravel-11",
+                "directory": "/persist/laravel-11/public",
+                "entrypoint": "index.php"
+            },
+            {
+                "pathPrefix": "/php-wasm/cgi-bin/laminas-3",
+                "directory": "/persist/laminas-3/public",
                 "entrypoint": "index.php"
             }
         ]

@@ -1,0 +1,76 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+{% set propertyHintMap = DocBlock.buildEntityPropertyHintTypeMap(propertySchema ?: []) %}
+{% set associationHintMap = DocBlock.buildEntityAssociationHintTypeMap(propertySchema ?: []) %}
+{% set annotations = DocBlock.propertyHints(propertyHintMap) %}
+
+{%- if associationHintMap %}
+    {%- set annotations = annotations|merge(['']) %}
+    {%- set annotations = annotations|merge(DocBlock.propertyHints(associationHintMap)) %}
+{% endif %}
+
+{%- set accessible = Bake.getFieldAccessibility(fields, primaryKey) %}
+
+{%- set generatedProperties = [] %}
+{{ element('Bake.file_header', {
+    namespace: fileBuilder.namespace,
+    classImports: fileBuilder.classImports(['Cake\\ORM\\Entity']),
+}) }}
+
+{{ DocBlock.classDescription(name, 'Entity', annotations)|raw }}
+class {{ name }} extends Entity{{ fileBuilder.classBuilder.implements ? ' implements ' ~ fileBuilder.classBuilder.implements|join(', ') : '' }}
+{
+{% set userConstants = fileBuilder.classBuilder.userConstants([]) %}
+{% if userConstants %}
+    {{~ Bake.concat('\n\n', userConstants) }}
+
+{% endif %}
+{% if accessible %}
+{%- set generatedProperties = generatedProperties|merge(['_accessible']) %}
+    /**
+     * Fields that can be mass assigned using newEntity() or patchEntity().
+     *
+     * Note that when '*' is set to true, this allows all unspecified fields to
+     * be mass assigned. For security purposes, it is advised to set '*' to false
+     * (or remove it), and explicitly make individual fields accessible as needed.
+     *
+     * @var array<string, bool>
+     */
+    protected array $_accessible = {{ Bake.exportVar(accessible, 1)|raw }};
+{% endif %}
+{% if accessible and hidden %}
+
+{% endif %}
+{%- if hidden %}
+{%- set generatedProperties = generatedProperties|merge(['_hidden']) %}
+    /**
+     * Fields that are excluded from JSON versions of the entity.
+     *
+     * @var list<string>
+     */
+    protected array $_hidden = {{ Bake.exportVar(hidden, 1)|raw }};
+{% endif %}
+{% set userProperties = fileBuilder.classBuilder.userProperties(generatedProperties) %}
+{% if userProperties %}
+
+    {{~ Bake.concat('\n\n', userProperties) }}
+{% endif %}
+{% set userFunctions = fileBuilder.classBuilder.userFunctions([]) %}
+{% if userFunctions %}
+
+    {{~ Bake.concat('\n\n', userFunctions) }}
+{% endif %}
+}

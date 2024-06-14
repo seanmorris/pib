@@ -1,0 +1,84 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+<?php
+/**
+ * @var \{{ namespace }}\View\AppView $this
+ * @var iterable<\{{ entityClass }}> ${{ pluralVar }}
+ */
+?>
+<div class="{{ pluralVar }} index content">
+{% set fields = Bake.filterFields(fields, schema, modelObject, indexColumns, ['binary', 'text']) %}
+    <?= $this->Html->link(__('New {{ singularHumanName }}'), ['action' => 'add'], ['class' => 'button float-right']) ?>
+{% set done = [] %}
+    <h3><?= __('{{ pluralHumanName }}') ?></h3>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+{% for field in fields %}
+                    <th><?= $this->Paginator->sort('{{ field }}') ?></th>
+{% endfor %}
+                    <th class="actions"><?= __('Actions') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach (${{ pluralVar }} as ${{ singularVar }}): ?>
+                <tr>
+{% for field in fields %}
+{% set isKey = false %}
+{% if associations.BelongsTo is defined %}
+{% for alias, details in associations.BelongsTo %}
+{% if field == details.foreignKey %}
+{% set isKey = true %}
+                    <td><?= ${{ singularVar }}->hasValue('{{ details.property }}') ? $this->Html->link(${{ singularVar }}->{{ details.property }}->{{ details.displayField }}, ['controller' => '{{ details.controller }}', 'action' => 'view', ${{ singularVar }}->{{ details.property }}->{{ details.primaryKey[0] }}]) : '' ?></td>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if isKey is not same as(true) %}
+{% set columnData = Bake.columnData(field, schema) %}
+{% if columnData.type starts with 'enum-' %}
+                    <td><?= ${{ singularVar }}->{{ field }} === null ? '' : h(${{ singularVar }}->{{ field }}->label()) ?></td>
+{% elseif columnData.type not in ['integer', 'float', 'decimal', 'biginteger', 'smallinteger', 'tinyinteger'] %}
+                    <td><?= h(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.null %}
+                    <td><?= ${{ singularVar }}->{{ field }} === null ? '' : $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
+{% else %}
+                    <td><?= $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
+{% endif %}
+{% endif %}
+{% endfor %}
+{% set pk = '$' ~ singularVar ~ '->' ~ primaryKey[0] %}
+                    <td class="actions">
+                        <?= $this->Html->link(__('View'), ['action' => 'view', {{ pk|raw }}]) ?>
+                        <?= $this->Html->link(__('Edit'), ['action' => 'edit', {{ pk|raw }}]) ?>
+                        <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', {{ pk|raw }}], ['confirm' => __('Are you sure you want to delete # {0}?', {{ pk|raw }})]) ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="paginator">
+        <ul class="pagination">
+            <?= $this->Paginator->first('<< ' . __('first')) ?>
+            <?= $this->Paginator->prev('< ' . __('previous')) ?>
+            <?= $this->Paginator->numbers() ?>
+            <?= $this->Paginator->next(__('next') . ' >') ?>
+            <?= $this->Paginator->last(__('last') . ' >>') ?>
+        </ul>
+        <p><?= $this->Paginator->counter(__('Page {{ '{{' }}page{{ '}}' }} of {{ '{{' }}pages{{ '}}' }}, showing {{ '{{' }}current{{ '}}' }} record(s) out of {{ '{{' }}count{{ '}}' }} total')) ?></p>
+    </div>
+</div>

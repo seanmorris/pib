@@ -1,0 +1,11 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Instanceof between mixed and Cake\\\\Chronos\\\\Chronos will always evaluate to false\\.$#"
+			count: 1
+			path: src/Command/FixtureCommand.php
+
+		-
+			message: "#^Dead catch \\- UnexpectedValueException is never thrown in the try block\\.$#"
+			count: 1
+			path: src/Command/TestCommand.php

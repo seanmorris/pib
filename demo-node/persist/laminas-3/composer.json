@@ -1,0 +1,146 @@
+{
+    "name": "laminas/laminas-mvc-skeleton",
+    "description": "Laminas MVC Skeleton Application",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "mvc",
+        "skeleton",
+        "framework"
+    ],
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "laminas/laminas-component-installer": "^3.4.0",
+        "laminas/laminas-development-mode": "^3.12.0",
+        "laminas/laminas-mvc": "^3.7.0",
+        "laminas/laminas-skeleton-installer": "^1.3.0"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "laminas/laminas-test": "^4.9",
+        "phpunit/phpunit": "^10.4",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "squizlabs/php_codesniffer": "^3.7",
+        "vimeo/psalm": "^5.13"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "module/Application/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ApplicationTest\\": "module/Application/test/"
+        }
+    },
+    "extra": {
+        "laminas-skeleton-installer": [
+            {
+                "name": "laminas/laminas-developer-tools",
+                "constraint": "^2.8.0",
+                "prompt": "Would you like to install the developer toolbar?",
+                "module": true,
+                "dev": true
+            },
+            {
+                "name": "laminas/laminas-db",
+                "constraint": "^2.17.0",
+                "prompt": "Would you like to install database support (installs laminas-db)?",
+                "module": true
+            },
+            {
+                "name": "laminas/laminas-mvc-form",
+                "constraint": "^2.0.0",
+                "prompt": "Would you like to install forms support?",
+                "module": true
+            },
+            {
+                "name": "laminas/laminas-json",
+                "constraint": "^3.5.0",
+                "prompt": "Would you like to install JSON de/serialization support?"
+            },
+            {
+                "name": "laminas/laminas-log",
+                "constraint": "^2.16.1",
+                "prompt": "Would you like to install logging support?",
+                "module": true
+            },
+            {
+                "name": "laminas/laminas-cli",
+                "constraint": "^1.8.0",
+                "prompt": "Would you like to install command-line interface support?"
+            },
+            {
+                "name": "laminas/laminas-mvc-i18n",
+                "constraint": "^1.7.0",
+                "prompt": "Would you like to install i18n support?",
+                "module": true
+            },
+            {
+                "name": "laminas/laminas-mvc-plugins",
+                "constraint": "^1.2.0",
+                "prompt": "Would you like to install the official MVC plugins, including PRG support, identity, and flash messages?",
+                "module": true
+            },
+            {
+                "name": "laminas/laminas-mvc-middleware",
+                "constraint": "^2.3.0",
+                "prompt": "Would you like to use the PSR-7 middleware dispatcher?",
+                "module": true
+            },
+            {
+                "name": "laminas/laminas-session",
+                "constraint": "^2.16.0",
+                "prompt": "Would you like to install sessions support?",
+                "module": true
+            },
+            {
+                "name": "laminas/laminas-di",
+                "constraint": "^3.12.0",
+                "prompt": "Would you like to install the laminas-di for laminas-servicemanager?",
+                "module": true
+            }
+        ]
+    },
+    "scripts": {
+        "clear-config-cache": "php bin/clear-config-cache.php",
+        "cs-check": "vendor/bin/phpcs",
+        "cs-fix": "vendor/bin/phpcbf",
+        "development-disable": "laminas-development-mode disable",
+        "development-enable": "laminas-development-mode enable",
+        "development-status": "laminas-development-mode status",
+        "post-create-project-cmd": [
+            "@development-enable",
+            "php bin/update-gitignore.php",
+            "php -r 'if (file_exists(\"bin/remove-package-artifacts.php\")) include \"bin/remove-package-artifacts.php\";'"
+        ],
+        "post-install-cmd": "@clear-config-cache",
+        "post-update-cmd": "@clear-config-cache",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "php -S 0.0.0.0:8080 -t public"
+        ],
+        "test": "vendor/bin/phpunit",
+        "static-analysis": "vendor/bin/psalm --stats"
+    },
+    "scripts-descriptions": {
+        "clear-config-cache": "Clears merged config cache. Required for config changes to be applied.",
+        "cs-check": "Run coding standards checks.",
+        "cs-fix": "Automatically fix coding standard issues.",
+        "development-disable": "Disable development mode.",
+        "development-enable": "Enable development mode.",
+        "development-status": "Detail whether or not the application is in development mode.",
+        "serve": "Start the built-in PHP web server and serve the application.",
+        "static-analysis": "Run static analysis tool Psalm.",
+        "test": "Run unit tests."
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "laminas/laminas-component-installer": true,
+            "laminas/laminas-skeleton-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

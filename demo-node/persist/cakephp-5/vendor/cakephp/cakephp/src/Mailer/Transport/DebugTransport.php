@@ -1,0 +1,42 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Emulates the message sending process for testing purposes
+ *
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
+ */
+namespace Cake\Mailer\Transport;
+
+use Cake\Mailer\AbstractTransport;
+use Cake\Mailer\Message;
+
+/**
+ * Debug Transport class, useful for emulating the email sending process and inspecting
+ * the resultant email message before actually sending it during development
+ */
+class DebugTransport extends AbstractTransport
+{
+    /**
+     * @inheritDoc
+     */
+    public function send(Message $message): array
+    {
+        $headers = $message->getHeadersString(
+            ['from', 'sender', 'replyTo', 'readReceipt', 'returnPath', 'to', 'cc', 'subject']
+        );
+        $message = implode("\r\n", $message->getBody());
+
+        return ['headers' => $headers, 'message' => $message];
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "name": "cakephp/cakephp-codesniffer",
+    "description": "CakePHP CodeSniffer Standards",
+    "type": "phpcodesniffer-standard",
+    "keywords": ["framework", "codesniffer"],
+    "homepage": "https://cakephp.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "CakePHP Community",
+            "homepage": "https://github.com/cakephp/cakephp-codesniffer/graphs/contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/cakephp/cakephp-codesniffer/issues",
+        "forum": "https://stackoverflow.com/tags/cakephp",
+        "irc": "irc://irc.freenode.org/cakephp",
+        "source": "https://github.com/cakephp/cakephp-codesniffer"
+    },
+    "require": {
+        "php": ">=8.1.0",
+        "phpstan/phpdoc-parser": "^1.4.5",
+        "slevomat/coding-standard": "^8.4",
+        "squizlabs/php_codesniffer": "^3.7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "CakePHP\\": "CakePHP/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "add-standard" : "phpcs --config-set installed_paths $(pwd)",
+        "phpunit": "phpunit vendor/squizlabs/php_codesniffer/tests/AllTests.php --filter CakePHP --no-configuration --bootstrap=vendor/squizlabs/php_codesniffer/tests/bootstrap.php --dont-report-useless-tests",
+        "test": [
+          "@add-standard",
+          "@phpunit"
+        ],
+        "cs-check": "phpcs --colors --parallel=16 -p -s CakePHP/",
+        "cs-fix": "phpcbf --colors --parallel=16 -p CakePHP/",
+        "docs": "php docs/generate.php",
+        "explain": "phpcs -e --standard=CakePHP"
+    }
+}

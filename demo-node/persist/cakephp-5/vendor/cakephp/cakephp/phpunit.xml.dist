@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         colors="true"
+         bootstrap="tests/bootstrap.php"
+         backupGlobals="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="cakephp">
+            <directory>tests/TestCase/</directory>
+            <!-- Excludes are required in order to let DatabaseSuite decorate the tests -->
+            <exclude>tests/TestCase/Database/</exclude>
+            <exclude>tests/TestCase/ORM/</exclude>
+            <exclude>tests/TestCase/Collection/FunctionsGlobalTest.php</exclude>
+            <exclude>tests/TestCase/Core/FunctionsGlobalTest.php</exclude>
+            <exclude>tests/TestCase/Routing/FunctionsGlobalTest.php</exclude>
+        </testsuite>
+        <testsuite name="database">
+            <directory>tests/TestCase/Database/</directory>
+            <directory>tests/TestCase/ORM/</directory>
+        </testsuite>
+        <testsuite name="http-interop-http-factory">
+            <directory>./vendor/http-interop/http-factory-tests/test</directory>
+        </testsuite>
+        <testsuite name="globalfunctions">
+            <file>tests/TestCase/Collection/FunctionsGlobalTest.php</file>
+            <file>tests/TestCase/Core/FunctionsGlobalTest.php</file>
+            <file>tests/TestCase/Routing/FunctionsGlobalTest.php</file>
+        </testsuite>
+    </testsuites>
+
+    <extensions>
+        <bootstrap class="Cake\TestSuite\Fixture\Extension\PHPUnitExtension"/>
+    </extensions>
+
+    <source>
+        <include>
+            <directory suffix=".php">src/</directory>
+        </include>
+    </source>
+
+    <php>
+        <ini name="memory_limit" value="-1"/>
+        <!-- E_ALL & ~E_USER_DEPRECATED (16383)-->
+        <!-- E_ALL (32767) -->
+        <ini name="error_reporting" value="32767"/>
+        <env name="FIXTURE_SCHEMA_METADATA" value="./tests/schema.php"/>
+
+        <!-- Enable query logging output for the testrun.
+        <env name="LOG_QUERIES" value="1" />
+        -->
+        <!-- SQLite
+        <env name="DB_URL" value="sqlite:///:memory:"/>
+        -->
+        <!-- Postgres
+        <env name="DB_URL" value="postgres://localhost/cake_test?timezone=UTC"/>
+        -->
+        <!-- MySQL
+        <env name="DB_URL" value="mysql://localhost/cake_test?timezone=UTC"/>
+        -->
+        <!-- SQL Server
+        <env name="DB_URL" value="sqlserver://localhost/cake_test?timezone=UTC"/>
+        -->
+
+        <const name="PHPUNIT_TESTSUITE" value="true"/>
+        <!-- Constants used by Http Interop's Http Factory tests -->
+        <const name="REQUEST_FACTORY" value="Cake\Http\RequestFactory"/>
+        <const name="RESPONSE_FACTORY" value="Cake\Http\ResponseFactory"/>
+        <const name="SERVER_REQUEST_FACTORY" value="Cake\Http\ServerRequestFactory"/>
+        <const name="STREAM_FACTORY" value="Cake\Http\StreamFactory"/>
+        <const name="UPLOADED_FILE_FACTORY" value="Cake\Http\UploadedFileFactory"/>
+        <const name="URI_FACTORY" value="Cake\Http\UriFactory"/>
+    </php>
+</phpunit>

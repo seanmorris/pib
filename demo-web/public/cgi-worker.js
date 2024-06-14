@@ -30,7 +30,7 @@ module.exports = webpackEmptyAsyncContext;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-module.exports = __webpack_require__.p + "ca0859f91adf00b5fb50.wasm";
+module.exports = __webpack_require__.p + "0dc43eda614ba9ba6798.wasm";
 
 /***/ }),
 
@@ -201,7 +201,7 @@ class PhpCgiBase {
         return located;
       }
       if (urlLibs[path]) {
-        return urlLibs[path];
+        return String(urlLibs[path]);
       }
     };
     const phpArgs = {
@@ -220,10 +220,15 @@ class PhpCgiBase {
       await php.ccall('pib_storage_init', NUM, [], [], {
         async: true
       });
-      this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
+      if (!php.FS.analyzePath('/preload').exists) {
+        php.FS.mkdir('/preload');
+      }
+      await this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
       const iniLines = libs.map(lib => {
-        if (typeof lib === 'string') {
+        if (typeof lib === 'string' || lib instanceof URL) {
           return `extension=${lib}`;
+        } else if (typeof lib === 'object' && lib.ini) {
+          return `extension=${String(lib.url).split('/').pop()}`;
         }
       });
       this.phpArgs.ini && iniLines.push(this.phpArgs.ini.replace(/\n\s+/g, '\n'));
@@ -291,7 +296,7 @@ class PhpCgiBase {
     }
     let originalPath = url.pathname;
     const extension = path.split('.').pop();
-    if (extension !== 'php') {
+    if (extension !== 'php' && extension !== 'phar') {
       const aboutPath = php.FS.analyzePath(path);
 
       // Return static file
@@ -367,6 +372,7 @@ class PhpCgiBase {
       } else {
         console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
         console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
+        await this.refresh();
       }
     } catch (error) {
       console.error(error);
@@ -396,8 +402,14 @@ class PhpCgiBase {
     const headers = {
       ...parsedResponse.headers
     };
-    delete headers['Set-Cookie'];
-    headers["Content-type"] = headers["Content-type"] ?? 'text/html; charset=utf-8';
+
+    // delete headers['Set-Cookie'];
+
+    if (extension in this.types) {
+      // headers["Content-type"] = this.types[extension];
+    } else {
+      headers["Content-type"] = headers["Content-type"] ?? 'text/html; charset=utf-8';
+    }
     if (parsedResponse.headers.Location) {
       headers.Location = parsedResponse.headers.Location;
     }
@@ -532,22 +544,26 @@ class PhpCgiWebBase extends _PhpCgiBase_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiB
   }
   async _beforeRequest() {
     if (!this.initialized) {
+      console.log('Locking');
       await navigator.locks.request('php-wasm-fs-lock', async () => {
         const php = await this.binary;
         await this.loadInit(php);
         await new Promise((accept, reject) => php.FS.syncfs(true, err => {
           if (err) reject(err);else accept();
         }));
+        console.log('Unlocking');
       });
     }
     this.initialized = true;
   }
   async _afterRequest() {
+    console.log('Locking');
     await navigator.locks.request('php-wasm-fs-lock', async () => {
       const php = await this.binary;
       await new Promise((accept, reject) => php.FS.syncfs(false, err => {
         if (err) reject(err);else accept();
       }));
+      console.log('Unlocking');
     });
   }
   refresh() {
@@ -578,20 +594,26 @@ class PhpCgiWebBase extends _PhpCgiBase_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiB
       stderr: x => this.error.push(x),
       locateFile
     };
+    console.log('Locking');
     this.binary = navigator.locks.request('php-wasm-fs-lock', async () => {
       const php = await new this.PHP(phpArgs);
-      this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
+      await php.ccall('pib_storage_init', NUM, [], [], {
+        async: true
+      });
+      if (!php.FS.analyzePath('/preload').exists) {
+        php.FS.mkdir('/preload');
+      }
+      await this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false));
       const iniLines = libs.map(lib => {
-        if (typeof lib === 'string') {
+        if (typeof lib === 'string' || lib instanceof URL) {
           return `extension=${lib}`;
+        } else if (typeof lib === 'object' && lib.ini) {
+          return `extension=${String(lib.url).split('/').pop()}`;
         }
       });
       this.phpArgs.ini && iniLines.push(this.phpArgs.ini.replace(/\n\s+/g, '\n'));
       php.FS.writeFile('/php.ini', iniLines.join("\n") + "\n", {
         encoding: 'utf8'
-      });
-      await php.ccall('pib_storage_init', NUM, [], [], {
-        async: true
       });
       await new Promise((accept, reject) => {
         php.FS.syncfs(true, error => {
@@ -602,15 +624,19 @@ class PhpCgiWebBase extends _PhpCgiBase_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiB
         async: true
       });
       await this.loadInit(php);
+      console.log('Unlocking');
       return php;
     });
   }
-  _enqueue(callback, params = []) {
+  async _enqueue(callback, params = []) {
     let accept, reject;
     const coordinator = new Promise((a, r) => [accept, reject] = [a, r]);
     this.queue.push([callback, params, accept, reject]);
+    console.log(await navigator.locks.query());
+    console.log('Locking');
     navigator.locks.request('php-wasm-fs-lock', async () => {
       if (!this.queue.length) {
+        console.log('Unlocking');
         return;
       }
       await (this.autoTransaction ? this.startTransaction() : Promise.resolve());
@@ -623,6 +649,7 @@ class PhpCgiWebBase extends _PhpCgiBase_mjs__WEBPACK_IMPORTED_MODULE_0__.PhpCgiB
         }
       } while (this.queue.length);
       await (this.autoTransaction ? this.commitTransaction() : Promise.resolve());
+      console.log('Unlocking');
     });
     return coordinator;
   }
@@ -704,6 +731,12 @@ const breakoutRequest = request => {
     });
   } else if (request.arrayBuffer) {
     getPost = request.arrayBuffer().then(buffer => [...new Uint8Array(buffer)].map(x => String.fromCharCode(x)).join(''));
+  } else if (request.on) {
+    getPost = new Promise(accept => {
+      let body = [];
+      request.on('data', chunk => body.push(chunk));
+      request.on('end', () => accept([...new Uint8Array(Buffer.concat(body))].map(x => String.fromCharCode(x)).join('')));
+    });
   }
   const url = new URL(request.url);
   return getPost.then(post => ({
@@ -711,7 +744,7 @@ const breakoutRequest = request => {
     method: request.method,
     get: url.search ? url.search.substr(1) : '',
     post: request.method === 'POST' ? post : null,
-    contentType: request.method === 'POST' ? request.headers.get('Content-Type') ?? 'application/x-www-form-urlencoded' : null
+    contentType: request.method === 'POST' ? request.headers && request.headers.get('Content-Type') || 'application/x-www-form-urlencoded' : null
   }));
 };
 
