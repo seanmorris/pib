@@ -7,6 +7,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
+      - run: cp .circleci/.env_8.3.ci .env
       - run: make test
   test-8-2:
     runs-on: ubuntu-latest
@@ -14,6 +15,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
+      - run: cp .circleci/.env_8.2.ci .env
       - run: make test PHP_VERSION=8.2
   test-8-1:
     runs-on: ubuntu-latest
@@ -21,6 +23,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
+      - run: cp .circleci/.env_8.1.ci .env
       - run: make test PHP_VERSION=8.1
   test-8-0:
     runs-on: ubuntu-latest
@@ -28,4 +31,5 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
+      - run: cp .circleci/.env_8.0.ci .env
       - run: make test PHP_VERSION=8.0
