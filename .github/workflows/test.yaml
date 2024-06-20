@@ -2,7 +2,7 @@ name: Test
 on: [push]
 jobs:
   test:
-    name: Test
+    name: Test 8.3
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -12,6 +12,7 @@ jobs:
       - run: make test
 
   test-8-2:
+    name: Test 8.2
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -21,6 +22,7 @@ jobs:
       - run: make test PHP_VERSION=8.2
 
   test-8-1:
+    name: Test 8.1
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -30,6 +32,7 @@ jobs:
       - run: make test PHP_VERSION=8.1
 
   test-8-0:
+    name: Test 8.0
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -40,7 +43,7 @@ jobs:
 
 
   test-dynamic:
-    name: Test
+    name: 8.3 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -50,6 +53,7 @@ jobs:
       - run: make test
 
   test-8-2-dynamic:
+    name: 8.2 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -59,6 +63,7 @@ jobs:
       - run: make test PHP_VERSION=8.2
 
   test-8-1-dynamic:
+    name: 8.1 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -68,6 +73,7 @@ jobs:
       - run: make test PHP_VERSION=8.1
 
   test-8-0-dynamic:
+    name: 8.0 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -78,7 +84,7 @@ jobs:
 
 
   test-shared:
-    name: Test
+    name: 8.3 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -88,6 +94,7 @@ jobs:
       - run: make test
 
   test-8-2-shared:
+    name: 8.2 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -97,6 +104,7 @@ jobs:
       - run: make test PHP_VERSION=8.2
 
   test-8-1-shared:
+    name: 8.1 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -106,6 +114,7 @@ jobs:
       - run: make test PHP_VERSION=8.1
 
   test-8-0-shared:
+    name: 8.0 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
