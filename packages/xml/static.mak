@@ -22,7 +22,7 @@ TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
 endif
 
 ifeq (${WITH_XML},dynamic)
-ifneq ($(filter ${WITH_LIBXML},static),)
+ifneq ($(filter ${WITH_LIBXML},static shared),)
 $(error WITH_XML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
