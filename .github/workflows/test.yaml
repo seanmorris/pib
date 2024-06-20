@@ -6,9 +6,10 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.27.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.3.ci .env
+      - run: make lib/lib/libicudata.a
       - run: make test
   # test-8-2:
   #   runs-on: ubuntu-latest
