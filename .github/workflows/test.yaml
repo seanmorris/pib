@@ -7,7 +7,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: sudo apt update
-      - run: sudo apt upgrade -y
+      - run: sudo apt install -y docker-compose
       - run: npm install
       - run: cp .circleci/.env_8.3.ci .env
       - run: make test
