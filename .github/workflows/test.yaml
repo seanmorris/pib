@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.3.ci .env
       - run: make test
@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.2.ci .env
       - run: make test PHP_VERSION=8.2
@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.1.ci .env
       - run: make test PHP_VERSION=8.1
@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.0.ci .env
       - run: make test PHP_VERSION=8.0
@@ -52,7 +52,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make test
@@ -63,7 +63,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: make test PHP_VERSION=8.2
@@ -74,7 +74,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: make test PHP_VERSION=8.1
@@ -85,7 +85,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make test PHP_VERSION=8.0
@@ -97,7 +97,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: make test
@@ -108,7 +108,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: make test PHP_VERSION=8.2
@@ -119,7 +119,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: make test PHP_VERSION=8.1
@@ -130,7 +130,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
+      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: make test PHP_VERSION=8.0
