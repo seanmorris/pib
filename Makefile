@@ -129,7 +129,7 @@ SHELL=bash -euo pipefail
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 INTERACTIVE=
-PROGRESS=--progress auto
+PROGRESS?=--progress auto
 CPU_COUNT=`nproc || echo 1`
 # PRELOAD_ASSETS+=php.ini
 
