@@ -8,24 +8,27 @@
 	"bin": {
 		"php-wasm-builder": "./bin/php-wasm-builder.js"
 	},
+	"scripts": {
+		"test": "make test"
+	},
 	"dependencies": {
 		"@babel/cli": "^7.8.4",
 		"@babel/core": "^7.8.7",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",
 		"@babel/preset-env": "^7.0.0",
-		"php-wasm-freetype": "^0.0.9-b",
-		"php-wasm-gd": "^0.0.9-d",
+		"php-wasm-dom": "^0.0.0",
+		"php-wasm-gd": "^0.0.9-e",
 		"php-wasm-iconv": "^0.0.9-g",
-		"php-wasm-libicu": "^0.0.9-s",
-		"php-wasm-libjpeg": "^0.0.9-c",
-		"php-wasm-libpng": "^0.0.9-h",
-		"php-wasm-libxml": "^0.0.9-j",
+		"php-wasm-intl": "^0.0.0",
+		"php-wasm-libxml": "^0.0.9-k",
 		"php-wasm-libzip": "^0.0.9-d",
-		"php-wasm-oniguruma": "^0.0.9-c",
+		"php-wasm-mbstring": "^0.0.0",
 		"php-wasm-openssl": "^0.0.9-f",
 		"php-wasm-phar": "^0.0.9-c",
 		"php-wasm-sqlite": "^0.0.9-u",
+		"php-wasm-simplexml": "^0.0.0",
 		"php-wasm-tidy": "^0.0.9-e",
+		"php-wasm-xml": "^0.0.0",
 		"php-wasm-yaml": "^0.0.9-g",
 		"php-wasm-zlib": "^0.0.9-e",
 		"vrzno": "^0.0.9-f"

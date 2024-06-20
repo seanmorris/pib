@@ -1,6 +1,6 @@
-import { phpVersion } from "./config";
-import { OutputBuffer } from "./OutputBuffer";
-import { _Event } from "./_Event";
+import { phpVersion } from './config';
+import { OutputBuffer } from './OutputBuffer';
+import { _Event } from './_Event';
 import { fsOps } from './fsOps';
 import { resolveDependencies } from './resolveDependencies';
 

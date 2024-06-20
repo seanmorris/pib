@@ -45,16 +45,18 @@ const commands = {};
 
 		const options = [
 			`${envName}${binaryMode === 'cgi' ? '-cgi-' : '-'}${buildTypeLower}`,
-			`PHP${binaryMode === 'cgi' ? '_CGI_' : '_'}DIST_DIR=${cwd}`,
+			`PHP_BUILDER_DIR=${cwd}`,
 			`BUILD_TYPE=${buildTypeLower}`,
 			`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`
 		];
 
 		console.log(options);
 
+		options.push(`ENV_DIR=${cwd}/`);
+
 		if(fs.existsSync(cwd + '/.php-wasm-rc'))
 		{
-			options.push(`ENV_FILE=${rcFile}`,);
+			options.push(`ENV_FILE=${rcFile}`);
 		}
 
 		child_process.spawn(`make`, options, {
@@ -129,11 +131,16 @@ const commands = {};
 
 { // assets
 	const assets = () => {
-		const options = [`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`];
+		const options = [
+			`PHP_BUILDER_DIR=${cwd}`,
+			`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`,
+		];
+
+		options.push(`ENV_DIR=${cwd}/`);
 
 		if(fs.existsSync(cwd + '/.php-wasm-rc'))
 		{
-			options.push(`ENV_FILE=${rcFile}`,`ENV_DIR=${cwd}/`);
+			options.push(`ENV_FILE=${rcFile}`);
 		}
 
 		options.push('assets');

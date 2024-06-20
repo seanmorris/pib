@@ -1,11 +1,26 @@
 import { PhpCgiBase } from './PhpCgiBase';
 import PHP from './php-cgi-node';
+import path from 'node:path';
+import url from 'node:url';
 
 export class PhpCgiNode extends PhpCgiBase
 {
 	constructor({docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
 	{
-		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args});
+		let dir;
+
+		if(typeof __dirname === 'undefined')
+		{
+			dir = path.dirname(url.fileURLToPath(import.meta.url));
+		}
+		else
+		{
+			dir = __dirname;
+		}
+
+		const locateFile = name => path.resolve(dir, name);
+
+		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, locateFile, ...args});
 	}
 
 	async request(request)

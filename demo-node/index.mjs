@@ -10,11 +10,11 @@ const php = new PhpCgiNode({
 		, {mountPath: '/config' , localPath: './config'}
 	]
 	, sharedLibs: [
-		await import('php-wasm-libicu')
+		await import('php-wasm-intl')
 		, await import('php-wasm-libxml')
 		, await import('php-wasm-sqlite')
 		, await import('php-wasm-phar')
-		, await import('php-wasm-oniguruma')
+		, await import('php-wasm-mbstring')
 		, await import('php-wasm-openssl')
 	]
 	, types: {

@@ -38,7 +38,7 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 				|| libDef.substr(0, 8) == 'https://'
 				|| libDef.substr(0, 7) == 'http://'
 			){
-				urlLibs[ String(libDef.split('/')).pop() ] = libDef;
+				urlLibs[ String(libDef).split('/').pop() ] = libDef;
 			}
 		}
 		else if(typeof libDef === 'object') {

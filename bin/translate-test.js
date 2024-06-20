@@ -42,13 +42,13 @@ test(${JSON.stringify(String(sections.TEST).trim())}, async () => {
 	process.env.WITH_ZLIB  === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-zlib.so');
 	process.env.WITH_GD    === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-gd.so');
 	process.env.WITH_ICONV === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-iconv.so');
-	process.env.WITH_ICU   === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-intl.so');
+	process.env.WITH_INTL  === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-intl.so');
 	process.env.WITH_XML   === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-xml.so', 'php${parsedArgs.phpVersion}-dom.so', 'php${parsedArgs.phpVersion}-simplexml.so');
 	process.env.WITH_ONIGURUMA === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-mbstring.so');
 	process.env.WITH_OPENSSL   === 'dynamic' && sharedLibs.push('php${parsedArgs.phpVersion}-openssl.so');
 
 	const files = [];
-	process.env.WITH_ICU === 'dynamic' && files.push({parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-libicu/icudt72l.dat'});
+	process.env.WITH_INTL === 'dynamic' && files.push({parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-intl/icudt72l.dat'});
 
 	const php = new PhpNode( { sharedLibs, files, persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
 

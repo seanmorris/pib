@@ -33,5 +33,6 @@ configured
 /.cache
 .env
 packages/**/*.so
+packages/**/*.dat
 emscripten/
 **.generated.mjs

@@ -6,10 +6,10 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
 ## Defaults:
 
+ENV_DIR?=.
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
-ENV_DIR?=
 
 ## Default libraries
 WITH_BCMATH  ?=1
@@ -66,7 +66,7 @@ WITH_FREETYPE?=0
 
 ## Extra libraries...
 WITH_ONIGURUMA?=0
-WITH_ICU   ?=0
+WITH_INTL  ?=0
 WITH_TIDY  ?=0
 WITH_EXIF  ?=0
 WITH_YAML  ?=0
@@ -103,7 +103,12 @@ $(error PHP_VERSION MUST BE 8.3, 8.2, 8.1 or 8.0. PLEASE CHECK YOUR SETTINGS FIL
 endif
 
 ## More Options
-PHP_DIST_DIR?=./packages/php-wasm
+ifdef PHP_BUILDER_DIR
+ENV_DIR:=${PHP_BUILDER_DIR}
+PHP_DIST_DIR:=${ENV_DIR}/${PHP_DIST_DIR}
+PHP_ASSET_PATH:=${ENV_DIR}/${PHP_ASSET_PATH}
+endif
+PHP_DIST_DIR?=${ENV_DIR}/packages/php-wasm
 INITIAL_MEMORY ?=128MB
 MAXIMUM_MEMORY ?=4096MB
 ASSERTIONS     ?=0
@@ -153,19 +158,19 @@ cjs: ${CJS}
 mjs: ${MJS}
 
 web-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-web.mjs)
-web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.mjs _Event.js php-web.js)
+web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-web.js)
 
 worker-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-worker.mjs)
-worker-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.mjs _Event.js php-worker.js)
+worker-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-worker.js)
 
 webview-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-webview.mjs)
-webview-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.mjs _Event.js php-webview.js)
+webview-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-webview.js)
 
 node-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs php-node.mjs)
-node-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js  fsOps.js   resolveDependencies.mjs _Event.js php-node.js)
+node-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js  fsOps.js  resolveDependencies.js  _Event.js php-node.js)
 
 shell-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpShell.mjs OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs php-shell.mjs)
-shell-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpShell.js  OutputBuffer.js  fsOps.js  resolveDependencies.mjs _Event.js php-shell.js)
+shell-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpShell.js  OutputBuffer.js  fsOps.js  resolveDependencies.js  _Event.js php-shell.js)
 
 WITH_CGI=1
 
@@ -218,7 +223,7 @@ ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
 PHP_ASSET_PATH?=${PHP_DIST_DIR}
-SHARED_ASSET_PATHS=${ENV_DIR}${PHP_ASSET_PATH}
+SHARED_ASSET_PATHS=${PHP_ASSET_PATH}
 
 ifneq (${PHP_ASSET_PATH},${PHP_DIST_DIR})
 PHP_ASSET_LIST+=
@@ -231,12 +236,12 @@ PRELOAD_NAME=php
 
 ifdef PRELOAD_ASSETS
 # DEPENDENCIES+=
-# PHP_ASSET_LIST+= ${PRELOAD_NAME}.data
+PHP_ASSET_LIST+= ${PRELOAD_NAME}.data
 ORDER_ONLY+=.cache/preload-collected
 EXTRA_FLAGS+= --preload-name ${PRELOAD_NAME} ${PRELOAD_METHOD} /src/third_party/preload@/preload
 
-${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
-	cp -Lprf packages/php-wasm/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}/
+${PHP_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
+	cp -Lprf packages/php-wasm/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}/
 endif
 
 ########### Collect & patch the source code. ###########
@@ -326,6 +331,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 		--enable-embed=static \
 		--enable-pib       \
 		--enable-json      \
+		--enable-pdo       \
 		--disable-all      \
 		--disable-fiber-asm \
 		--disable-phpdbg   \
@@ -424,6 +430,9 @@ DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS
 ${PHP_DIST_DIR}/config.mjs:
 	echo 'export const phpVersion = "${PHP_VERSION}";' > $@
 
+${PHP_DIST_DIR}/config.js:
+	echo 'module.exports = {phpVersion: "${PHP_VERSION}"};' > $@
+
 ${PHP_DIST_DIR}/php-web.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-web.js: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php-web.js: FS_TYPE=${WEB_FS_TYPE}
@@ -437,14 +446,12 @@ ${PHP_DIST_DIR}/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
-
-$(info ${BUILD_FLAGS})
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-web.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-web.mjs: ENVIRONMENT=web
@@ -461,19 +468,19 @@ ${PHP_DIST_DIR}/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	perl -pi -w -e 's|_setTempRet0|setTempRet0|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ${PHP_DIST_DIR}/php-worker.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-worker.js: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -481,19 +488,19 @@ ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-worker.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-worker.mjs: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -502,19 +509,19 @@ ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ${PHP_DIST_DIR}/php-node.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-node.js: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -522,19 +529,19 @@ ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-node.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-node.mjs: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -543,18 +550,18 @@ ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ${PHP_DIST_DIR}/php-shell.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-shell.js: ENVIRONMENT=shell
 ${PHP_DIST_DIR}/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"${PHP_ASSET_PATH}
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -562,18 +569,18 @@ ${PHP_DIST_DIR}/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-shell.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-shell.mjs: ENVIRONMENT=shell
 ${PHP_DIST_DIR}/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}/
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -582,18 +589,19 @@ ${PHP_DIST_DIR}/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}/
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ${PHP_DIST_DIR}/php-webview.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-webview.js: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -601,19 +609,19 @@ ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-webview.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-webview.mjs: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -j${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -622,17 +630,19 @@ ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_ASSET_PATH}
-	${MAKE} ${ENV_DIR}${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
+	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
+	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ########## Package files ###########
 
 ${PHP_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_DIST_DIR}
+	sed -i 's|import.meta|(undefined /*import.meta*/)|' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\("(\..+?)"\)|require("\1.js")|' ${PHP_DIST_DIR}/$(notdir $@)
 
 ${PHP_DIST_DIR}/%.mjs: source/%.js
 	cp $< $@;
@@ -694,11 +704,14 @@ patch/php8.0.patch:
 # 	perl -pi -w -e 's|([ab])/|\1/third_party/libicu-72-1/|g' ./patch/libicu.patch
 
 php-clean:
-	${DOCKER_RUN_IN_PHP} touch configured
+	${DOCKER_RUN_IN_PHP} rm -f configured
 	${DOCKER_RUN_IN_PHP} make clean
 
 clean:
 	${DOCKER_RUN} rm -rf \
+		packages/*/*.so \
+		packages/*/*.dat \
+		third_party/php${PHP_VERSION}-src/configured \
 		lib/* \
 		demo-source/public/*.so \
 		demo-source/public/*.wasm \
@@ -707,7 +720,8 @@ clean:
 		packages/php-wasm/*.data \
 		packages/php-wasm/*.mjs* \
 		packages/php-cgi-wasm/*.data \
-		packages/php-cgi-wasm/*.mjs*
+		packages/php-cgi-wasm/*.mjs* \
+		${MAKE} php-clean
 
  deep-clean: clean
 	${DOCKER_RUN} rm -rf \
@@ -764,7 +778,7 @@ test: node-mjs
 	WITH_MBSTRING=${WITH_MBSTRING} \
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
-	WITH_ICU=${WITH_ICU} node --test ${TEST_LIST} `ls test/*.mjs`
+	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
 
 emcc-test:
 	${DOCKER_RUN} /emsdk/upstream/emscripten/test/runner browser.test_preload_file
@@ -777,3 +791,9 @@ demo-source/mounted/%.js: demo-source/mounted/%
 
 run:
 	${DOCKER_ENV} emscripten-builder bash
+
+
+XYZ=123
+
+xyz:
+	echo ${XYZ}

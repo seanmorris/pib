@@ -67,7 +67,7 @@ void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 					{
 						if(!useNodeRawFS)
 						{
-							const fs = require('fs');
+							const fs = (globalThis.__non_webpack_require__||require)('fs');
 							if(!fs.existsSync(localPath))
 							{
 								fs.mkdirSync(localPath, {recursive: true});

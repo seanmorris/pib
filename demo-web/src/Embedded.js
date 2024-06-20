@@ -8,38 +8,18 @@ import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
 const sharedLibs = [
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-zlib@0.0.9-d'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libzip@0.0.9-c'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-iconv@0.0.9-f'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libicu@0.0.9-r'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-s'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-freetype@0.0.9-c'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libpng@0.0.9-h'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libjpeg@0.0.9-c'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libxml@0.0.9-h'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-gd@0.0.9-c'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-openssl@0.0.9-e'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-phar@0.0.9-b'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy@0.0.9-d'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml@0.0.9-f'),
-
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-zlib'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libzip'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-iconv'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-libicu'),
-	// await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite@0.0.9-t'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-freetype'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libpng'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libjpeg'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-libxml'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-gd'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-openssl'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-phar'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-tidy'),
-	// 	await import('https://cdn.jsdelivr.net/npm/php-wasm-yaml'),
-
-	// await import('php-wasm-sqlite')
-	// await import('php-wasm-libicu')
+	`php${PhpWeb.phpVersion}-zlib.so`,
+	`php${PhpWeb.phpVersion}-zip.so`,
+	`php${PhpWeb.phpVersion}-gd.so`,
+	`php${PhpWeb.phpVersion}-iconv.so`,
+	`php${PhpWeb.phpVersion}-intl.so`,
+	`php${PhpWeb.phpVersion}-openssl.so`,
+	`php${PhpWeb.phpVersion}-dom.so`,
+	`php${PhpWeb.phpVersion}-mbstring.so`,
+	`php${PhpWeb.phpVersion}-sqlite.so`,
+	`php${PhpWeb.phpVersion}-pdo-sqlite.so`,
+	`php${PhpWeb.phpVersion}-xml.so`,
+	`php${PhpWeb.phpVersion}-simplexml.so`,
 ];
 
 const files = [

@@ -59,6 +59,7 @@
 		"php-tags.mjs",
 		"php-tags.local.mjs",
 		"php-tags.jsdelivr.mjs",
-		"php-tags.unpkg.mjs"
+		"php-tags.unpkg.mjs",
+		"libxml2.so"
 	]
 }

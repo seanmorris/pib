@@ -361,20 +361,20 @@ const php = new PhpWeb({ini: `
 
 The following extensions may be loaded at runtime. This allows the shared extension & their dependencies to be cached, re-used, and selected a-la-carte for each application.
 
-* gd
-* iconv
-* intl
-* xml
-* dom
-* simplexml
-* yaml
-* zip
-* mbstring
-* openssl
-* phar
-* sqlite
-* pdo-sqlite
-* zlib
+* gd (https://www.npmjs.com/package/php-wasm-gd, https://www.npmjs.com/package/php-wasm-libjpeg, https://www.npmjs.com/package/php-wasm-libpng, https://www.npmjs.com/package/php-wasm-freetype)
+* iconv  (https://www.npmjs.com/package/php-wasm-iconv)
+* intl (https://www.npmjs.com/package/php-wasm-intl)
+* xml (https://www.npmjs.com/package/php-wasm-libxml)
+* dom (https://www.npmjs.com/package/php-wasm-libxml)
+* simplexml (https://www.npmjs.com/package/php-wasm-libxml)
+* yaml (https://www.npmjs.com/package/php-wasm-libyaml)
+* zip (https://www.npmjs.com/package/php-wasm-libzip)
+* mbstring (https://www.npmjs.com/package/php-wasm-mbstring)
+* openssl (https://www.npmjs.com/package/php-wasm-openssl)
+* phar (https://www.npmjs.com/package/php-wasm-phar)
+* sqlite (https://www.npmjs.com/package/php-wasm-sqlite)
+* pdo-sqlite (https://www.npmjs.com/package/php-wasm-sqlite)
+* zlib (https://www.npmjs.com/package/php-wasm-zlib)
 
 There are two ways to load extensions at runtime, using the `dl()` function or `php.ini`.
 
@@ -444,7 +444,7 @@ const php = new PhpWeb({sharedLibs: [
 Dynamic extensions can be loaded as modules: So long as the main file of the module defines the `getLibs` and `getFiles` methods, extensions may be loaded like so:
 
 ```javascript
-new PhpNode({sharedLibs:[ await import('php-wasm-libicu') ]})
+new PhpNode({sharedLibs:[ await import('php-wasm-intl') ]})
 ```
 
 Dynamic extensions can also be loaded as modules from any static HTTP server with an ESM directory structure.
@@ -471,13 +471,13 @@ Extensions may be compiled as `dynamic`, `shared`, or `static`. See `Custom Buil
 When spawning a new instance of PHP, a `files` array can be provided to be loaded into the filesystem. For example, the `php-intl` extension requires us to load `icudt72l.dat` into the  `/preload` directory.
 
 ```javascript
-const sharedLibs = [`https://unpkg.com/php-wasm-libicu/php\${PHP_VERSION}-intl.so`];
+const sharedLibs = [`https://unpkg.com/php-wasm-intl/php\${PHP_VERSION}-intl.so`];
 
 const files = [
     {
         name: 'icudt72l.dat',
         parent: '/preload/',
-        url: 'https://unpkg.com/php-wasm-libicu/icudt72l.dat'
+        url: 'https://unpkg.com/php-wasm-intl/icudt72l.dat'
     }
 ];
 
@@ -821,7 +821,7 @@ WITH_TIDY      # [0, 1, static, shared, dynamic]
 WITH_MBSTRING  # [0, 1, static, dynamic]
 WITH_ONIGURUMA # [0, 1, static, shared]
 WITH_OPENSSL   # [0, 1, shared, dynamic]
-WITH_ICU       # [0, 1, static, shared, dynamic]
+WITH_INTL      # [0, 1, static, shared, dynamic]
 ```
 
 ---
@@ -974,7 +974,7 @@ When compiled as a `dynamic` extension, this will produce the extension `php-8.x
 
 When compiled as a `dynamic` or `shared` extension, it will produce the libraries `libssl.so` &  `libcrypto.so`.
 
-##### WITH_ICU
+##### WITH_INTL
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-intl.so` & the following libraries:
 

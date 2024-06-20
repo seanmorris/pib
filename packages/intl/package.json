@@ -1,0 +1,32 @@
+{
+	"name": "php-wasm-intl",
+	"description": "intl extension for php-wasm.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/seanmorris/php-wasm.git"
+	},
+	"author": "Sean Morris <php-wasm@seanmorr.is>",
+	"version": "0.0.0",
+	"main": "index.mjs",
+	"files": [
+		"index.mjs",
+		"test/basic.mjs",
+		"env.js",
+		"filter.json",
+		"LICENSE",
+		"NOTICE",
+		"README.md",
+		"static.mak",
+		"php8.3-intl.so",
+		"php8.2-intl.so",
+		"php8.1-intl.so",
+		"php8.0-intl.so",
+		"libicudata.so",
+		"libicui18n.so",
+		"libicuio.so",
+		"libicutest.so",
+		"libicutu.so",
+		"libicuuc.so",
+		"icudt72l.dat"
+	]
+}
