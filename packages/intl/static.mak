@@ -56,7 +56,6 @@ third_party/libicu-${LIBICU_VERSION}/.gitignore:
 		--depth 1;
 	${DOCKER_RUN} cp -rf /src/third_party/libicu-${LIBICU_VERSION} /src/third_party/libicu_alt
 	${DOCKER_RUN} mv /src/third_party/libicu_alt /src/third_party/libicu-${LIBICU_VERSION}
-	${DOCKER_RUN_IN_LIBICU} git apply --no-index /src/patch/libicu.patch
 
 third_party/llvm/.gitignore:
 	@ echo -e "\e[33;4mDownloading LLVM\e[0m"
