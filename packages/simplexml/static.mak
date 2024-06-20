@@ -13,7 +13,7 @@ WITH_XML=static
 endif
 
 ifeq (${WITH_SIMPLEXML},static)
-ifeq ($(filter ${WITH_LIBXML},static),)
+ifeq ($(filter ${WITH_LIBXML},1 static),)
 $(error WITH_SIMPLEXML=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
@@ -22,7 +22,7 @@ TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
 endif
 
 ifeq (${WITH_SIMPLEXML},dynamic)
-ifeq ($(filter ${WITH_LIBXML},static shared),)
+ifeq ($(filter ${WITH_LIBXML},1 static shared),)
 $(error WITH_SIMPLEXML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 

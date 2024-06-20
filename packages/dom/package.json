@@ -3,7 +3,7 @@
 	"description": "libxml for php-wasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.0-f",
+	"version": "0.0.0-g",
 	"main": "index.mjs",
 	"files": [
 		"index.mjs",
