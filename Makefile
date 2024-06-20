@@ -794,9 +794,3 @@ demo-source/mounted/%.js: demo-source/mounted/%
 
 run:
 	${DOCKER_ENV} emscripten-builder bash
-
-
-XYZ=123
-
-xyz:
-	echo ${XYZ}
