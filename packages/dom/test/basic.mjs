@@ -3,7 +3,7 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('DOM Extension is enabled.', async () => {
-	const php = process.env.WITH_LIBXML === 'dynamic'
+	const php = process.env.WITH_DOM === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-dom.so`]})
 		: new PhpNode;
 

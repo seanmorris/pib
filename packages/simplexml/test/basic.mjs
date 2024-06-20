@@ -3,7 +3,7 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('SimpleXML Extension is enabled.', async () => {
-	const php = process.env.WITH_LIBXML === 'dynamic'
+	const php = process.env.WITH_SIMPLEXML === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-simplexml.so`]})
 		: new PhpNode;
 
