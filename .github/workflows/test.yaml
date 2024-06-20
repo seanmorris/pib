@@ -7,32 +7,109 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: sudo bash -c 'curl -SL https://github.com/docker/compose/releases/download/v2.27.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose'
       - run: npm install
       - run: cp .circleci/.env_8.3.ci .env
-      - run: make lib/lib/libicudata.a
       - run: make test
-  # test-8-2:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out repository code
-  #       uses: actions/checkout@v4
-  #     - run: npm install
-  #     - run: cp .circleci/.env_8.2.ci .env
-  #     - run: make test PHP_VERSION=8.2
-  # test-8-1:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out repository code
-  #       uses: actions/checkout@v4
-  #     - run: npm install
-  #     - run: cp .circleci/.env_8.1.ci .env
-  #     - run: make test PHP_VERSION=8.1
-  # test-8-0:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out repository code
-  #       uses: actions/checkout@v4
-  #     - run: npm install
-  #     - run: cp .circleci/.env_8.0.ci .env
-  #     - run: make test PHP_VERSION=8.0
+
+  test-8-2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.2.ci .env
+      - run: make test PHP_VERSION=8.2
+
+  test-8-1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.1.ci .env
+      - run: make test PHP_VERSION=8.1
+
+  test-8-0:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.0.ci .env
+      - run: make test PHP_VERSION=8.0
+
+
+  test-dynamic:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.3-dynamic.ci .env
+      - run: make test
+
+  test-8-2-dynamic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.2-dynamic.ci .env
+      - run: make test PHP_VERSION=8.2
+
+  test-8-1-dynamic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.1-dynamic.ci .env
+      - run: make test PHP_VERSION=8.1
+
+  test-8-0-dynamic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.0-dynamic.ci .env
+      - run: make test PHP_VERSION=8.0
+
+
+  test-shared:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.3-shared.ci .env
+      - run: make test
+
+  test-8-2-shared:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.2-shared.ci .env
+      - run: make test PHP_VERSION=8.2
+
+  test-8-1-shared:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.1-shared.ci .env
+      - run: make test PHP_VERSION=8.1
+
+  test-8-0-shared:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: cp .circleci/.env_8.0-shared.ci .env
+      - run: make test PHP_VERSION=8.0
