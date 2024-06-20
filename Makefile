@@ -474,6 +474,7 @@ ifdef PRELOAD_ASSETS
 	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+	${MAKE} ${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 
 ${PHP_DIST_DIR}/php-worker.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-worker.js: ENVIRONMENT=worker
@@ -720,10 +721,10 @@ clean:
 		packages/php-wasm/*.data \
 		packages/php-wasm/*.mjs* \
 		packages/php-cgi-wasm/*.data \
-		packages/php-cgi-wasm/*.mjs* \
-		${MAKE} php-clean
+		packages/php-cgi-wasm/*.mjs*
+	${MAKE} php-clean
 
- deep-clean: clean
+deep-clean: clean
 	${DOCKER_RUN} rm -rf \
 		packages/*/*.so \
 		third_party/* \

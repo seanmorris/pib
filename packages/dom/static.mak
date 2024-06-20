@@ -2,6 +2,8 @@
 
 DOCKER_RUN_IN_EXT_DOM =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-dom/ emscripten-builder
 
+WITH_DOM?=1
+
 ifeq ($(filter ${WITH_DOM},0 1 static dynamic),)
 $(error WITH_DOM MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
@@ -11,11 +13,19 @@ WITH_DOM=static
 endif
 
 ifeq (${WITH_DOM},static)
+ifneq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_DOM=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
 CONFIGURE_FLAGS+= --enable-dom
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
 endif
 
 ifeq (${WITH_DOM},dynamic)
+ifneq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_DOM=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
 PHP_ASSET_LIST+= php${PHP_VERSION}-dom.so
 endif

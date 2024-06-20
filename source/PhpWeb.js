@@ -161,8 +161,6 @@ export const runPhpTags = (doc) => {
 
 	for(const phpNode of phpNodes)
 	{
-		const code = phpNode.innerText.trim();
-
 		runPhpScriptTag(phpNode);
 	}
 

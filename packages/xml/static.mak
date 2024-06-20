@@ -2,6 +2,8 @@
 
 DOCKER_RUN_IN_EXT_XML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-xml/ emscripten-builder
 
+WITH_XML?=1
+
 ifeq ($(filter ${WITH_XML},0 1 static dynamic),)
 $(error WITH_XML MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
@@ -11,11 +13,19 @@ WITH_XML=static
 endif
 
 ifeq (${WITH_XML},static)
+ifneq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_XML=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
 CONFIGURE_FLAGS+= --enable-xml
 TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
 endif
 
 ifeq (${WITH_XML},dynamic)
+ifneq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_XML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
 TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
 PHP_ASSET_LIST+= php${PHP_VERSION}-xml.so
 endif

@@ -1,1 +1,6 @@
-import('https://www.unpkg.com/php-wasm/PhpWeb.js').then(({runPhpTags}) => runPhpTags(document));
+console.info('Deprecated. Use php-tags.mjs');
+
+const importMeta = import.meta;
+const moduleRoot = new URL('..', importMeta.url);
+
+import(moduleRoot + '/PhpWeb.mjs').then(({runPhpTags}) => runPhpTags(document));

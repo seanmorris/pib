@@ -1,1 +1,4 @@
-import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs').then(({runPhpTags}) => runPhpTags(document));
+const importMeta = import.meta;
+const moduleRoot = new URL('..', importMeta.url);
+
+import(moduleRoot + '/PhpWeb.mjs').then(({runPhpTags}) => runPhpTags(document));

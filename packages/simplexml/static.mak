@@ -2,6 +2,8 @@
 
 DOCKER_RUN_IN_EXT_SIMPLEXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-simplexml/ emscripten-builder
 
+WITH_SIMPLEXML?=1
+
 ifeq ($(filter ${WITH_SIMPLEXML},0 1 static dynamic),)
 $(error WITH_SIMPLEXML MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
@@ -11,11 +13,19 @@ WITH_XML=static
 endif
 
 ifeq (${WITH_SIMPLEXML},static)
+ifneq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_SIMPLEXML=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
 CONFIGURE_FLAGS+= --enable-simplexml
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
 endif
 
 ifeq (${WITH_SIMPLEXML},dynamic)
+ifneq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_SIMPLEXML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
 PHP_ASSET_LIST+= php${PHP_VERSION}-simplexml.so
 endif
