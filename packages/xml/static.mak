@@ -11,6 +11,7 @@ WITH_XML=static
 endif
 
 ifeq (${WITH_XML},static)
+CONFIGURE_FLAGS+= --enable-exml
 TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
 endif
 
