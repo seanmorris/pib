@@ -407,7 +407,7 @@ const php = new PhpWeb({sharedLibs: [
 You can also load extensions from remote servers with URLs:
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [`https://unpkg.com/php-wasm-iconv/php8.3-phar.so`]});
+const php = new PhpWeb({sharedLibs: [`https://unpkg.com/php-wasm-phar/php8.3-phar.so`]});
 ```
 
 The above is actually shorthand for the following code. Passing `ini: true` will automatically load the extension via `/php.ini`, passing `ini: false` will wait for a call to `dl()` to do the lookup.
@@ -416,7 +416,7 @@ The above is actually shorthand for the following code. Passing `ini: true` will
 const php = new PhpWeb({sharedLibs: [
     {
         name: `php8.3-xml.so`,
-        url:  `https://unpkg.com/php-wasm-iconv/php8.3-xml.so`,
+        url:  `https://unpkg.com/php-wasm-phar/php8.3-phar.so`,
         ini:  true,
     }
 ]});
@@ -836,13 +836,11 @@ When compiled as a `dynamic` extension, this will produce the extension file `ph
 
 ##### WITH_LIBXML
 
-static|shared|dynamic
+static|shared
 
-When compiled as a set of `dynamic` extensions, this will produce the extensions `php-8.x-dom.so`, `php-8.x-xml.so`, `php-8.x-simplexml.so`.
+This actual `php-libxml` extension must be statically compiled, but `libxml` itself may be loaded as a shared library.
 
-When compiled as a `dynamic` or `shared` extension, it will produce the library `libxml.so`.
-
-This actual `php-libxml` extension must be statically compiled, but `libxml` may be loaded as a shared library.
+When compiled as a `shared` library, it will produce the library `libxml.so`.
 
 ---
 
@@ -886,6 +884,30 @@ This extenstion makes use of `freetype`, `libjpeg`, `libpng`, & `zlib`.
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-gd.so`.
 
+###### WITH_LIBPNG
+
+static|shared
+
+When compiled as a `shared` library, this will produce the library `libpng.so`.
+
+If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
+
+###### WITH_FREETYPE
+
+static|shared
+
+When compiled as a `shared` library, this will produce the library `libfreetype.so`.
+
+If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
+
+###### WITH_LIBJPEG
+
+static|shared
+
+When compiled as a `shared` library, this will produce the library `libjpeg.so`.
+
+If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
+
 ---
 
 ##### WITH_ZLIB
@@ -895,36 +917,6 @@ static|shared|dynamic
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-zlib.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libz.so`.
-
----
-
-##### WITH_LIBPNG
-
-static|shared
-
-When compiled as a `shared` library, this will produce the library `libpng.so`.
-
-If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
-
----
-
-##### WITH_FREETYPE
-
-static|shared
-
-When compiled as a `shared` library, this will produce the library `libfreetype.so`.
-
-If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
-
----
-
-##### WITH_LIBJPEG
-
-static|shared
-
-When compiled as a `shared` library, this will produce the library `libjpeg.so`.
-
-If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
 
 ---
 

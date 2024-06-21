@@ -1,6 +1,6 @@
-# php-wasm-libzip
+# php-wasm-libyaml
 
-libzip extension for php-wasm
+libyaml extension for php-wasm
 
 https://github.com/seanmorris/php-wasm
 
@@ -8,21 +8,21 @@ https://www.npmjs.com/package/php-wasm
 
 ## Usage
 
-`php-wasm-libzip` can be loaded via dynamic imports:
+`php-wasm-libyaml` can be loaded via dynamic imports:
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	await import('https://unpkg.com/php-wasm-libzip')
+	await import('https://unpkg.com/php-wasm-libyaml')
 ]});
 ```
 
-The files `php8.𝑥-libzip.so` will automatically be pulled from the package.
+The files `php8.𝑥-libyaml.so` will automatically be pulled from the package.
 
 You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	'php8.3-libzip.so'
+	'php8.3-libyaml.so'
 ]});
 ```
 
@@ -33,17 +33,17 @@ const locateFile = (libName) => {
 	return `https://my-example-server.site/path/to/libs/${libName}`;
 };
 
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-libzip.so']});
+const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-libyaml.so']});
 ```
 
 ## Build options:
 
 The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
 
-* WITH_libzip
+* WITH_libyaml
 
-### WITH_libzip
+### WITH_libyaml
 
 static|shared
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-libzip.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.x-libyaml.so`.
