@@ -15,15 +15,12 @@ const php = new PhpWeb({sharedLibs: [
 	await import('https://unpkg.com/php-wasm-mbstring')
 ]});
 ```
+The supporting library `libonig.so` will automatically be pulled from the package.
 
-The files `php8.𝑥-mbstring.so` will automatically be pulled from the package.
-
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+You can rely on the default loading behavior if `.so` files are served from the same directory as your `.wasm` files.
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [
-	'php8.3-mbstring.so'
-]});
+const php = new PhpWeb({sharedLibs: ['php8.3-mbstring.so']});
 ```
 
 You can provide a callback as the `locateFile` option to map library names to URLs:
@@ -45,10 +42,12 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 ### WITH_MBSTRING
 
-static|shared|dynamic
+`0|static|shared|dynamic`
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-mbstring.so`.
 
 ### WITH_ONIGURUMA
 
-static|shared
+`0|static|shared`
+
+When compiled as a `shared` library, this will produce the library `libonig.so`.

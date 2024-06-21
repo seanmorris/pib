@@ -21,9 +21,7 @@ The files `php8.𝑥-libzip.so` will automatically be pulled from the package.
 You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [
-	'php8.3-libzip.so'
-]});
+const php = new PhpWeb({sharedLibs: ['php8.3-zip.so']});
 ```
 
 You can provide a callback as the `locateFile` option to map library names to URLs:
@@ -33,7 +31,7 @@ const locateFile = (libName) => {
 	return `https://my-example-server.site/path/to/libs/${libName}`;
 };
 
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-libzip.so']});
+const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-zip.so']});
 ```
 
 ## Build options:
@@ -44,6 +42,6 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 ### WITH_libzip
 
-static|shared
+`0|static|shared`
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-libzip.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.x-zip.so`.

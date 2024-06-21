@@ -12,25 +12,21 @@ https://www.npmjs.com/package/php-wasm
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	await import('https://unpkg.com/php-wasm-xml')
+    await import('https://unpkg.com/php-wasm-xml')
 ]});
 ```
-
-The files `php8.𝑥-xml.so` will automatically be pulled from the package.
 
 You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [
-	'php8.3-xml.so'
-]});
+const php = new PhpWeb({sharedLibs: ['php8.3-xml.so']});
 ```
 
 You can provide a callback as the `locateFile` option to map library names to URLs:
 
 ```javascript
 const locateFile = (libName) => {
-	return `https://my-example-server.site/path/to/libs/${libName}`;
+    return `https://my-example-server.site/path/to/libs/${libName}`;
 };
 
 const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-xml.so']});
@@ -44,6 +40,6 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 ### WITH_XML
 
-static|shared
+`0|static|shared`
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-xml.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-xml.so`.

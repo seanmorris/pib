@@ -12,25 +12,23 @@ https://www.npmjs.com/package/php-wasm
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	await import('https://unpkg.com/php-wasm-openssl')
+    await import('https://unpkg.com/php-wasm-openssl')
 ]});
 ```
 
-The files `php8.𝑥-openssl.so` will automatically be pulled from the package.
+The supporting libraries `libssl.so` and `libcrypto.so` will automatically be pulled from the package.
 
 You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [
-	'php8.3-openssl.so'
-]});
+const php = new PhpWeb({sharedLibs: ['php8.3-openssl.so']});
 ```
 
 You can provide a callback as the `locateFile` option to map library names to URLs:
 
 ```javascript
 const locateFile = (libName) => {
-	return `https://my-example-server.site/path/to/libs/${libName}`;
+    return `https://my-example-server.site/path/to/libs/${libName}`;
 };
 
 const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-openssl.so']});
@@ -44,6 +42,6 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 ### WITH_OPENSSL
 
-static|shared|dynamic
+`0|shared|dynamic`
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-openssl.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.x-openssl` as well as the libraries `libssl.so` & `libcrypto.so`.

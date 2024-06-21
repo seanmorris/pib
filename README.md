@@ -976,8 +976,7 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 * libicuio.so
 * libicui18n.so
 * libicudata.so
-
-If compiles as `static` or `shared`, it will also add `/preload/icudt72l.dat` to `PRELOAD_ASSETS`, and cause `php.data` to be required.
+* icudt72l.dat
 
 ---
 

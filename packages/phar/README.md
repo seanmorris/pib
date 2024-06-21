@@ -16,14 +16,10 @@ const php = new PhpWeb({sharedLibs: [
 ]});
 ```
 
-The files `php8.𝑥-phar.so` will automatically be pulled from the package.
-
 You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [
-	'php8.3-phar.so'
-]});
+const php = new PhpWeb({sharedLibs: ['php8.3-phar.so']});
 ```
 
 You can provide a callback as the `locateFile` option to map library names to URLs:
@@ -44,6 +40,6 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 ### WITH_PHAR
 
-static|dynamic
+`0|static|dynamic`
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-phar.so`.
