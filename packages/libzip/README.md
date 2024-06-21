@@ -42,4 +42,4 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 `0|static|shared`
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-zip.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-zip.so`.

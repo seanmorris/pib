@@ -44,4 +44,4 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 `0|shared|dynamic`
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-openssl` as well as the libraries `libssl.so` & `libcrypto.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-openssl` as well as the libraries `libssl.so` & `libcrypto.so`.

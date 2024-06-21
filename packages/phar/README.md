@@ -42,4 +42,4 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 `0|static|dynamic`
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-phar.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-phar.so`.

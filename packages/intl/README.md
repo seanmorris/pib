@@ -69,7 +69,7 @@ The following options may be set in `.php-wasm-rc` for custom builds of `php-was
 
 `0|static|shared|dynamic`
 
-When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-intl.so` & the following libraries:
+When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.𝑥-intl.so` & the following libraries:
 
 * libicuuc.so
 * libicutu.so
