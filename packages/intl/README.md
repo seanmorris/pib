@@ -81,4 +81,3 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 The following data file will also be produced, and should be loaded to the `/preload` directory:
 
 * icudt72l.dat
-

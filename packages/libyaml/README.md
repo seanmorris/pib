@@ -12,7 +12,7 @@ https://www.npmjs.com/package/php-wasm
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-	await import('https://unpkg.com/php-wasm-libyaml')
+    await import('https://unpkg.com/php-wasm-libyaml')
 ]});
 ```
 
@@ -28,20 +28,20 @@ You can provide a callback as the `locateFile` option to map library names to UR
 
 ```javascript
 const locateFile = (libName) => {
-	return `https://my-example-server.site/path/to/libs/${libName}`;
+    return `https://my-example-server.site/path/to/libs/${libName}`;
 };
 
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-libyaml.so']});
+const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-yaml.so']});
 ```
 
 ## Build options:
 
 The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
 
-* WITH_libyaml
+* WITH_LIBYAML
 
-### WITH_libyaml
+### WITH_LIBYAML
 
 `0|static|shared`
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-libyaml.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-yaml.so`.

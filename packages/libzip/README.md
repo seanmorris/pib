@@ -16,8 +16,6 @@ const php = new PhpWeb({sharedLibs: [
 ]});
 ```
 
-The files `php8.𝑥-libzip.so` will automatically be pulled from the package.
-
 You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
 
 ```javascript
