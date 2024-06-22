@@ -38,7 +38,7 @@ third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}
 
 else
 
-third_party/vrzno/lib.js: $(wildcard third_party/vrzno/js/*.js)
+third_party/vrzno/lib.js: $(wildcard third_party/vrzno/js/*.js) third_party/vrzno/vrzno.c
 	@ echo -e "\e[33;4mBuilding VRZNO lib.js\e[0m"
 	${DOCKER_RUN} bash -c 'cat third_party/vrzno/js/WeakerMap.js \
 		third_party/vrzno/js/PolyFill.js \
