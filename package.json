@@ -31,7 +31,7 @@
 		"php-wasm-xml": "^0.0.0-i",
 		"php-wasm-yaml": "^0.0.9-i",
 		"php-wasm-zlib": "^0.0.9-f",
-		"vrzno": "^0.0.9-f"
+		"vrzno": "^0.0.9-g"
 	},
 	"contributors": [
 		{

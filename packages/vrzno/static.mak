@@ -18,7 +18,7 @@ ifdef VRZNO_DEV_PATH
 
 DEPENDENCIES+= ${VRZNO_DEV_PATH}/lib.js
 
-${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js)
+${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js) third_party/vrzno/vrzno.c
 	cat ${VRZNO_DEV_PATH}/js/WeakerMap.js \
 		${VRZNO_DEV_PATH}/js/PolyFill.js \
 		${VRZNO_DEV_PATH}/js/UniqueIndex.js \
