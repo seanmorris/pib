@@ -159,30 +159,20 @@ cjs:
 mjs:
 	${MAKE} -j${CPU_COUNT} ${MJS}
 
-web-mjs:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-web.mjs)
-web-js:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-web.js)
+web-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-web.mjs)
+web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-web.js)
 
-worker-mjs:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-worker.mjs)
-worker-js:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-worker.js)
+worker-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-worker.mjs)
+worker-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-worker.js)
 
-webview-mjs:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-webview.mjs)
-webview-js:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-webview.js)
+webview-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-webview.mjs)
+webview-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-webview.js)
 
-node-mjs:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs php-node.mjs)
-node-js:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js  fsOps.js  resolveDependencies.js  _Event.js php-node.js)
+node-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs php-node.mjs)
+node-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js  fsOps.js  resolveDependencies.js  _Event.js php-node.js)
 
-shell-mjs:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpShell.mjs OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs php-shell.mjs)
-shell-js:
-	${MAKE} -j${CPU_COUNT} $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpShell.js  OutputBuffer.js  fsOps.js  resolveDependencies.js  _Event.js php-shell.js)
+shell-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpShell.mjs OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs php-shell.mjs)
+shell-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpShell.js  OutputBuffer.js  fsOps.js  resolveDependencies.js  _Event.js php-shell.js)
 
 WITH_CGI=1
 
@@ -684,6 +674,9 @@ shared: ${SHARED_LIBS}
 
 assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 #	 @ echo $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
+
+deps:
+	${MAKE} -j${CPU_COUNT} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
 
 PHPIZE: ${PHPIZE}
 
