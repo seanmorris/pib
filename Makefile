@@ -2,7 +2,7 @@
 
 .PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs
 
-MAKEFLAGS += --no-builtin-rules --no-builtin-variables --j ${CPU_COUNT} --max-load ${CPU_COUNT} --shuffle
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables --j ${CPU_COUNT} --max-load ${CPU_COUNT}
 
 ## Defaults:
 
@@ -383,7 +383,7 @@ SAPI_CLI_PATH=sapi/cgi/php-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
 SAPI_CGI_PATH=sapi/cli/php-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
 
 BUILD_FLAGS=-f ../../php.mk \
-	-j${CPU_COUNT} --max-load ${CPU_COUNT} --shuffle \
+	-j${CPU_COUNT} --max-load ${CPU_COUNT} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
 	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
