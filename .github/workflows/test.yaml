@@ -12,9 +12,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist-without-markdown
-          path: |
-            dist
-            !dist/**/*.md
+          path: image
   test-8-3:
     name: Test 8.3
     runs-on: ubuntu-latest
