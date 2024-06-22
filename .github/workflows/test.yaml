@@ -9,7 +9,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.3.ci .env
-      - run: make test PROGRESS=
+      - run: make image test PROGRESS=
 
   test-8-2:
     name: Test 8.2
@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.2.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.2
+      - run: make image test PROGRESS= PHP_VERSION=8.2
 
   test-8-1:
     name: Test 8.1
@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.1.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.1
+      - run: make image test PROGRESS= PHP_VERSION=8.1
 
   test-8-0:
     name: Test 8.0
@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.0.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.0
+      - run: make image test PROGRESS= PHP_VERSION=8.0
 
 
   test-dynamic:
@@ -50,7 +50,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.3-dynamic.ci .env
-      - run: make test PROGRESS=
+      - run: make image test PROGRESS=
 
   test-8-2-dynamic:
     name: 8.2 Dynamic
@@ -60,7 +60,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.2-dynamic.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.2
+      - run: make image test PROGRESS= PHP_VERSION=8.2
 
   test-8-1-dynamic:
     name: 8.1 Dynamic
@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.1-dynamic.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.1
+      - run: make image test PROGRESS= PHP_VERSION=8.1
 
   test-8-0-dynamic:
     name: 8.0 Dynamic
@@ -80,7 +80,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.0-dynamic.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.0
+      - run: make image test PROGRESS= PHP_VERSION=8.0
 
 
   test-shared:
@@ -91,7 +91,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.3-shared.ci .env
-      - run: make test PROGRESS=
+      - run: make image test PROGRESS=
 
   test-8-2-shared:
     name: 8.2 Shared
@@ -101,7 +101,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.2-shared.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.2
+      - run: make image test PROGRESS= PHP_VERSION=8.2
 
   test-8-1-shared:
     name: 8.1 Shared
@@ -111,7 +111,7 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.1-shared.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.1
+      - run: make image test PROGRESS= PHP_VERSION=8.1
 
   test-8-0-shared:
     name: 8.0 Shared
@@ -121,4 +121,4 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: cp .circleci/.env_8.0-shared.ci .env
-      - run: make test PROGRESS= PHP_VERSION=8.0
+      - run: make image test PROGRESS= PHP_VERSION=8.0
