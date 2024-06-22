@@ -785,7 +785,9 @@ NPM_PUBLISH_DRY?=--dry-run
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
 
-test: node-mjs
+test:
+	${DOCKER_RUN} echo "Works!"
+	${MAKE} node-mjs
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
