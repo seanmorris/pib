@@ -30,6 +30,7 @@
 		"NOTICE",
 		"README",
 		"package.json",
+
 		"PhpBase.js",
 		"PhpBase.mjs",
 		"PhpNode.js",
@@ -40,6 +41,11 @@
 		"PhpWebView.mjs",
 		"PhpWorker.js",
 		"PhpWorker.mjs",
+
+		"php-node.js",
+		"php-node.mjs",
+		"php-node.js.wasm",
+		"php-node.mjs.wasm",
 		"php-web.js",
 		"php-web.mjs",
 		"php-web.js.wasm",
@@ -48,18 +54,29 @@
 		"php-worker.mjs",
 		"php-worker.js.wasm",
 		"php-worker.mjs.wasm",
-		"php-node.js",
-		"php-node.mjs",
-		"php-node.js.wasm",
-		"php-node.mjs.wasm",
 		"php-webview.js",
 		"php-webview.mjs",
 		"php-webview.js.wasm",
 		"php-webview.mjs.wasm",
+
 		"php-tags.mjs",
 		"php-tags.local.mjs",
 		"php-tags.jsdelivr.mjs",
 		"php-tags.unpkg.mjs",
+
+		"_Event.js",
+		"_Event.mjs",
+		"config.js",
+		"config.mjs",
+		"fsOps.js",
+		"fsOps.mjs",
+		"OutputBuffer.js",
+		"OutputBuffer.mjs",
+		"resolveDependencies.js",
+		"resolveDependencies.mjs",
+		"webTransactions.js",
+		"webTransactions.mjs",
+
 		"libxml2.so"
 	]
 }

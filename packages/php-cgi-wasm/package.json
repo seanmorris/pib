@@ -26,16 +26,20 @@
 		"NOTICE",
 		"README",
 		"package.json",
+
 		"PhpCgiBase.js",
 		"PhpCgiBase.mjs",
 		"PhpCgiNode.js",
 		"PhpCgiNode.mjs",
 		"PhpCgiWeb.js",
 		"PhpCgiWeb.mjs",
+		"PhpCgiWebBase.js",
+		"PhpCgiWebBase.mjs",
 		"PhpCgiWebView.js",
 		"PhpCgiWebView.mjs",
 		"PhpCgiWorker.js",
 		"PhpCgiWorker.mjs",
+
 		"php-cgi-web.js",
 		"php-cgi-web.mjs",
 		"php-cgi-web.js.wasm",
@@ -51,6 +55,19 @@
 		"php-cgi-webview.js",
 		"php-cgi-webview.mjs",
 		"php-cgi-webview.js.wasm",
-		"php-cgi-webview.mjs.wasm"
+		"php-cgi-webview.mjs.wasm",
+
+		"_Event.js",
+		"_Event.mjs",
+		"config.js",
+		"config.mjs",
+		"fsOps.js",
+		"fsOps.mjs",
+		"OutputBuffer.js",
+		"OutputBuffer.mjs",
+		"resolveDependencies.js",
+		"resolveDependencies.mjs",
+		"webTransactions.js",
+		"webTransactions.mjs"
 	]
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const child_process = require('node:child_process');
+const path = require('path');
 const fs  = require("fs");
 var tty = require('tty');
 
@@ -151,10 +152,76 @@ const commands = {};
 		});
 	};
 
-	assets.info = `Copy shared libs & file packages to asset directory.`;
+	assets.info = `Build shared libs & file packages to asset directory.`;
 	assets.help = `Usage: php-wasm-builder assets`;
 
 	commands.assets = assets;
+}
+
+{ // copy-assets
+	const copy_assets = () => {
+		const ls = child_process.spawnSync('npm', ['ls', '-p'], { encoding : 'utf8' });
+
+		const allFiles = ls.stdout.split('\n').map(x=>x||'.').map(dir => {
+			const json = fs.readFileSync(dir + '/package.json', {encoding: 'utf8'});
+			const package = JSON.parse(json);
+
+			if(!package.files)
+			{
+				return [];
+			}
+
+			const files = package.files.filter(name => name.match(/\.(so|dat)$/)).map(file => path.join(dir, file));
+
+			if(!files)
+			{
+				return [];
+			}
+
+			return files;
+
+		}).flat();
+
+		const options = ['-f', 'info.mak'];
+
+		options.push(`ENV_DIR=${cwd}/`);
+
+		if(fs.existsSync(cwd + '/.php-wasm-rc'))
+		{
+			options.push(`ENV_FILE=${rcFile}`);
+		}
+
+		const getAssetPath = child_process.spawnSync(`make`, ['get-asset-path'].concat(options), {
+			cwd: __dirname + '/..', encoding : 'utf8'
+		});
+
+		const getPhpVersion = child_process.spawnSync(`make`, ['get-php-version'].concat(options), {
+			cwd: __dirname + '/..', encoding : 'utf8'
+		});
+
+		const assetPath  = getAssetPath.stdout.trim();
+		const phpVersion = getPhpVersion.stdout.trim();
+
+		allFiles.forEach(file => {
+			const name = path.basename(file);
+
+			if(name.substr(0, 3) === 'php' && name.substr(3, 3) !== phpVersion)
+			{
+				return;
+			}
+
+			const destination = path.join(assetPath, name);
+
+			console.error(`${file}\n => ${destination}`);
+
+			fs.copyFileSync(file, destination);
+		});
+	};
+
+	copy_assets.info = `Copy shared libs & file packages from node_modules to asset directory.`;
+	copy_assets.help = `Usage: php-wasm-builder copy-assets`;
+
+	commands['copy-assets'] = copy_assets;
 }
 
 { // help

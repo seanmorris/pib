@@ -15,6 +15,9 @@ ${ENV_DIR}${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
 	cp -Lprf packages/php-cgi-wasm/${PRELOAD_NAME}.data ${ENV_DIR}${PHP_CGI_ASSET_PATH}/
 endif
 
+NOTPARALLEL+= $(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
+	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-shell.js php-cgi-worker.js)
+
 CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.mjs PhpCgiWebview.mjs PhpCgiNode.mjs PhpCgiShell.mjs PhpCgiWorker.mjs PhpCgiBase.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs) \

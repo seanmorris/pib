@@ -97,10 +97,15 @@ const installDemo = async (overwrite = false) => {
 	await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 	await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
 
-	await navigator.locks.request('php-wasm-demo-install', async () => {
-		const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
+	const downloader = fetch(process.env.PUBLIC_URL + selectedFramework.file);
 
+	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Acquiring Lock...'}));
+
+	const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
+
+	await navigator.locks.request('php-wasm-demo-install', async () => {
 		const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
+
 		if(!overwrite && checkPath.exists)
 		{
 			window.demoInstalling = null;
@@ -113,7 +118,7 @@ const installDemo = async (overwrite = false) => {
 		}
 
 		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Downloading package...'}));
-		const download = await fetch(process.env.PUBLIC_URL + selectedFramework.file);
+		const download = await downloader;
 		const zipContents = await download.arrayBuffer();
 
 		const settings = await sendMessage('getSettings');
@@ -148,8 +153,6 @@ const installDemo = async (overwrite = false) => {
 		await sendMessage('refresh', []);
 
 		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Opening site...'}));
-
-		// window.demoInstalling = null;
 
 		if(window.opener)
 		{
@@ -230,7 +233,7 @@ export default function InstallDemo() {
 		<div className = "install-demo">
 			<div className = "center">
 				{ message !== 'Site already exists!'
-					? <img className = "loader-icon" src = {loader} />
+					? <img className = "loader-icon" src = {loader} alt = "loading spinner" />
 					: ''
 				}
 				<div className = "bevel">
