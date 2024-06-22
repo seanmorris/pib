@@ -64,11 +64,9 @@ third_party/llvm/.gitignore:
 		--single-branch     \
 		--depth 1;
 
-${LIBICU_DATFILE}: lib/lib/libicudata.a
-
 ICU_DATA_FILTER_FILE=/src/packages/intl/filter.json
 
-lib/share/icu/72.1/icudt72l.dat: lib/lib/libicudata.a
+${LIBICU_DATFILE}: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emmake make -C data -j${CPU_COUNT} install
 
 lib/lib/libicudata.a: lib/lib/libicuuc.a

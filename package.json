@@ -19,7 +19,7 @@
 		"php-wasm-dom": "^0.0.0-h",
 		"php-wasm-gd": "^0.0.9-g",
 		"php-wasm-iconv": "^0.0.9-h",
-		"php-wasm-intl": "^0.0.0-g",
+		"php-wasm-intl": "^0.0.0-h",
 		"php-wasm-libxml": "^0.0.9-n",
 		"php-wasm-libzip": "^0.0.9-e",
 		"php-wasm-mbstring": "^0.0.0-a",
