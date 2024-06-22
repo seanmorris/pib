@@ -23,7 +23,7 @@
 		"php-wasm-libxml": "^0.0.9-n",
 		"php-wasm-libzip": "^0.0.9-e",
 		"php-wasm-mbstring": "^0.0.0-a",
-		"php-wasm-openssl": "^0.0.9-g",
+		"php-wasm-openssl": "^0.0.9-h",
 		"php-wasm-phar": "^0.0.9-d",
 		"php-wasm-simplexml": "^0.0.0-h",
 		"php-wasm-sqlite": "^0.0.9-v",
