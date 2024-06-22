@@ -1,7 +1,21 @@
 name: Test
 on: [push]
 jobs:
-  test:
+  build-image:
+    name: Build Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: make image save-image
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-without-markdown
+          path: |
+            dist
+            !dist/**/*.md
+  test-8-3:
     name: Test 8.3
     runs-on: ubuntu-latest
     steps:

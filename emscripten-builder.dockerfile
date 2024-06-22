@@ -33,8 +33,9 @@ RUN apt-get update; \
 RUN cd /emsdk/upstream && { \
 	rm -rf emscripten; \
 	git clone https://github.com/seanmorris/emscripten.git emscripten --branch sm-updates --depth=1; \
-	cd emscripten && ./bootstrap; \
 }
+
+RUN cd /emsdk/upstream/emscripten && ./bootstrap;
 
 # RUN emsdk install node-18.20.3-64bit; \
 # 	emsdk activate node-18.20.3-64bit; \

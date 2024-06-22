@@ -770,6 +770,10 @@ pull-image:
 push-image:
 	docker-compose --progress quiet push
 
+save-image:
+	mkdir -p ./image
+	docker image save seanmorris/phpwasm-emscripten-builder -o ./image/builder.tar
+
 demo:
 	cd demo-source && npm run build
 
