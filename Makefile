@@ -2,7 +2,7 @@
 
 .PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs
 
-MAKEFLAGS += --no-builtin-rules --no-builtin-variables --j ${CPU_COUNT} --max-load ${CPU_COUNT}
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
 ## Defaults:
 
@@ -150,14 +150,11 @@ TAG_JS=$(addprefix ${PHP_DIST_DIR}/,php-tags.mjs php-tags.jsdelivr.mjs php-tags.
 
 ALL=${MJS} ${CJS} ${TAG_JS}
 
-all:
-	${MAKE} -j${CPU_COUNT} ${ALL}
+all: ${ALL}
 
-cjs:
-	${MAKE} -j${CPU_COUNT} ${CJS}
+cjs: ${CJS}
 
-mjs:
-	${MAKE} -j${CPU_COUNT} ${MJS}
+mjs: ${MJS}
 
 web-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-web.mjs)
 web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-web.js)
