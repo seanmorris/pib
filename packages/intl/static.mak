@@ -71,7 +71,9 @@ ICU_DATA_FILTER_FILE=/src/packages/intl/filter.json
 lib/share/icu/72.1/icudt72l.dat: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emmake make -C data -j${CPU_COUNT} install
 
-lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
+lib/lib/libicuuc.a: lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a
+
+lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
 	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
 	${DOCKER_RUN_IN_LIBICU_ALT} ./configure \
 		--with-data-packaging=archive \
