@@ -195,7 +195,7 @@ EXTRA_FLAGS=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
 SHARED_LIBS=
-EXPORTED_FUNCTIONS="_pib_init", "_pib_storage_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_pib_flush", "_main", "_malloc", "_free", "_realloc"
+# EXPORTED_FUNCTIONS="_pib_init", "_pib_storage_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_pib_flush", "_main", "_malloc", "_free", "_realloc"
 PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
 PHPIZE=third_party/php${PHP_VERSION}-src/scripts/phpize
@@ -404,7 +404,6 @@ BUILD_FLAGS=-f ../../php.mk \
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		${SYMBOL_FLAGS} -flto -fPIC \
-		-s EXPORTED_FUNCTIONS='\''[${EXPORTED_FUNCTIONS}]'\'' \
 		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS"]'\'' \
 		-s ENVIRONMENT=${ENVIRONMENT}            \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY}      \
