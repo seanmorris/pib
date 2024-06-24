@@ -241,6 +241,9 @@ ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
 	cp -Lprf packages/php-wasm/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}/
 endif
 
+-include packages/php-cgi-wasm/pre.mak
+-include $(addsuffix /pre.mak,$(shell npm ls -p))
+
 -include packages/php-cgi-wasm/static.mak
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 

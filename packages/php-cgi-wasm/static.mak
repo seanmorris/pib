@@ -1,17 +1,5 @@
 #!/usr/bin/env make
 
-ifdef PHP_BUILDER_DIR
-PHP_CGI_DIST_DIR:=${PHP_BUILDER_DIR}/${PHP_CGI_DIST_DIR}
-PHP_CGI_ASSET_PATH:=${PHP_BUILDER_DIR}/${PHP_CGI_ASSET_PATH}
-endif
-PHP_CGI_DIST_DIR?=${ENV_DIR}/packages/php-cgi-wasm
-PHP_CGI_ASSET_PATH?=${PHP_CGI_DIST_DIR}
-
-ifneq (${SHARED_ASSET_PATHS},${PHP_CGI_ASSET_PATH})
-SHARED_ASSET_PATHS+= ${PHP_CGI_ASSET_PATH}
-endif
-
-.SECONDEXPANSION:
 ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- $(if $${PRELOAD_ASSETS},cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/${PRELOAD_NAME}.data ${PHP_CGI_DIST_DIR})
 	- $(if $${PRELOAD_ASSETS},cp -Lprf ${PHP_CGI_DIST_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/)
