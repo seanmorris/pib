@@ -781,6 +781,42 @@ WITH_LIBJPEG=1
 WITH_FREETYPE=1
 ```
 
+#### Options
+
+The following options may appear in `.php-wasm-rc`.
+
+##### PHP_VERSION
+
+8.0|8.1|8.2|**8.3**
+
+##### PHP_DIST_DIR
+
+This is the directory where javascript & wasm files will be built to, *relative to the current directory.*
+
+##### PHP_ASSET_PATH
+
+This is the directory where shared libs, extension, `.data` files & other supporting files will be built to, *relative to the current directory.* Defaults to `PHP_DIST_DIR`.
+
+##### OPTIMIZE
+
+0|1|2|**3**
+
+The optimization level to use while compiling.
+
+##### SUBOPTIMIZE
+
+The optimization level to use while compiling libraries. Defaults to `OPTIMIZE`.
+
+##### PRELOAD_ASSETS
+
+A list of **absolute paths** to files & directories to build to the `/preload` directory. Will produce a `.data` file.
+
+##### ASSERTIONS
+
+0|**1**
+
+Build with/without assertions.
+
 #### Extensions
 
 As stated above, extensions may be compiled as `dynamic`, `shared`, or `static`.
@@ -788,6 +824,8 @@ As stated above, extensions may be compiled as `dynamic`, `shared`, or `static`.
 * dynamic - these extensions may be loaded selectively at runtime.
 * shared - these extensions will always be loaded at startup and can be cached and reused.
 * static - these extensions will be built directly into the main wasm binary (may cause a huge filesize).
+
+(defaults provided below in **bold**)
 
 The following options are availavle for building static PHP extensions:
 
@@ -828,7 +866,7 @@ WITH_INTL      # [0, 1, static, shared, dynamic]
 
 ##### WITH_PHAR
 
-static|dynamic
+static|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension file `php8.x-phar.so`.
 
@@ -836,7 +874,7 @@ When compiled as a `dynamic` extension, this will produce the extension file `ph
 
 ##### WITH_LIBXML
 
-static|shared
+static|**shared**
 
 This actual `php-libxml` extension must be statically compiled, but `libxml` itself may be loaded as a shared library.
 
@@ -846,7 +884,7 @@ When compiled as a `shared` library, it will produce the library `libxml.so`.
 
 ##### WITH_LIBZIP
 
-static|shared|dynamic
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-zip.so`.
 
@@ -858,7 +896,7 @@ This extension depends on `zlib`.
 
 ##### WITH_ICONV
 
-static|shared|dynamic
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-iconv.so`.
 
@@ -868,7 +906,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 ##### WITH_SQLITE
 
-static|shared|dynamic
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extensions `php-8.x-sqlite.so`, & `php-8.x-pdo-sqlite.so`.
 
@@ -878,7 +916,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 ##### WITH_GD
 
-static|dynamic
+static|**dynamic**
 
 This extenstion makes use of `freetype`, `libjpeg`, `libpng`, & `zlib`.
 
@@ -886,7 +924,7 @@ When compiled as a `dynamic` extension, this will produce the extension `php-8.x
 
 ###### WITH_LIBPNG
 
-static|shared
+static|**shared**
 
 When compiled as a `shared` library, this will produce the library `libpng.so`.
 
@@ -894,7 +932,7 @@ If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
 
 ###### WITH_FREETYPE
 
-static|shared
+static|**shared**
 
 When compiled as a `shared` library, this will produce the library `libfreetype.so`.
 
@@ -902,7 +940,7 @@ If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
 
 ###### WITH_LIBJPEG
 
-static|shared
+static|**shared**
 
 When compiled as a `shared` library, this will produce the library `libjpeg.so`.
 
@@ -912,7 +950,7 @@ If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
 
 ##### WITH_ZLIB
 
-static|shared|dynamic
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-zlib.so`.
 
@@ -922,7 +960,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 ##### WITH_YAML
 
-static|shared|dynamic
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-yaml.so`.
 
@@ -932,7 +970,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 ##### WITH_TIDY
 
-static|shared|dynamic
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-tidy.so`.
 
@@ -942,7 +980,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 ##### WITH_MBSTRING
 
-static|dynamic
+static|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-mbstring.so`.
 
@@ -950,7 +988,7 @@ When compiled as a `dynamic` extension, this will produce the extension `php-8.x
 
 ##### WITH_ONIGURUMA
 
-static|shared|dynamic
+static|shared|**dynamic**
 
 Support library for `mbstring`.
 
@@ -962,11 +1000,15 @@ If `WITH_MBSTRING` is `dynamic`, then loading will be deferred until after `mbst
 
 ##### WITH_OPENSSL
 
+shared|**dynamic**
+
 When compiled as a `dynamic` extension, this will produce the extension `php-8.x-openssl`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the libraries `libssl.so` &  `libcrypto.so`.
 
 ##### WITH_INTL
+
+static|shared|**dynamic**
 
 When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-intl.so` & the following libraries:
 
@@ -979,6 +1021,68 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 * icudt72l.dat
 
 ---
+
+### php-wasm-builder commands
+
+#### php-wasm-builder build
+
+Use this to build custom version of php-wasm. Its recommended to build this to an empty directory using a `.php-wasm-rc` file.
+
+```bash
+npx php-wasm-builder build
+```
+
+#### php-wasm-builder image
+
+This will build the docker container used to build php-wasm.
+
+```bash
+npx php-wasm-builder image
+```
+
+#### php-wasm-builder copy-assets
+
+This will scan the current package's node_modules directory for shared libraries & supporting files, and copy them to `PHP_ASSET_PATH`.
+
+You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
+
+```bash
+npx php-wasm-builder copy-assets
+```
+
+#### php-wasm-builder build-assets
+
+Similar to `copy-assets`, but will actually compile the shared libaries, then copy them to `PHP_ASSET_PATH`.
+
+You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
+
+```bash
+npx php-wasm-builder build-assets
+```
+
+#### php-wasm-builder clean
+
+Clear cached build resources.
+
+```bash
+npx php-wasm-builder clean
+```
+
+#### php-wasm-builder deep-clean
+
+Clear out all downloaded dependencies and start from scratch.
+
+```bash
+npx php-wasm-builder deep-clean
+```
+
+#### php-wasm-builder help
+
+Print the help text for a given command
+
+```bash
+npx php-wasm-builder help COMMAND
+```
 
 ## 🤝 php-wasm started as a fork of oraoto/PIB...
 
