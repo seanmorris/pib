@@ -32,7 +32,7 @@ RUN apt-get update; \
 
 RUN cd /emsdk/upstream && { \
 	rm -rf emscripten; \
-	git clone https://github.com/seanmorris/emscripten.git emscripten --branch sm-updates --depth=1; \
+	git clone https://github.com/seanmorris/emscripten.git emscripten --depth=1 --branch sm-updates; \
 }
 
 RUN cd /emsdk/upstream/emscripten && ./bootstrap;
