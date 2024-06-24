@@ -1,5 +1,10 @@
 #!/usr/bin/env make
 
+WITH_GD?=dynamic
+WITH_LIBPNG?=shared
+WITH_LIBJPEG?=shared
+WITH_FREETYPE?=shared
+
 ifeq ($(filter ${WITH_GD},0 1 static dynamic),)
 $(error WITH_GD MUST BE 0, 1, static, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif

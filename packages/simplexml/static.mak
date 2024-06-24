@@ -2,7 +2,7 @@
 
 DOCKER_RUN_IN_EXT_SIMPLEXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-simplexml/ emscripten-builder
 
-WITH_SIMPLEXML?=1
+WITH_SIMPLEXML?=dynamic
 
 ifeq ($(filter ${WITH_SIMPLEXML},0 1 static dynamic),)
 $(error WITH_SIMPLEXML MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))

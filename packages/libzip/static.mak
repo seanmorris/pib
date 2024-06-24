@@ -1,5 +1,6 @@
 #!/usr/bin/env make
 
+WITH_LIBZIP?=dynamic
 LIBZIP_TAG?=v1.10.1
 DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/libzip/ emscripten-builder
 DOCKER_RUN_IN_EXT_ZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/php${PHP_VERSION}-zip/ emscripten-builder

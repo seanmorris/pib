@@ -333,6 +333,7 @@ function Embedded() {
 							<select data-select-demo ref = {selectDemoBox}>
 								<option value = "">Select a Demo</option>
 								<option value = "hello-world.php">Hello, World!</option>
+								<option value = "dynamic-extension.php">Dynamic Extension Loading</option>
 								<option value = "callbacks.php">Javascript Callbacks</option>
 								<option value = "import.php">Import Javascript Modules</option>
 								<option value = "curvature.php">Curvature</option>

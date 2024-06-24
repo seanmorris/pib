@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_INTL?=dynamic
+
 LIBICU_VERSION=72-1
 LIBICU_TAG?=release-${LIBICU_VERSION}
 LIBICU_DATFILE=lib/share/icu/72.1/icudt72l.dat

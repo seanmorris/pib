@@ -1,10 +1,11 @@
-PHP_CGI_DIST_DIR?=${ENV_DIR}/packages/php-cgi-wasm
+#!/usr/bin/env make
 
-ifneq (${PHP_DIST_DIR},${PHP_ASSET_PATH})
-PHP_CGI_ASSET_PATH?=${PHP_ASSET_PATH}
-else
-PHP_CGI_ASSET_PATH?=${PHP_CGI_DIST_DIR}
+ifdef PHP_BUILDER_DIR
+PHP_CGI_DIST_DIR:=${PHP_BUILDER_DIR}/${PHP_CGI_DIST_DIR}
+PHP_CGI_ASSET_PATH:=${PHP_BUILDER_DIR}/${PHP_CGI_ASSET_PATH}
 endif
+PHP_CGI_DIST_DIR?=${ENV_DIR}/packages/php-cgi-wasm
+PHP_CGI_ASSET_PATH?=${PHP_CGI_DIST_DIR}
 
 ifneq (${SHARED_ASSET_PATHS},${PHP_CGI_ASSET_PATH})
 SHARED_ASSET_PATHS+= ${PHP_CGI_ASSET_PATH}
@@ -21,15 +22,21 @@ NOTPARALLEL+= $(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.m
 CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.mjs PhpCgiWebview.mjs PhpCgiNode.mjs PhpCgiShell.mjs PhpCgiWorker.mjs PhpCgiBase.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.mjs)
+	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.mjs PhpCgiWebBase.mjs)
 
 CGI_CJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-shell.js php-cgi-worker.js) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.js PhpCgiWebview.js PhpCgiNode.js PhpCgiShell.js PhpCgiWorker.js PhpCgiBase.js) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.js breakoutRequest.js parseResponse.js fsOps.js msg-bus.js webTransactions.js) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.js)
+	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.js PhpCgiWebBase.js)
 
 CGI_ALL= ${CGI_MJS} ${CGI_CJS}
 ALL+= ${CGI_ALL}
+
+cgi-all: ${CGI_ALL}
+
+cgi-mjs: ${CGI_MJS}
+
+cgi-cjs: ${CGI_CJS}
 
 web-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWeb.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-web.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
 web-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWeb.js  breakoutRequest.js  parseResponse.js  php-cgi-web.js  fsOps.js  msg-bus.js  webTransactions.js resolveDependencies.js)

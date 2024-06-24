@@ -361,7 +361,7 @@ const php = new PhpWeb({ini: `
 
 The following extensions may be loaded at runtime. This allows the shared extension & their dependencies to be cached, re-used, and selected a-la-carte for each application.
 
-* gd (https://www.npmjs.com/package/php-wasm-gd, https://www.npmjs.com/package/php-wasm-libjpeg, https://www.npmjs.com/package/php-wasm-libpng, https://www.npmjs.com/package/php-wasm-freetype)
+* gd (https://www.npmjs.com/package/php-wasm-gd)
 * iconv  (https://www.npmjs.com/package/php-wasm-iconv)
 * intl (https://www.npmjs.com/package/php-wasm-intl)
 * xml (https://www.npmjs.com/package/php-wasm-libxml)

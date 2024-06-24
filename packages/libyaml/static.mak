@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_YAML?=dynamic
+
 LIBYAML_TAG?=0.2.5
 DOCKER_RUN_IN_LIB_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libyaml/ emscripten-builder
 DOCKER_RUN_IN_EXT_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-yaml/ emscripten-builder

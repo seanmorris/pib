@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_PHAR?=dynamic
+
 ifeq ($(filter ${WITH_PHAR},0 1 static dynamic),)
 $(error WITH_PHAR MUST BE 0, 1, static, dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif

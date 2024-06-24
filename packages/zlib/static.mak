@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_ZLIB?=dynamic
+
 ZLIB_TAG?=v1.3.1
 DOCKER_RUN_IN_ZLIB=${DOCKER_ENV} -w /src/third_party/zlib/ emscripten-builder
 DOCKER_RUN_IN_EXT_ZLIB=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-zlib/ emscripten-builder

@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_SQLITE?=dynamic
+
 SQLITE_VERSION?=3410200
 SQLITE_DIR?=sqlite3.41-src
 DOCKER_RUN_IN_SQLITE=${DOCKER_ENV} -w /src/third_party/${SQLITE_DIR}/ emscripten-builder

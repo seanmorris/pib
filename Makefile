@@ -47,28 +47,29 @@ ifeq ($(filter ${WITH_TOKENIZER},0 1),)
 $(error WITH_TOKENIZER MUST BE 0 or 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-## More libraries
-WITH_ICONV   ?=1
-WITH_LIBXML  ?=1
-WITH_LIBZIP  ?=1
-WITH_SQLITE  ?=1
-WITH_VRZNO   ?=1
-WITH_ZLIB    ?=1
+WITH_LIBXML?=shared
 
-## Even more libraries...
-WITH_PHAR    ?=0
-WITH_OPENSSL ?=0
-WITH_GD      ?=0
-WITH_LIBPNG  ?=0
-WITH_LIBJPEG ?=0
-WITH_FREETYPE?=0
+# ## More libraries
+# WITH_ICONV   ?=1
+# WITH_LIBZIP  ?=1
+# WITH_SQLITE  ?=1
+# WITH_VRZNO   ?=1
+# WITH_ZLIB    ?=1
 
-## Extra libraries...
-WITH_ONIGURUMA?=0
-WITH_INTL  ?=0
-WITH_TIDY  ?=0
-WITH_EXIF  ?=0
-WITH_YAML  ?=0
+# ## Even more libraries...
+# WITH_PHAR    ?=0
+# WITH_OPENSSL ?=0
+# WITH_GD      ?=0
+# WITH_LIBPNG  ?=0
+# WITH_LIBJPEG ?=0
+# WITH_FREETYPE?=0
+
+# ## Extra libraries...
+# WITH_ONIGURUMA?=0
+# WITH_INTL  ?=0
+# WITH_TIDY  ?=0
+# WITH_EXIF  ?=0
+# WITH_YAML  ?=0
 
 ## Emscripten features...
 NODE_RAW_FS ?=0
@@ -230,9 +231,6 @@ endif
 
 PRELOAD_NAME=php
 
--include packages/php-cgi-wasm/static.mak
--include $(addsuffix /static.mak,$(shell npm ls -p))
-
 ifdef PRELOAD_ASSETS
 # DEPENDENCIES+=
 PHP_ASSET_LIST+= ${PRELOAD_NAME}.data
@@ -242,6 +240,9 @@ EXTRA_FLAGS+= --preload-name ${PRELOAD_NAME} ${PRELOAD_METHOD} /src/third_party/
 ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
 	cp -Lprf packages/php-wasm/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}/
 endif
+
+-include packages/php-cgi-wasm/static.mak
+-include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ########### Collect & patch the source code. ###########
 
@@ -254,7 +255,11 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	 ${DOCKER_RUN} rm -rf /src/third_party/preload
 ifdef PRELOAD_ASSETS
 	@ mkdir -p third_party/preload
+ifdef PHP_BUILDER_DIR
+	@ cp -prfL $(addprefix ${PHP_BUILDER_DIR},${PRELOAD_ASSETS}) third_party/preload/
+else
 	@ cp -prfL ${PRELOAD_ASSETS} third_party/preload/
+endif
 	@ ${DOCKER_RUN} touch .cache/preload-collected
 endif
 
@@ -728,7 +733,10 @@ clean:
 		packages/php-wasm/*.mjs* \
 		packages/php-cgi-wasm/*.data \
 		packages/php-cgi-wasm/*.mjs* \
-		third_party/php${PHP_VERSION}-src/configured
+		third_party/php${PHP_VERSION}-src/configured \
+		third_party/preload \
+		.cache/pre.js \
+		.cache/preload-collected
 	${MAKE} php-clean
 
 deep-clean: clean

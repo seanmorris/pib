@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_TIDY?=dynamic
+
 TIDYHTML_TAG?=5.6.0
 DOCKER_RUN_IN_TIDY=${DOCKER_ENV} -w /src/third_party/tidy-html5/ emscripten-builder
 DOCKER_RUN_IN_EXT_TIDY=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-tidy/ emscripten-builder

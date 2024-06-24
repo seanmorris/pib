@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_ICONV?=dynamic
+
 ICONV_TAG?=v1.17
 DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libiconv-1.17/ emscripten-builder
 DOCKER_RUN_IN_EXT_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-iconv/ emscripten-builder

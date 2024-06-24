@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_VRZNO?=1
+
 DOCKER_RUN_IN_EXT_VRZNO=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-vrzno/ emscripten-builder
 
 ifeq (${WITH_VRZNO}, 1)

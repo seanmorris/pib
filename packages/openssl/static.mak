@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+WITH_OPENSSL?=dynamic
+
 OPENSSL_TAG?=OpenSSL_1_1_1-stable
 DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} \
 	-eCC='emcc -fPIC -flto -O${OPTIMIZE} -sLINKABLE' \

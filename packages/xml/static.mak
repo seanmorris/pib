@@ -2,7 +2,7 @@
 
 DOCKER_RUN_IN_EXT_XML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-xml/ emscripten-builder
 
-WITH_XML?=1
+WITH_XML?=dynamic
 
 ifeq ($(filter ${WITH_XML},0 1 static dynamic),)
 $(error WITH_XML MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))

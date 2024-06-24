@@ -1,5 +1,8 @@
 #!/usr/bin/env make
 
+WITH_MBSTRING?=dynamic
+WITH_ONIGURUMA?=dynamic
+
 ONIGURUMA_TAG?=v6.9.9
 DOCKER_RUN_IN_ONIGURUMA=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/oniguruma/ emscripten-builder
 DOCKER_RUN_IN_EXT_MBSTRING=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-mbstring/ emscripten-builder

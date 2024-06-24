@@ -66,7 +66,7 @@ const commands = {};
 		});
 	};
 
-	build.info = `Build php-wasm.`;
+	build.info = `Build php-wasm, optionally using a .php-wasm-rc file in the current directory.`;
 	build.help = `Usage: php-wasm-builder build [ENV_NAME] [MODULE_TYPE] [BINARY_TYPE]
 
   ENV_NAME: [web, node]
@@ -111,51 +111,9 @@ const commands = {};
 	};
 
 	image.info = 'Create the build environment docker image';
-	image.help = `Usage: php-wasm-builder image`
+	image.help = `Usage: php-wasm-builder image.`
 
 	commands.image = image;
-}
-
-{ // clean
-	const clean = () => {
-		const subprocess = child_process.spawn(`make`, ['deep-clean'], {
-			stdio: [ 'inherit', 'inherit', 'inherit' ],
-			cwd: __dirname + '/..',
-		});
-	};
-
-	clean.info = `Clear cached build resources`;
-	clean.help = `Usage: php-wasm-builder clean`;
-
-	commands.clean = clean;
-}
-
-{ // assets
-	const assets = () => {
-		const options = [
-			`PHP_BUILDER_DIR=${cwd}`,
-			`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`,
-		];
-
-		options.push(`ENV_DIR=${cwd}/`);
-
-		if(fs.existsSync(cwd + '/.php-wasm-rc'))
-		{
-			options.push(`ENV_FILE=${rcFile}`);
-		}
-
-		options.push('assets');
-
-		const subprocess = child_process.spawn(`make`, options, {
-			stdio: [ 'inherit', 'inherit', 'inherit' ],
-			cwd: __dirname + '/..',
-		});
-	};
-
-	assets.info = `Build shared libs & file packages to asset directory.`;
-	assets.help = `Usage: php-wasm-builder assets`;
-
-	commands.assets = assets;
 }
 
 { // copy-assets
@@ -222,6 +180,59 @@ const commands = {};
 	copy_assets.help = `Usage: php-wasm-builder copy-assets`;
 
 	commands['copy-assets'] = copy_assets;
+}
+
+{ // build-assets
+	const build_assets = () => {
+		const options = [
+			`PHP_BUILDER_DIR=${cwd}`,
+			`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`,
+		];
+
+		options.push(`ENV_DIR=${cwd}/`);
+
+		if(fs.existsSync(cwd + '/.php-wasm-rc'))
+		{
+			options.push(`ENV_FILE=${rcFile}`);
+		}
+
+		options.push('assets');
+
+		const subprocess = child_process.spawn(`make`, options, {
+			stdio: [ 'inherit', 'inherit', 'inherit' ],
+			cwd: __dirname + '/..',
+		});
+	};
+
+	build_assets.info = `Build shared libs & file packages to asset directory.`;
+	build_assets.help = `Usage: php-wasm-builder assets`;
+
+	commands['build-assets'] = build_assets;
+}
+
+{ // clean
+	const clean = () => {
+		const subprocess = child_process.spawn(`make`, ['deep-clean'], {
+			stdio: [ 'inherit', 'inherit', 'inherit' ],
+			cwd: __dirname + '/..',
+		});
+	};
+
+	clean.info = `Clear cached build resources.`;
+	clean.help = `Usage: php-wasm-builder clean`;
+
+	commands.clean = clean;
+}
+
+{ // deep-clean
+	const deep_clean = () => {
+
+	};
+
+	deep_clean.info = 'Clear out all downloaded dependencies and start from scratch.';
+	deep_clean.help = `Usage: php-wasm-builder deep-clean`
+
+	commands['deep-clean'] = deep_clean;
 }
 
 { // help
