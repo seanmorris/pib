@@ -6,7 +6,7 @@
 		"url": "git+https://github.com/seanmorris/php-wasm.git"
 	},
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.0-k",
+	"version": "0.0.0-l",
 	"main": "index.mjs",
 	"files": [
 		"index.mjs",
@@ -16,6 +16,7 @@
 		"LICENSE",
 		"NOTICE",
 		"README.md",
+		"pre.mak",
 		"static.mak",
 		"php8.3-intl.so",
 		"php8.2-intl.so",
