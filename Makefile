@@ -708,7 +708,7 @@ patch/php8.0.patch:
 
 php-clean:
 	${DOCKER_RUN_IN_PHP} rm -f configured
-	${DOCKER_RUN_IN_PHP} make clean
+	- ${DOCKER_RUN_IN_PHP} make clean
 
 clean:
 	${DOCKER_RUN} rm -rf \
