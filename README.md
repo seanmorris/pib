@@ -785,17 +785,25 @@ WITH_FREETYPE=1
 
 The following options may appear in `.php-wasm-rc`.
 
+---
+
 ##### PHP_VERSION
 
 8.0|8.1|8.2|**8.3**
+
+---
 
 ##### PHP_DIST_DIR
 
 This is the directory where javascript & wasm files will be built to, *relative to the current directory.*
 
+---
+
 ##### PHP_ASSET_PATH
 
 This is the directory where shared libs, extension, `.data` files & other supporting files will be built to, *relative to the current directory.* Defaults to `PHP_DIST_DIR`.
+
+---
 
 ##### OPTIMIZE
 
@@ -803,19 +811,27 @@ This is the directory where shared libs, extension, `.data` files & other suppor
 
 The optimization level to use while compiling.
 
+---
+
 ##### SUBOPTIMIZE
 
 The optimization level to use while compiling libraries. Defaults to `OPTIMIZE`.
 
+---
+
 ##### PRELOAD_ASSETS
 
 A list of **absolute paths** to files & directories to build to the `/preload` directory. Will produce a `.data` file.
+
+---
 
 ##### ASSERTIONS
 
 0|**1**
 
 Build with/without assertions.
+
+---
 
 #### Extensions
 
