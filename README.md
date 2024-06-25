@@ -28,18 +28,18 @@ find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://gi
 Installing php-wasm:
 
 ```sh
-$ npm i php-wasm
+$ npm i php-wasm@alpha
 ```
 
 Installing php-cgi-wasm:
 
 ```sh
-$ npm i php-wasm
+$ npm i php-cgi-wasm@alpha
 ```
 Installing php-wasm-builder:
 
 ```sh
-$ npm i php-wasm-builder
+$ npm i php-wasm-builder@alpha
 ```
 
 ## ☀️ Examples
