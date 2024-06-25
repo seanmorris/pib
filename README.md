@@ -752,10 +752,13 @@ You can also create a `.php-wasm-rc` file in this directory to customize the bui
 
 ```make
 # Select a PHP version
-PHP_VERSION=8.2
+PHP_VERSION=8.3
 
-# Build the package to a directory other than the current one (absolute path)
-PHP_DIST_DIR=~/my-project/public
+# Build the package to a directory other than the current one (RELATIVE path)
+PHP_DIST_DIR=./public
+
+# Build the extensions to a directory other than the current one (RELATIVE path)
+PHP_ASSET_DIR=./public
 
 # Build the CGI package to a directory other than the current one (absolute path)
 PHP_CGI_DIST_DIR
@@ -799,7 +802,7 @@ This is the directory where javascript & wasm files will be built to, *relative 
 
 ---
 
-##### PHP_ASSET_PATH
+##### PHP_ASSET_DIR
 
 This is the directory where shared libs, extension, `.data` files & other supporting files will be built to, *relative to the current directory.* Defaults to `PHP_DIST_DIR`.
 
@@ -1058,7 +1061,7 @@ npx php-wasm-builder image
 
 #### php-wasm-builder copy-assets
 
-This will scan the current package's node_modules directory for shared libraries & supporting files, and copy them to `PHP_ASSET_PATH`.
+This will scan the current package's node_modules directory for shared libraries & supporting files, and copy them to `PHP_ASSET_DIR`.
 
 You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
 
@@ -1068,7 +1071,7 @@ npx php-wasm-builder copy-assets
 
 #### php-wasm-builder build-assets
 
-Similar to `copy-assets`, but will actually compile the shared libaries, then copy them to `PHP_ASSET_PATH`.
+Similar to `copy-assets`, but will actually compile the shared libaries, then copy them to `PHP_ASSET_DIR`.
 
 You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
 

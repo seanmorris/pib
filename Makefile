@@ -106,7 +106,7 @@ endif
 ifdef PHP_BUILDER_DIR
 ENV_DIR:=${PHP_BUILDER_DIR}
 PHP_DIST_DIR:=${ENV_DIR}/${PHP_DIST_DIR}
-PHP_ASSET_PATH:=${ENV_DIR}/${PHP_ASSET_PATH}
+PHP_ASSET_DIR:=${ENV_DIR}/${PHP_ASSET_DIR}
 endif
 PHP_DIST_DIR?=${ENV_DIR}/packages/php-wasm
 INITIAL_MEMORY ?=128MB
@@ -222,10 +222,10 @@ EXTRA_CFLAGS=
 ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
-PHP_ASSET_PATH?=${PHP_DIST_DIR}
-SHARED_ASSET_PATHS=${PHP_ASSET_PATH}
+PHP_ASSET_DIR?=${PHP_DIST_DIR}
+SHARED_ASSET_PATHS=${PHP_ASSET_DIR}
 
-ifneq (${PHP_ASSET_PATH},${PHP_DIST_DIR})
+ifneq (${PHP_ASSET_DIR},${PHP_DIST_DIR})
 PHP_ASSET_LIST+=
 endif
 
@@ -244,8 +244,8 @@ endif
 -include packages/php-cgi-wasm/static.mak
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
-${PHP_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
-	cp -Lprf packages/php-wasm/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}/
+${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
+	cp -Lprf packages/php-wasm/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}/
 
 ########### Collect & patch the source code. ###########
 
@@ -452,13 +452,13 @@ ${PHP_DIST_DIR}/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-web.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-web.mjs: ENVIRONMENT=web
@@ -474,13 +474,13 @@ ${PHP_DIST_DIR}/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	perl -pi -w -e 's|_setTempRet0|setTempRet0|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 	${MAKE} ${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 
 ${PHP_DIST_DIR}/php-worker.js: BUILD_TYPE=js
@@ -495,13 +495,13 @@ ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-worker.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-worker.mjs: ENVIRONMENT=worker
@@ -516,13 +516,13 @@ ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ${PHP_DIST_DIR}/php-node.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-node.js: ENVIRONMENT=node
@@ -536,13 +536,13 @@ ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-node.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-node.mjs: ENVIRONMENT=node
@@ -557,13 +557,13 @@ ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ${PHP_DIST_DIR}/php-shell.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-shell.js: ENVIRONMENT=shell
@@ -576,13 +576,13 @@ ${PHP_DIST_DIR}/php-shell.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-shell.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-shell.mjs: ENVIRONMENT=shell
@@ -596,13 +596,13 @@ ${PHP_DIST_DIR}/php-shell.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}/
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ${PHP_DIST_DIR}/php-webview.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-webview.js: ENVIRONMENT=webview
@@ -616,13 +616,13 @@ ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ${PHP_DIST_DIR}/php-webview.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-webview.mjs: ENVIRONMENT=webview
@@ -637,13 +637,13 @@ ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_PATH}/
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
 ifdef PRELOAD_ASSETS
 	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_DIST_DIR}
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_PATH}
-	${MAKE} ${PHP_ASSET_PATH}/${PRELOAD_NAME}.data
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
+	${MAKE} ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
-	${MAKE} $(addprefix ${PHP_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 
 ########## Package files ###########
 

@@ -7,13 +7,13 @@ ENV_FILE?=.env
 
 ifdef PHP_BUILDER_DIR
 ENV_DIR:=${PHP_BUILDER_DIR}
-PHP_ASSET_PATH:=${ENV_DIR}/${PHP_ASSET_PATH}
+PHP_ASSET_DIR:=${ENV_DIR}/${PHP_ASSET_DIR}
 endif
 
-PHP_ASSET_PATH:=${ENV_DIR}/${PHP_ASSET_PATH}
+PHP_ASSET_DIR:=${ENV_DIR}/${PHP_ASSET_DIR}
 
 get-asset-path:
-	@ echo $(abspath ${PHP_ASSET_PATH});
+	@ echo $(abspath ${PHP_ASSET_DIR});
 
 get-php-version:
 	@ echo ${PHP_VERSION};
