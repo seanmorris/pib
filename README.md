@@ -8,7 +8,7 @@ _PHP in WebAssembly, npm not required._
 
 find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
 
-## 🌟 v0.0.9 - Aiming for the (GitHub) Stars
+## 🌟 v0.0.9-alpha - Aiming for the (GitHub) Stars
 
 * Adding PHP-CGI support!
 * Runtime extension loading!
