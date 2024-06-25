@@ -34,7 +34,7 @@ const sharedLibs = [
 	`php\${PHP_VERSION}-simplexml.so`,
 ];
 
-const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: '/icudt72l.dat' }];
+const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }];
 
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({

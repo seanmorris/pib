@@ -69,21 +69,38 @@ export class PhpWeb extends PhpBase
 
 const runPhpScriptTag = element => {
 
-	const tags = {stdin: null, stdout: null, stderr: null};
+	const scope = {stdin: null, stdout: null, stderr: null, ini: '', libs: []};
 
 	if(element.hasAttribute('data-stdout'))
 	{
-		tags.stdout = document.querySelector(element.getAttribute('data-stdout'));
+		scope.stdout = document.querySelector(element.getAttribute('data-stdout'));
 	}
 
 	if(element.hasAttribute('data-stderr'))
 	{
-		tags.stderr = document.querySelector(element.getAttribute('data-stderr'));
+		scope.stderr = document.querySelector(element.getAttribute('data-stderr'));
 	}
 
 	if(element.hasAttribute('data-stdin'))
 	{
-		tags.stdin = document.querySelector(element.getAttribute('data-stdin'));
+		scope.stdin = document.querySelector(element.getAttribute('data-stdin'));
+	}
+
+	if(element.hasAttribute('data-ini'))
+	{
+		scope.ini = element.getAttribute('data-ini');
+	}
+
+	if(element.hasAttribute('data-libs'))
+	{
+		try
+		{
+			scope.libs = JSON.parse(element.getAttribute('data-libs'));
+		}
+		catch(error)
+		{
+			console.error(error);
+		}
 	}
 
 	let stdout = '';
@@ -99,20 +116,20 @@ const runPhpScriptTag = element => {
 
 	let getInput = Promise.resolve('');
 
-	if(tags.stdin)
+	if(scope.stdin)
 	{
-		getInput = Promise.resolve(tags.stdin.innerText);
+		getInput = Promise.resolve(scope.stdin.innerText);
 
-		if(tags.stdin.hasAttribute('src'))
+		if(scope.stdin.hasAttribute('src'))
 		{
-			getInput = fetch(tags.stdin.getAttribute('src')).then(response => response.text());
+			getInput = fetch(scope.stdin.getAttribute('src')).then(response => response.text());
 		}
 	}
 
 	const getAll = Promise.all([getCode, getInput]);
 
 	getAll.then(([code, input,]) => {
-		const php = new PhpWeb;
+		const php = new PhpWeb({sharedLibs: scope.libs, ini: scope.ini});
 
 		php.inputString(input);
 
@@ -120,9 +137,9 @@ const runPhpScriptTag = element => {
 
 			stdout += event.detail;
 
-			if(ran && tags.stdout)
+			if(ran && scope.stdout)
 			{
-				tags.stdout.innerHTML = stdout;
+				scope.stdout.innerHTML = stdout;
 			}
 		};
 
@@ -130,9 +147,9 @@ const runPhpScriptTag = element => {
 
 			stderr += event.detail;
 
-			if(ran && tags.stderr)
+			if(ran && scope.stderr)
 			{
-				tags.stderr.innerHTML = stderr;
+				scope.stderr.innerHTML = stderr;
 			}
 		};
 
@@ -146,8 +163,8 @@ const runPhpScriptTag = element => {
 			.finally(() => {
 				ran = true;
 				php.flush();
-				tags.stdout && (tags.stdout.innerHTML = stdout);
-				tags.stderr && (tags.stderr.innerHTML = stderr);
+				scope.stdout && (scope.stdout.innerHTML = stdout);
+				scope.stderr && (scope.stderr.innerHTML = stderr);
 			});
 		});
 	});
