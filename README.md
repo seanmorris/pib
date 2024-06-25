@@ -1116,4 +1116,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 http://www.apache.org/licenses/LICENSE-2.0
 
+---
+
 *Special thanks to Alex Haussmann*

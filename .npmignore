@@ -1,4 +1,7 @@
 .circleci/*
-demo-source/*
+emscripten/*
+emscripten/tools/*
+demo-node/*
+demo-web/*
 packages/*
 docs/*
