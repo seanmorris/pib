@@ -760,11 +760,14 @@ PHP_DIST_DIR=./public
 # Build the extensions to a directory other than the current one (RELATIVE path)
 PHP_ASSET_DIR=./public
 
-# Build the CGI package to a directory other than the current one (absolute path)
-PHP_CGI_DIST_DIR
-PHP_DIST_DIR=~/my-project/public
 
-# Space separated list of files/directories (absolute paths)
+# Build the cgi package to a directory other than the current one (RELATIVE path)
+PHP_CGI_DIST_DIR=./public
+
+# Build the cgi package's extensions to a directory other than the current one (RELATIVE path)
+PHP_CGI_ASSET_DIR=./public
+
+# Space separated list of files/directories (ABSOLUTE paths)
 # to be included under the /preload directory in the final build.
 PRELOAD_ASSETS=~/my-project/php-scripts ~/other-dir/example.php
 

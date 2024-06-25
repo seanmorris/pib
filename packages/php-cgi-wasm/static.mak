@@ -1,8 +1,8 @@
 #!/usr/bin/env make
 
-${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data: .cache/preload-collected
+${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- $(if $${PRELOAD_ASSETS},cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/${PRELOAD_NAME}.data ${PHP_CGI_DIST_DIR})
-	- $(if $${PRELOAD_ASSETS},cp -Lprf ${PHP_CGI_DIST_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/)
+	- $(if $${PRELOAD_ASSETS},cp -Lprf ${PHP_CGI_DIST_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/)
 
 NOTPARALLEL+= $(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-shell.js php-cgi-worker.js)
@@ -43,7 +43,7 @@ shell-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiShell.js  b
 
 cgi: ${CGI_MJS} ${CGI_CJS}
 
-CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured # $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST})
+CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured # $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
 
 ${PHP_CGI_DIST_DIR}/config.mjs:
 	echo 'export const phpVersion = "${PHP_VERSION}";' > $@
@@ -69,9 +69,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 
 ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: BUILD_TYPE=mjs
 ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ENVIRONMENT=web
@@ -84,9 +84,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: BUILD_TYPE=js
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ENVIRONMENT=worker
@@ -99,9 +99,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|${READ_ASYNC_OLD}|${READ_ASYNC_NEW}|' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: BUILD_TYPE=mjs
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ENVIRONMENT=worker
@@ -114,9 +114,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 
 ${PHP_CGI_DIST_DIR}/php-cgi-node.js: BUILD_TYPE=js
 ${PHP_CGI_DIST_DIR}/php-cgi-node.js: ENVIRONMENT=node
@@ -128,9 +128,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: BUILD_TYPE=mjs
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ENVIRONMENT=node
@@ -142,9 +142,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.js: BUILD_TYPE=js
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.js: ENVIRONMENT=shell
@@ -155,9 +155,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-shell.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: BUILD_TYPE=mjs
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: ENVIRONMENT=shell
@@ -168,9 +168,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}/
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: BUILD_TYPE=js
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ENVIRONMENT=webview
@@ -182,9 +182,9 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: BUILD_TYPE=mjs
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ENVIRONMENT=webview
@@ -197,6 +197,6 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_PATH}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_PATH}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_PATH}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
+	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
