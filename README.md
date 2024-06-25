@@ -310,6 +310,21 @@ php.inputString('This is a string of data provided on STDIN.');
 const exitCode = await php.run('<?php echo "Hello, world!";');
 ```
 
+### Dynamic Extensions in Static Pages
+
+Dynamic extensions can be loaded in static webpages like so:
+
+```html
+<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm@0.0.9-alpha-12/php-tags.mjs"></script>
+
+<script type = "text/php" data-stdout = "#output" data-stderr = "#error" data-libs = '[
+  {"url": "https://unpkg.com/php-wasm-yaml/php8.3-yaml.so", "ini": true},
+  {"url": "https://unpkg.com/php-wasm-yaml/libyaml.so", "ini": false}
+]'><?php
+  print yaml_emit([1,2,3,"string",["k1" => "value", "k2" => "value2", "k3" => "value3"],"now" => date("Y-m-d h:i:s")]);
+</script>
+```
+
 ## ⚙️ Configuration
 
 You can pass in the `ini` property to the constructor to add lines to `/php.ini`:
@@ -415,7 +430,7 @@ The above is actually shorthand for the following code. Passing `ini: true` will
 ```javascript
 const php = new PhpWeb({sharedLibs: [
     {
-        name: `php8.3-xml.so`,
+        name: `php8.3-phar.so`,
         url:  `https://unpkg.com/php-wasm-phar/php8.3-phar.so`,
         ini:  true,
     }
