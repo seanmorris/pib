@@ -447,6 +447,8 @@ const php = new PhpWeb({sharedLibs: [
 
 Some extensions require supporting libraries. You can provide URLs for those as `sharedLibs` as well, just pass `ini: false`:
 
+*(`name` is implied to be the last section of the URL here.)*
+
 ```javascript
 const php = new PhpWeb({sharedLibs: [
     { url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true  },
