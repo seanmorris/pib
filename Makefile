@@ -131,7 +131,7 @@ PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 CPU_COUNT=`nproc || echo 1`
 # PRELOAD_ASSETS+=php.ini
 
-DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
+DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker compose -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
@@ -761,14 +761,14 @@ hooks:
 	git config core.hooksPath githooks
 
 image:
-	docker-compose build --progress plain
+	docker compose build --progress plain
 	# docker-compose --progress quiet build
 
 pull-image:
-	docker-compose --progress quiet pull
+	docker compose --progress quiet pull
 
 push-image:
-	docker-compose --progress quiet push
+	docker compose --progress quiet push
 
 save-image:
 	mkdir -p ./image
