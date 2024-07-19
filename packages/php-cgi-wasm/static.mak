@@ -58,7 +58,7 @@ ${PHP_CGI_DIST_DIR}/config.js:
 
 ${PHP_CGI_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_CGI_DIST_DIR}/
-	sed -i 's|import.meta|(undefined /*import.meta*/)|' ${PHP_CGI_DIST_DIR}/$(notdir $@)
+	sed -i '' -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_CGI_DIST_DIR}/$(notdir $@)
 
 ${PHP_CGI_DIST_DIR}/%.mjs: source/%.js
 	cp $< $@;
