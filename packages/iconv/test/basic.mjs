@@ -2,10 +2,6 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
-test('Iconv Extension is present in phpExtensions.', async () => {
-	assert.equal('WITH_ICONV' in PhpNode.phpExtensions, true);
-});
-
 test('Iconv Extension is enabled.', async () => {
 	const php = process.env.WITH_INTL === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-iconv.so`]})

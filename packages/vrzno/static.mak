@@ -12,23 +12,14 @@ PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 CONFIGURE_FLAGS+= --enable-vrzno
 PRE_JS_FILES+= third_party/vrzno/lib.js
 DEPENDENCIES+= third_party/vrzno/vrzno.c
+TEST_LIST+=$(shell ls packages/vrzno/test/*.mjs)
 endif
-
-# PHP_ASSET_LIST+= php${PHP_VERSION}-vrzno.so
 
 ifdef VRZNO_DEV_PATH
 
 DEPENDENCIES+= ${VRZNO_DEV_PATH}/lib.js
 
-
-${VRZNO_DEV_PATH}/vrzno_js.h: ${VRZNO_DEV_PATH}/vrzno_js.pre.h
-	cd ${VRZNO_DEV_PATH} && ./pre.pl < vrzno_js.pre.h  > vrzno_js.h
-
-
-# ${VRZNO_DEV_PATH}/vrzno.c: $(wildcard ${VRZNO_DEV_PATH}/js/*.js) ${VRZNO_DEV_PATH}/vrzno.pre.c
-# 	${DOCKER_RUN}
-
-${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js) third_party/vrzno/vrzno.c
+${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js) # third_party/vrzno/vrzno.c
 	cat ${VRZNO_DEV_PATH}/js/WeakerMap.js \
 		${VRZNO_DEV_PATH}/js/PolyFill.js \
 		${VRZNO_DEV_PATH}/js/UniqueIndex.js \
@@ -40,7 +31,7 @@ ${VRZNO_DEV_PATH}/lib.js: $(wildcard ${VRZNO_DEV_PATH}/js/*.js) third_party/vrzn
 		${VRZNO_DEV_PATH}/js/module.js \
 		> ${VRZNO_DEV_PATH}/lib.js
 
-third_party/vrzno/vrzno.c: ${VRZNO_DEV_PATH}/lib.js $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
+third_party/vrzno/vrzno.c: $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h) ${VRZNO_DEV_PATH}/lib.js
 	echo -e "\e[33;4mImporting VRZNO\e[0m"
 	- ${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) ./third_party/vrzno/
 	cp -prfv ${VRZNO_DEV_PATH} third_party/

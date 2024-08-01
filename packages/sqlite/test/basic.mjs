@@ -2,10 +2,6 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
-test('WITH_SQLITE is present in phpExtensions.', async () => {
-	assert.equal('WITH_SQLITE' in PhpNode.phpExtensions, true);
-});
-
 test('Sqlite3 Extension is enabled.', async () => {
 	const php = process.env.WITH_SQLITE === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-sqlite.so`]})

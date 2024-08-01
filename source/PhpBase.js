@@ -1,6 +1,5 @@
 import { phpVersion } from './config';
 import { phpVersionFull } from './config';
-import { phpExtensions } from './config';
 import { OutputBuffer } from './OutputBuffer';
 import { _Event } from './_Event';
 import { fsOps } from './fsOps';
@@ -219,8 +218,9 @@ export class PhpBase extends EventTarget
 	async x(fragments, ...values)
 	{
 		const names = [];
+		const phpModule = await this.binary;
 
-		if(this.constructor.phpExtensions.WITH_VRZNO)
+		if(phpModule.hasVrzno)
 		{
 			for(const value of values)
 			{
@@ -245,8 +245,6 @@ export class PhpBase extends EventTarget
 			}
 
 			code = `vrzno_zval( ${code} );`;
-
-			const phpModule = await this.binary;
 
 			return phpModule.zvalToJS(await this.exec(code));
 		}
@@ -273,11 +271,12 @@ export class PhpBase extends EventTarget
 		}
 	}
 
-	r(fragments, ...values)
+	async r(fragments, ...values)
 	{
 		const names = [];
+		const phpModule = await this.binary;
 
-		if(this.constructor.phpExtensions.WITH_VRZNO)
+		if(phpModule.hasVrzno)
 		{
 			for(const value of values)
 			{
@@ -394,4 +393,3 @@ export class PhpBase extends EventTarget
 
 PhpBase.phpVersion = phpVersion;
 PhpBase.phpVersionFull = phpVersionFull;
-PhpBase.phpExtensions = phpExtensions

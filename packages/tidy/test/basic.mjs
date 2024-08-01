@@ -2,10 +2,6 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
-test('WITH_TIDY is present in phpExtensions.', async () => {
-	assert.equal('WITH_TIDY' in PhpNode.phpExtensions, true);
-});
-
 test('Tidy Extension is enabled.', async () => {
 	const php = process.env.WITH_TIDY === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-tidy.so`]})
