@@ -1,4 +1,6 @@
 import { phpVersion } from './config';
+import { phpVersionFull } from './config';
+import { phpExtensions } from './config';
 import { OutputBuffer } from './OutputBuffer';
 import { _Event } from './_Event';
 import { fsOps } from './fsOps';
@@ -31,6 +33,8 @@ export class PhpBase extends EventTarget
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
+		this.shared = args.shared = ('shared' in args) ? args.shared : {};
+
 		const defaults = {
 			stdin:  () => this.buffers.stdin.shift() ?? null,
 			stdout: byte => this.buffers.stdout.push(byte),
@@ -62,6 +66,8 @@ export class PhpBase extends EventTarget
 				return urlLibs[path];
 			}
 		};
+
+		this.valueIndex = 0;
 
 		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
 
@@ -201,13 +207,123 @@ export class PhpBase extends EventTarget
 	async _exec(phpCode)
 	{
 		return (await this.binary).ccall(
-				'pib_exec'
-				, STR
-				, [STR]
-				, [phpCode]
-				, {async: true}
+			'pib_exec'
+			, STR
+			, [STR]
+			, [phpCode]
+			, {async: true}
 		)
 		.finally(() => this.flush());
+	}
+
+	async x(fragments, ...values)
+	{
+		const names = [];
+
+		if(this.constructor.phpExtensions.WITH_VRZNO)
+		{
+			for(const value of values)
+			{
+				const name = `___value__${this.valueIndex++}`;
+				this.shared[name] = value;
+				names.push(name);
+			}
+
+			let code = '';
+
+			fragments = [...fragments];
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(names.length)
+				{
+					code += `(vrzno_env('${names.shift()}'))`;
+				}
+			}
+
+			code = `vrzno_zval( ${code} );`;
+
+			const phpModule = await this.binary;
+
+			return phpModule.zvalToJS(await this.exec(code));
+		}
+		else
+		{
+			const encoded = values.map(value => JSON.stringify(value));
+
+			fragments = [...fragments];
+
+			let code = '';
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(encoded.length)
+				{
+					code += `(json_decode('${encoded.shift()}'))`;
+				}
+			}
+
+			return this.exec(code);
+		}
+	}
+
+	r(fragments, ...values)
+	{
+		const names = [];
+
+		if(this.constructor.phpExtensions.WITH_VRZNO)
+		{
+			for(const value of values)
+			{
+				const name = `___value__${this.valueIndex++}`;
+				this.shared[name] = value;
+				names.push(name);
+			}
+
+			let code = '';
+
+			fragments = [...fragments];
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(names.length)
+				{
+					code += `(vrzno_env('${names.shift()}'))`;
+				}
+			}
+
+			return this.run(code);
+		}
+		else
+		{
+			const encoded = values.map(value => JSON.stringify(value));
+
+			fragments = [...fragments];
+
+			let code = '';
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(encoded.length)
+				{
+					code += `(json_decode('${encoded.shift()}'))`;
+				}
+			}
+
+			return this.run(code);
+		}
 	}
 
 	async refresh()
@@ -218,6 +334,8 @@ export class PhpBase extends EventTarget
 		{
 			callback();
 		}
+
+		Object.keys(this.shared).forEach(key => delete this.shared[key]);
 
 		await php.ccall(
 			'pib_refresh'
@@ -275,3 +393,5 @@ export class PhpBase extends EventTarget
 }
 
 PhpBase.phpVersion = phpVersion;
+PhpBase.phpVersionFull = phpVersionFull;
+PhpBase.phpExtensions = phpExtensions

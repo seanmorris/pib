@@ -1,6 +1,6 @@
 {
 	"name": "php-cgi-wasm",
-	"version": "0.0.9-alpha-0",
+	"version": "0.0.9-alpha-2",
 	"description": "php-cgi for wasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
@@ -26,6 +26,7 @@
 		"NOTICE",
 		"README",
 		"package.json",
+		"libxml2.so",
 
 		"PhpCgiBase.js",
 		"PhpCgiBase.mjs",
@@ -57,14 +58,18 @@
 		"php-cgi-webview.js.wasm",
 		"php-cgi-webview.mjs.wasm",
 
-		"_Event.js",
-		"_Event.mjs",
+		"breakoutRequest.js",
+		"breakoutRequest.mjs",
 		"config.js",
 		"config.mjs",
 		"fsOps.js",
 		"fsOps.mjs",
-		"OutputBuffer.js",
-		"OutputBuffer.mjs",
+
+		"msg-bus.js",
+		"msg-bus.mjs",
+
+		"parseResponse.mjs",
+		"parseResponse.js",
 		"resolveDependencies.js",
 		"resolveDependencies.mjs",
 		"webTransactions.js",

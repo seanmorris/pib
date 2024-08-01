@@ -49,28 +49,6 @@ endif
 
 WITH_LIBXML?=shared
 
-# ## More libraries
-# WITH_ICONV   ?=1
-# WITH_LIBZIP  ?=1
-# WITH_SQLITE  ?=1
-# WITH_VRZNO   ?=1
-# WITH_ZLIB    ?=1
-
-# ## Even more libraries...
-# WITH_PHAR    ?=0
-# WITH_OPENSSL ?=0
-# WITH_GD      ?=0
-# WITH_LIBPNG  ?=0
-# WITH_LIBJPEG ?=0
-# WITH_FREETYPE?=0
-
-# ## Extra libraries...
-# WITH_ONIGURUMA?=0
-# WITH_INTL  ?=0
-# WITH_TIDY  ?=0
-# WITH_EXIF  ?=0
-# WITH_YAML  ?=0
-
 ## Emscripten features...
 NODE_RAW_FS ?=0
 WITH_NETWORKING?=0
@@ -105,8 +83,8 @@ endif
 ## More Options
 ifdef PHP_BUILDER_DIR
 ENV_DIR:=${PHP_BUILDER_DIR}
-PHP_DIST_DIR:=${ENV_DIR}/${PHP_DIST_DIR}
-PHP_ASSET_DIR:=${ENV_DIR}/${PHP_ASSET_DIR}
+PHP_DIST_DIR:=$(realpath ${ENV_DIR}/${PHP_DIST_DIR})
+PHP_ASSET_DIR:=$(realpath ${ENV_DIR}/${PHP_ASSET_DIR})
 endif
 PHP_DIST_DIR?=${ENV_DIR}/packages/php-wasm
 INITIAL_MEMORY ?=128MB
@@ -116,8 +94,13 @@ SYMBOLS        ?=0
 OPTIMIZE       ?=3
 SUB_OPTIMIZE   ?=${OPTIMIZE}
 PHP_SUFFIX ?=
+WITH_SOURCEMAPS?=0
 
 ## End of defaults
+
+ifeq (${WITH_SOURCEMAPS},1)
+SYMBOLS
+endif
 
 _UID:=$(shell id -u)
 _GID:=$(shell id -g)
@@ -131,7 +114,7 @@ PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 CPU_COUNT=`nproc || echo 1`
 # PRELOAD_ASSETS+=php.ini
 
-DOCKER_ENV=PHP_DIST_DIR=${PHP_DIST_DIR} docker-compose -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
+DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) docker-compose -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
@@ -178,8 +161,8 @@ PHP_CONFIGURE_DEPS=
 DEPENDENCIES=
 ORDER_ONLY=
 EXTRA_FILES=
-CONFIGURE_FLAGS=
-EXTRA_FLAGS=
+CONFIGURE_FLAGS?=
+EXTRA_FLAGS?=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
 SHARED_LIBS=
@@ -193,27 +176,32 @@ PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
 TEST_LIST=
 
 ifeq (${PHP_VERSION},8.3)
-PHP_BRANCH=php-8.3.7
+PHP_VERSION_FULL=8.3.7
+PHP_BRANCH=php-${PHP_VERSION_FULL}
 PHP_AR=libphp
 endif
 
 ifeq (${PHP_VERSION},8.2)
-PHP_BRANCH=php-8.2.11
+PHP_VERSION_FULL=8.2.11
+PHP_BRANCH=php-${PHP_VERSION_FULL}
 PHP_AR=libphp
 endif
 
 ifeq (${PHP_VERSION},8.1)
-PHP_BRANCH=php-8.1.28
+PHP_VERSION_FULL=8.1.28
+PHP_BRANCH=php-${PHP_VERSION_FULL}
 PHP_AR=libphp
 endif
 
 ifeq (${PHP_VERSION},8.0)
-PHP_BRANCH=php-8.0.30
+PHP_VERSION_FULL=8.0.30
+PHP_BRANCH=php-${PHP_VERSION_FULL}
 PHP_AR=libphp
 endif
 
 ifeq (${PHP_VERSION},7.4)
-PHP_BRANCH=php-7.4.28
+PHP_VERSION_FULL=7.4.28
+PHP_BRANCH=php-${PHP_VERSION_FULL}
 PHP_AR=libphp7
 EXTRA_FLAGS+= -s EMULATE_FUNCTION_POINTER_CASTS=1
 endif
@@ -434,11 +422,19 @@ endif
 
 DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS}
 
+EXTENSIONS_JS=Object.fromEntries(Object.entries({"WITH_BCMATH":"${WITH_BCMATH}","WITH_CALENDAR":"${WITH_CALENDAR}","WITH_CTYPE":"${WITH_CTYPE}","WITH_FILTER":"${WITH_FILTER}","WITH_TOKENIZER":"${WITH_TOKENIZER}","WITH_VRZNO":"${WITH_VRZNO}","WITH_EXIF":"${WITH_EXIF}","WITH_PHAR":"${WITH_PHAR}","WITH_LIBXML":"${WITH_LIBXML}","WITH_DOM":"${WITH_DOM}","WITH_XML":"${WITH_XML}","WITH_SIMPLEXML":"${WITH_SIMPLEXML}","WITH_LIBZIP":"${WITH_LIBZIP}","WITH_ICONV":"${WITH_ICONV}","WITH_SQLITE":"${WITH_SQLITE}","WITH_GD":"${WITH_GD}","WITH_ZLIB":"${WITH_ZLIB}","WITH_LIBPNG":"${WITH_LIBPNG}","WITH_FREETYPE":"${WITH_FREETYPE}","WITH_LIBJPEG":"${WITH_LIBJPEG}","WITH_YAML":"${WITH_YAML}","WITH_TIDY":"${WITH_TIDY}","WITH_MBSTRING":"${WITH_MBSTRING}","WITH_ONIGURUMA":"${WITH_ONIGURUMA}","WITH_OPENSSL":"${WITH_OPENSSL}","WITH_INTL":"${WITH_INTL}"}).filter(([k,v]) => v !== "0"))
+
 ${PHP_DIST_DIR}/config.mjs:
-	echo 'export const phpVersion = "${PHP_VERSION}";' > $@
+	echo '' > $@
+	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
+	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
+	echo 'export const phpExtensions = ${EXTENSIONS_JS};'       >> $@
 
 ${PHP_DIST_DIR}/config.js:
-	echo 'module.exports = {phpVersion: "${PHP_VERSION}"};' > $@
+	echo 'module.exports = {};' > $@
+	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
+	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
+	echo 'module.exports.phpExtensions = ${EXTENSIONS_JS};'       >> $@
 
 ${PHP_DIST_DIR}/php-web.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-web.js: ENVIRONMENT=web
@@ -816,6 +812,9 @@ pack-files: demo-source/mounted/stuff.js
 
 demo-source/mounted/%.js: demo-source/mounted/%
 	${DOCKER_RUN} /emsdk/upstream/emscripten/tools/file_packager $@.data --separate-metadata --preload $<@/preload/$< --js-output=$@
+
+remap-sourcemap:
+	${DOCKER_RUN} ./remap-sourcemap.sh
 
 run:
 	${DOCKER_ENV} emscripten-builder bash

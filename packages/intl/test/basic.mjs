@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
+test('Intl Extension is present in phpExtensions.', async () => {
+	assert.equal('WITH_INTL' in PhpNode.phpExtensions, true);
+});
+
 test('Intl Extension is enabled. (explicit)', async () => {
 	const php = process.env.WITH_INTL === 'dynamic'
 		? new PhpNode({

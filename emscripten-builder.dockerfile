@@ -25,7 +25,8 @@ RUN apt-get update; \
 		gdb \
 		git \
 		sed \
-		pv
+		pv \
+		jq
 
 # RUN emsdk install tot; \
 # 	emsdk activate tot;

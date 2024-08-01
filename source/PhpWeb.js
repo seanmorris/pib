@@ -69,7 +69,7 @@ export class PhpWeb extends PhpBase
 
 const runPhpScriptTag = element => {
 
-	const scope = {stdin: null, stdout: null, stderr: null, ini: '', libs: [], files: []};
+	const scope = {stdin: null, canvas: null, stdout: null, stderr: null, ini: '', libs: [], files: []};
 
 	if(element.hasAttribute('data-stdout'))
 	{
@@ -84,6 +84,11 @@ const runPhpScriptTag = element => {
 	if(element.hasAttribute('data-stdin'))
 	{
 		scope.stdin = document.querySelector(element.getAttribute('data-stdin'));
+	}
+
+	if(element.hasAttribute('data-canvas'))
+	{
+		scope.canvas = document.querySelector(element.getAttribute('data-canvas'));
 	}
 
 	if(element.hasAttribute('data-ini'))
@@ -141,7 +146,7 @@ const runPhpScriptTag = element => {
 	const getAll = Promise.all([getCode, getInput]);
 
 	getAll.then(([code, input,]) => {
-		const php = new PhpWeb({sharedLibs: scope.libs, ini: scope.ini, files: scope.files});
+		const php = new PhpWeb({sharedLibs: scope.libs, ini: scope.ini, files: scope.files, canvas: scope.canvas});
 
 		php.inputString(input);
 
@@ -167,7 +172,6 @@ const runPhpScriptTag = element => {
 
 		php.addEventListener('output', outListener);
 		php.addEventListener('error',  errListener);
-
 		php.addEventListener('ready', () => {
 			php.run(code)
 			.then(exitCode => console.log(exitCode))

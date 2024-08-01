@@ -4,6 +4,7 @@ WITH_GD?=dynamic
 WITH_LIBPNG?=shared
 WITH_LIBJPEG?=shared
 WITH_FREETYPE?=shared
+WITH_LIBWEBP?=shared
 
 ifeq ($(filter ${WITH_GD},0 1 static dynamic),)
 $(error WITH_GD MUST BE 0, 1, static, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -51,6 +52,14 @@ SHARED_LIBS+= packages/gd/libpng.so
 endif
 endif
 
+ifeq (${WITH_LIBWEBP},shared)
+GD_FLAGS+= --with-webp=/src/lib
+GD_LIBS+= packages/gd/libwebp.so
+ifeq (${WITH_GD}, static)
+SHARED_LIBS+= packages/gd/libwebp.so
+endif
+endif
+
 DOCKER_RUN_IN_EXT_GD=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-gd/ emscripten-builder
 
 FREETYPE_VERSION?=2.10.0
@@ -64,6 +73,9 @@ DOCKER_RUN_IN_LIBJPEG=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE
 LIBPNG_TAG?=v1.6.41
 DOCKER_RUN_IN_LIBPNG=${DOCKER_ENV} -w /src/third_party/libpng/ emscripten-builder
 
+LIBWEBP_TAG=1.4.0
+DOCKER_RUN_IN_LIBWEBP=${DOCKER_ENV} -w /src/third_party/libwebp-${LIBWEBP_TAG}/ emscripten-builder
+
 ifeq ($(filter ${WITH_FREETYPE},0 1 shared static),)
 $(error WITH_FREETYPE MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
@@ -73,8 +85,8 @@ WITH_FREETYPE=static
 endif
 
 ifeq (${WITH_FREETYPE},static)
-CONFIGURE_FLAGS+= --with-freetype
 ARCHIVES+= lib/lib/libfreetype.a
+CONFIGURE_FLAGS+= --with-freetype
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
 SKIP_LIBS+= -lfreetype
 endif
@@ -124,6 +136,28 @@ endif
 ifeq (${WITH_LIBPNG},shared)
 PHP_ASSET_LIST+= libpng.so
 SKIP_LIBS+= -lpng16
+endif
+
+
+
+
+ifeq ($(filter ${WITH_LIBWEBP},0 1 shared static),)
+$(error WITH_LIBWEBP MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+
+ifeq (${WITH_LIBWEBP},1)
+WITH_LIBWEBP=static
+endif
+
+ifeq (${WITH_LIBWEBP},static)
+ARCHIVES+= lib/lib/libwebp.a
+CONFIGURE_FLAGS+= --with-webp
+SKIP_LIBS+= -lwebp
+endif
+
+ifeq (${WITH_LIBWEBP},shared)
+PHP_ASSET_LIST+= libwebp.so
+SKIP_LIBS+= -lwebp
 endif
 
 
@@ -199,7 +233,7 @@ lib/lib/libjpeg.a: third_party/jpeg-9f/README
 	${DOCKER_RUN_IN_LIBJPEG} emmake make install
 
 lib/lib/libjpeg.so: lib/lib/libjpeg.a
-	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/gd/libjpeg.so: lib/lib/libjpeg.so
 	cp -rL $^ $@
@@ -245,4 +279,27 @@ packages/gd/libpng.so: lib/lib/libpng.so
 	cp -rL $^ $@
 
 $(addsuffix /libpng.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd/libpng.so
+	cp -Lp $^ $@
+
+
+third_party/libwebp-${LIBWEBP_TAG}/README.md:
+	@ echo -e "\e[33;4mDownloading LIBWEBP\e[0m"
+	${DOCKER_RUN} wget -q https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${LIBWEBP_TAG}.tar.gz
+	${DOCKER_RUN} tar -xvzf libwebp-${LIBWEBP_TAG}.tar.gz -C third_party
+	${DOCKER_RUN} rm libwebp-${LIBWEBP_TAG}.tar.gz
+
+lib/lib/libwebp.so: lib/lib/libwebp.a
+	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+
+lib/lib/libwebp.a: third_party/libwebp-${LIBWEBP_TAG}/README.md
+	@ echo -e "\e[33;4mBuilding LIBWEBP\e[0m"
+	${DOCKER_RUN_IN_LIBWEBP} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak -j1
+	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak install
+	${DOCKER_RUN} rm /src/lib/lib/libwebp.so
+
+packages/gd/libwebp.so: lib/lib/libwebp.so
+	cp -rL $^ $@
+
+$(addsuffix /libwebp.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd/libwebp.so
 	cp -Lp $^ $@

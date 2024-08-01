@@ -46,10 +46,16 @@ cgi: ${CGI_MJS} ${CGI_CJS}
 CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured # $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
 
 ${PHP_CGI_DIST_DIR}/config.mjs:
-	echo 'export const phpVersion = "${PHP_VERSION}";' > $@
+	echo '' > $@
+	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
+	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
+	echo 'export const phpExtensions = ${EXTENSIONS_JS};'       >> $@
 
 ${PHP_CGI_DIST_DIR}/config.js:
-	echo 'module.exports = {phpVersion: "${PHP_VERSION}"};' > $@
+	echo 'module.exports = {};' > $@
+	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
+	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
+	echo 'module.exports.phpExtensions = ${EXTENSIONS_JS};'       >> $@
 
 ${PHP_CGI_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_CGI_DIST_DIR}/

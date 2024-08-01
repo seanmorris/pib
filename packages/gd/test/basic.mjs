@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
+test('GD Extension is present in phpExtensions.', async () => {
+	assert.equal('WITH_GD' in PhpNode.phpExtensions, true);
+});
+
 test('GD Extension is enabled.', async () => {
 	const php = process.env.WITH_GD === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-gd.so`]})

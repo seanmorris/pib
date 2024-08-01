@@ -9,13 +9,11 @@
 		"php-wasm-builder": "./bin/php-wasm-builder.js"
 	},
 	"scripts": {
+		"build": "make",
+		"clean": "make clean",
 		"test": "make test"
 	},
 	"dependencies": {
-		"@babel/cli": "^7.8.4",
-		"@babel/core": "^7.8.7",
-		"@babel/plugin-proposal-class-properties": "^7.10.4",
-		"@babel/preset-env": "^7.0.0",
 		"php-wasm-dom": "^0.0.0-j",
 		"php-wasm-gd": "^0.0.9-i",
 		"php-wasm-iconv": "^0.0.9-j",
@@ -32,6 +30,12 @@
 		"php-wasm-yaml": "^0.0.9-k",
 		"php-wasm-zlib": "^0.0.9-h",
 		"vrzno": "^0.0.9-i"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.8.4",
+		"@babel/core": "^7.8.7",
+		"@babel/plugin-proposal-class-properties": "^7.10.4",
+		"@babel/preset-env": "^7.0.0"
 	},
 	"contributors": [
 		{

@@ -1,6 +1,6 @@
 {
 	"name": "php-wasm",
-	"version": "0.0.9-alpha-13",
+	"version": "0.0.9-alpha-14",
 	"description": "Run PHP right in the browser or anywhere else JS can run",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris<php-wasm@seanmorr.is>",
@@ -77,6 +77,14 @@
 		"webTransactions.js",
 		"webTransactions.mjs",
 
-		"libxml2.so"
+		"libxml2.so",
+
+		"php-web.mjs.wasm.map",
+		"php-webview.mjs.wasm.map",
+		"php-worker.mjs.wasm.map",
+		"php-node.mjs.wasm.map",
+		"php-shell.mjs.wasm.map",
+
+		"mapped/*"
 	]
 }

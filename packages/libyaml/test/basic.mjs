@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
+test('WITH_YAML Extension is present in phpExtensions.', async () => {
+	assert.equal('WITH_YAML' in PhpNode.phpExtensions, true);
+});
+
 test('Yaml Extension is enabled.', async () => {
 	const php = process.env.WITH_YAML === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-yaml.so`]})

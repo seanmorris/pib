@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
+test('libXML Extension is present in phpExtensions.', async () => {
+	assert.equal('WITH_LIBXML' in PhpNode.phpExtensions, true);
+});
+
 test('libXML Extension is enabled.', async () => {
 	const php = new PhpNode();
 

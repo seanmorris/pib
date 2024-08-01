@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
+test('Zip Extension is present in phpExtensions.', async () => {
+	assert.equal('WITH_LIBZIP' in PhpNode.phpExtensions, true);
+});
+
 test('Zip Extension is enabled.', async () => {
 	const php = process.env.WITH_LIBZIP === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-zip.so`]})

@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
+test('DOM Extension is present in phpExtensions.', async () => {
+	assert.equal('WITH_DOM' in PhpNode.phpExtensions, true);
+});
+
 test('DOM Extension is enabled.', async () => {
 	const php = process.env.WITH_DOM === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-dom.so`]})
@@ -20,3 +24,4 @@ test('DOM Extension is enabled.', async () => {
 	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
 });
+
