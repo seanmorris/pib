@@ -4,16 +4,16 @@ ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- $(if $${PRELOAD_ASSETS},cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/${PRELOAD_NAME}.data ${PHP_CGI_DIST_DIR})
 	- $(if $${PRELOAD_ASSETS},cp -Lprf ${PHP_CGI_DIST_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/)
 
-NOTPARALLEL+= $(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-shell.js php-cgi-worker.js)
+NOTPARALLEL+= $(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-worker.mjs) \
+	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-worker.js)
 
-CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-shell.mjs php-cgi-worker.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.mjs PhpCgiWebview.mjs PhpCgiNode.mjs PhpCgiShell.mjs PhpCgiWorker.mjs PhpCgiBase.mjs) \
+CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-worker.mjs) \
+	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.mjs PhpCgiWebview.mjs PhpCgiNode.mjs PhpCgiWorker.mjs PhpCgiBase.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.mjs PhpCgiWebBase.mjs)
 
-CGI_CJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-shell.js php-cgi-worker.js) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.js PhpCgiWebview.js PhpCgiNode.js PhpCgiShell.js PhpCgiWorker.js PhpCgiBase.js) \
+CGI_CJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-worker.js) \
+	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.js PhpCgiWebview.js PhpCgiNode.js PhpCgiWorker.js PhpCgiBase.js) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.js breakoutRequest.js parseResponse.js fsOps.js msg-bus.js webTransactions.js) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.js PhpCgiWebBase.js)
 
@@ -38,8 +38,9 @@ webview-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.j
 node-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-node.mjs fsOps.mjs resolveDependencies.mjs)
 node-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js  breakoutRequest.js  parseResponse.js  php-cgi-node.js  fsOps.js resolveDependencies.js)
 
-shell-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiShell.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-shell.mjs fsOps.mjs resolveDependencies.mjs)
-shell-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiShell.js  breakoutRequest.js  parseResponse.js  php-cgi-shell.js  fsOps.js resolveDependencies.js)
+# Deprecated
+shell-cgi-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs resolveDependencies.mjs)
+shell-cgi-js:  $(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  breakoutRequest.js  parseResponse.js  fsOps.js resolveDependencies.js)
 
 cgi: ${CGI_MJS} ${CGI_CJS}
 
@@ -150,6 +151,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 
+# Deprecated
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.js: BUILD_TYPE=js
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.js: ENVIRONMENT=shell
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
@@ -163,6 +165,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-shell.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 
+# Deprecated
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: BUILD_TYPE=mjs
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: ENVIRONMENT=shell
 ${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}/
