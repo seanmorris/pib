@@ -8,7 +8,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3.ci .env
       - run: make image test
 
@@ -19,7 +19,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2.ci .env
       - run: make image test PHP_VERSION=8.2
 
@@ -30,7 +30,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1.ci .env
       - run: make image test PHP_VERSION=8.1
 
@@ -41,7 +41,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0.ci .env
       - run: make image test PHP_VERSION=8.0
 
@@ -53,7 +53,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image test
 
@@ -64,7 +64,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: make image test PHP_VERSION=8.2
 
@@ -75,7 +75,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: make image test PHP_VERSION=8.1
 
@@ -86,7 +86,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make image test PHP_VERSION=8.0
 
@@ -98,7 +98,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: make image test
 
@@ -109,7 +109,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: make image test PHP_VERSION=8.2
 
@@ -120,7 +120,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: make image test PHP_VERSION=8.1
 
@@ -131,6 +131,6 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: npm install
-      - run: apt update && apt install docker-compose -y
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: make image test PHP_VERSION=8.0
