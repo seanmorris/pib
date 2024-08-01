@@ -10,6 +10,7 @@
 	},
 	"scripts": {
 		"build": "make",
+		"build-image": "make image",
 		"clean": "make clean",
 		"test": "make test"
 	},
