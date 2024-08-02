@@ -1,0 +1,102 @@
+{
+    "name": "laminas/laminas-view",
+    "description": "Flexible view layer supporting and providing multiple view layers, helpers, and more",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "view"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-view/",
+        "issues": "https://github.com/laminas/laminas-view/issues",
+        "source": "https://github.com/laminas/laminas-view",
+        "rss": "https://github.com/laminas/laminas-view/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.99"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "ext-dom": "*",
+        "ext-filter": "*",
+        "ext-json": "*",
+        "laminas/laminas-escaper": "^2.5",
+        "laminas/laminas-eventmanager": "^3.4",
+        "laminas/laminas-json": "^3.3",
+        "laminas/laminas-servicemanager": "^3.21.0",
+        "laminas/laminas-stdlib": "^3.10.1",
+        "psr/container": "^1 || ^2"
+    },
+    "require-dev": {
+        "laminas/laminas-authentication": "^2.16",
+        "laminas/laminas-coding-standard": "~2.5.0",
+        "laminas/laminas-feed": "^2.22",
+        "laminas/laminas-filter": "^2.34",
+        "laminas/laminas-http": "^2.19",
+        "laminas/laminas-i18n": "^2.26.0",
+        "laminas/laminas-modulemanager": "^2.15",
+        "laminas/laminas-mvc": "^3.7.0",
+        "laminas/laminas-mvc-i18n": "^1.8",
+        "laminas/laminas-mvc-plugin-flashmessenger": "^1.10.1",
+        "laminas/laminas-navigation": "^2.19.1",
+        "laminas/laminas-paginator": "^2.18.1",
+        "laminas/laminas-permissions-acl": "^2.16",
+        "laminas/laminas-router": "^3.12.0",
+        "laminas/laminas-uri": "^2.11",
+        "phpunit/phpunit": "^10.5.9",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "vimeo/psalm": "^5.20"
+    },
+    "conflict": {
+        "container-interop/container-interop": "<1.2",
+        "laminas/laminas-session": "<2.12",
+        "laminas/laminas-router": "<3.0.1",
+        "zendframework/zend-view": "*"
+    },
+    "suggest": {
+        "laminas/laminas-authentication": "Laminas\\Authentication component",
+        "laminas/laminas-feed": "Laminas\\Feed component",
+        "laminas/laminas-filter": "Laminas\\Filter component",
+        "laminas/laminas-http": "Laminas\\Http component",
+        "laminas/laminas-i18n": "Laminas\\I18n component",
+        "laminas/laminas-mvc": "Laminas\\Mvc component",
+        "laminas/laminas-mvc-plugin-flashmessenger": "laminas-mvc-plugin-flashmessenger component, if you want to use the FlashMessenger view helper with laminas-mvc versions 3 and up",
+        "laminas/laminas-navigation": "Laminas\\Navigation component",
+        "laminas/laminas-paginator": "Laminas\\Paginator component",
+        "laminas/laminas-permissions-acl": "Laminas\\Permissions\\Acl component",
+        "laminas/laminas-uri": "Laminas\\Uri component"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\View\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\View\\": "test/"
+        }
+    },
+    "bin": [
+        "bin/templatemap_generator.php"
+    ],
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "static-analysis": "psalm --shepherd --stats",
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    }
+}

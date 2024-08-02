@@ -1,0 +1,58 @@
+{
+    "name": "laminas/laminas-uri",
+    "description": "A component that aids in manipulating and validating \u00bb Uniform Resource Identifiers (URIs)",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "uri"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-uri/",
+        "issues": "https://github.com/laminas/laminas-uri/issues",
+        "source": "https://github.com/laminas/laminas-uri",
+        "rss": "https://github.com/laminas/laminas-uri/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "laminas/laminas-escaper": "^2.9",
+        "laminas/laminas-validator": "^2.39"
+    },
+    "require-dev": {
+        "laminas/laminas-coding-standard": "~2.4.0",
+        "phpunit/phpunit": "^9.5.25"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\Uri\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\Uri\\": "test/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    },
+    "conflict": {
+        "zendframework/zend-uri": "*"
+    }
+}

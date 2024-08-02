@@ -136,16 +136,31 @@ export class PhpCgiBase
 
 		const {files, urlLibs} = resolveDependencies(this.sharedLibs, this);
 
-		const staticUrls = [...files.map(file => file.url),...Object.values(urlLibs),]
-		.map(url => new URL(url, location.origin))
-		.filter(url => url.origin === location.origin)
-		.map(url => url.pathname);
+		let isWhitelisted = false;
+		let isBlacklisted = false;
 
-		const isWhitelisted = url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname;
-		const isBlacklisted = url.pathname.match(/\.wasm$/i)
-		|| staticUrls.includes(url.pathname)
-		|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
-		|| false;
+		if(globalThis.location)
+		{
+			const staticUrls = [self.location.pathname, ...files.map(file => file.url),...Object.values(urlLibs)]
+			.map(url => new URL(url, self.location.origin))
+			.filter(url => url.origin === self.location.origin)
+			.map(url => url.pathname);
+
+			isWhitelisted = url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname;
+
+			isBlacklisted = url.pathname.match(/\.wasm$/i)
+			|| staticUrls.includes(url.pathname)
+			|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
+			|| false;
+		}
+		else
+		{
+			isWhitelisted = url.pathname.substr(0, prefix.length) === prefix;
+
+			isBlacklisted = url.pathname.match(/\.wasm$/i)
+			|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
+			|| false;
+		}
 
 		if(isWhitelisted && !isBlacklisted)
 		{

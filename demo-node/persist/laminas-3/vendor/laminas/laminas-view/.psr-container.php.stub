@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Psr\Container {
+    /**
+     * Provides automatic type inference for Psalm when retrieving a service from a container using a FQCN
+     */
+    interface ContainerInterface
+    {
+        /**
+         * @param string|class-string $id
+         * @return bool
+         */
+        public function has(string $id);
+
+        /**
+         * @template T
+         * @psalm-param string|class-string<T> $id
+         * @psalm-return ($id is class-string ? T : mixed)
+         */
+        public function get(string $id);
+    }
+}
