@@ -32,6 +32,7 @@ const sharedLibs = [
 	`php\${PHP_VERSION}-pdo-sqlite.so`,
 	`php\${PHP_VERSION}-xml.so`,
 	`php\${PHP_VERSION}-simplexml.so`,
+	{url: `libs/libxml2.so`, ini: false},
 ];
 
 const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }];
@@ -41,6 +42,7 @@ const php = new PhpCgiWorker({
 	onRequest, notFound
 	, sharedLibs, files
 	, prefix: '/php-wasm/cgi-bin/'
+	, exclude: ['/php-wasm/cgi-bin/~!@', '/php-wasm/cgi-bin/.']
 	, docroot: '/persist/www'
 	, types: {
 		jpeg: 'image/jpeg'

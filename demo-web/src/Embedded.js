@@ -20,6 +20,7 @@ const sharedLibs = [
 	`php${PhpWeb.phpVersion}-pdo-sqlite.so`,
 	`php${PhpWeb.phpVersion}-xml.so`,
 	`php${PhpWeb.phpVersion}-simplexml.so`,
+	{url: `libs/libxml2.so`, ini:false},
 ];
 
 const files = [

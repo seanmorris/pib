@@ -1,4 +1,5 @@
 import { phpVersion } from "./config";
+import { phpVersionFull } from "./config";
 import { parseResponse } from './parseResponse';
 import { breakoutRequest } from './breakoutRequest';
 import { fsOps } from './fsOps';
@@ -20,6 +21,7 @@ export class PhpCgiBase
 {
 	docroot    = null;
 	prefix     = '/php-wasm';
+	exclude    = [];
 	rewrite    = path => path;
 	cookies    = null;
 	types      = {};
@@ -42,11 +44,12 @@ export class PhpCgiBase
 
 	queue = [];
 
-	constructor(PHP, {docroot, prefix, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, files, ...args} = {})
+	constructor(PHP, {docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, files, ...args} = {})
 	{
 		this.PHP        = PHP;
 		this.docroot    = docroot    || this.docroot;
 		this.prefix     = prefix     || this.prefix;
+		this.exclude    = exclude    || this.exclude;
 		this.rewrite    = rewrite    || this.rewrite;
 		this.entrypoint = entrypoint || this.entrypoint;
 		this.cookies    = cookies    || new Map;
@@ -131,7 +134,20 @@ export class PhpCgiBase
 		const url     = new URL(event.request.url);
 		const prefix  = this.prefix;
 
-		if(url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname)
+		const {files, urlLibs} = resolveDependencies(this.sharedLibs, this);
+
+		const staticUrls = [...files.map(file => file.url),...Object.values(urlLibs),]
+		.map(url => new URL(url, location.origin))
+		.filter(url => url.origin === location.origin)
+		.map(url => url.pathname);
+
+		const isWhitelisted = url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname;
+		const isBlacklisted = url.pathname.match(/\.wasm$/i)
+		|| staticUrls.includes(url.pathname)
+		|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
+		|| false;
+
+		if(isWhitelisted && !isBlacklisted)
 		{
 			requestTimes.set(event.request, Date.now());
 			const response = this.request(event.request);
@@ -616,3 +632,4 @@ export class PhpCgiBase
 }
 
 PhpCgiBase.phpVersion = phpVersion;
+PhpCgiBase.phpVersionFull = phpVersionFull;
