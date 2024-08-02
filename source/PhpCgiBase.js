@@ -423,7 +423,8 @@ export class PhpCgiBase
 		putEnv(php, 'REQUEST_METHOD', method);
 		putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
 		putEnv(php, 'HTTP_HOST', selfUrl.host);
-		putEnv(php, 'REQUEST_SCHEME', selfUrl.protocol.substr(0, selfUrl.protocol.length - 0));
+		putEnv(php, 'REQUEST_SCHEME', selfUrl.protocol);
+		putEnv(php, 'HTTPS', selfUrl.protocol === 'https' ? 'on' : 'off');
 
 		putEnv(php, 'DOCUMENT_ROOT', docroot);
 		putEnv(php, 'REQUEST_URI', originalPath);
