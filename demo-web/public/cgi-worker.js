@@ -367,11 +367,13 @@ class PhpCgiBase {
     for (const [name, value] of Object.entries(this.env)) {
       putEnv(php, name, value);
     }
+    const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
     putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown');
     putEnv(php, 'REQUEST_METHOD', method);
     putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
     putEnv(php, 'HTTP_HOST', selfUrl.host);
-    putEnv(php, 'REQUEST_SCHEME', selfUrl.protocol.substr(0, selfUrl.protocol.length - 0));
+    putEnv(php, 'REQUEST_SCHEME', protocol);
+    putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
     putEnv(php, 'DOCUMENT_ROOT', docroot);
     putEnv(php, 'REQUEST_URI', originalPath);
     putEnv(php, 'SCRIPT_NAME', scriptName);
