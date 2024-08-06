@@ -99,7 +99,7 @@ WITH_SOURCEMAPS?=0
 ## End of defaults
 
 ifeq (${WITH_SOURCEMAPS},1)
-SYMBOLS
+SYMBOLS=1
 endif
 
 _UID:=$(shell id -u)
