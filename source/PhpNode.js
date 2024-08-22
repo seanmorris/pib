@@ -27,6 +27,6 @@ export class PhpNode extends PhpBase
 			return path.isAbsolute(name) ? name : path.resolve(dir, name);
 		};
 
-		super(PhpBinary, {...args, locateFile});
+		super(PhpBinary, {locateFile, ...args});
 	}
 }
