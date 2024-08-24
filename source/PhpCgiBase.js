@@ -376,13 +376,14 @@ export class PhpCgiBase
 			{
 				originalPath += '/'
 			}
-			else {
-				originalPath += url.search
-			}
 
 			// Rewrite to index
 			path = docroot + '/index.php';
 		}
+
+		// Ensure query parameters are preserved.
+		originalPath += url.search
+		
 
 		if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
 		{
