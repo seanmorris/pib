@@ -8,7 +8,6 @@ export class PhpNode extends PhpBase
 	constructor(args = {})
 	{
 		const locateFile = (name, dir) => {
-			console.log({dir, name});
 			if(name.substr(0, 7) === 'file://')
 			{
 				name = new URL(name).pathname;
