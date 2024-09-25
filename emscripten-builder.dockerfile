@@ -1,4 +1,4 @@
-FROM emscripten/emsdk:3.1.61
+FROM emscripten/emsdk:3.1.67
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
@@ -34,6 +34,7 @@ RUN apt-get update; \
 RUN cd /emsdk/upstream && { \
 	rm -rf emscripten; \
 	git clone https://github.com/seanmorris/emscripten.git emscripten --depth=1 --branch sm-updates; \
+	echo "lolol"; \
 }
 
 RUN cd /emsdk/upstream/emscripten && ./bootstrap;

@@ -17,6 +17,7 @@ const packages = {
 	'drupal-7': {
 		name:  'Drupal 7',
 		file:  '/backups/drupal-7.95.zip',
+		sql:   '/backups/drupal-7.95.sql',
 		path:  'drupal-7.95',
 		vHost: 'drupal',
 		dir:   'drupal-7.95',
@@ -90,6 +91,18 @@ const installDemo = async (overwrite = false) => {
 	const php = new PhpWeb({sharedLibs, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 	await php.binary;
+
+	console.log({sql:selectedFramework.sql});
+
+	if(selectedFramework.sql)
+	{
+		const sqlFile = await (await fetch(selectedFramework.sql)).text();
+		console.log(sqlFile);
+		const sqlResult = await sendMessage('execSql', [`idb://host= dbname=idb:drupal port=5432`, sqlFile]);
+		console.log({sqlResult});
+		const tableResult = await sendMessage('runSql', [`idb://host= dbname=idb:drupal port=5432`, 'select * from information_schema.tables']);
+		console.log({tableResult});
+	}
 
 	php.addEventListener('output', event => console.log(event.detail));
 	php.addEventListener('error', event => console.log(event.detail));

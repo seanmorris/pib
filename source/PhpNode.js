@@ -7,18 +7,8 @@ export class PhpNode extends PhpBase
 {
 	constructor(args = {})
 	{
-		let dir;
-
-		if(typeof __dirname === 'undefined')
-		{
-			dir = path.dirname(url.fileURLToPath(import.meta.url));
-		}
-		else
-		{
-			dir = __dirname;
-		}
-
-		const locateFile = name => {
+		const locateFile = (name, dir) => {
+			console.log({dir, name});
 			if(name.substr(0, 7) === 'file://')
 			{
 				name = new URL(name).pathname;

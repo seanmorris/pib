@@ -21,9 +21,9 @@ export class PhpCgiWebBase extends PhpCgiBase
 	{
 		if(!this.initialized)
 		{
+			const php = await this.binary;
+			await this.loadInit(php);
 			await navigator.locks.request('php-wasm-fs-lock', async () => {
-				const php = await this.binary;
-				await this.loadInit(php);
 				await new Promise((accept,reject) => php.FS.syncfs(true, err => {
 					if(err) reject(err);
 					else    accept();
@@ -36,8 +36,14 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	async _afterRequest()
 	{
+		const php = await this.binary;
+
+		if(this.phpArgs.staticFS)
+		{
+			return;
+		}
+
 		await navigator.locks.request('php-wasm-fs-lock', async () => {
-			const php = await this.binary;
 			await new Promise((accept,reject) => php.FS.syncfs(false, err => {
 				if(err) reject(err);
 				else    accept();

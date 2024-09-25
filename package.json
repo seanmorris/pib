@@ -36,7 +36,9 @@
 		"@babel/cli": "^7.8.4",
 		"@babel/core": "^7.8.7",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",
-		"@babel/preset-env": "^7.0.0"
+		"@babel/preset-env": "^7.0.0",
+		"cv3-test": "^0.1.5",
+		"pobot": "^0.1.5"
 	},
 	"contributors": [
 		{

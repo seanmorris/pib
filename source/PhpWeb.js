@@ -35,6 +35,8 @@ export class PhpWeb extends PhpBase
 
 	async _enqueue(callback, params = [])
 	{
+		await this.binary;
+
 		let accept, reject;
 
 		const coordinator = new Promise((a,r) => [accept, reject] = [a, r]);

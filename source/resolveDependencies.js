@@ -1,8 +1,23 @@
+/**
+ * An object representing files, libs and urlLibs for a shared library.
+ * @typedef {object} ResolvedDependencies
+ * @property {FileDef[]} files
+ * @property {LibDef[]} libs
+ * @property {Object<string, string|url>} urlLibs mapping of resource names to URLs
+ */
+
+/**
+ * Resolves dependencies related to dynamically loaded shared libs.
+ * Normalizes LibDefs & FileDefs, and extracts URLs to specified resources.
+ * @param {LibDef[]} sharedLibs List of LibDefs to resolve dependencies for.
+ * @param {object} wrapper PHP Object to resolve depencencies for.
+ * @returns {ResolvedDependencies} Normalized LibDefs, FileDefs, and their URLs.
+ */
 export const resolveDependencies = (sharedLibs, wrapper) => {
 	const _files = [];
 	const _libs = [];
 
-	 (sharedLibs || []).forEach(libDef => {
+	(sharedLibs || []).forEach(libDef => {
 		if(typeof libDef === 'object')
 		{
 			if(typeof libDef.getLibs === 'function')
@@ -36,7 +51,8 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 	const urlLibs = {};
 
 	const libs = _libs.map(libDef => {
-		if(typeof libDef === 'string' || libDef instanceof URL) {
+		if(typeof libDef === 'string' || libDef instanceof URL)
+		{
 			if(libDef.substr(0, 1) == '/'
 				|| libDef.substr(0, 2) == './'
 				|| libDef.substr(0, 8) == 'https://'
@@ -51,7 +67,8 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 
 			return libDef;
 		}
-		else if(typeof libDef === 'object') {
+		else if(typeof libDef === 'object')
+		{
 			const name = libDef.name ?? String(libDef.url).split('/').pop();
 			urlLibs[ name ] = libDef.url;
 

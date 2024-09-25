@@ -21,3 +21,7 @@ insert_final_newline     = false
 [*.md]
 indent_size = 4
 indent_style = tab
+
+[*.json]
+indent_size = 2
+indent_style = space

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "@electric-sql/pglite": "^0.2.7",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -31,10 +32,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "npx webpack --config service-worker-dev.config.ts  && react-scripts start",
-    "build": "npx webpack --config service-worker-prod.config.ts && react-scripts build; cat aphex.txt >> build/index.html && cp build/index.html build/404.html && cp build/index.html build/home.html && cp build/index.html build/embedded-php.html && cp build/index.html build/select-framework.html && cp build/index.html build/install-demo.html && cp build/index.html build/code-editor.html && git add ../docs/static/js/*",
+    "start": "./npm-start.sh",
+    "build": "./npm-build.sh",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "clean": ""
   },
   "eslintConfig": {
     "extends": [

@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AceEditor from "react-ace-builds";
 import "react-ace-builds/webpack-resolver-min";
 
+import { PGlite } from '@electric-sql/pglite';
+
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
@@ -61,11 +63,11 @@ function Embedded() {
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
-		// phpRef.current = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+		// phpRef.current = new PhpWeb({});
 		// phpRef.current = new PhpWeb({sharedLibs, ini, locateFile: filename => {
 		// 	console.log(filename);
 		// }});
-		phpRef.current = new PhpWeb({sharedLibs, files, ini});
+		phpRef.current = new PhpWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		const php = phpRef.current;
 
@@ -124,7 +126,10 @@ function Embedded() {
 				{
 					const ret = await phpRef.current.exec(code);
 					setStdRet(ret);
-					persist.current.checked || phpRef.current.refresh();
+					if(!persist.current.checked)
+					{
+						await phpRef.current.refresh();
+					}
 				}
 				catch(error)
 				{
@@ -144,7 +149,10 @@ function Embedded() {
 				{
 					const exitCode = await phpRef.current.run(code);
 					setExitCode(exitCode);
-					persist.current.checked || phpRef.current.refresh();
+					if(!persist.current.checked)
+					{
+						await phpRef.current.refresh();
+					}
 				}
 				catch(error)
 				{
@@ -345,6 +353,7 @@ function Embedded() {
 								<option value = "dom-access.php">DOM Access</option>
 								<option value = "goto.php">GoTo</option>
 								<option value = "stdio.php">StdOut, StdIn, & Return</option>
+								<option value = "postgres.php">PostgreSQL</option>
 								<option value = "sqlite.php">SQLite</option>
 								<option value = "sqlite-pdo.php">SQLite (PDO)</option>
 								<option value = "json.php">JSON</option>

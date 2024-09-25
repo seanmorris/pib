@@ -34,6 +34,8 @@ export class PhpBase extends EventTarget
 
 		this.shared = args.shared = ('shared' in args) ? args.shared : {};
 
+		this.phpArgs = args;
+
 		const defaults = {
 			stdin:  () => this.buffers.stdin.shift() ?? null,
 			stdout: byte => this.buffers.stdout.push(byte),
@@ -54,8 +56,8 @@ export class PhpBase extends EventTarget
 
 		const {files: extraFiles, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
 
-		args.locateFile = path => {
-			let located = userLocateFile(path);
+		args.locateFile = (path, directory) => {
+			let located = userLocateFile(path, directory);
 			if(located !== undefined)
 			{
 				return located;
@@ -132,8 +134,7 @@ export class PhpBase extends EventTarget
 
 	tokenize(phpCode)
 	{
-		return this.binary
-		.then(php => php.ccall(
+		return this.binary.then(php => php.ccall(
 			'pib_tokenize'
 			, STR
 			, [STR]
