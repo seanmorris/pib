@@ -168,10 +168,6 @@ export class PhpCgiBase
 			const response = this.request(event.request);
 			return event.respondWith(response);
 		}
-		else
-		{
-			return fetch(event.request);
-		}
 	}
 
 	async _enqueue(callback, params = [])
