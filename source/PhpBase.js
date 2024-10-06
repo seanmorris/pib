@@ -72,12 +72,11 @@ export class PhpBase extends EventTarget
 
 		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
 
-			await php.ccall(
+			php.ccall(
 				'pib_storage_init'
 				, NUM
 				, []
 				, []
-				, {async: true}
 			);
 
 			if(!php.FS.analyzePath('/preload').exists)
@@ -85,9 +84,16 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
-			await files.concat(extraFiles).forEach(
-				fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false)
-			);
+			await Promise.all(files.concat(extraFiles).map(
+				fileDef => new Promise(accept => php.FS.createPreloadedFile(
+					fileDef.parent,
+					fileDef.name,
+					fileDef.url,
+					true,
+					false,
+					accept,
+				))
+			));
 
 			const iniLines = libs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
@@ -139,7 +145,6 @@ export class PhpBase extends EventTarget
 			, STR
 			, [STR]
 			, [phpCode]
-			, {async: true}
 		));
 	}
 
@@ -189,14 +194,15 @@ export class PhpBase extends EventTarget
 
 	async _run(phpCode)
 	{
-		return await (await this.binary).ccall(
+		const call = (await this.binary).ccall(
 			'pib_run'
 			, NUM
 			, [STR]
 			, [`?>${phpCode}`]
 			, {async: true}
-		)
-		.finally(() => this.flush());
+		);
+
+		return call.finally(() => this.flush());
 	}
 
 	exec(phpCode)
@@ -206,14 +212,15 @@ export class PhpBase extends EventTarget
 
 	async _exec(phpCode)
 	{
-		return (await this.binary).ccall(
+		const call = (await this.binary).ccall(
 			'pib_exec'
 			, STR
 			, [STR]
 			, [phpCode]
 			, {async: true}
-		)
-		.finally(() => this.flush());
+		);
+
+		return call.finally(() => this.flush());
 	}
 
 	async x(fragments, ...values)
@@ -241,7 +248,7 @@ export class PhpBase extends EventTarget
 
 				if(names.length)
 				{
-					code += `(vrzno_env('${names.shift()}'))`;
+					code += `(vrzno_shared('${names.shift()}'))`;
 				}
 			}
 
@@ -297,7 +304,7 @@ export class PhpBase extends EventTarget
 
 				if(names.length)
 				{
-					code += `(vrzno_env('${names.shift()}'))`;
+					code += `(vrzno_shared('${names.shift()}'))`;
 				}
 			}
 
@@ -337,12 +344,12 @@ export class PhpBase extends EventTarget
 
 		Object.keys(this.shared).forEach(key => delete this.shared[key]);
 
-		await php.ccall(
+		return php.ccall(
 			'pib_refresh'
 			, NUM
 			, []
 			, []
-			, {async:true}
+			, {async: true}
 		);
 	}
 

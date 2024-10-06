@@ -2,7 +2,7 @@
 WITH_VRZNO?=1
 
 ifeq (${WITH_VRZNO}, 1)
-VRZNO_BRANCH?=sm-marshal-classes
+VRZNO_BRANCH?=master
 EXTRA_FLAGS+= -D WITH_VRZNO=1
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
 PHP_ARCHIVE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c

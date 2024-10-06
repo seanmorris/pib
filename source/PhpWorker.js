@@ -22,6 +22,12 @@ export class PhpWorker extends PhpBase
 	async refresh()
 	{
 		super.refresh();
+
+		if(!this.phpArgs.persist)
+		{
+			return;
+		}
+
 		const php = await this.binary;
 		await navigator.locks.request('php-wasm-fs-lock', async () => {
 			return new Promise((accept, reject) => {

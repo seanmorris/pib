@@ -11,7 +11,6 @@ test('Intl Extension is enabled. (explicit)', async () => {
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
-
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
@@ -33,7 +32,6 @@ test('Intl can format numbers. (explicit)', async () => {
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
-
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
@@ -44,9 +42,9 @@ test('Intl can format numbers. (explicit)', async () => {
 		var_dump($formatter->format(100.00));
 	`);
 
-	assert.equal(exitCode, 0);
-	assert.equal(stdOut, `string(7) "$100.00"\n`);
 	assert.equal(stdErr, '');
+	assert.equal(stdOut, `string(7) "$100.00"\n`);
+	assert.equal(exitCode, 0);
 
 });
 
@@ -56,7 +54,6 @@ test('Intl Extension is enabled. (module loader)', async () => {
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
-
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
@@ -75,7 +72,6 @@ test('Intl can format numbers. (module loader)', async () => {
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
-
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 

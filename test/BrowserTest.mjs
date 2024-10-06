@@ -3,7 +3,10 @@ import { compareSnapshot } from 'cv3-test/Snapshot.mjs';
 
 export class BrowserTest extends BotTest
 {
-	startDocument = 'http://localhost:3000/embedded-php.html';
+	startDocument = 'http://localhost:3000/embedded-php.html?no-service-worker';
+	parallel = false;
+	width = 1024;
+	height = 768;
 
 	async testHelloWorld()
 	{
@@ -19,6 +22,16 @@ export class BrowserTest extends BotTest
 	{
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto('http://localhost:3000/embedded-php.html?demo=sqlite.php')
+		await new Promise(a => setTimeout(a, 5000));
+		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
+		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
+		await new Promise(a => setTimeout(a, 100));
+	}
+
+	async testPostgres()
+	{
+		await new Promise(a => setTimeout(a, 1000));
+		await this.pobot.goto('http://localhost:3000/embedded-php.html?demo=postgres.php')
 		await new Promise(a => setTimeout(a, 5000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');

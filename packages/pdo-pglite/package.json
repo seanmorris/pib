@@ -1,0 +1,15 @@
+{
+	"name": "pdo-pglite",
+	"description": "PGlite connector for pdo & php-wasm.",
+	"repository": "https://github.com/seanmorris/php-wasm",
+	"author": "Sean Morris <php-wasm@seanmorr.is>",
+	"version": "0.0.0",
+	"files": [
+		"README.md",
+		"pre.mak",
+		"static.mak"
+	],
+	"optionalDependencies": {
+		"@electric-sql/pglite": "^0.2.7"
+	}
+}

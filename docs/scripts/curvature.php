@@ -1,4 +1,4 @@
-<?php // {"autorun":true, "persist":true, "single-expression": false, "render-as": "text"}
+<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"text"}
 $window = new Vrzno;
 $require = $window->require;
 $Form = $require('curvature/form/Form')->Form;
@@ -20,7 +20,7 @@ $view = $View->from('<div style = "display:flex;flex-direction:row;margin:1rem;"
 	</div>
 	<div style = "margin-right:1rem">
 		<p>Form: [[form]]</p>
-		<p>Serialized: [[serialized]]</p>
+		<p>PHP Serialized: [[serialized]]</p>
 		<p>JSON: [[json]]</p>
 	</div>
 </div>');

@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/php-wasm/static/css/main.3c387d48.css",
-    "main.js": "/php-wasm/static/js/main.7faf0864.js",
+    "main.css": "/php-wasm/static/css/main.979884d0.css",
+    "main.js": "/php-wasm/static/js/main.99777732.js",
     "static/js/719.fc665f84.chunk.js": "/php-wasm/static/js/719.fc665f84.chunk.js",
     "static/js/717.60c5a572.chunk.js": "/php-wasm/static/js/717.60c5a572.chunk.js",
     "static/js/262.329b798d.chunk.js": "/php-wasm/static/js/262.329b798d.chunk.js",
@@ -11,7 +11,7 @@
     "static/js/450.5d59c362.chunk.js": "/php-wasm/static/js/450.5d59c362.chunk.js",
     "static/js/833.9a5f9c42.chunk.js": "/php-wasm/static/js/833.9a5f9c42.chunk.js",
     "static/js/226.3f7dbb9e.chunk.js": "/php-wasm/static/js/226.3f7dbb9e.chunk.js",
-    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.905318bed9288ca0e1a1.wasm",
+    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.23a4583fb2b685630a81.wasm",
     "static/media/postgres.wasm": "/php-wasm/static/media/postgres.fcb7a7ac4b20758c5ba8.wasm",
     "static/media/postgres.data": "/php-wasm/static/media/postgres.bc46a5d5c440de38d4a5.data",
     "worker-xquery.js": "/php-wasm/16470d85f9e6b184411b622ce1783fd0.js",
@@ -502,14 +502,14 @@
     "ftl.js": "/php-wasm/f76ee9c8abfdd96fb9d70116d40435d5.js",
     "d.js": "/php-wasm/c98e74fc97b04fe8bf43dcdff549afcf.js",
     "mode-text.js": "/php-wasm/0ffb18fb70c87335edee31a479f58a43.js",
-    "main.3c387d48.css.map": "/php-wasm/static/css/main.3c387d48.css.map",
-    "main.7faf0864.js.map": "/php-wasm/static/js/main.7faf0864.js.map",
+    "main.979884d0.css.map": "/php-wasm/static/css/main.979884d0.css.map",
+    "main.99777732.js.map": "/php-wasm/static/js/main.99777732.js.map",
     "991.d9fbdec8.chunk.js.map": "/php-wasm/static/js/991.d9fbdec8.chunk.js.map",
     "305.de336abc.chunk.js.map": "/php-wasm/static/js/305.de336abc.chunk.js.map",
     "450.5d59c362.chunk.js.map": "/php-wasm/static/js/450.5d59c362.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.3c387d48.css",
-    "static/js/main.7faf0864.js"
+    "static/css/main.979884d0.css",
+    "static/js/main.99777732.js"
   ]
 }

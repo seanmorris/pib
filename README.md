@@ -884,12 +884,13 @@ The following extension may be compiled as static, shared or dynamic:
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
 WITH_LIBXML    # [0, 1, static, shared]
-WITH_LIBZIP    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]
 WITH_SQLITE    # [0, 1, static, shared, dynamic]
 
-WITH_GD        # [0, 1, static, shared, dynamic]
+WITH_LIBZIP    # [0, 1, static, shared, dynamic]
 WITH_ZLIB      # [0, 1, static, shared, dynamic]
+
+WITH_GD        # [0, 1, static, shared, dynamic]
 WITH_LIBPNG    # [0, 1, static, shared]
 WITH_FREETYPE  # [0, 1, static, shared]
 WITH_LIBJPEG   # [0, 1, static, shared]
