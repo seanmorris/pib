@@ -17,4 +17,4 @@ endif
 
 third_party/php${PHP_VERSION}-src/ext/pdo_cfd1/%: third_party/pdo-cfd1/% third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33;4mimporting pdo_cfd1\e[0m"
-	${DOCKER_RUN} cp -TLprfv third_party/pdo-cfd1/ third_party/php${PHP_VERSION}-src/ext/pdo_cfd1
+	${DOCKER_RUN} cp -TLprfv third_party/pdo-cfd1/ third_party/php${PHP_VERSION}-src/ext/pdo_cfd1/

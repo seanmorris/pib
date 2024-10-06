@@ -7,20 +7,22 @@
 
 _PHP in WebAssembly, npm not required._
 
-find php-wasm on [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
+## [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
 
 ## 🌟 v0.0.9-alpha - Aiming for the (GitHub) Stars
 
 * Adding PHP-CGI support!
 * Runtime extension loading!
 * libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
-* Implemented an httpd-like CGI wrapper.
 * php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
+* Vrzno now facilitates url fopen via the fetch() api.
+* pdo_cfd1 is now a separate extension from Vrzno.
+* pdo_pglite adds local Postgres support.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
 * Modules are now webpack-compatible out of the box.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
-* Fixed the bug with POST requests under FireFox.
+* Fixed the bug with POST requests under Firefox.
 * Adding support for PHP 8.3.7
 * Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
 

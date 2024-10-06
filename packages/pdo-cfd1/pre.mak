@@ -1,7 +1,7 @@
 #!/usr/bin/env make
 WITH_PDO_CFD1?=0
 
-ifeq (${WITH_PDO_CFD1}, 1)
+ifeq (${WITH_PDO_CFD1},1)
 EXTRA_FLAGS+= -D WITH_PDO_CFD1=1
 PHP_CONFIGURE_DEPS+= third_party/pdo-cfd1/config.m4
 CONFIGURE_FLAGS+= --enable-pdo-cfd1
