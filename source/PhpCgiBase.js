@@ -206,7 +206,6 @@ export class PhpCgiBase
 			.map(url => url.pathname);
 
 			isWhitelisted = url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname;
-
 			isBlacklisted = url.pathname.match(/\.wasm$/i)
 			|| staticUrls.includes(url.pathname)
 			|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
@@ -215,7 +214,6 @@ export class PhpCgiBase
 		else
 		{
 			isWhitelisted = url.pathname.substr(0, prefix.length) === prefix;
-
 			isBlacklisted = url.pathname.match(/\.wasm$/i)
 			|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
 			|| false;
