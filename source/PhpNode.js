@@ -13,7 +13,19 @@ export class PhpNode extends PhpBase
 				name = new URL(name).pathname;
 			}
 
-			return path.isAbsolute(name) ? name : path.resolve(dir, name);
+			if(dir === '')
+			{
+				if(typeof __dirname === 'undefined')
+				{
+					dir = path.dirname(url.fileURLToPath(import.meta.url));
+				}
+				else
+				{
+					dir = __dirname;
+				}
+			}
+
+			return path.resolve( path.format({dir, name}) );
 		};
 
 		super(PhpBinary, {...args, locateFile});
