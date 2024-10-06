@@ -46,6 +46,7 @@ RUN apt-get update; \
 
 # RUN rm -rf /emsdk/upstream/emscripten
 # ADD emscripten /emsdk/upstream/emscripten
+# RUN /emsdk/upstream/emscripten/bootstrap
 
 RUN cd /emsdk/upstream && {\
 	rm -rf emscripten;\

@@ -4,6 +4,7 @@ WITH_LIBXML?=shared
 
 LIBXML2_TAG?=v2.9.10
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libxml2/ emscripten-builder
+DOCKER_RUN_IN_EXT_LIBXML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-libxml/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBXML},0 1 static shared),)
 $(error WITH_LIBXML MUST BE 0, 1, static, OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -52,3 +53,17 @@ packages/libxml/libxml2.so: lib/lib/libxml2.so
 $(addsuffix /libxml2.so,$(sort ${SHARED_ASSET_PATHS})): packages/libxml/libxml2.so
 	cp -Lp $^ $@
 
+## EXPERIMENTAL!!
+third_party/php${PHP_VERSION}-libxml/config0.m4: third_party/php${PHP_VERSION}-src/patched
+	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/libxml /src/third_party/php${PHP_VERSION}-libxml
+
+packages/libxml/php${PHP_VERSION}-libxml.so: ${PHPIZE} packages/libxml/libxml2.so third_party/php${PHP_VERSION}-xml/config.m4
+	@ echo -e "\e[33;4mBuilding php-libxml\e[0m"
+	${DOCKER_RUN_IN_EXT_LIBXML} cp config0.m4 config.m4
+	${DOCKER_RUN_IN_EXT_LIBXML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
+	${DOCKER_RUN_IN_EXT_LIBXML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
+	${DOCKER_RUN_IN_EXT_LIBXML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-libxml=/src/lib;
+	${DOCKER_RUN_IN_EXT_LIBXML} sed -i 's#-shared#-static#g' Makefile;
+	${DOCKER_RUN_IN_EXT_LIBXML} sed -i 's#-export-dynamic##g' Makefile;
+	${DOCKER_RUN_IN_EXT_LIBXML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
+	${DOCKER_RUN_IN_EXT_LIBXML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/libxml.a /src/packages/libxml/libxml2.so

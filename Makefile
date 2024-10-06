@@ -112,8 +112,6 @@ SHELL=bash -euo pipefail
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 CPU_COUNT=`nproc || echo 1`
-# PRELOAD_ASSETS+=php.ini
-
 DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) docker-compose -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
