@@ -1,6 +1,6 @@
 {
 	"name": "php-cgi-wasm",
-	"version": "0.0.9-alpha-17",
+	"version": "0.0.9-alpha-17-b",
 	"description": "php-cgi for wasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
