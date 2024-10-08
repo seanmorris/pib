@@ -283,8 +283,7 @@ export class PhpCgiBase
 			, locateFile
 		};
 
-		this.binary = new this.PHP(phpArgs).then(async php => {
-
+		return this.binary = new this.PHP(phpArgs).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -298,9 +297,9 @@ export class PhpCgiBase
 				php.FS.mkdir('/preload');
 			}
 
-			await this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
+			await Promise.all(this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
 				fileDef.parent, fileDef.name, userLocateFile(fileDef.url) ?? fileDef.url, true, false
-			));
+			)));
 
 			const iniLines = libs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
@@ -325,7 +324,7 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
-			await this.loadInit(php);
+			await this.loadInit();
 
 			return php;
 		});
@@ -498,35 +497,21 @@ export class PhpCgiBase
 		putEnv(php, 'CONTENT_TYPE', contentType);
 		putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
 
+		let exitCode = -1;
+
 		try
 		{
-			const exitCode = await navigator.locks.request('php-wasm-fs-lock', async () => {
-				return php.ccall(
-					'main'
-					, 'number'
-					, []
-					, []
-					, {async: true}
-				);
-			});
-
-			if(exitCode === 0)
-			{
-				this._afterRequest();
-			}
-			else
-			{
-				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
-				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
-
-				await this.refresh();
-			}
+			exitCode = await navigator.locks.request('php-wasm-fs-lock', () => php.ccall(
+				'main'
+				, 'number'
+				, []
+				, []
+				, {async: true}
+			));
 		}
 		catch (error)
 		{
 			console.error(error);
-
-			this.refresh();
 
 			const response = new Response(
 				`500: Internal Server Error.\n`
@@ -539,9 +524,26 @@ export class PhpCgiBase
 					+ `=`.repeat(80) + `\n\n`
 				, { status: 500 }
 			);
+
 			this.onRequest(request, response);
 
+			this.refresh();
+
 			return response;
+		}
+		finally
+		{
+			if(exitCode === 0)
+			{
+				this._afterRequest();
+			}
+			else
+			{
+				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
+				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
+
+				this.refresh();
+			}
 		}
 
 		++this.count;

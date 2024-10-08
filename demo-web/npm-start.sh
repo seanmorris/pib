@@ -2,8 +2,6 @@
 
 set -eux;
 
-npx webpack --config service-worker-dev.config.ts;
-
 if [ -d 'public/static/media/mapped' ]; then {
 	rm public/static/media/*.map
 	rm -rf public/static/media/mapped
@@ -22,4 +20,15 @@ if [ -d '../packages/php-cgi-wasm/mapped' ]; then {
 }
 fi
 
+rm -f build/*.wasm;
+rm -f build/*.data;
+rm -f build/*.map;
+rm -f build/*.js;
+
+rm -f public/*.wasm;
+rm -f public/*.data;
+rm -f public/*.map;
+rm -f public/*.js;
+
+npx webpack --config service-worker-dev.config.ts;
 react-scripts start --no-cache

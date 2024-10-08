@@ -1,4 +1,4 @@
-<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"text"}
+<?php // {"autorun":true, "persist":true, "single-expression": false, "render-as": "text"}
 $window = new Vrzno;
 $require = $window->require;
 $Form = $require('curvature/form/Form')->Form;

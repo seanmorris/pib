@@ -72,11 +72,37 @@ export class fsOps
 
 	static async writeFile(binary, path, data, options)
 	{
-		return (await binary).FS.writeFile(path, data, options);
+		const bin = (await binary);
+
+		const about = bin.FS.analyzePath(path);
+
+		let forced = false;
+
+		if(about.object && about.object.mode)
+		{
+			if(!(about.object.mode & 0o200))
+			{
+				await bin.FS.chmod(path, about.object.mode | 0o200);
+			}
+		}
+
+		const result = bin.FS.writeFile(path, data, options);
+
+		if(forced)
+		{
+			await bin.FS.chmod(path, about.object.mode);
+		}
+
+		return result;
 	}
 
 	static async unlink(binary, path)
 	{
 		return (await binary).FS.unlink(path);
+	}
+
+	static async chmod(binary, mode)
+	{
+		return (await binary).FS.chmod(mode);
 	}
 }

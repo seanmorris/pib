@@ -29,8 +29,8 @@ export class PhpWorker extends PhpBase
 		}
 
 		const php = await this.binary;
-		await navigator.locks.request('php-wasm-fs-lock', async () => {
-			return new Promise((accept, reject) => {
+		await navigator.locks.request('php-wasm-fs-lock', () => {
+			new Promise((accept, reject) => {
 				php.FS.syncfs(true, error => {
 					if(error) reject(error);
 					else accept();

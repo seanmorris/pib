@@ -1,6 +1,6 @@
 {
 	"name": "php-wasm",
-	"version": "0.0.9-alpha-17",
+	"version": "0.0.9-alpha-17-a",
 	"description": "Run PHP right in the browser or anywhere else JS can run",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris<php-wasm@seanmorr.is>",

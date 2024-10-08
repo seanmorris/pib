@@ -71,7 +71,6 @@ export class PhpBase extends EventTarget
 		this.valueIndex = 0;
 
 		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
-
 			php.ccall(
 				'pib_storage_init'
 				, NUM

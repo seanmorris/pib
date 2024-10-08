@@ -9,7 +9,7 @@ export const sendMessageFor = (serviceWorkerUrl) => async (action, params = []) 
 	const token = window.crypto.randomUUID();
 	let accept, reject;
 	const ret = new Promise((_accept, _reject) => [accept, reject] = [_accept, _reject]);
-	incomplete.set(token, [accept, reject]);
+	incomplete.set(token, [accept, reject, action, params]);
 
 	navigator.serviceWorker
 	.getRegistration(serviceWorkerUrl)
@@ -25,17 +25,17 @@ export const sendMessageFor = (serviceWorkerUrl) => async (action, params = []) 
 export const onMessage = event => {
 	if(event.data.re && incomplete.has(event.data.re))
 	{
-		const callbacks = incomplete.get(event.data.re);
+		const [accept, reject, action, params] = incomplete.get(event.data.re);
 
 		incomplete.delete(event.data.re);
 
 		if(!event.data.error)
 		{
-			callbacks[0](event.data.result);
+			accept(event.data.result);
 		}
 		else
 		{
-			callbacks[1](event.data.error);
+			reject({error: event.data.error, action, params});
 		}
 	}
 };

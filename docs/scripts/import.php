@@ -1,8 +1,15 @@
 <?php // {"autorun":true, "persist":true, "single-expression": false, "render-as": "text"}
 
 $window = new Vrzno;
+
+$renderTo = $window->document->body->querySelector('#example');
+$renderTo->innerHTML = '';
+
 $import = vrzno_import('https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm');
 $Plot = vrzno_await($import);
+
+// Adapted from Javascript at:
+// https://observablehq.com/@observablehq/plot-vertical-bars-rotated-labels
 
 $brands = [
 	["name" => "Apple", "value" => 214480],
@@ -18,14 +25,19 @@ $brands = [
 	["name" => "Intel", "value" => 43293],
 ];
 
-$plot = $Plot->barY($brands, (object)[
+$plot = $Plot->barY($brands, [
 	'x' => 'name',
 	'y' => 'value',
 	'sort' => (object)['x' => 'y', 'reverse' => true, 'limit' => 10],
 	'fill' => 'steelblue',
-])->plot();
-
-$renderTo = $window->document->body->querySelector('#example');
-$renderTo->innerHTML = '';
+])->plot([
+	'marginBottom' => 60,
+	'x' => ['tickRotate' => -30],
+	'y' => [
+		'transform' => fn($d) => $d / 1000,
+		'label' => '↑ Market value (US dollars, billions)',
+		'grid' => 5,
+	]
+]);
 
 $renderTo->append($plot);

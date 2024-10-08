@@ -17,7 +17,7 @@ const packages = {
 	'drupal-7': {
 		name:  'Drupal 7',
 		file:  '/backups/drupal-7.95.zip',
-		sql:   '/backups/drupal-7.95.sql',
+		// sql:   '/backups/drupal-7.95.sql',
 		path:  'drupal-7.95',
 		vHost: 'drupal',
 		dir:   'drupal-7.95',
@@ -91,16 +91,16 @@ const installDemo = async (overwrite = false) => {
 	const php = new PhpWeb({sharedLibs, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 	await php.binary;
-	// if(selectedFramework.sql)
-	// {
-	// 	console.log({sql:selectedFramework.sql});
-	// 	const sqlFile = await (await fetch(selectedFramework.sql)).text();
-	// 	console.log(sqlFile);
-	// 	const sqlResult = await sendMessage('execSql', [`idb://host= dbname=idb:drupal port=5432`, sqlFile]);
-	// 	console.log({sqlResult});
-	// 	const tableResult = await sendMessage('runSql', [`idb://host= dbname=idb:drupal port=5432`, 'select * from information_schema.tables']);
-	// 	console.log({tableResult});
-	// }
+	if(selectedFramework.sql)
+	{
+		console.log({sql:selectedFramework.sql});
+		const sqlFile = await (await fetch(selectedFramework.sql)).text();
+		console.log(sqlFile);
+		const sqlResult = await sendMessage('execSql', [`idb://host= dbname=drupal port=5432`, sqlFile]);
+		console.log({sqlResult});
+		const tableResult = await sendMessage('runSql', [`idb://host= dbname=drupal port=5432`, 'select * from information_schema.tables']);
+		console.log({tableResult});
+	}
 
 	php.addEventListener('output', event => console.log(event.detail));
 	php.addEventListener('error', event => console.log(event.detail));
@@ -115,12 +115,15 @@ const installDemo = async (overwrite = false) => {
 	const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
 
 	await navigator.locks.request('php-wasm-demo-install', async () => {
+		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Got Lock...'}));
+
 		const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
 
 		if(!overwrite && checkPath.exists)
 		{
 			window.demoInstalling = null;
 			window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+			window.dispatchEvent(new CustomEvent('install-status', {detail: 'Already installed...'}));
 			if(window.opener)
 			{
 				window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: selectedFrameworkName}));

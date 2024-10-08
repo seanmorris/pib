@@ -23,10 +23,10 @@ export class PhpCgiWebBase extends PhpCgiBase
 		{
 			const php = await this.binary;
 			await this.loadInit(php);
-			await navigator.locks.request('php-wasm-fs-lock', async () => {
-				await new Promise((accept,reject) => php.FS.syncfs(true, err => {
+			await navigator.locks.request('php-wasm-fs-lock', () => {
+				return new Promise((accept,reject) => php.FS.syncfs(true, err => {
 					if(err) reject(err);
-					else    accept();
+					else accept();
 				}));
 			});
 		}
@@ -36,17 +36,18 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	async _afterRequest()
 	{
-		const php = await this.binary;
 
 		if(this.phpArgs.staticFS)
 		{
 			return;
 		}
 
-		await navigator.locks.request('php-wasm-fs-lock', async () => {
-			await new Promise((accept,reject) => php.FS.syncfs(false, err => {
+		const php = await this.binary;
+
+		await navigator.locks.request('php-wasm-fs-lock', () => {
+			return new Promise((accept,reject) => php.FS.syncfs(false, err => {
 				if(err) reject(err);
-				else    accept();
+				else accept();
 			}));
 		});
 	}

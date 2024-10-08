@@ -23,7 +23,7 @@ export class PhpWeb extends PhpBase
 	{
 		super.refresh();
 		const php = await this.binary;
-		await navigator.locks.request('php-wasm-fs-lock', async () => {
+		await navigator.locks.request('php-wasm-fs-lock', () => {
 			return new Promise((accept, reject) => {
 				php.FS.syncfs(true, error => {
 					if(error) reject(error);
