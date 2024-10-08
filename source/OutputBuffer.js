@@ -9,6 +9,7 @@ export class OutputBuffer
 		Object.defineProperty(this, 'eventType', {value: eventType});
 		Object.defineProperty(this, 'maxLength', {value: maxLength});
 		Object.defineProperty(this, 'decoder',   {value: new TextDecoder()});
+		Object.defineProperty(this, 'queue',     {value: new Set});
 	}
 
 	push(...items)
@@ -35,9 +36,8 @@ export class OutputBuffer
 			return;
 		}
 
-		const event = new _Event(this.eventType, {
-			detail: [this.decoder.decode(new Uint8Array(this.buffer))]
-		});
+		const detail = [this.decoder.decode(new Uint8Array(this.buffer))];
+		const event = new _Event(this.eventType, {detail});
 
 		if(this.target['on' + this.eventType])
 		{

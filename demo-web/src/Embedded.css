@@ -73,14 +73,27 @@ button[data-run]::after {
     opacity: 0.5;
 }
 
+body.loading button[data-run] {
+	transition: background-color 0.5s ease-in-out;
+}
+
 [data-running="0"] button[data-run]::after {
 	background-color: #F00 !important;
 	transition: background-color 0s 0.05s ease-out;
 }
 
 [data-running="1"] button[data-run] {
-	filter: saturate(0) brightness(1.25) contrast(0.25);
+	background-color: #c3c3c3;
+	background-color: #505050;
+
+	color: rgba(0,0,0,0.5);
+
+	filter: saturate(0) brightness(1.25) contrast(0.5);
 	pointer-events: none;
+
+	background-image: url(loading.svg);
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
 .header button[data-reset-storage] {
@@ -204,6 +217,11 @@ div.panel > div {
 	flex: 1;
 }
 
+.Embedded:not([data-output-mode="single"]) div.panel > div:not(:has(iframe[srcdoc=""])) + div:has(iframe[srcdoc=""]) {
+	flex: 0;
+	min-height: 5rem;
+}
+
 .liquid{
 	display: flex;
 	flex-direction: column;
@@ -211,7 +229,7 @@ div.panel > div {
 }
 
 button,
-.panel label {
+.panel > div label {
 	user-select: none;
 	border: 2px solid;
 	border-image: url(border.png) 2 2 2 2 !important;
@@ -227,14 +245,18 @@ button,
 	/* margin-top: -1px; */
 }
 
-.panel label[tabindex]:first-child {
+.panel > div label[tabindex]:first-child {
 	/* margin-right: -1px; */
 	box-sizing: border-box;
 }
 
-.panel .cols > label[tabindex]:last-child {
+.panel > div .cols > label[tabindex]:last-child {
 	border-right-width: 2px;
 	/* border-right: 1px; */
+}
+
+label[tabindex], button {
+	position: relative;
 }
 
 label[tabindex]:active,
@@ -356,5 +378,19 @@ body:not(.loading) .loader {
 }
 
 .Embedded[data-output-mode="normal"] #ret {
+	display: none;
+}
+
+#example-wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	white-space: initial;
+}
+#example-wrapper p {
+	word-break: break-all;
+}
+
+#example-wrapper:has( #example:empty ) {
 	display: none;
 }

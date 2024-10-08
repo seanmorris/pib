@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AceEditor from "react-ace-builds";
 import "react-ace-builds/webpack-resolver-min";
 
+import { PGlite } from '@electric-sql/pglite';
+
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
@@ -42,7 +44,6 @@ function Embedded() {
 	const textRadio = useRef(null);
 	const editor = useRef(null);
 	const input = useRef('');
-
 	const persist = useRef('');
 	const single  = useRef('');
 
@@ -61,11 +62,8 @@ function Embedded() {
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
-		// phpRef.current = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
-		// phpRef.current = new PhpWeb({sharedLibs, ini, locateFile: filename => {
-		// 	console.log(filename);
-		// }});
-		phpRef.current = new PhpWeb({sharedLibs, files, ini});
+		window.list = [1,2,3,4];
+		phpRef.current = new PhpWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		const php = phpRef.current;
 
@@ -90,10 +88,9 @@ function Embedded() {
 
 	const singleChanged = () => setOutputMode(single.current.checked ? 'single' : 'normal');
 	const formatSelected = event => setDisplayMode(event.target.value);
-
 	const codeChanged = newValue => input.current = newValue;
 
-	const runCode = useCallback(() => {
+	const runCode = useCallback(async () => {
 		setRunning(true);
 
 		setStatusMessage('Executing...');
@@ -106,59 +103,64 @@ function Embedded() {
 
 		setStdRet('');
 
-		const phpCode = editor.current.editor.getValue();
+		let code = editor.current.editor.getValue();
 
-		query.set('code', encodeURIComponent(phpCode));
+		code = code.replace(/^<\?php \/\/.+\n/, `<?php //${JSON.stringify({
+			'autorun': true,
+			'persist': persist.current.checked,
+			'single-expression': single.current.checked,
+			'render-as': htmlRadio.current.checked ? 'html' : 'text',
+		})}\n`);
+
+		query.set('code', encodeURIComponent(code));
 
 		window.history.replaceState({}, document.title, "?" + query.toString());
 
-		let code = input.current;
+		if(single.current.checked)
+		{
+			code = code.replace(/^\s*<\?php/, '');
+			code = code.replace(/\?>\s*/, '');
 
-		setTimeout(async () => {
-			if(single.current.checked)
+			try
 			{
-				code = code.replace(/^\s*<\?php/, '');
-				code = code.replace(/\?>\s*/, '');
-
-				try
+				const ret = await phpRef.current.exec(code);
+				setStdRet(ret);
+				if(!persist.current.checked)
 				{
-					const ret = await phpRef.current.exec(code);
-					setStdRet(ret);
-					persist.current.checked || phpRef.current.refresh();
-				}
-				catch(error)
-				{
-					console.error(error);
-				}
-				finally
-				{
-					setTimeout(() => {
-						setStatusMessage('php-wasm ready!')
-						setRunning(false);
-					}, 1);
+					await phpRef.current.refresh();
 				}
 			}
-			else
+			catch(error)
 			{
-				try
+				console.error(error);
+			}
+			finally
+			{
+				setStatusMessage('php-wasm ready!')
+				setRunning(false);
+			}
+		}
+		else
+		{
+			try
+			{
+				const exitCode = await phpRef.current.run(code);
+				setExitCode(exitCode);
+				if(!persist.current.checked)
 				{
-					const exitCode = await phpRef.current.run(code);
-					setExitCode(exitCode);
-					persist.current.checked || phpRef.current.refresh();
-				}
-				catch(error)
-				{
-					console.error(error)
-				}
-				finally
-				{
-					setTimeout(() => {
-						setStatusMessage('php-wasm ready!')
-						setRunning(false);
-					}, 1);
+					await phpRef.current.refresh();
 				}
 			}
-		}, 1);
+			catch(error)
+			{
+				console.error(error)
+			}
+			finally
+			{
+				setStatusMessage('php-wasm ready!')
+				setRunning(false);
+			}
+		}
 	}, [query]);
 
 	const loadDemo = useCallback(demoName => {
@@ -178,6 +180,8 @@ function Embedded() {
 			return;
 		}
 
+		setRunning(true);
+
 		setStdOut('');
 		setStdErr('');
 		setStdRet('');
@@ -187,14 +191,15 @@ function Embedded() {
 		.then(async phpCode => {
 			editor.current.editor.setValue(phpCode, -1);
 
-			refreshPhp();
+			if(!persist.current.checked)
+			{
+				refreshPhp();
+			}
 
 			selectDemoBox.current.value = demoName;
-
 			await phpRef.current.binary;
 
 			document.querySelector('#example').innerHTML = '';
-
 			const firstLine = String(phpCode.split(/\n/).shift());
 			const settings  = JSON.parse(firstLine.split('//').pop()) || {};
 
@@ -204,7 +209,6 @@ function Embedded() {
 			if(settings['render-as'])
 			{
 				setDisplayMode(settings['render-as']);
-
 				htmlRadio.current.checked = settings['render-as'] === 'html';
 				textRadio.current.checked = settings['render-as'] !== 'html';
 			}
@@ -214,7 +218,7 @@ function Embedded() {
 			if(settings.autorun)
 			{
 				setStatusMessage('Executing...');
-				setTimeout(runCode, 16);
+				runCode();
 			}
 
 			query.set('persist', persist.current.checked ? 1 : 0);
@@ -280,11 +284,6 @@ function Embedded() {
 			textRadio.current.checked = settings['render-as'] !== 'html';
 		}
 
-		if(settings.autorun)
-		{
-			setTimeout(runCode, 1);
-		}
-
 		if(editor.current && query.has('code'))
 		{
 			editor.current.editor.setValue(query.has('code'), -1);
@@ -293,6 +292,11 @@ function Embedded() {
 		{
 			loadDemo(query.get('demo'));
 			query.delete('demo');
+		}
+
+		if(settings.autorun)
+		{
+			setTimeout(runCode, 1);
 		}
 
 	}, [query, loadDemo, runCode]);
@@ -345,6 +349,7 @@ function Embedded() {
 								<option value = "dom-access.php">DOM Access</option>
 								<option value = "goto.php">GoTo</option>
 								<option value = "stdio.php">StdOut, StdIn, & Return</option>
+								<option value = "postgres.php">PostgreSQL</option>
 								<option value = "sqlite.php">SQLite</option>
 								<option value = "sqlite-pdo.php">SQLite (PDO)</option>
 								<option value = "json.php">JSON</option>
@@ -380,7 +385,7 @@ function Embedded() {
 								<input type = "checkbox" id = "singleExpression" ref = { single } onChange = {singleChanged} />
 							</label>
 						</div>
-						<button data-run onClick = { () => setTimeout(runCode, 16) }><span>run</span></button>
+						<button data-run onClick = { runCode }><span>run</span></button>
 					</div>
 				</div>
 
@@ -400,13 +405,16 @@ function Embedded() {
 					</div>
 
 					<div className = "panel">
+						<section id = "example-wrapper">
+							<div id = "example"></div>
+						</section>
 						<div id = "ret">
 							<div className = "cols">
 								<label tabIndex="-1">return</label>
 							</div>
 							<div className = "stdret output liquid">
 								<div className = "column">
-									<iframe srcDoc = {stdRet} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
+									<iframe srcDoc = {stdRet} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
 									<div className = "scroller">{stdRet}</div>
 								</div>
 							</div>
@@ -418,7 +426,7 @@ function Embedded() {
 							</div>
 							<div className = "stdout output liquid">
 								<div className = "column">
-									<iframe srcDoc = {stdOut} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
+									<iframe srcDoc = {stdOut} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
 									<div className = "scroller">{stdOut}</div>
 								</div>
 							</div>
@@ -429,15 +437,13 @@ function Embedded() {
 							</div>
 							<div className = "stderr output liquid">
 								<div className = "column">
-								<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms" className = "scroller"></iframe>
+								<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
 									<div className = "scroller">{stdErr}</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-
-				<div id = "example"></div>
 
 				<div className = "row status toolbar">
 					<div>
