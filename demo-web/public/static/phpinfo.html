@@ -1,0 +1,22 @@
+<html>
+	<body>
+		<script async type = "module" src = "./php-tags.mjs"></script>
+		<script type = "text/php" data-stdout = "#output" data-stderr = "#error">
+			<?php phpinfo();
+        </script>
+		<script type = "module">
+			import { PhpWeb } from './PhpWeb.mjs';
+			(async () => {
+				const php = new PhpWeb;
+				const exception = await php.x`new \\Exception("This is an exception")`;
+				console.log(exception.message);
+				console.log(exception.getMessage);
+				console.log(exception.getMessage());
+				console.log(exception.__toString());
+				console.log(String(exception));
+			})()
+		</script>
+		<span id = "output"></span>
+		<span id = "error"></span>
+	</body>
+</html>
