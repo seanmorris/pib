@@ -1,0 +1,76 @@
+{
+    "name": "laminas/laminas-eventmanager",
+    "description": "Trigger and listen to events within a PHP application",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "event",
+        "events",
+        "eventmanager"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-eventmanager/",
+        "issues": "https://github.com/laminas/laminas-eventmanager/issues",
+        "source": "https://github.com/laminas/laminas-eventmanager",
+        "rss": "https://github.com/laminas/laminas-eventmanager/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.99"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "extra": {
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0"
+    },
+    "require-dev": {
+        "laminas/laminas-coding-standard": "~2.5.0",
+        "laminas/laminas-stdlib": "^3.18",
+        "phpbench/phpbench": "^1.2.15",
+        "phpunit/phpunit": "^10.5.5",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "psr/container": "^1.1.2 || ^2.0.2",
+        "vimeo/psalm": "^5.18"
+    },
+    "suggest": {
+        "psr/container": "^1.1.2 || ^2.0.2, to use the lazy listeners feature",
+        "laminas/laminas-stdlib": "^2.7.3 || ^3.0, to use the FilterChain feature"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\EventManager\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\EventManager\\": "test/",
+            "LaminasBench\\EventManager\\": "benchmarks/",
+            "LaminasPsalm\\EventManager\\": "psalm/"
+        }
+    },
+    "scripts": {
+        "benchmark": "phpbench run --revs=2 --iterations=2 --report=aggregate",
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
+        "static-analysis": "psalm --shepherd --stats"
+    },
+    "conflict": {
+        "container-interop/container-interop": "<1.2",
+        "zendframework/zend-eventmanager": "*"
+    }
+}

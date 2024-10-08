@@ -1,0 +1,71 @@
+{
+    "name": "laminas/laminas-component-installer",
+    "description": "Composer plugin for injecting modules and configuration providers into application configuration",
+    "type": "composer-plugin",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "component installer",
+        "composer",
+        "plugin"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-component-installer/",
+        "issues": "https://github.com/laminas/laminas-component-installer/issues",
+        "source": "https://github.com/laminas/laminas-component-installer",
+        "rss": "https://github.com/laminas/laminas-component-installer/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.99"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+        "class": "Laminas\\ComponentInstaller\\ComponentInstaller"
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "composer-plugin-api": "^2.0"
+    },
+    "require-dev": {
+        "composer/composer": "^2.6.4",
+        "laminas/laminas-coding-standard": "~2.5.0",
+        "mikey179/vfsstream": "^1.6.11",
+        "phpunit/phpunit": "^10.4",
+        "psalm/plugin-phpunit": "^0.18.0",
+        "vimeo/psalm": "^5.15.0",
+        "webmozart/assert": "^1.11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\ComponentInstaller\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\ComponentInstaller\\": "test/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test",
+            "@static-analysis"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "test": "phpunit --colors=always",
+        "static-analysis": "psalm --shepherd --stats",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    },
+    "conflict": {
+        "zendframework/zend-component-installer": "*"
+    }
+}

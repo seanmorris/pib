@@ -8,8 +8,7 @@ export async function startTransaction(wrapper)
 	}
 
 	return await new Promise((accept, reject) => {
-		php.FS.syncfs(true, error => {
-
+		return php.FS.syncfs(true, error => {
 			if(error)
 			{
 				reject(error);
@@ -38,8 +37,7 @@ export async function commitTransaction(wrapper)
 	}
 
 	return await new Promise((accept, reject) => {
-		php.FS.syncfs(false, error => {
-
+		return php.FS.syncfs(false, error => {
 			if(error)
 			{
 				reject(error);

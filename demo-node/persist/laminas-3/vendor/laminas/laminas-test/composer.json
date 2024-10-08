@@ -1,0 +1,78 @@
+{
+    "name": "laminas/laminas-test",
+    "description": "Tools to facilitate integration testing of laminas-mvc applications",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "test"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-test/",
+        "issues": "https://github.com/laminas/laminas-test/issues",
+        "source": "https://github.com/laminas/laminas-test",
+        "rss": "https://github.com/laminas/laminas-test/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.99"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "conflict": {
+        "zendframework/zend-test": "*"
+    },
+    "extra": {
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "laminas/laminas-eventmanager": "^3.0",
+        "laminas/laminas-http": "^2.15.0",
+        "laminas/laminas-mvc": "^3.3.0",
+        "laminas/laminas-servicemanager": "^3.0.3",
+        "laminas/laminas-uri": "^2.5",
+        "laminas/laminas-view": "^2.13.1",
+        "phpunit/phpunit": "^10.4",
+        "symfony/css-selector": "^6.0 || ^7.0",
+        "symfony/dom-crawler": "^6.0 || ^7.0"
+    },
+    "require-dev": {
+        "laminas/laminas-coding-standard": "^2.4.0",
+        "laminas/laminas-i18n": "^2.21",
+        "laminas/laminas-modulemanager": "^2.14.0",
+        "laminas/laminas-mvc-plugin-flashmessenger": "^1.9.0",
+        "laminas/laminas-serializer": "^2.14.0",
+        "laminas/laminas-session": "^2.16",
+        "laminas/laminas-stdlib": "^3.16.1",
+        "laminas/laminas-validator": "^2.28",
+        "mikey179/vfsstream": "^1.6.11",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "vimeo/psalm": "^5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\Test\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\Test\\": "test/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "test": "phpunit --colors",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
+        "static-analysis": "psalm --shepherd --stats"
+    }
+}

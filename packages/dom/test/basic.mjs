@@ -20,3 +20,4 @@ test('DOM Extension is enabled.', async () => {
 	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
 });
+

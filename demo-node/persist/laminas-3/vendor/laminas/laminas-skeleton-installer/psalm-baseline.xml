@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.15.0@5c774aca4746caf3d239d9c8cadb9f882ca29352">
+  <file src="src/Collection.php">
+    <DocblockTypeContradiction>
+      <code>is_array($items)</code>
+    </DocblockTypeContradiction>
+    <InvalidArgument>
+      <code>$callback($item)</code>
+    </InvalidArgument>
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[$this->items]]></code>
+    </InvalidPropertyAssignmentValue>
+    <UnsafeInstantiation>
+      <code>new static($items)</code>
+      <code>new static([])</code>
+      <code>new static([])</code>
+      <code>new static([])</code>
+    </UnsafeInstantiation>
+  </file>
+  <file src="src/ComposerJsonRetrievalTrait.php">
+    <MixedArgument>
+      <code>$composerFile</code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code>$composerFile</code>
+    </MixedAssignment>
+  </file>
+  <file src="src/OptionalPackagesInstaller.php">
+    <ArgumentTypeCoercion>
+      <code>$spec</code>
+    </ArgumentTypeCoercion>
+    <InvalidArgument>
+      <code>$package</code>
+    </InvalidArgument>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$extra['laminas-skeleton-installer']]]></code>
+      <code><![CDATA[isset($extra['zend-skeleton-installer']) && is_array($extra['zend-skeleton-installer'])
+            ? $extra['zend-skeleton-installer']
+            : []]]></code>
+    </LessSpecificReturnStatement>
+    <MissingReturnType>
+      <code>attachPackageWhitelistBasedOnComposerVersion</code>
+      <code>removeOptionalPackages</code>
+    </MissingReturnType>
+    <MixedArgument>
+      <code>$answer</code>
+      <code>$answer</code>
+      <code>$composer</code>
+      <code>$json</code>
+      <code>$requires</code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$packagesToInstall->reduce(function ($requires, $package) {
+            return $this->addRootPackageRequirement($requires, $package);
+        }, $package->getRequires())]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$json['extra']]]></code>
+      <code><![CDATA[$json['extra']]]></code>
+      <code><![CDATA[$json['extra']['laminas-skeleton-installer']]]></code>
+      <code><![CDATA[$json['extra']['zend-skeleton-installer']]]></code>
+    </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$composer[$key][$package->getName()]]]></code>
+    </MixedArrayAssignment>
+    <MixedAssignment>
+      <code>$answer</code>
+      <code>$answer</code>
+      <code>$json</code>
+    </MixedAssignment>
+    <MoreSpecificReturnType>
+      <code><![CDATA[list<array>]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyInvalidArgument>
+      <code>$description</code>
+    </PossiblyInvalidArgument>
+    <UnusedMethod>
+      <code>createInstaller</code>
+    </UnusedMethod>
+  </file>
+  <file src="src/Plugin.php">
+    <LessSpecificImplementedReturnType>
+      <code>array</code>
+    </LessSpecificImplementedReturnType>
+    <MissingConstructor>
+      <code>$composer</code>
+      <code>$io</code>
+    </MissingConstructor>
+    <MissingReturnType>
+      <code>installOptionalDependencies</code>
+      <code>uninstallPlugin</code>
+    </MissingReturnType>
+    <PossiblyUnusedMethod>
+      <code>installOptionalDependencies</code>
+      <code>uninstallPlugin</code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code>$event</code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Uninstaller.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$aliases->toArray()]]></code>
+    </ArgumentTypeCoercion>
+    <InvalidArgument>
+      <code><![CDATA[$locker->getStabilityFlags()]]></code>
+    </InvalidArgument>
+    <MissingReturnType>
+      <code>removePluginFromComposer</code>
+      <code>removePluginInstall</code>
+      <code>updateLockFile</code>
+    </MissingReturnType>
+    <MixedArgument>
+      <code>$json</code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code>$platformDevReqs</code>
+      <code>$platformReqs</code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$json['require']]]></code>
+      <code><![CDATA[$json['require'][self::PLUGIN_NAME]]]></code>
+    </MixedArrayAccess>
+    <MixedAssignment>
+      <code>$json</code>
+    </MixedAssignment>
+    <PossiblyNullArgument>
+      <code><![CDATA[$locker->getPreferLowest()]]></code>
+      <code><![CDATA[$locker->getPreferStable()]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="test/CollectionTest.php">
+    <MixedArgument>
+      <code>$items</code>
+      <code>$items</code>
+    </MixedArgument>
+    <MixedArrayAssignment>
+      <code>$results[]</code>
+    </MixedArrayAssignment>
+    <MixedInferredReturnType>
+      <code>array</code>
+      <code>array</code>
+    </MixedInferredReturnType>
+    <MixedOperand>
+      <code>$accumulator</code>
+    </MixedOperand>
+  </file>
+  <file src="test/OptionalPackageTest.php">
+    <MixedInferredReturnType>
+      <code>array</code>
+      <code>array</code>
+    </MixedInferredReturnType>
+  </file>
+  <file src="test/OptionalPackagesInstallerTest.php">
+    <MixedArgument>
+      <code>$constraintFailures</code>
+      <code>$constraintFailures</code>
+      <code>$constraintFailures</code>
+      <code>$constraintFailures</code>
+    </MixedArgument>
+    <MixedArrayAssignment>
+      <code>$constraintFailures[]</code>
+      <code>$constraintFailures[]</code>
+      <code>$constraintFailures[]</code>
+      <code>$constraintFailures[]</code>
+      <code>$constraintFailures[]</code>
+      <code>$constraintFailures[]</code>
+      <code>$constraintFailures[]</code>
+    </MixedArrayAssignment>
+    <MixedAssignment>
+      <code>$composer</code>
+      <code>$composer</code>
+      <code>$escapedFailure</code>
+      <code>$escapedFailure</code>
+      <code>$escapedFailure</code>
+      <code>$escapedFailure</code>
+    </MixedAssignment>
+  </file>
+  <file src="test/PluginTest.php">
+    <MissingReturnType>
+      <code>testSubscribesToExpectedEventsForComposer2</code>
+    </MissingReturnType>
+  </file>
+  <file src="test/UninstallerTest.php">
+    <MixedArrayAssignment>
+      <code>$constraintFailures[]</code>
+    </MixedArrayAssignment>
+    <MixedAssignment>
+      <code>$composer</code>
+    </MixedAssignment>
+  </file>
+</files>

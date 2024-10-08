@@ -6,6 +6,7 @@ const moduleRoot = url + (String(url).substr(-10) !== '/index.mjs' ? '/' : '');
 export const getLibs = php => [
 	{url: new URL(`./php${php.phpVersion}-gd.so`, moduleRoot), ini},
 	{url: new URL('./libfreetype.so', moduleRoot)},
+	{url: new URL('./libwebp.so', moduleRoot)},
 	{url: new URL('./libjpeg.so', moduleRoot)},
 	{url: new URL('./libpng.so', moduleRoot)},
 ];

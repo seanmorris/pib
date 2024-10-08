@@ -1,8 +1,27 @@
 import { phpVersion } from "./config";
+import { phpVersionFull } from "./config";
 import { parseResponse } from './parseResponse';
 import { breakoutRequest } from './breakoutRequest';
 import { fsOps } from './fsOps';
 import { resolveDependencies } from './resolveDependencies';
+
+/**
+ * An object representing a dynamically loaded data file.
+ * @typedef {string|object} FileDef
+ * @property {string} url
+ * @property {string} path
+ * @property {string} parent
+ */
+
+/**
+ * A string or object representing a dynamically loaded shared library.
+ * @typedef {string|object} LibDef
+ * @property {string} name
+ * @property {string} url
+ * @property {boolean} ini
+ * @property {function():libDef[]} getLibs
+ * @property {function():fileDef[]} getFiles
+ */
 
 const STR = 'string';
 const NUM = 'number';
@@ -20,6 +39,7 @@ export class PhpCgiBase
 {
 	docroot    = null;
 	prefix     = '/php-wasm';
+	exclude    = [];
 	rewrite    = path => path;
 	cookies    = null;
 	types      = {};
@@ -42,11 +62,32 @@ export class PhpCgiBase
 
 	queue = [];
 
-	constructor(PHP, {docroot, prefix, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, files, ...args} = {})
+	/**
+	 * Creates a new PHP instance (async)
+	 * @param {*} PHP
+	 * @param {string} options.prefix The URL path prefix to look for when routing to PHP.
+	 * @param {string} options.docroot The internal directory to use as the public document root.
+	 * @param {string[]} options.exclude Array of URL prefixes to exclude from routing to PHP.
+	 * @param {Array.<{pathPrefix: string, directory: string, entrypoint: string}>} options.vHosts A list of prefixes, directories and entrypoints to serve multiple PHP applications by URL prefix.
+	 * @param {string} options.entrypoint Path to PHP file under docroot to serve as an entrypoint
+	 * @param {function(string):string} options.rewrite Function to rewrite URLs
+	 * @param {object<string, string>} options.types Mapping of file extensions to mime types to populate the `Content-type` header.
+	 * @param {function()} options.onRequest Function to be executed on each request.
+	 * @param {function(Request):Response|string} options.notFound Function to handle 404s.
+	 * @param {LibDef[]} options.sharedLibs Dynamically load shared libraries with LibDefs
+	 * @param {FileDef[]} options.files Dynamically load files with FileDefs
+	 * @param {boolean} options.autoTransaction Automatically handle FS transactions on each request
+	 * @param {number} options.maxRequestAge Oldest request to process (ms)
+	 * @param {number} options.staticCacheTime Static cache time (ms)
+	 * @param {number} options.dynamicCacheTime Dynamic cache time (ms)
+	 * @param {object<string, string}>} options.env Mapping of environment variable names to values to set inside the server.
+	 */
+	constructor(PHP, {docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, actions, files, ...args} = {})
 	{
 		this.PHP        = PHP;
 		this.docroot    = docroot    || this.docroot;
 		this.prefix     = prefix     || this.prefix;
+		this.exclude    = exclude    || this.exclude;
 		this.rewrite    = rewrite    || this.rewrite;
 		this.entrypoint = entrypoint || this.entrypoint;
 		this.cookies    = cookies    || new Map;
@@ -55,6 +96,7 @@ export class PhpCgiBase
 		this.notFound   = notFound   || this.notFound;
 		this.sharedLibs = sharedLibs || this.sharedLibs;
 		this.files      = files      || this.files;
+		this.extraActions = actions  || {};
 
 		this.phpArgs   = args;
 
@@ -88,41 +130,61 @@ export class PhpCgiBase
 		const { data, source } = event;
 		const { action, token, params = [] } = data;
 
-		switch(action)
+		const actions = [
+			'analyzePath',
+			'readdir',
+			'readFile',
+			'stat',
+			'mkdir',
+			'rmdir',
+			'writeFile',
+			'rename',
+			'unlink',
+			'putEnv',
+			'refresh',
+			'getSettings',
+			'setSettings',
+			'getEnvs',
+			'setEnvs',
+			'storeInit',
+		];
+
+		if(actions.includes(action))
 		{
-			case 'analyzePath':
-			case 'readdir':
-			case 'readFile':
-			case 'stat':
-			case 'mkdir':
-			case 'rmdir':
-			case 'writeFile':
-			case 'rename':
-			case 'unlink':
-			case 'putEnv':
+			let result, error;
 
-			case 'refresh':
-			case 'getSettings':
-			case 'setSettings':
-			case 'getEnvs':
-			case 'setEnvs':
-			case 'storeInit':
-				let result, error;
-				try
-				{
-					result = await this[action](...params);
-				}
-				catch(_error)
-				{
-					error = JSON.parse(JSON.stringify(_error));
-					console.warn(_error);
-				}
-				finally
-				{
-					source.postMessage({re: token, result, error});
-				}
+			try
+			{
+				result = await this[action](...params);
+			}
+			catch(_error)
+			{
+				error = JSON.parse(JSON.stringify(_error));
+				console.warn(_error);
+			}
+			finally
+			{
+				source.postMessage({re: token, result, error});
+			}
+		}
 
-			break;
+		if(action in this.extraActions)
+		{
+			let result, error;
+
+			try
+			{
+				result = await this.extraActions[action](this, ...params);
+			}
+			catch(_error)
+			{
+				error = JSON.parse(JSON.stringify(_error));
+				console.warn(_error);
+			}
+			finally
+			{
+				source.postMessage({re: token, result, error});
+			}
 		}
 	}
 
@@ -131,7 +193,33 @@ export class PhpCgiBase
 		const url     = new URL(event.request.url);
 		const prefix  = this.prefix;
 
-		if(url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname)
+		const {files, urlLibs} = resolveDependencies(this.sharedLibs, this);
+
+		let isWhitelisted = false;
+		let isBlacklisted = false;
+
+		if(globalThis.location)
+		{
+			const staticUrls = [self.location.pathname, ...files.map(file => file.url),...Object.values(urlLibs)]
+			.map(url => new URL(url, self.location.origin))
+			.filter(url => url.origin === self.location.origin)
+			.map(url => url.pathname);
+
+			isWhitelisted = url.pathname.substr(0, prefix.length) === prefix && url.hostname === self.location.hostname;
+			isBlacklisted = url.pathname.match(/\.wasm$/i)
+			|| staticUrls.includes(url.pathname)
+			|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
+			|| false;
+		}
+		else
+		{
+			isWhitelisted = url.pathname.substr(0, prefix.length) === prefix;
+			isBlacklisted = url.pathname.match(/\.wasm$/i)
+			|| (this.exclude.findIndex(exclude => url.pathname.substr(0, exclude.length) === exclude) > -1)
+			|| false;
+		}
+
+		if(isWhitelisted && !isBlacklisted)
 		{
 			requestTimes.set(event.request, Date.now());
 			const response = this.request(event.request);
@@ -171,8 +259,8 @@ export class PhpCgiBase
 
 		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
 
-		const locateFile = path => {
-			let located = userLocateFile(path);
+		const locateFile = (path, directory) => {
+			let located = userLocateFile(path, directory);
 			if(located !== undefined)
 			{
 				return located;
@@ -181,6 +269,7 @@ export class PhpCgiBase
 			{
 				return String(urlLibs[path]);
 			}
+			console.log((path, directory));
 		};
 
 		const phpArgs = {
@@ -194,8 +283,7 @@ export class PhpCgiBase
 			, locateFile
 		};
 
-		this.binary = new this.PHP(phpArgs).then(async php => {
-
+		return this.binary = new this.PHP(phpArgs).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -209,9 +297,9 @@ export class PhpCgiBase
 				php.FS.mkdir('/preload');
 			}
 
-			await this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
+			await Promise.all(this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
 				fileDef.parent, fileDef.name, userLocateFile(fileDef.url) ?? fileDef.url, true, false
-			));
+			)));
 
 			const iniLines = libs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
@@ -236,7 +324,7 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
-			await this.loadInit(php);
+			await this.loadInit();
 
 			return php;
 		});
@@ -388,11 +476,14 @@ export class PhpCgiBase
 			putEnv(php, name, value);
 		}
 
+		const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
+
 		putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
 		putEnv(php, 'REQUEST_METHOD', method);
 		putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
 		putEnv(php, 'HTTP_HOST', selfUrl.host);
-		putEnv(php, 'REQUEST_SCHEME', selfUrl.protocol.substr(0, selfUrl.protocol.length - 0));
+		putEnv(php, 'REQUEST_SCHEME', protocol);
+		putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
 
 		putEnv(php, 'DOCUMENT_ROOT', docroot);
 		putEnv(php, 'REQUEST_URI', originalPath);
@@ -406,33 +497,21 @@ export class PhpCgiBase
 		putEnv(php, 'CONTENT_TYPE', contentType);
 		putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
 
+		let exitCode = -1;
+
 		try
 		{
-			const exitCode = await php.ccall(
+			exitCode = await navigator.locks.request('php-wasm-fs-lock', () => php.ccall(
 				'main'
 				, 'number'
-				, ['number', 'string']
+				, []
 				, []
 				, {async: true}
-			);
-
-			if(exitCode === 0)
-			{
-				this._afterRequest();
-			}
-			else
-			{
-				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
-				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
-
-				await this.refresh();
-			}
+			));
 		}
 		catch (error)
 		{
 			console.error(error);
-
-			this.refresh();
 
 			const response = new Response(
 				`500: Internal Server Error.\n`
@@ -445,9 +524,26 @@ export class PhpCgiBase
 					+ `=`.repeat(80) + `\n\n`
 				, { status: 500 }
 			);
+
 			this.onRequest(request, response);
 
+			this.refresh();
+
 			return response;
+		}
+		finally
+		{
+			if(exitCode === 0)
+			{
+				this._afterRequest();
+			}
+			else
+			{
+				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
+				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
+
+				this.refresh();
+			}
 		}
 
 		++this.count;
@@ -616,3 +712,4 @@ export class PhpCgiBase
 }
 
 PhpCgiBase.phpVersion = phpVersion;
+PhpCgiBase.phpVersionFull = phpVersionFull;

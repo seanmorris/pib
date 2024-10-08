@@ -1,0 +1,73 @@
+{
+    "name": "laminas/laminas-router",
+    "description": "Flexible routing system for HTTP and console applications",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "routing"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-router/",
+        "issues": "https://github.com/laminas/laminas-router/issues",
+        "source": "https://github.com/laminas/laminas-router",
+        "rss": "https://github.com/laminas/laminas-router/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.99"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+        "laminas": {
+            "component": "Laminas\\Router",
+            "config-provider": "Laminas\\Router\\ConfigProvider"
+        }
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "laminas/laminas-http": "^2.15",
+        "laminas/laminas-servicemanager": "^3.14.0",
+        "laminas/laminas-stdlib": "^3.10.1"
+    },
+    "require-dev": {
+        "laminas/laminas-coding-standard": "~2.5.0",
+        "laminas/laminas-i18n": "^2.26.0",
+        "phpunit/phpunit": "^10.5.11",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "vimeo/psalm": "^5.22.2"
+    },
+    "suggest": {
+        "laminas/laminas-i18n": "^2.15.0 if defining translatable HTTP path segments"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\Router\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\Router\\": "test/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "static-analysis": "psalm --shepherd --stats",
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    },
+    "conflict": {
+        "zendframework/zend-router": "*"
+    }
+}

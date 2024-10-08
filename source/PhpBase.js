@@ -1,4 +1,5 @@
 import { phpVersion } from './config';
+import { phpVersionFull } from './config';
 import { OutputBuffer } from './OutputBuffer';
 import { _Event } from './_Event';
 import { fsOps } from './fsOps';
@@ -31,6 +32,10 @@ export class PhpBase extends EventTarget
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
+		this.shared = args.shared = ('shared' in args) ? args.shared : {};
+
+		this.phpArgs = args;
+
 		const defaults = {
 			stdin:  () => this.buffers.stdin.shift() ?? null,
 			stdout: byte => this.buffers.stdout.push(byte),
@@ -51,8 +56,8 @@ export class PhpBase extends EventTarget
 
 		const {files: extraFiles, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
 
-		args.locateFile = path => {
-			let located = userLocateFile(path);
+		args.locateFile = (path, directory) => {
+			let located = userLocateFile(path, directory);
 			if(located !== undefined)
 			{
 				return located;
@@ -63,14 +68,14 @@ export class PhpBase extends EventTarget
 			}
 		};
 
-		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
+		this.valueIndex = 0;
 
-			await php.ccall(
+		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
+			php.ccall(
 				'pib_storage_init'
 				, NUM
 				, []
 				, []
-				, {async: true}
 			);
 
 			if(!php.FS.analyzePath('/preload').exists)
@@ -78,9 +83,16 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
-			await files.concat(extraFiles).forEach(
-				fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false)
-			);
+			await Promise.all(files.concat(extraFiles).map(
+				fileDef => new Promise(accept => php.FS.createPreloadedFile(
+					fileDef.parent,
+					fileDef.name,
+					fileDef.url,
+					true,
+					false,
+					accept,
+				))
+			));
 
 			const iniLines = libs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
@@ -127,13 +139,11 @@ export class PhpBase extends EventTarget
 
 	tokenize(phpCode)
 	{
-		return this.binary
-		.then(php => php.ccall(
+		return this.binary.then(php => php.ccall(
 			'pib_tokenize'
 			, STR
 			, [STR]
 			, [phpCode]
-			, {async: true}
 		));
 	}
 
@@ -183,14 +193,15 @@ export class PhpBase extends EventTarget
 
 	async _run(phpCode)
 	{
-		return await (await this.binary).ccall(
+		const call = (await this.binary).ccall(
 			'pib_run'
 			, NUM
 			, [STR]
 			, [`?>${phpCode}`]
 			, {async: true}
-		)
-		.finally(() => this.flush());
+		);
+
+		return call.finally(() => this.flush());
 	}
 
 	exec(phpCode)
@@ -200,14 +211,125 @@ export class PhpBase extends EventTarget
 
 	async _exec(phpCode)
 	{
-		return (await this.binary).ccall(
-				'pib_exec'
-				, STR
-				, [STR]
-				, [phpCode]
-				, {async: true}
-		)
-		.finally(() => this.flush());
+		const call = (await this.binary).ccall(
+			'pib_exec'
+			, STR
+			, [STR]
+			, [phpCode]
+			, {async: true}
+		);
+
+		return call.finally(() => this.flush());
+	}
+
+	async x(fragments, ...values)
+	{
+		const names = [];
+		const phpModule = await this.binary;
+
+		if(phpModule.hasVrzno)
+		{
+			for(const value of values)
+			{
+				const name = `___value__${this.valueIndex++}`;
+				this.shared[name] = value;
+				names.push(name);
+			}
+
+			let code = '';
+
+			fragments = [...fragments];
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(names.length)
+				{
+					code += `(vrzno_shared('${names.shift()}'))`;
+				}
+			}
+
+			code = `vrzno_zval( ${code} );`;
+
+			return phpModule.zvalToJS(await this.exec(code));
+		}
+		else
+		{
+			const encoded = values.map(value => JSON.stringify(value));
+
+			fragments = [...fragments];
+
+			let code = '';
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(encoded.length)
+				{
+					code += `(json_decode('${encoded.shift()}'))`;
+				}
+			}
+
+			return this.exec(code);
+		}
+	}
+
+	async r(fragments, ...values)
+	{
+		const names = [];
+		const phpModule = await this.binary;
+
+		if(phpModule.hasVrzno)
+		{
+			for(const value of values)
+			{
+				const name = `___value__${this.valueIndex++}`;
+				this.shared[name] = value;
+				names.push(name);
+			}
+
+			let code = '';
+
+			fragments = [...fragments];
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(names.length)
+				{
+					code += `(vrzno_shared('${names.shift()}'))`;
+				}
+			}
+
+			return this.run(code);
+		}
+		else
+		{
+			const encoded = values.map(value => JSON.stringify(value));
+
+			fragments = [...fragments];
+
+			let code = '';
+
+			while(fragments.length || names.length)
+			{
+				if(fragments.length)
+					code += fragments.shift();
+
+				if(encoded.length)
+				{
+					code += `(json_decode('${encoded.shift()}'))`;
+				}
+			}
+
+			return this.run(code);
+		}
 	}
 
 	async refresh()
@@ -219,12 +341,14 @@ export class PhpBase extends EventTarget
 			callback();
 		}
 
-		await php.ccall(
+		Object.keys(this.shared).forEach(key => delete this.shared[key]);
+
+		return php.ccall(
 			'pib_refresh'
 			, NUM
 			, []
 			, []
-			, {async:true}
+			, {async: true}
 		);
 	}
 
@@ -275,3 +399,4 @@ export class PhpBase extends EventTarget
 }
 
 PhpBase.phpVersion = phpVersion;
+PhpBase.phpVersionFull = phpVersionFull;

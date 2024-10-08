@@ -1,0 +1,69 @@
+{
+    "name": "laminas/laminas-skeleton-installer",
+    "description": "Installer plugin for Laminas skeleton application",
+    "type": "composer-plugin",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "skeleton-installer"
+    ],
+    "homepage": "https://laminas.dev",
+    "support": {
+        "docs": "https://docs.laminas.dev/laminas-skeleton-installer/",
+        "issues": "https://github.com/laminas/laminas-skeleton-installer/issues",
+        "source": "https://github.com/laminas/laminas-skeleton-installer",
+        "rss": "https://github.com/laminas/laminas-skeleton-installer/releases.atom",
+        "chat": "https://laminas.dev/chat",
+        "forum": "https://discourse.laminas.dev"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.99"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "laminas/laminas-component-installer": false
+        }
+    },
+    "extra": {
+        "class": "Laminas\\SkeletonInstaller\\Plugin"
+    },
+    "require": {
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
+        "composer-plugin-api": "^2.2",
+        "laminas/laminas-component-installer": "^3.0"
+    },
+    "require-dev": {
+        "composer/composer": "^2.6.4",
+        "laminas/laminas-coding-standard": "~2.5.0",
+        "mikey179/vfsstream": "^1.6.11",
+        "phpunit/phpunit": "^10.4",
+        "psalm/plugin-phpunit": "^0.18.4",
+        "vimeo/psalm": "^5.15"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laminas\\SkeletonInstaller\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaminasTest\\SkeletonInstaller\\": "test/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "static-analysis": "psalm --shepherd --stats",
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    },
+    "conflict": {
+        "zendframework/zend-skeleton-installer": "*"
+    }
+}
