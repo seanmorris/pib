@@ -1,33 +1,63 @@
+diff --git a/third_party/php8.2-src/Zend/zend_atomic.h b/third_party/php8.2-src/Zend/zend_atomic.h
+index 617cde0..fe9cba5 100644
+--- a/third_party/php8.2-src/Zend/zend_atomic.h
++++ b/third_party/php8.2-src/Zend/zend_atomic.h
+@@ -23,7 +23,7 @@
+ 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
+ 
+ /* Builtins are used to avoid library linkage */
+-#if __has_feature(c_atomic)
++#if 0
+ #define	HAVE_C11_ATOMICS 1
+ #elif ZEND_GCC_PREREQ(4, 7)
+ #define	HAVE_GNUC_ATOMICS 1
+diff --git a/third_party/php8.2-src/ext/openssl/openssl.c b/third_party/php8.2-src/ext/openssl/openssl.c
+index f9c7f8c..2219409 100644
+--- a/third_party/php8.2-src/ext/openssl/openssl.c
++++ b/third_party/php8.2-src/ext/openssl/openssl.c
+@@ -1277,8 +1277,8 @@ PHP_MINIT_FUNCTION(openssl)
+ 	/* override the default tcp socket provider */
+ 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory);
+ 
+-	php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
+-	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
++	// php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
++	// php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
+ 
+ 	REGISTER_INI_ENTRIES();
+ 
 diff --git a/third_party/php8.2-src/ext/pdo/config.m4 b/third_party/php8.2-src/ext/pdo/config.m4
+index 9b9a3e3..1148123 100644
 --- a/third_party/php8.2-src/ext/pdo/config.m4
 +++ b/third_party/php8.2-src/ext/pdo/config.m4
 @@ -4,15 +4,14 @@ PHP_ARG_ENABLE([pdo],
      [Disable PHP Data Objects support])],
    [yes])
-
+ 
 -if test "$PHP_PDO" != "no"; then
 -
 -  dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
 -  PHP_PDO=yes
 +dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
 +PHP_PDO=yes
-
+ 
 +if test "$PHP_PDO" != "no"; then
 +  dnl so we always include the known-good working hack.
    PHP_NEW_EXTENSION(pdo, pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c, $ext_shared)
    PHP_ADD_EXTENSION_DEP(pdo, spl, true)
    PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h php_pdo_error.h])
-
+ 
 -  dnl so we always include the known-good working hack.
    PHP_ADD_MAKEFILE_FRAGMENT
  fi
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/config.m4 b/third_party/php8.2-src/ext/pdo_sqlite/config.m4
+index 64311ea..57cfa19 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/config.m4
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/config.m4
-@@ -10,23 +10,6 @@ if test "$PHP_PDO_SQLITE" != "no"; then
+@@ -10,25 +10,8 @@ if test "$PHP_PDO_SQLITE" != "no"; then
      AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
    fi
-
+ 
 -  PHP_CHECK_PDO_INCLUDES
 -
 -  PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7])
@@ -51,7 +81,7 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/config.m4 b/third_party/php8.
  
    PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
  fi
-diff --git a/ext/pdo_sqlite/pdo_sqlite.c b/ext/pdo_sqlite/pdo_sqlite.c
+diff --git a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
 index 81761b1..0942423 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/pdo_sqlite.c
@@ -67,9 +97,10 @@ index 81761b1..0942423 100644
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
+index de5170a..2ea31b6 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c
-@@ -23,8 +23,8 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
@@ -81,9 +112,10 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_driver.c b/third_party
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
 diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c
+index 90de059..8dc0ad3 100644
 --- a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c
 +++ b/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c
-@@ -23,8 +23,8 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
@@ -93,13 +125,14 @@ diff --git a/third_party/php8.2-src/ext/pdo_sqlite/sqlite_statement.c b/third_pa
 +#include "../pdo/php_pdo_driver.h"
  #include "php_pdo_sqlite.h"
  #include "php_pdo_sqlite_int.h"
-
+ 
 diff --git a/third_party/php8.2-src/ext/sqlite3/config0.m4 b/third_party/php8.2-src/ext/sqlite3/config0.m4
+index 2373d13..b94508f 100644
 --- a/third_party/php8.2-src/ext/sqlite3/config0.m4
 +++ b/third_party/php8.2-src/ext/sqlite3/config0.m4
 @@ -5,26 +5,6 @@ PHP_ARG_WITH([sqlite3],
    [yes])
-
+ 
  if test $PHP_SQLITE3 != "no"; then
 -  PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7])
 -
@@ -121,36 +154,26 @@ diff --git a/third_party/php8.2-src/ext/sqlite3/config0.m4 b/third_party/php8.2-
 -    [$SQLITE3_SHARED_LIBADD]
 -  )
 -
--  PHP_NEW_EXTENSION(sqlite3, sqlite3.c, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-+  PHP_NEW_EXTENSION(sqlite3, sqlite3.c, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+   PHP_NEW_EXTENSION(sqlite3, sqlite3.c, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
    PHP_SUBST(SQLITE3_SHARED_LIBADD)
  fi
-diff --git a/third_party/php8.2-src/sapi/embed/php_embed.c b/third_party/php8.2-src/sapi/embed/php_embed.c
---- a/third_party/php8.2-src/sapi/embed/php_embed.c
-+++ b/third_party/php8.2-src/sapi/embed/php_embed.c
-@@ -243,8 +243,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
- 		return FAILURE;
- 	}
-
--	SG(headers_sent) = 1;
--	SG(request_info).no_headers = 1;
-+	SG(headers_sent) = 0;
-+	SG(request_info).no_headers = 0;
- 	php_register_variable("PHP_SELF", "-", NULL);
-
- 	return SUCCESS;
-diff --git a/third_party/php8.2-src/Zend/zend_atomic.h b/third_party/php8.2-src/Zend/zend_atomic.h
---- a/third_party/php8.2-src/Zend/zend_atomic.h
-+++ b/third_party/php8.2-src/Zend/zend_atomic.h
-@@ -23,5 +23,5 @@
- 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
-
- /* Builtins are used to avoid library linkage */
--#if __has_feature(c_atomic)
-+#if 0
- #define	HAVE_C11_ATOMICS 1
- #elif ZEND_GCC_PREREQ(4, 7)
-diff --git a/third_party/php8.2-src/ext/standard/credits.c b/ext/standard/credits.c
+diff --git a/third_party/php8.2-src/ext/standard/basic_functions.c b/third_party/php8.2-src/ext/standard/basic_functions.c
+index 6967307..d3601f6 100755
+--- a/third_party/php8.2-src/ext/standard/basic_functions.c
++++ b/third_party/php8.2-src/ext/standard/basic_functions.c
+@@ -355,8 +355,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
+ 	php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper);
+ #endif
+ 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper);
+-	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
+-	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
++	// php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
++	// php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
+ 
+ 	BASIC_MINIT_SUBMODULE(hrtime)
+ 
+diff --git a/third_party/php8.2-src/ext/standard/credits.c b/third_party/php8.2-src/ext/standard/credits.c
+index 4e8722d..1343330 100644
 --- a/third_party/php8.2-src/ext/standard/credits.c
 +++ b/third_party/php8.2-src/ext/standard/credits.c
 @@ -33,6 +33,11 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
@@ -165,7 +188,45 @@ diff --git a/third_party/php8.2-src/ext/standard/credits.c b/ext/standard/credit
  	if (flag & PHP_CREDITS_GROUP) {
  		/* Group */
  
-diff --git a/third_party/php8.2-src/sapi/cgi/cgi_main.c b/sapi/cgi/cgi_main.c
+diff --git a/third_party/php8.2-src/ext/tokenizer/tokenizer.c b/third_party/php8.2-src/ext/tokenizer/tokenizer.c
+index 20124db..33327c1 100644
+--- a/third_party/php8.2-src/ext/tokenizer/tokenizer.c
++++ b/third_party/php8.2-src/ext/tokenizer/tokenizer.c
+@@ -319,7 +319,7 @@ static void add_token(
+ 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
+ }
+ 
+-static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
++bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
+ {
+ 	zval source_zval;
+ 	zend_lex_state original_lex_state;
+diff --git a/third_party/php8.2-src/main/fastcgi.c b/third_party/php8.2-src/main/fastcgi.c
+index a77491f..7f9778f 100644
+--- a/third_party/php8.2-src/main/fastcgi.c
++++ b/third_party/php8.2-src/main/fastcgi.c
+@@ -553,6 +553,7 @@ void fcgi_shutdown(void)
+ {
+ 	if (is_initialized) {
+ 		zend_hash_destroy(&fcgi_mgmt_vars);
++		is_initialized = 0;
+ 	}
+ 	is_fastcgi = 0;
+ 	if (allowed_clients) {
+diff --git a/third_party/php8.2-src/sapi/cgi/Makefile.frag b/third_party/php8.2-src/sapi/cgi/Makefile.frag
+index 79e2afe..0956f43 100644
+--- a/third_party/php8.2-src/sapi/cgi/Makefile.frag
++++ b/third_party/php8.2-src/sapi/cgi/Makefile.frag
+@@ -1,7 +1,7 @@
+ cgi: $(SAPI_CGI_PATH)
+ 
+ $(SAPI_CGI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_FASTCGI_OBJS) $(PHP_CGI_OBJS)
+-	$(BUILD_CGI)
++	$(BUILD_CGI) $(WASM_SHARED_LIBS)
+ 
+ install-cgi: $(SAPI_CGI_PATH)
+ 	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
+diff --git a/third_party/php8.2-src/sapi/cgi/cgi_main.c b/third_party/php8.2-src/sapi/cgi/cgi_main.c
 index b454680..e98bf3e 100644
 --- a/third_party/php8.2-src/sapi/cgi/cgi_main.c
 +++ b/third_party/php8.2-src/sapi/cgi/cgi_main.c
@@ -220,31 +281,6 @@ index b454680..e98bf3e 100644
 +{
 +	return _sapi_cgi_putenv(name, strlen(name), value);
 +}
-diff --git a/third_party/php8.2-src/ext/tokenizer/tokenizer.c b/third_party/php8.2-src/ext/tokenizer/tokenizer.c
-index 20124db..33327c1 100644
---- a/third_party/php8.2-src/ext/tokenizer/tokenizer.c
-+++ b/third_party/php8.2-src/ext/tokenizer/tokenizer.c
-@@ -319,7 +319,7 @@ static void add_token(
- 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
- }
- 
--static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
-+bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
- {
- 	zval source_zval;
- 	zend_lex_state original_lex_state;
-diff --git a/third_party/php8.2-src/main/fastcgi.c b/third_party/php8.2-src/main/fastcgi.c
-index a77491f..7f9778f 100644
---- a/third_party/php8.2-src/main/fastcgi.c
-+++ b/third_party/php8.2-src/main/fastcgi.c
-@@ -553,6 +553,7 @@ void fcgi_shutdown(void)
- {
- 	if (is_initialized) {
- 		zend_hash_destroy(&fcgi_mgmt_vars);
-+		is_initialized = 0;
- 	}
- 	is_fastcgi = 0;
- 	if (allowed_clients) {
 diff --git a/third_party/php8.2-src/sapi/cli/Makefile.frag b/third_party/php8.2-src/sapi/cli/Makefile.frag
 index aa1d642..649533d 100644
 --- a/third_party/php8.2-src/sapi/cli/Makefile.frag
@@ -258,16 +294,18 @@ index aa1d642..649533d 100644
  
  install-cli: $(SAPI_CLI_PATH)
  	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
-diff --git a/third_party/php8.2-src/sapi/cgi/Makefile.frag b/third_party/php8.2-src/sapi/cgi/Makefile.frag
-index 79e2afe..0956f43 100644
---- a/third_party/php8.2-src/sapi/cgi/Makefile.frag
-+++ b/third_party/php8.2-src/sapi/cgi/Makefile.frag
-@@ -1,7 +1,7 @@
- cgi: $(SAPI_CGI_PATH)
+diff --git a/third_party/php8.2-src/sapi/embed/php_embed.c b/third_party/php8.2-src/sapi/embed/php_embed.c
+index 4b94bd9..fc44d30 100644
+--- a/third_party/php8.2-src/sapi/embed/php_embed.c
++++ b/third_party/php8.2-src/sapi/embed/php_embed.c
+@@ -243,8 +243,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
+ 		return FAILURE;
+ 	}
  
- $(SAPI_CGI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_FASTCGI_OBJS) $(PHP_CGI_OBJS)
--	$(BUILD_CGI)
-+	$(BUILD_CGI) $(WASM_SHARED_LIBS)
+-	SG(headers_sent) = 1;
+-	SG(request_info).no_headers = 1;
++	SG(headers_sent) = 0;
++	SG(request_info).no_headers = 0;
+ 	php_register_variable("PHP_SELF", "-", NULL);
  
- install-cgi: $(SAPI_CGI_PATH)
- 	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
+ 	return SUCCESS;

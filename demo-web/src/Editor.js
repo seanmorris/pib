@@ -49,11 +49,9 @@ export default function Editor() {
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		if(currentPath.current)
 		{
-			console.log(openFilesMap, currentPath.current);
-
 			const entry = openFilesMap.get(currentPath.current);
 			entry.dirty = false;
 

@@ -22,7 +22,6 @@ WITH_INTL=static
 endif
 
 ifneq ($(filter ${WITH_INTL},shared static dynamic),)
-# PRELOAD_ASSETS+=${LIBICU_DATFILE}
 PRE_JS_FILES+=packages/intl/env.js
 TEST_LIST+=$(shell ls packages/intl/test/*.mjs)
 # TEST_LIST+= packages/intl/test/basic.mjs $(addprefix packages/intl/test/,$(addsuffix .php${PHP_VERSION}.generated.mjs, badargs breakiter_clone_basic breakiter_first_basic breakiter_setText_basic calendar_add_basic calendar_get_basic))

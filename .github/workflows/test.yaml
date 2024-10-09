@@ -1,8 +1,8 @@
 name: Test
 on: [push]
 jobs:
-  test-8-3:
-    name: Test 8.3
+  test-8-3-static:
+    name: Test 8.3 Static
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -12,8 +12,8 @@ jobs:
       - run: cp .circleci/.env_8.3.ci .env
       - run: make image test
 
-  test-8-2:
-    name: Test 8.2
+  test-8-2-static:
+    name: Test 8.2 Static
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -23,8 +23,8 @@ jobs:
       - run: cp .circleci/.env_8.2.ci .env
       - run: make image test PHP_VERSION=8.2
 
-  test-8-1:
-    name: Test 8.1
+  test-8-1-static:
+    name: Test 8.1 Static
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -34,8 +34,8 @@ jobs:
       - run: cp .circleci/.env_8.1.ci .env
       - run: make image test PHP_VERSION=8.1
 
-  test-8-0:
-    name: Test 8.0
+  test-8-0-static:
+    name: Test 8.0 Static
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code

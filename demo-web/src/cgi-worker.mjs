@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
+import { PGlite } from '@electric-sql/pglite';
 
 // Log requests
 const onRequest = (request, response) => {
@@ -37,10 +38,27 @@ const sharedLibs = [
 
 const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }];
 
+const actions = {
+	runSql: (php, database, sql) => {
+		console.log({database});
+		const pglite = new PGlite(database);
+		return pglite.query(sql);
+	},
+	execSql: (php, database, sql) => {
+		console.log(database)
+		const pglite = new PGlite(database);
+		return pglite.exec(sql);
+	}
+};
+
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({
 	onRequest, notFound
-	, sharedLibs, files
+	, sharedLibs
+	, files
+	, PGlite
+	, actions
+	, staticFS: false
 	, prefix: '/php-wasm/cgi-bin/'
 	, exclude: ['/php-wasm/cgi-bin/~!@', '/php-wasm/cgi-bin/.']
 	, docroot: '/persist/www'

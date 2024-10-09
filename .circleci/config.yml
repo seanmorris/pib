@@ -8,7 +8,8 @@ workflows:
   build-test-flow:
     jobs:
       - make-archives
-      - make-test-8-3:
+
+      - make-test-8-3-static:
           requires:
             - make-archives
       - make-test-8-3-shared:
@@ -17,7 +18,8 @@ workflows:
       - make-test-8-3-dynamic:
           requires:
             - make-archives
-      - make-test-8-2:
+
+      - make-test-8-2-static:
           requires:
             - make-archives
       - make-test-8-2-shared:
@@ -26,7 +28,8 @@ workflows:
       - make-test-8-2-dynamic:
           requires:
             - make-archives
-      - make-test-8-1:
+
+      - make-test-8-1-static:
           requires:
             - make-archives
       - make-test-8-1-shared:
@@ -35,7 +38,8 @@ workflows:
       - make-test-8-1-dynamic:
           requires:
             - make-archives
-      - make-test-8-0:
+
+      - make-test-8-0-static:
           requires:
             - make-archives
       - make-test-8-0-shared:
@@ -62,7 +66,7 @@ jobs:
           paths:
             - project/
 
-  make-test-8-3:
+  make-test-8-3-static:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
@@ -98,7 +102,7 @@ jobs:
       - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
-  make-test-8-2:
+  make-test-8-2-static:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
@@ -134,7 +138,7 @@ jobs:
       - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
-  make-test-8-1:
+  make-test-8-1-static:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1
@@ -170,7 +174,7 @@ jobs:
       - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
-  make-test-8-0:
+  make-test-8-0-static:
     parallelism: 1
     machine:
       image: ubuntu-2204:2023.10.1

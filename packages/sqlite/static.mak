@@ -2,8 +2,8 @@
 
 WITH_SQLITE?=dynamic
 
-SQLITE_VERSION?=3410200
-SQLITE_DIR?=sqlite3.41-src
+SQLITE_VERSION?=3460100
+SQLITE_DIR?=sqlite3.46.1-src
 DOCKER_RUN_IN_SQLITE=${DOCKER_ENV} -w /src/third_party/${SQLITE_DIR}/ emscripten-builder
 DOCKER_RUN_IN_EXT_SQLITE=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-sqlite/ emscripten-builder
 DOCKER_RUN_IN_EXT_PDO=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-pdo/ emscripten-builder
@@ -42,7 +42,7 @@ endif
 
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
-	wget -q https://sqlite.org/2023/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
+	wget -q https://sqlite.org/2024/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xzf sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}
