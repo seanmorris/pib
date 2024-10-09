@@ -11,11 +11,14 @@ import InstallDemo from './InstallDemo';
 import Editor from './Editor';
 import { onMessage } from 'php-cgi-wasm/msg-bus';
 
-navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
+const params = new URLSearchParams(window.location.search);
 
-navigator.serviceWorker.addEventListener('message', onMessage);
-
-setTimeout(() => navigator.serviceWorker.controller || window.location.reload(), 350);
+if(!params.has('no-service-worker'))
+{
+	navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
+	navigator.serviceWorker.addEventListener('message', onMessage);
+	setTimeout(() => navigator.serviceWorker.controller || window.location.reload(), 350);
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

@@ -184,7 +184,7 @@ third_party/freetype-${FREETYPE_VERSION}/README:
 	${DOCKER_RUN} tar -xvzf freetype-${FREETYPE_VERSION}.tar.gz -C third_party
 	${DOCKER_RUN} rm freetype-${FREETYPE_VERSION}.tar.gz
 
-lib/lib/libfreetype.a: third_party/freetype-${FREETYPE_VERSION}/README
+lib/lib/libfreetype.a: third_party/freetype-${FREETYPE_VERSION}/README lib/lib/libz.a
 	@ echo -e "\e[33;4mBuilding FREETYPE\e[0m"
 	${DOCKER_RUN} rm -rf third_party/freetype-${FREETYPE_VERSION}/build
 	${DOCKER_RUN} mkdir third_party/freetype-${FREETYPE_VERSION}/build
@@ -195,22 +195,9 @@ lib/lib/libfreetype.a: third_party/freetype-${FREETYPE_VERSION}/README
 	${DOCKER_RUN_IN_FREETYPE} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_FREETYPE} emmake make install
 
-lib/lib/libfreetype.so: third_party/freetype-${FREETYPE_VERSION}/README lib/lib/libz.so lib/lib/libpng.so
+lib/lib/libfreetype.so: lib/lib/libfreetype.a lib/lib/libpng.so lib/lib/libz.a
 	@ echo -e "\e[33;4mBuilding FREETYPE\e[0m"
-	${DOCKER_RUN} rm -rf third_party/freetype-${FREETYPE_VERSION}/build
-	${DOCKER_RUN} mkdir third_party/freetype-${FREETYPE_VERSION}/build
-	${DOCKER_RUN_IN_FREETYPE} emcmake cmake \
-		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
-		-DBUILD_SHARED_LIBS:BOOL=true \
-		-DZLIB_LIBRARY="/src/lib/lib/libz.so" \
-		-DPNG_LIBRARY="/src/lib/lib/libpng.so" \
-		-DPNG_PNG_INCLUDE_DIR=/src/lib/include \
-		-DZLIB_INCLUDE_DIR="/src/lib/include" \
-		-DCMAKE_PROJECT_INCLUDE=/src/source/force-shared.cmake \
-		-DCMAKE_C_FLAGS="-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}" \
-		..
-	${DOCKER_RUN_IN_FREETYPE} emmake make -j${CPU_COUNT}
-	${DOCKER_RUN_IN_FREETYPE} emmake make install
+	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/gd/libfreetype.so: lib/lib/libfreetype.so
 	cp -Lp $^ $@

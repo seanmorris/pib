@@ -34,7 +34,20 @@
 int main(void) { return 0; }
 
 bool started = false;
-void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
+
+/**
+ * Initialize Embdedded PHP
+ */
+int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(void)
+{
+	putenv("USE_ZEND_ALLOC=0");
+	return php_embed_init(0, NULL);
+}
+
+/**
+ * Initialize Storage Engine(s)
+ */
+void *EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 {
 	if(!started)
 	{
@@ -43,7 +56,6 @@ void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 #ifdef NODERAWFS
 		useNodeRawFS = true;
 #endif
-
 		EM_ASM({
 			if(Module.persist)
 			{
@@ -80,35 +92,42 @@ void EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
 			}
 		}, useNodeRawFS);
 	}
+
+	return NULL;
 }
 
-int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(void)
-{
-	putenv("USE_ZEND_ALLOC=0");
-	return php_embed_init(0, NULL);
-}
-
-void EMSCRIPTEN_KEEPALIVE pib_destroy(void)
+/**
+ * Clear PHP's memory
+ */
+void pib_destroy(void)
 {
 	php_embed_shutdown();
 }
 
+/**
+ * Clear & refresh PHP's memory
+ */
 int EMSCRIPTEN_KEEPALIVE pib_refresh(void)
 {
 	pib_destroy();
 	return pib_init();
 }
 
+/**
+ * Flush the buffers
+ */
 void EMSCRIPTEN_KEEPALIVE pib_flush(void)
 {
 	php_output_flush_all();
 }
 
-void pib_finally(void)
-{
-	pib_flush();
-}
-
+/**
+ * Execute a single PHP statement & return the result.
+ * Statement must NOT end in a semicolon.
+ * Statement must NOT start with a PHP tag.
+ * Multiple statements can be wrapped in an IFFE.
+ * Async.
+ */
 char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 {
 	char *retVal = NULL;
@@ -125,11 +144,17 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 	}
 	zend_end_try();
 
-	pib_finally();
+	pib_flush();
 
 	return retVal;
 }
 
+/**
+ * Run some PHP code and return the exit code.
+ * 0 = good, >0 = bad.
+ * Code MUST start with a PHP tag.
+ * Async.
+*/
 int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 {
 	int retVal = 255; // Unknown error.
@@ -159,15 +184,22 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 	}
 	zend_end_try();
 
-	pib_finally();
+	pib_flush();
+	
 	return retVal;
 }
 
+/**
+ * Return the PHP version.
+*/
 char* EMSCRIPTEN_KEEPALIVE pib_php_version(void)
 {
 	return PHP_VERSION;
 }
 
+/**
+ * Return the PHP extension API version.
+*/
 char* EMSCRIPTEN_KEEPALIVE pib_php_ext_api_version(void)
 {
 	return STRINGIFY(PHP_API_VERSION);
@@ -175,6 +207,10 @@ char* EMSCRIPTEN_KEEPALIVE pib_php_ext_api_version(void)
 
 bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class);
 
+
+/**
+ * Return the PHP extension API version.
+*/
 char* EMSCRIPTEN_KEEPALIVE pib_tokenize(char *code)
 {
 	zval parsed;
@@ -197,22 +233,6 @@ char* EMSCRIPTEN_KEEPALIVE pib_tokenize(char *code)
 
 	return ret;
 }
-
-#ifdef WITH_VRZNO
-int EMSCRIPTEN_KEEPALIVE exec_callback(zend_function *fptr, zval *argv, int argc)
-{
-	// int retVal = vrzno_exec_callback(fptr, argv, argc);
-	// fflush(stdout);
-	// return retVal;
-	return NULL;
-}
-
-int EMSCRIPTEN_KEEPALIVE del_callback(zend_function *fptr)
-{
-	// return vrzno_del_callback(fptr);
-	return NULL;
-}
-#endif
 
 /* pib extension for PHP */
 
@@ -238,7 +258,7 @@ PHP_MINIT_FUNCTION(pib)
 PHP_MINFO_FUNCTION(pib)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "pib support", "enabled");
+	php_info_print_table_row(2, "pib support", "enabled");
 	php_info_print_table_end();
 }
 

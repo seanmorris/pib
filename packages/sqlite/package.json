@@ -3,7 +3,7 @@
 	"description": "sqlite for phpwasm.",
 	"repository": "https://github.com/seanmorris/php-wasm",
 	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-x",
+	"version": "0.0.9-alpha-17",
 	"main": "index.mjs",
 	"files": [
 		"index.mjs",

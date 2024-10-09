@@ -7,26 +7,27 @@ export class PhpNode extends PhpBase
 {
 	constructor(args = {})
 	{
-		let dir;
-
-		if(typeof __dirname === 'undefined')
-		{
-			dir = path.dirname(url.fileURLToPath(import.meta.url));
-		}
-		else
-		{
-			dir = __dirname;
-		}
-
-		const locateFile = name => {
+		const locateFile = (name, dir) => {
 			if(name.substr(0, 7) === 'file://')
 			{
 				name = new URL(name).pathname;
 			}
 
-			return path.isAbsolute(name) ? name : path.resolve(dir, name);
+			if(dir === '')
+			{
+				if(typeof __dirname === 'undefined')
+				{
+					dir = path.dirname(url.fileURLToPath(import.meta.url));
+				}
+				else
+				{
+					dir = __dirname;
+				}
+			}
+
+			return path.resolve( path.format({dir, name}) );
 		};
 
-		super(PhpBinary, {...args, locateFile});
+		super(PhpBinary, {locateFile, ...args});
 	}
 }
