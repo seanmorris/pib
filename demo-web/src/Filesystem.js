@@ -31,6 +31,7 @@ const backupSite = async () => {
 	const link = document.createElement('a');
 	link.href = URL.createObjectURL(blob);
 	link.click();
+	URL.revokeObjectURL(link.href);
 };
 
 const restoreSite = async ({fileInput}) => {
