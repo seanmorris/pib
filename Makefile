@@ -111,8 +111,9 @@ SHELL=bash -euo pipefail
 
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
+DOCKER_COMPOSE?=docker-compose
 CPU_COUNT=`nproc || echo 1`
-DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) docker-compose -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
+DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
@@ -815,14 +816,13 @@ hooks:
 	git config core.hooksPath githooks
 
 image:
-	docker-compose build --progress plain
-	# docker-compose --progress quiet build
+	${DOCKER_COMPOSE} build --progress plain
 
 pull-image:
-	docker-compose --progress quiet pull
+	${DOCKER_COMPOSE} --progress quiet pull
 
 push-image:
-	docker-compose --progress quiet push
+	${DOCKER_COMPOSE} --progress quiet push
 
 save-image:
 	mkdir -p ./image
