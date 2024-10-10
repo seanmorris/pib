@@ -293,7 +293,7 @@ export class PhpCgiBase
 				php.FS.mkdir('/preload');
 			}
 
-			await Promise.all(this.files.concat(files).forEach(fileDef => php.FS.createPreloadedFile(
+			await Promise.all(this.files.concat(files).map(fileDef => php.FS.createPreloadedFile(
 				fileDef.parent, fileDef.name, userLocateFile(fileDef.url) ?? fileDef.url, true, false
 			)));
 
@@ -320,7 +320,7 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
-			await this.loadInit();
+			await this.loadInit(php);
 
 			return php;
 		});
@@ -436,7 +436,7 @@ export class PhpCgiBase
 
 		// Ensure query parameters are preserved.
 		originalPath += url.search
-		
+
 
 		if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
 		{
@@ -501,13 +501,13 @@ export class PhpCgiBase
 
 		try
 		{
-			exitCode = await navigator.locks.request('php-wasm-fs-lock', () => php.ccall(
+			exitCode = await php.ccall(
 				'main'
 				, 'number'
-				, []
+				, ['number', 'string']
 				, []
 				, {async: true}
-			));
+			);
 		}
 		catch (error)
 		{
