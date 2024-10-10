@@ -13,7 +13,5 @@ function updateFile
 updateFile "package.json" "0.0.9-alpha-18";
 
 ls packages | while read PACKAGE; do {
-
 	updateFile "packages/${PACKAGE}/package.json" "0.0.9-alpha-18";
-
 }; done;

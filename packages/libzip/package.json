@@ -1,7 +1,10 @@
 {
   "name": "php-wasm-libzip",
   "description": "libzip for php-wasm.",
-  "repository": "https://github.com/seanmorris/php-wasm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "version": "0.0.9-alpha-18",
   "main": "index.mjs",

@@ -2,7 +2,10 @@
   "name": "php-cgi-wasm",
   "version": "0.0.9-alpha-18",
   "description": "php-cgi for wasm.",
-  "repository": "https://github.com/seanmorris/php-wasm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "license": "Apache-2.0",
   "contributors": [
