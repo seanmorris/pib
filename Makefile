@@ -873,3 +873,9 @@ demo-source/mounted/%.js: demo-source/mounted/%
 
 run:
 	${DOCKER_ENV} emscripten-builder bash
+
+all-versions:
+	${MAKE} PHP_VERSION=8.0 all cgi-all
+	${MAKE} PHP_VERSION=8.1 all cgi-all
+	${MAKE} PHP_VERSION=8.2 all cgi-all
+	${MAKE} PHP_VERSION=8.3 all cgi-all
