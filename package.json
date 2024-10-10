@@ -1,60 +1,60 @@
 {
-	"name": "php-wasm-builder",
-	"version": "0.0.9-alpha-17",
-	"description": "Builds php-wasm, php-cgi-wasm & dependencies.",
-	"repository": "https://github.com/seanmorris/php-wasm",
-	"author": "Sean Morris<php-wasm@seanmorr.is>",
-	"license": "Apache-2.0",
-	"bin": {
-		"php-wasm-builder": "./bin/php-wasm-builder.js"
-	},
-	"scripts": {
-		"build": "make",
-		"build-image": "make image",
-		"clean": "make clean",
-		"test": "make test"
-	},
-	"dependencies": {
-		"pdo-cfd1": "0.0.9-alpha-17",
-		"pdo-pglite": "0.0.9-alpha-17",
-		"php-wasm-dom": "0.0.9-alpha-17",
-		"php-wasm-gd": "0.0.9-alpha-17",
-		"php-wasm-iconv": "0.0.9-alpha-17",
-		"php-wasm-intl": "0.0.9-alpha-17",
-		"php-wasm-libxml": "0.0.9-alpha-17",
-		"php-wasm-libzip": "0.0.9-alpha-17",
-		"php-wasm-mbstring": "0.0.9-alpha-17",
-		"php-wasm-openssl": "0.0.9-alpha-17",
-		"php-wasm-phar": "0.0.9-alpha-17",
-		"php-wasm-simplexml": "0.0.9-alpha-17",
-		"php-wasm-sqlite": "0.0.9-alpha-17",
-		"php-wasm-tidy": "0.0.9-alpha-17",
-		"php-wasm-xml": "0.0.9-alpha-17",
-		"php-wasm-yaml": "0.0.9-alpha-17",
-		"php-wasm-zlib": "0.0.9-alpha-17",
-		"vrzno": "0.0.9-alpha-17-d",
+  "name": "php-wasm-builder",
+  "version": "0.0.9-alpha-18",
+  "description": "Builds php-wasm, php-cgi-wasm & dependencies.",
+  "repository": "https://github.com/seanmorris/php-wasm",
+  "author": "Sean Morris<php-wasm@seanmorr.is>",
+  "license": "Apache-2.0",
+  "bin": {
+    "php-wasm-builder": "./bin/php-wasm-builder.js"
+  },
+  "scripts": {
+    "build": "make",
+    "build-image": "make image",
+    "clean": "make clean",
+    "test": "make test"
+  },
+  "dependencies": {
+    "pdo-cfd1": "0.0.9-alpha-17",
+    "pdo-pglite": "0.0.9-alpha-17",
+    "php-wasm-dom": "0.0.9-alpha-17",
+    "php-wasm-gd": "0.0.9-alpha-17",
+    "php-wasm-iconv": "0.0.9-alpha-17",
+    "php-wasm-intl": "0.0.9-alpha-17",
+    "php-wasm-libxml": "0.0.9-alpha-17",
+    "php-wasm-libzip": "0.0.9-alpha-17",
+    "php-wasm-mbstring": "0.0.9-alpha-17",
+    "php-wasm-openssl": "0.0.9-alpha-17",
+    "php-wasm-phar": "0.0.9-alpha-17",
+    "php-wasm-simplexml": "0.0.9-alpha-17",
+    "php-wasm-sqlite": "0.0.9-alpha-17",
+    "php-wasm-tidy": "0.0.9-alpha-17",
+    "php-wasm-xml": "0.0.9-alpha-17",
+    "php-wasm-yaml": "0.0.9-alpha-17",
+    "php-wasm-zlib": "0.0.9-alpha-17",
+    "vrzno": "0.0.9-alpha-17-d",
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.7",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/preset-env": "^7.0.0",
     "cv3-test": "^0.1.6",
     "pobot": "^0.1.5"
-	},
-	"contributors": [
-		{
-			"name": "Sean Morris",
-			"email": "php-wasm@seanmorr.is",
-			"url": "https://seanmorr.is"
-		},
-		{
-			"name": "Oraoto",
-			"email": "oraoto@outlook.com"
-		}
-	],
-	"keywords": [
-		"php",
-		"wasm",
-		"php-wasm",
-		"vrzno"
-	]
+  },
+  "contributors": [
+    {
+      "name": "Sean Morris",
+      "email": "php-wasm@seanmorr.is",
+      "url": "https://seanmorr.is"
+    },
+    {
+      "name": "Oraoto",
+      "email": "oraoto@outlook.com"
+    }
+  ],
+  "keywords": [
+    "php",
+    "wasm",
+    "php-wasm",
+    "vrzno"
+  ]
 }

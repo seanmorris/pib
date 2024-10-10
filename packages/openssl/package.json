@@ -1,22 +1,22 @@
 {
-	"name": "php-wasm-openssl",
-	"description": "openssl for php-wasm.",
-	"repository": "https://github.com/seanmorris/php-wasm",
-	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-alpha-17",
-	"main": "index.mjs",
-	"files": [
-		"index.mjs",
-		"test/basic.mjs",
-		"LICENSE",
-		"NOTICE",
-		"README.md",
-		"static.mak",
-		"libcrypto.so",
-		"libssl.so",
-		"php8.3-openssl.so",
-		"php8.2-openssl.so",
-		"php8.1-openssl.so",
-		"php8.0-openssl.so"
-	]
+  "name": "php-wasm-openssl",
+  "description": "openssl for php-wasm.",
+  "repository": "https://github.com/seanmorris/php-wasm",
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "version": "0.0.9-alpha-18",
+  "main": "index.mjs",
+  "files": [
+    "index.mjs",
+    "test/basic.mjs",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "static.mak",
+    "libcrypto.so",
+    "libssl.so",
+    "php8.3-openssl.so",
+    "php8.2-openssl.so",
+    "php8.1-openssl.so",
+    "php8.0-openssl.so"
+  ]
 }

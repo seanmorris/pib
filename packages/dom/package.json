@@ -1,20 +1,20 @@
 {
-	"name": "php-wasm-dom",
-	"description": "libxml for php-wasm.",
-	"repository": "https://github.com/seanmorris/php-wasm",
-	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"version": "0.0.9-alpha-17",
-	"main": "index.mjs",
-	"files": [
-		"index.mjs",
-		"test/basic.mjs",
-		"LICENSE",
-		"NOTICE",
-		"README.md",
-		"static.mak",
-		"php8.3-dom.so",
-		"php8.2-dom.so",
-		"php8.1-dom.so",
-		"php8.0-dom.so"
-	]
+  "name": "php-wasm-dom",
+  "description": "libxml for php-wasm.",
+  "repository": "https://github.com/seanmorris/php-wasm",
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "version": "0.0.9-alpha-18",
+  "main": "index.mjs",
+  "files": [
+    "index.mjs",
+    "test/basic.mjs",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "static.mak",
+    "php8.3-dom.so",
+    "php8.2-dom.so",
+    "php8.1-dom.so",
+    "php8.0-dom.so"
+  ]
 }

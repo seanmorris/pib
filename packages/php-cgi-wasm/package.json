@@ -1,78 +1,73 @@
 {
-	"name": "php-cgi-wasm",
-	"version": "0.0.9-alpha-17-b",
-	"description": "php-cgi for wasm.",
-	"repository": "https://github.com/seanmorris/php-wasm",
-	"author": "Sean Morris <php-wasm@seanmorr.is>",
-	"license": "Apache-2.0",
-	"contributors": [
-		{
-			"name": "Sean Morris",
-			"email": "php-wasm@seanmorr.is",
-			"url": "https://seanmorr.is"
-		}
-	],
-	"scripts": {
-		"postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
-	},
-	"keywords": [
-		"php",
-		"wasm",
-		"php-wasm",
-		"vrzno"
-	],
-	"files": [
-		"LICENSE",
-		"NOTICE",
-		"README",
-		"package.json",
-		"libxml2.so",
-
-		"PhpCgiBase.js",
-		"PhpCgiBase.mjs",
-		"PhpCgiNode.js",
-		"PhpCgiNode.mjs",
-		"PhpCgiWeb.js",
-		"PhpCgiWeb.mjs",
-		"PhpCgiWebBase.js",
-		"PhpCgiWebBase.mjs",
-		"PhpCgiWebView.js",
-		"PhpCgiWebView.mjs",
-		"PhpCgiWorker.js",
-		"PhpCgiWorker.mjs",
-
-		"php-cgi-web.js",
-		"php-cgi-web.mjs",
-		"php-cgi-web.js.wasm",
-		"php-cgi-web.mjs.wasm",
-		"php-cgi-worker.js",
-		"php-cgi-worker.mjs",
-		"php-cgi-worker.js.wasm",
-		"php-cgi-worker.mjs.wasm",
-		"php-cgi-node.js",
-		"php-cgi-node.mjs",
-		"php-cgi-node.js.wasm",
-		"php-cgi-node.mjs.wasm",
-		"php-cgi-webview.js",
-		"php-cgi-webview.mjs",
-		"php-cgi-webview.js.wasm",
-		"php-cgi-webview.mjs.wasm",
-
-		"breakoutRequest.js",
-		"breakoutRequest.mjs",
-		"config.js",
-		"config.mjs",
-		"fsOps.js",
-		"fsOps.mjs",
-
-		"msg-bus.js",
-		"msg-bus.mjs",
-
-		"parseResponse.mjs",
-		"parseResponse.js",
-		"resolveDependencies.js",
-		"resolveDependencies.mjs",
-		"webTransactions.js",
-		"webTransactions.mjs"
-	]
+  "name": "php-cgi-wasm",
+  "version": "0.0.9-alpha-18",
+  "description": "php-cgi for wasm.",
+  "repository": "https://github.com/seanmorris/php-wasm",
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "license": "Apache-2.0",
+  "contributors": [
+    {
+      "name": "Sean Morris",
+      "email": "php-wasm@seanmorr.is",
+      "url": "https://seanmorr.is"
+    }
+  ],
+  "scripts": {
+    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
+  },
+  "keywords": [
+    "php",
+    "wasm",
+    "php-wasm",
+    "vrzno"
+  ],
+  "files": [
+    "LICENSE",
+    "NOTICE",
+    "README",
+    "package.json",
+    "libxml2.so",
+    "PhpCgiBase.js",
+    "PhpCgiBase.mjs",
+    "PhpCgiNode.js",
+    "PhpCgiNode.mjs",
+    "PhpCgiWeb.js",
+    "PhpCgiWeb.mjs",
+    "PhpCgiWebBase.js",
+    "PhpCgiWebBase.mjs",
+    "PhpCgiWebView.js",
+    "PhpCgiWebView.mjs",
+    "PhpCgiWorker.js",
+    "PhpCgiWorker.mjs",
+    "php-cgi-web.js",
+    "php-cgi-web.mjs",
+    "php-cgi-web.js.wasm",
+    "php-cgi-web.mjs.wasm",
+    "php-cgi-worker.js",
+    "php-cgi-worker.mjs",
+    "php-cgi-worker.js.wasm",
+    "php-cgi-worker.mjs.wasm",
+    "php-cgi-node.js",
+    "php-cgi-node.mjs",
+    "php-cgi-node.js.wasm",
+    "php-cgi-node.mjs.wasm",
+    "php-cgi-webview.js",
+    "php-cgi-webview.mjs",
+    "php-cgi-webview.js.wasm",
+    "php-cgi-webview.mjs.wasm",
+    "breakoutRequest.js",
+    "breakoutRequest.mjs",
+    "config.js",
+    "config.mjs",
+    "fsOps.js",
+    "fsOps.mjs",
+    "msg-bus.js",
+    "msg-bus.mjs",
+    "parseResponse.mjs",
+    "parseResponse.js",
+    "resolveDependencies.js",
+    "resolveDependencies.mjs",
+    "webTransactions.js",
+    "webTransactions.mjs"
+  ]
 }

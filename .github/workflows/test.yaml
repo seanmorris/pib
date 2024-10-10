@@ -47,7 +47,7 @@ jobs:
 
 
   test-dynamic:
-    name: 8.3 Dynamic
+    name: Test 8.3 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -58,7 +58,7 @@ jobs:
       - run: make image test
 
   test-8-2-dynamic:
-    name: 8.2 Dynamic
+    name: Test 8.2 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -69,7 +69,7 @@ jobs:
       - run: make image test PHP_VERSION=8.2
 
   test-8-1-dynamic:
-    name: 8.1 Dynamic
+    name: Test 8.1 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -80,7 +80,7 @@ jobs:
       - run: make image test PHP_VERSION=8.1
 
   test-8-0-dynamic:
-    name: 8.0 Dynamic
+    name: Test 8.0 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -92,7 +92,7 @@ jobs:
 
 
   test-shared:
-    name: 8.3 Shared
+    name: Test 8.3 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -103,7 +103,7 @@ jobs:
       - run: make image test
 
   test-8-2-shared:
-    name: 8.2 Shared
+    name: Test 8.2 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -114,7 +114,7 @@ jobs:
       - run: make image test PHP_VERSION=8.2
 
   test-8-1-shared:
-    name: 8.1 Shared
+    name: Test 8.1 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -125,7 +125,7 @@ jobs:
       - run: make image test PHP_VERSION=8.1
 
   test-8-0-shared:
-    name: 8.0 Shared
+    name: Test 8.0 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
