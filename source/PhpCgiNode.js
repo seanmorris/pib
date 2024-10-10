@@ -18,13 +18,30 @@ export class PhpCgiNode extends PhpCgiBase
 			dir = __dirname;
 		}
 
-		const locateFile = name => {
+		const locateFile = (name, directory) => {
 			if(name.substr(0, 7) === 'file://')
 			{
 				name = new URL(name).pathname;
 			}
 
-			return path.isAbsolute(name) ? name : path.resolve(dir, name);
+			if(dir === '')
+			{
+				if(typeof __dirname === 'undefined')
+				{
+					dir = path.dirname(url.fileURLToPath(import.meta.url));
+				}
+				else
+				{
+					dir = __dirname;
+				}
+			}
+
+			const located = path.resolve(path.format({dir, name}));
+
+			if(fs.existsSync(located))
+			{
+				return located;
+			}
 		};
 
 		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, locateFile, ...args});

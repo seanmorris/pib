@@ -35,7 +35,6 @@ const server = http.createServer(async (request, response) => {
 	response.writeHead(result.status, [...result.headers.entries()].flat());
 
 	let done = false;
-
 	while (!done)
 	{
 		const chunk = await reader.read();

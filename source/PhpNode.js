@@ -25,7 +25,12 @@ export class PhpNode extends PhpBase
 				}
 			}
 
-			return path.resolve( path.format({dir, name}) );
+			const located = path.resolve(path.format({dir, name}));
+
+			if(fs.existsSync(located))
+			{
+				return located;
+			}
 		};
 
 		super(PhpBinary, {locateFile, ...args});
