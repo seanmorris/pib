@@ -443,7 +443,6 @@ ${PHP_DIST_DIR}/php-web.js: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php-web.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -464,13 +463,13 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-web.js.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ${PHP_DIST_DIR}/php-web.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-web.mjs: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -492,13 +491,13 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-web.mjs.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ${PHP_DIST_DIR}/php-worker.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-worker.js: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -519,13 +518,13 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-worker.js.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ${PHP_DIST_DIR}/php-worker.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-worker.mjs: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -545,13 +544,13 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-worker.mjs.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ${PHP_DIST_DIR}/php-node.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-node.js: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -572,13 +571,13 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-node.js.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ${PHP_DIST_DIR}/php-node.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-node.mjs: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -598,13 +597,13 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-node.mjs.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ${PHP_DIST_DIR}/php-webview.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-webview.js: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -625,13 +624,13 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-webview.js.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ${PHP_DIST_DIR}/php-webview.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-webview.mjs: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -651,6 +650,7 @@ endif
 ifeq (${WITH_SOURCEMAPS},1)
 	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-webview.mjs.wasm.map
 endif
+	@ cat ico.ans >&2
 
 ########## Package files ###########
 
