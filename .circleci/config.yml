@@ -55,7 +55,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - checkout
       - run: npm install
@@ -70,7 +70,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -82,7 +82,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -94,7 +94,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -106,7 +106,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
             at: ~/
@@ -118,7 +118,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -130,7 +130,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -142,7 +142,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
             at: ~/
@@ -154,7 +154,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -166,7 +166,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -178,7 +178,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
             at: ~/
@@ -190,7 +190,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
@@ -202,7 +202,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - attach_workspace:
           at: ~/
