@@ -16,8 +16,8 @@ _PHP in WebAssembly, npm not required._
 * libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
 * php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
 * Vrzno now facilitates url fopen via the fetch() api.
-* pdo_cfd1 is now a separate extension from Vrzno.
-* pdo_pglite adds local Postgres support.
+* [pdo_cfd1](https://github.com/seanmorris/pdo-cfd1) is now a separate extension from Vrzno.
+* [pdo_pglite](https://github.com/seanmorris/pdo-pglite) adds local Postgres support.
 * SQLite is now using version 3.46.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
