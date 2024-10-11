@@ -18,6 +18,7 @@ _PHP in WebAssembly, npm not required._
 * Vrzno now facilitates url fopen via the fetch() api.
 * pdo_cfd1 is now a separate extension from Vrzno.
 * pdo_pglite adds local Postgres support.
+* SQLite is now using version 3.46.
 * Demos for CodeIgniter, CakePHP, Laravel & Laminas.
 * Drupal & all other demos now use standard build + zip install.
 * Modules are now webpack-compatible out of the box.
