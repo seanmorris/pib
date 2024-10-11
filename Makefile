@@ -1,5 +1,4 @@
 #!/usr/bin/env make
-
 .PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
@@ -444,6 +443,7 @@ ${PHP_DIST_DIR}/php-web.js: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php-web.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -470,6 +470,7 @@ ${PHP_DIST_DIR}/php-web.mjs: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -497,6 +498,7 @@ ${PHP_DIST_DIR}/php-worker.js: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -523,6 +525,7 @@ ${PHP_DIST_DIR}/php-worker.mjs: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -548,6 +551,7 @@ ${PHP_DIST_DIR}/php-node.js: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -574,6 +578,7 @@ ${PHP_DIST_DIR}/php-node.mjs: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -599,6 +604,7 @@ ${PHP_DIST_DIR}/php-webview.js: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -625,6 +631,7 @@ ${PHP_DIST_DIR}/php-webview.mjs: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
+	@ cat ico.ans >&2
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})" | tee ${PHP_DIST_DIR}/build.log
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -779,12 +786,6 @@ save-image:
 	mkdir -p ./image
 	docker image save seanmorris/phpwasm-emscripten-builder -o ./image/builder.tar
 
-demo:
-	cd demo-source && npm run build
-
-serve-demo:
-	cd demo-source && npm run start
-
 NPM_PUBLISH_DRY?=--dry-run
 
 publish:
@@ -812,15 +813,6 @@ test:
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
-
-emcc-test:
-	${DOCKER_RUN} /emsdk/upstream/emscripten/test/runner browser.test_preload_file
-
-pack-files: demo-source/mounted/stuff.js
-	# ${DOCKER_RUN} /emsdk/upstream/emscripten/tools/file_packager --help
-
-demo-source/mounted/%.js: demo-source/mounted/%
-	${DOCKER_RUN} /emsdk/upstream/emscripten/tools/file_packager $@.data --separate-metadata --preload $<@/preload/$< --js-output=$@
 
 run:
 	${DOCKER_ENV} emscripten-builder bash
