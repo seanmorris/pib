@@ -60,7 +60,7 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 			){
 				const name = String(libDef).split('/').pop();
 				const url  = libDef
-				urlLibs[name] = url;
+				urlLibs[ name ] = url;
 
 				return {name, url, ini: true};
 			}

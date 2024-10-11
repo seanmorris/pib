@@ -2,6 +2,8 @@
 
 set -eux;
 
+NEW_VERSION=${1};
+
 function updateFile
 {
 	local FILE=${1};
@@ -10,8 +12,11 @@ function updateFile
 	mv ${FILE}.NEW ${FILE}
 }
 
-updateFile "package.json" "0.0.9-alpha-18";
+updateFile "package.json" ${NEW_VERSION};
 
 ls packages | while read PACKAGE; do {
-	updateFile "packages/${PACKAGE}/package.json" "0.0.9-alpha-18";
+	updateFile "packages/${PACKAGE}/package.json" ${NEW_VERSION};
+	cd "packages/${PACKAGE}";
+	npm pkg fix;
+	cd "../..";
 }; done;

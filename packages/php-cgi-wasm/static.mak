@@ -20,6 +20,10 @@ CGI_CJS=$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-c
 CGI_ALL= ${CGI_MJS} ${CGI_CJS}
 ALL+= ${CGI_ALL}
 
+ifneq (${PRE_JS_FILES},)
+CGI_DEPENDENCIES+= .cache/pre.js
+endif
+
 cgi-all: ${CGI_ALL}
 
 cgi-mjs: ${CGI_MJS}
@@ -146,34 +150,6 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: BUILD_TYPE=mjs
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ENVIRONMENT=node
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
-	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
-
-# Deprecated
-${PHP_CGI_DIST_DIR}/php-cgi-shell.js: BUILD_TYPE=js
-${PHP_CGI_DIST_DIR}/php-cgi-shell.js: ENVIRONMENT=shell
-${PHP_CGI_DIST_DIR}/php-cgi-shell.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
-	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
-	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
-	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
-	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
-
-# Deprecated
-${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: BUILD_TYPE=mjs
-${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: ENVIRONMENT=shell
-${PHP_CGI_DIST_DIR}/php-cgi-shell.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}/
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f /src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} /src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}

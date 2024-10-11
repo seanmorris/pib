@@ -12,10 +12,15 @@ const php = new PhpCgiNode({
 	, sharedLibs: [
 		await import('php-wasm-intl')
 		, await import('php-wasm-libxml')
-		, await import('php-wasm-sqlite')
 		, await import('php-wasm-phar')
 		, await import('php-wasm-mbstring')
 		, await import('php-wasm-openssl')
+		, await import('php-wasm-dom')
+		, await import('php-wasm-xml')
+		, await import('php-wasm-simplexml')
+		, await import('php-wasm-sqlite')
+		, await import('php-wasm-zlib')
+		, await import('php-wasm-gd')
 	]
 	, types: {
 		jpeg: 'image/jpeg'

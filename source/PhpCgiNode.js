@@ -2,23 +2,13 @@ import { PhpCgiBase } from './PhpCgiBase';
 import PHP from './php-cgi-node';
 import path from 'node:path';
 import url from 'node:url';
+import fs from 'node:fs';
 
 export class PhpCgiNode extends PhpCgiBase
 {
 	constructor({docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
 	{
-		let dir;
-
-		if(typeof __dirname === 'undefined')
-		{
-			dir = path.dirname(url.fileURLToPath(import.meta.url));
-		}
-		else
-		{
-			dir = __dirname;
-		}
-
-		const locateFile = (name, directory) => {
+		const locateFile = (name, dir) => {
 			if(name.substr(0, 7) === 'file://')
 			{
 				name = new URL(name).pathname;

@@ -261,11 +261,16 @@ export class PhpCgiBase
 			{
 				return located;
 			}
+
 			if(urlLibs[path])
 			{
+				if(urlLibs[path].protocol === 'file:')
+				{
+					return urlLibs[path].pathname;
+				}
+
 				return String(urlLibs[path]);
 			}
-			console.log((path, directory));
 		};
 
 		const phpArgs = {

@@ -3,8 +3,8 @@ $window = $window ?? new Vrzno;
 
 $promise = new $window->Promise(function($accept, $reject) {
 	$window = new Vrzno;
-	$window->setTimeout( fn() => $accept('Pass.'), 1000);
-	// $window->setTimeout( fn() => $reject('Fail.'), 1000);
+	$window->setTimeout(fn() => $accept('Pass.'), 1000);
+	// $window->setTimeout(fn() => $reject('Fail.'), 1000);
 });
 
 $promise
