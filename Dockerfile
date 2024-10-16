@@ -40,7 +40,7 @@ WORKDIR /src/sqlite
 RUN emcc -Oz -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_DISABLE_LFS -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_NORMALIZE -c sqlite3.c -o sqlite3.o
 
 FROM build_tool as php_src
-ARG PHP_BRANCH=PHP-8.3.0
+ARG PHP_BRANCH=PHP-8.4.0
 RUN git clone https://github.com/php/php-src.git php-src \
 		--branch $PHP_BRANCH \
 		--single-branch \
@@ -53,47 +53,48 @@ ARG EXPORT_NAME=createPhpModule
 ARG MODULARIZE=1
 ARG EXPORT_ES6=1
 ARG ASSERTIONS=0
-ARG OPTIMIZE=-O1
+ARG OPTIMIZE=-O2
 # TODO: find a way to keep this, it can't be empty if defined...
 # ARG PRE_JS=
-ARG INITIAL_MEMORY=256mb
-COPY --from=libxml /src/libxml2/build/ /src/usr
-COPY --from=sqlite /src/sqlite/sqlite3.o /src/usr/lib/
-COPY --from=sqlite /src/sqlite/sqlite3.h /src/usr/include/sqlite3/
-ENV LIBXML_LIBS "-L/src/usr/lib"
-ENV LIBXML_CFLAGS "-I/src/usr/include/libxml2"
-ENV SQLITE_CFLAGS "-I/src/usr/include/sqlite3"
-ENV SQLITE_LIBS "-L/src/usr/lib"
+ARG INITIAL_MEMORY=128mb
+# COPY --from=libxml /src/libxml2/build/ /src/usr
+# COPY --from=sqlite /src/sqlite/sqlite3.o /src/usr/lib/
+# COPY --from=sqlite /src/sqlite/sqlite3.h /src/usr/include/sqlite3/
+# ENV LIBXML_LIBS "-L/src/usr/lib"
+# ENV LIBXML_CFLAGS "-I/src/usr/include/libxml2"
+# ENV SQLITE_CFLAGS "-I/src/usr/include/sqlite3"
+# ENV SQLITE_LIBS "-L/src/usr/lib"
 RUN cd /src/php-src && ./buildconf --force \
     && emconfigure ./configure \
 		--enable-embed=static \
 		--with-layout=GNU  \
-		--with-libxml      \
-		--enable-xml       \
+		--without-libxml      \
+		--disable-xml       \
 		--disable-cgi      \
 		--disable-cli      \
 		--disable-fiber-asm \
 		--disable-all      \
-		--enable-session   \
-		--enable-filter    \
-		--enable-calendar  \
-		--enable-dom       \
+		--disable-spl      \
+		--disable-session   \
+		--disable-filter    \
+		--disable-calendar  \
+		--disable-dom       \
 		--disable-rpath    \
 		--disable-phpdbg   \
 		--without-pear     \
 		--with-valgrind=no \
 		--without-pcre-jit \
-		--enable-bcmath    \
-		--enable-json      \
-		--enable-ctype     \
-		--enable-mbstring  \
+		--disable-bcmath    \
+		--disable-json      \
+		--disable-ctype     \
+		--disable-mbstring  \
 		--disable-mbregex  \
 		--with-config-file-scan-dir=/src/php  \
-		--enable-tokenizer \
-		--enable-simplexml   \
-		--enable-pdo       \
-		--with-pdo-sqlite  \
-		--with-sqlite3
+		--disable-tokenizer \
+		--disable-simplexml   \
+		--disable-pdo       \
+		--without-pdo-sqlite  \
+		--without-sqlite3
 RUN cd /src/php-src && emmake make -j8
 # PHP7 outputs a libphp7 whereas php8 a libphp
 RUN cd /src/php-src && bash -c '[[ -f .libs/libphp7.la ]] && mv .libs/libphp7.la .libs/libphp.la && mv .libs/libphp7.a .libs/libphp.a && mv .libs/libphp7.lai .libs/libphp.lai || exit 0'
@@ -113,10 +114,9 @@ RUN mkdir /build && cd /src/php-src && emcc $OPTIMIZE \
 	-s EXPORTED_FUNCTIONS='["_phpw", "_phpw_flush", "_phpw_exec", "_phpw_run", "_chdir", "_setenv", "_php_embed_init", "_php_embed_shutdown", "_zend_eval_string"]' \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "FS"]' \
 	-s ENVIRONMENT=$WASM_ENVIRONMENT    \
-	-s FORCE_FILESYSTEM=1            \
-	-s MAXIMUM_MEMORY=2gb             \
+	-s MAXIMUM_MEMORY=128mb             \
 	-s INITIAL_MEMORY=$INITIAL_MEMORY \
-	-s ALLOW_MEMORY_GROWTH=1         \
+	-s ALLOW_MEMORY_GROWTH=0         \
 	-s ASSERTIONS=$ASSERTIONS      \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
 	-s MODULARIZE=$MODULARIZE        \
@@ -125,8 +125,8 @@ RUN mkdir /build && cd /src/php-src && emcc $OPTIMIZE \
 	-s EXPORT_ES6=$EXPORT_ES6 \
 	-s EXPORT_NAME=$EXPORT_NAME \
 	# -s DECLARE_ASM_MODULE_EXPORTS=0 \
-	-lidbfs.js                       \
-		/src/phpw.o /src/usr/lib/sqlite3.o .libs/libphp.a /src/usr/lib/libxml2.a
+	# -lidbfs.js                       \
+		/src/phpw.o .libs/libphp.a
 RUN rm -r /src/*
 
 FROM scratch
