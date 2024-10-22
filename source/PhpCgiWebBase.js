@@ -12,9 +12,9 @@ export class PhpCgiWebBase extends PhpCgiBase
 		return startTransaction(this);
 	}
 
-	commitTransaction()
+	commitTransaction(readOnly = false)
 	{
-		return commitTransaction(this);
+		return commitTransaction(this, readOnly);
 	}
 
 	async _beforeRequest()
@@ -98,9 +98,9 @@ export class PhpCgiWebBase extends PhpCgiBase
 				php.FS.mkdir('/preload');
 			}
 
-			await this.files.concat(files).forEach(
+			await Promise.all(this.files.concat(files).map(
 				fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false)
-			);
+			));
 
 			const iniLines = libs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
@@ -139,7 +139,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 		});
 	}
 
-	async _enqueue(callback, params = [])
+	async _enqueue(callback, params = [], readOnly = false)
 	{
 		let accept, reject;
 
@@ -167,7 +167,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 				}
 			} while(this.queue.length)
 
-			await (this.autoTransaction ? this.commitTransaction() : Promise.resolve());
+			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());
 		});
 
 		return coordinator;

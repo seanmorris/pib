@@ -185,7 +185,7 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 	zend_end_try();
 
 	pib_flush();
-	
+
 	return retVal;
 }
 
@@ -253,6 +253,7 @@ PHP_MINIT_FUNCTION(pib)
 #if defined(ZTS) && defined(COMPILE_DL_PIB)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
+	return SUCCESS;
 }
 
 PHP_MINFO_FUNCTION(pib)

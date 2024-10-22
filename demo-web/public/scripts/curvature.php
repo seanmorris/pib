@@ -9,7 +9,7 @@ $form = new $Form((object)[
     'name' => (object)['type' => 'text'],
 ]);
 
-$view = $View->from('<div style = "display:flex;flex-direction:row;margin:1rem;">
+$view = $View->from('<div style = "display:flex;flex-direction:row;margin:1rem;width:100%;">
 	<div style = "margin-right:1rem">
 		<p>Counter</p>
 		<div style = "display:flex;flex-direction:row;margin:1rem auto;min-width:4rem;">

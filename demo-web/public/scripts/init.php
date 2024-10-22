@@ -16,15 +16,6 @@ if(!file_exists($docroot))
 	mkdir($docroot, 0777, true);
 }
 
-echo "dir created\n";
-
-var_dump(file_get_contents('/php.ini'));
-
-// var_dump(dl('php-zlib.so'));
-// var_dump(dl('php-zip.so'));
-
-var_dump(extension_loaded('zip'));
-
 $zip = new ZipArchive;
 
 if($zip->open('/persist/restore.zip', ZipArchive::RDONLY) === TRUE)
@@ -46,8 +37,3 @@ if($zip->open('/persist/restore.zip', ZipArchive::RDONLY) === TRUE)
 	unlink($pathFile);
 	unlink('/persist/restore.zip');
 }
-
-
-exit;
-
-

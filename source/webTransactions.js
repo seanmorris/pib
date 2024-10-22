@@ -22,7 +22,7 @@ export async function startTransaction(wrapper)
 	});
 }
 
-export async function commitTransaction(wrapper)
+export async function commitTransaction(wrapper, readOnly = false)
 {
 	const php = await wrapper.binary;
 
@@ -34,6 +34,12 @@ export async function commitTransaction(wrapper)
 	if(!wrapper.transactionStarted)
 	{
 		throw new Error('No transaction initialized.');
+	}
+
+	if(readOnly)
+	{
+		wrapper.transactionStarted = false;
+		return Promise.resolve();
 	}
 
 	return await new Promise((accept, reject) => {

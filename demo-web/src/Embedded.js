@@ -59,7 +59,10 @@ function Embedded() {
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
 
 	const onOutput = event => setStdOut(stdOut => String(stdOut || '') + event.detail.join(''));
-	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
+	const onError  = event => {
+		setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
+		console.log(event.detail.join(''));
+	};
 
 	const refreshPhp = useCallback(() => {
 		window.list = [1,2,3,4];
@@ -80,6 +83,7 @@ function Embedded() {
 		if(!init)
 		{
 			refreshPhp();
+
 			init = true;
 		}
 	}, [refreshPhp]);
@@ -89,6 +93,10 @@ function Embedded() {
 	const singleChanged = () => setOutputMode(single.current.checked ? 'single' : 'normal');
 	const formatSelected = event => setDisplayMode(event.target.value);
 	const codeChanged = newValue => input.current = newValue;
+
+	const refreshMem = useCallback(async () => {
+		await phpRef.current.refresh();
+	});
 
 	const runCode = useCallback(async () => {
 		setRunning(true);
@@ -385,6 +393,7 @@ function Embedded() {
 								<input type = "checkbox" id = "singleExpression" ref = { single } onChange = {singleChanged} />
 							</label>
 						</div>
+						<button data-run onClick = { refreshMem }><span>refresh</span></button>
 						<button data-run onClick = { runCode }><span>run</span></button>
 					</div>
 				</div>
@@ -414,7 +423,7 @@ function Embedded() {
 							</div>
 							<div className = "stdret output liquid">
 								<div className = "column">
-									<iframe srcDoc = {stdRet} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
+									<iframe srcDoc = {stdRet} title = "output" sandbox = "allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
 									<div className = "scroller">{stdRet}</div>
 								</div>
 							</div>
@@ -426,7 +435,7 @@ function Embedded() {
 							</div>
 							<div className = "stdout output liquid">
 								<div className = "column">
-									<iframe srcDoc = {stdOut} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
+									<iframe srcDoc = {stdOut} title = "output" sandbox = "allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
 									<div className = "scroller">{stdOut}</div>
 								</div>
 							</div>
@@ -437,7 +446,7 @@ function Embedded() {
 							</div>
 							<div className = "stderr output liquid">
 								<div className = "column">
-								<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-same-origin allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
+								<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
 									<div className = "scroller">{stdErr}</div>
 								</div>
 							</div>

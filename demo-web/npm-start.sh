@@ -15,8 +15,8 @@ if [ -d '../packages/php-wasm/mapped' ]; then {
 fi
 
 if [ -d '../packages/php-cgi-wasm/mapped' ]; then {
-	cp -r ../packages/php-cgi-wasm/mapped public/static/media
-	cp ../packages/php-cgi-wasm/*.map public/static/media
+	cp -r ../packages/php-cgi-wasm/mapped public/
+	cp ../packages/php-cgi-wasm/*.map public/
 }
 fi
 

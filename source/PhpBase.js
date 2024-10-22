@@ -152,12 +152,12 @@ export class PhpBase extends EventTarget
 		return Promise.resolve();
 	}
 
-	commitTransaction()
+	commitTransaction(readOnly = false)
 	{
 		return Promise.resolve();
 	}
 
-	async _enqueue(callback, params = [])
+	async _enqueue(callback, params = [], readOnly = false)
 	{
 		let accept, reject;
 
@@ -173,7 +173,7 @@ export class PhpBase extends EventTarget
 			return;
 		}
 
-		await this.autoTransaction ? this.startTransaction() : Promise.resolve();
+		await (this.autoTransaction && !readOnly) ? this.startTransaction() : Promise.resolve();
 
 		while(this.queue.length)
 		{
@@ -181,7 +181,7 @@ export class PhpBase extends EventTarget
 			await callback(...params).then(accept).catch(reject);
 		}
 
-		await this.autoTransaction ? this.commitTransaction() : Promise.resolve();
+		await this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve();
 
 		return coordinator;
 	}

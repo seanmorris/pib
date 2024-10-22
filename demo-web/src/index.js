@@ -21,8 +21,7 @@ if(!params.has('no-service-worker'))
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
+root.render(<React.StrictMode>
 	<BrowserRouter basename={process.env.PUBLIC_URL}>
 		<Routes>
 			<Route path = "/" element = { <Home /> } />
@@ -61,5 +60,5 @@ root.render(
 			/>
 		</Routes>
 	</BrowserRouter>
-  </React.StrictMode>
+</React.StrictMode>
 );

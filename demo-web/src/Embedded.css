@@ -387,6 +387,15 @@ body:not(.loading) .loader {
 	align-items: center;
 	white-space: initial;
 }
+
+#example-wrapper #example {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	white-space: initial;
+	width: 100%;
+}
+
 #example-wrapper p {
 	word-break: break-all;
 }

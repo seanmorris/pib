@@ -167,8 +167,7 @@ export class PhpCgiBase
 				source.postMessage({re: token, result, error});
 			}
 		}
-
-		if(action in this.extraActions)
+		else if(action in this.extraActions)
 		{
 			let result, error;
 
@@ -227,7 +226,7 @@ export class PhpCgiBase
 		}
 	}
 
-	async _enqueue(callback, params = [])
+	async _enqueue(callback, params = [], readOnly = false)
 	{
 		let accept, reject;
 

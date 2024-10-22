@@ -82,7 +82,12 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-web.js.wasm.map
+endif
 	@ cat ico.ans >&2
 
 ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: BUILD_TYPE=mjs
@@ -98,7 +103,12 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-web.mjs.wasm.map
+endif
 	@ cat ico.ans >&2
 
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: BUILD_TYPE=js
@@ -115,7 +125,12 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-worker.js.wasm.map
+endif
 	@ cat ico.ans >&2
 
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: BUILD_TYPE=mjs
@@ -131,7 +146,12 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-worker.mjs.wasm.map
+endif
 	@ cat ico.ans >&2
 
 ${PHP_CGI_DIST_DIR}/php-cgi-node.js: BUILD_TYPE=js
@@ -148,7 +168,12 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-node.js.wasm.map
+endif
 	@ cat ico.ans >&2
 
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: BUILD_TYPE=mjs
@@ -163,7 +188,12 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-node.mjs.wasm.map
+endif
 	@ cat ico.ans >&2
 
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: BUILD_TYPE=js
@@ -180,7 +210,12 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-webview.js.wasm.map
+endif
 	@ cat ico.ans >&2
 
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: BUILD_TYPE=mjs
@@ -196,5 +231,10 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
 	${MAKE} ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
+endif
+ifeq (${WITH_SOURCEMAPS},1)
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-webview.mjs.wasm.map
+endif
 	@ cat ico.ans >&2

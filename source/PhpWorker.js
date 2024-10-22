@@ -14,9 +14,9 @@ export class PhpWorker extends PhpBase
 		return startTransaction(this);
 	}
 
-	commitTransaction()
+	commitTransaction(readOnly = false)
 	{
-		return commitTransaction(this);
+		return commitTransaction(this, readOnly);
 	}
 
 	async refresh()
@@ -39,7 +39,7 @@ export class PhpWorker extends PhpBase
 		});
 	}
 
-	async _enqueue(callback, params = [])
+	async _enqueue(callback, params = [], readOnly = false)
 	{
 		await this.binary;
 
@@ -58,7 +58,7 @@ export class PhpWorker extends PhpBase
 				return;
 			}
 
-			await (this.autoTransaction ? this.startTransaction() : Promise.resolve());
+			await ((this.autoTransaction && !readOnly) ? this.startTransaction() : Promise.resolve());
 
 			do
 			{
@@ -68,7 +68,7 @@ export class PhpWorker extends PhpBase
 				await run;
 			} while(this.queue.length)
 
-			await (this.autoTransaction ? this.commitTransaction() : Promise.resolve());
+			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());
 		});
 
 		return coordinator;

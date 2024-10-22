@@ -100,7 +100,7 @@ function SelectFramework() {
 			setLaravelInstalled(false);
 			setLaminasInstalled(false);
 			setOverlay(null)
-		 } } />) }
+		} } />) }
 		onCancel = { () => setOverlay(null) }
 		message = {(
 			<span>Are you sure you want to clear the filesystem? <b>Reminder:</b> This cannot be undone, you should take a backup first.</span>
