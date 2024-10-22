@@ -16,8 +16,14 @@ const params = new URLSearchParams(window.location.search);
 if(!params.has('no-service-worker'))
 {
 	navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
+	setTimeout(() => {
+		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
+		{
+			window.location.reload()
+		}
+	}, 350);
+
 	navigator.serviceWorker.addEventListener('message', onMessage);
-	setTimeout(() => navigator.serviceWorker.controller || window.location.reload(), 350);
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
