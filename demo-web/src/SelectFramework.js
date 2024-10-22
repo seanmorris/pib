@@ -5,7 +5,7 @@ import drupalIcon from './drupal-icon.svg';
 import codeIgniterIcon from './codeigniter-icon.svg';
 import laravelIcon from './laravel-icon.svg';
 import laminasIcon from './laminas-icon.svg';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Header from './Header';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
@@ -22,12 +22,15 @@ const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBL
 
 function SelectFramework() {
 
+	const query = useMemo(() => new URLSearchParams(window.location.search), []);
+
 	const [cakeInstalled, setCakeInstalled] = useState(false);
 	const [codeigniterInstalled, setCodeigniterInstalled] = useState(false);
 	const [drupalInstalled, setDrupalInstalled] = useState(false);
 	const [laravelInstalled, setLaravelInstalled] = useState(false);
 	const [laminasInstalled, setLaminasInstalled] = useState(false);
 	const [overlay, setOverlay] = useState(null);
+	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
 
 	const refreshAll = () => {
 		sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
@@ -108,9 +111,9 @@ function SelectFramework() {
 	/>);
 
 	return (
-		<div className = "select-framework">
+		<div className = "select-framework" data-iframed = {isIframe ? 1 : 0}>
 			<div className='framework-menu bevel'>
-				<Header />
+				{isIframe || <Header />}
 				<div className='frameworks'>
 					<h2>Select a Framework:</h2>
 					<div className='inset row icons'>
@@ -195,9 +198,9 @@ function SelectFramework() {
 							Clear
 						</button>
 					</div>
-					<div className = "inset right demo-bar">
+					{isIframe || (<div className = "inset right demo-bar">
 						<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
-					</div>
+					</div>)}
 				</div>
 			</div>
 			<div className = "overlay">{overlay}</div>

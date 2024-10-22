@@ -52,6 +52,13 @@ button.padded {
 	margin: 0.5rem;
 }
 
+[data-iframed="1"].margined {
+	margin: 0rem;
+}
+
+[data-iframed="1"].margined > .bevel {
+	padding-top: 0.8rem;
+}
 
 .button-bar {
 	display: flex;
@@ -152,3 +159,31 @@ button.square {
 a, button, select, input {
 	cursor: pointer;
 }
+
+[data-iframed="1"] h2:first-child {
+	margin-top: 0em;
+}
+
+[data-iframed="1"] h2 {
+	margin-bottom: 0.25em;
+}
+
+[data-iframed="1"]:not(.Confirm) > .bevel {
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+}
+
+[data-iframed="1"] .bevel .frameworks {
+	display: flex;
+	flex-direction: column;
+}
+
+[data-iframed="1"] .bevel .frameworks,
+[data-iframed="1"] .bevel .frameworks .row.icons {
+	flex: 1;
+}
+
+
