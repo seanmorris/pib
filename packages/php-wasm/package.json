@@ -1,6 +1,6 @@
 {
   "name": "php-wasm",
-  "version": "0.0.9-alpha-20",
+  "version": "0.0.9-alpha-27",
   "description": "Run PHP right in the browser or anywhere else JS can run",
   "repository": {
     "type": "git",
@@ -31,7 +31,7 @@
   "files": [
     "LICENSE",
     "NOTICE",
-    "README",
+    "README.md",
     "package.json",
     "PhpBase.js",
     "PhpBase.mjs",
@@ -39,8 +39,8 @@
     "PhpNode.mjs",
     "PhpWeb.js",
     "PhpWeb.mjs",
-    "PhpWebView.js",
-    "PhpWebView.mjs",
+    "PhpWebview.js",
+    "PhpWebview.mjs",
     "PhpWorker.js",
     "PhpWorker.mjs",
     "php-node.js",

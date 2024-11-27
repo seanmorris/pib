@@ -6,6 +6,11 @@
 	display: flex;
 }
 
+[data-iframed="0"].Embedded {
+	width: calc(100% - 1rem);
+	height: calc(100dvh - 1rem);
+}
+
 .Embedded > .bevel {
 	flex-grow: 1;
 	padding: 0.5rem;
@@ -62,7 +67,7 @@ button {
 	border-image: url(border.png) 2 2 2 2;
 }
 
-button[data-run]::after {
+button[data-ui]::after {
 	position: absolute;
 	top: -2px;
 	left:-2px;
@@ -73,7 +78,7 @@ button[data-run]::after {
     opacity: 0.5;
 }
 
-body.loading button[data-run] {
+body.loading button[data-ui] {
 	transition: background-color 0.5s ease-in-out;
 }
 
@@ -82,7 +87,7 @@ body.loading button[data-run] {
 	transition: background-color 0s 0.05s ease-out;
 }
 
-[data-running="1"] button[data-run] {
+[data-running="1"] button[data-ui] {
 	background-color: #c3c3c3;
 	background-color: #505050;
 
@@ -100,7 +105,7 @@ body.loading button[data-run] {
 	max-width: 6em;
 }
 
-.header button[data-run],
+.header button[data-ui],
 .header button[data-reset-storage],
 .header button[data-refresh] {
 	position: relative;

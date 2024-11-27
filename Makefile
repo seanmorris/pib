@@ -141,6 +141,8 @@ cjs: ${CJS}
 
 mjs: ${MJS}
 
+tags: ${TAG_JS}
+
 web-mjs: $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-web.mjs)
 web-js:  $(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-web.js)
 
@@ -168,8 +170,6 @@ EXTRA_FLAGS?=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
 SHARED_LIBS=
-# EXPORTED_FUNCTIONS="_pib_init", "_pib_storage_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_pib_flush", "_main", "_malloc", "_free", "_realloc"
-# EXPORTED_FUNCTIONS="_pib_init", "_pib_run", "_pib_exec", "_pib_refresh"
 PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
 PHPIZE=third_party/php${PHP_VERSION}-src/scripts/phpize
@@ -392,7 +392,8 @@ BUILD_FLAGS=-f ../../php.mk \
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		${SYMBOL_FLAGS} -flto -fPIC \
-		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "getValue", "FS", "ENV"]'\'' \
+		-s EXPORTED_FUNCTIONS='\''["_malloc", "_free", "_main"]'\'' \
+		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV"]'\'' \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY} \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
 		-s ENVIRONMENT=${ENVIRONMENT}       \

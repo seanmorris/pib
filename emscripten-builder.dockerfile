@@ -1,10 +1,11 @@
 # Bisecting for CloudFlare:
 
-# Works
+# Works (cloudflare)
 # FROM emscripten/emsdk:3.1.43
 # FROM emscripten/emsdk:3.1.44
 
-# Broken
+
+# Broken (cloudflare)
 # FROM emscripten/emsdk:3.1.67
 # FROM emscripten/emsdk:3.1.55
 # FROM emscripten/emsdk:3.1.51

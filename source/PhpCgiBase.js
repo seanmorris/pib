@@ -26,12 +26,32 @@ import { resolveDependencies } from './resolveDependencies';
 const STR = 'string';
 const NUM = 'number';
 
+//*/
 const putEnv = (php, key, value) => php.ccall(
 	'wasm_sapi_cgi_putenv'
 	, 'number'
 	, ['string', 'string']
 	, [key, value]
 );
+/*/
+const putEnv = (php, key, value) => {
+	value = value ?? "";
+	const len = php.lengthBytesUTF8(value) + 1;
+	const loc = php._malloc(len);
+	php.stringToUTF8(value, loc, len);
+
+	const result = php.ccall(
+		'wasm_sapi_cgi_putenv'
+		, 'number'
+		, ['string', 'number']
+		, [key, loc]
+	);
+
+	php._free(loc);
+
+	return result;
+}
+//*/
 
 const requestTimes = new WeakMap;
 
@@ -661,7 +681,7 @@ export class PhpCgiBase
 		};
 	}
 
-	async setSettings({docroot, maxRequestAge, staticCacheTime, dynamicCacheTime, vHosts})
+	setSettings({docroot, maxRequestAge, staticCacheTime, dynamicCacheTime, vHosts})
 	{
 		this.docroot = docroot ?? this.docroot;
 		this.maxRequestAge = maxRequestAge ?? this.maxRequestAge;
@@ -675,7 +695,7 @@ export class PhpCgiBase
 		return {...this.env};
 	}
 
-	async setEnvs(env)
+	setEnvs(env)
 	{
 		for(const key of Object.keys(this.env))
 		{

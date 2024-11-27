@@ -3,7 +3,7 @@
 set -eux;
 
 if [ -d 'public/static/media/mapped' ]; then {
-	rm public/static/media/*.map
+	rm public/static/media/*.map || true
 	rm -rf public/static/media/mapped
 }
 fi

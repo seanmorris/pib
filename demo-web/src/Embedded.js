@@ -393,8 +393,8 @@ function Embedded() {
 					<input type = "checkbox" id = "singleExpression" ref = { single } onChange = {singleChanged} />
 				</label>
 			</div>
-			<button data-run onClick = { refreshMem }><span>refresh</span></button>
-			<button data-run onClick = { runCode }><span>run</span></button>
+			<button data-ui data-refresh onClick = { refreshMem }><span>refresh</span></button>
+			<button data-ui data-run onClick = { runCode }><span>run</span></button>
 		</div>
 	</div>);
 

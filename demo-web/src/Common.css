@@ -134,7 +134,7 @@ button.padded {
 	font-weight: bold;
 	border: 2px solid;
 	align-self: center;
-	margin-left: 1em;
+	margin-left: 0.5em;
 	margin-right: 0.25em;
 	display: flex;
 	flex-direction: column;

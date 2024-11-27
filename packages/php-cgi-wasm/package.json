@@ -1,6 +1,6 @@
 {
   "name": "php-cgi-wasm",
-  "version": "0.0.9-alpha-20",
+  "version": "0.0.9-alpha-27",
   "description": "php-cgi for wasm.",
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
   "files": [
     "LICENSE",
     "NOTICE",
-    "README",
+    "README.md",
     "package.json",
     "libxml2.so",
     "PhpCgiBase.js",
@@ -38,8 +38,8 @@
     "PhpCgiWeb.mjs",
     "PhpCgiWebBase.js",
     "PhpCgiWebBase.mjs",
-    "PhpCgiWebView.js",
-    "PhpCgiWebView.mjs",
+    "PhpCgiWebview.js",
+    "PhpCgiWebview.mjs",
     "PhpCgiWorker.js",
     "PhpCgiWorker.mjs",
     "php-cgi-web.js",
