@@ -12,7 +12,7 @@
 # FROM emscripten/emsdk:3.1.45
 
 # ARG EMSDK_VERSION="3.1.44"
-ARG EMSDK_VERSION="3.1.67"
+ARG EMSDK_VERSION="3.1.73"
 FROM emscripten/emsdk:${EMSDK_VERSION}
 
 MAINTAINER Sean Morris <sean@seanmorr.is>
@@ -50,8 +50,8 @@ RUN apt-get update; \
 
 RUN cd /emsdk/upstream && {\
 	rm -rf emscripten;\
-	git clone https://github.com/seanmorris/emscripten.git emscripten --depth=1 --branch sm-updates;\
+	git clone https://github.com/endorhq/emscripten.git emscripten --depth=1 --branch seanmorris+dev+wip;\
 	emscripten/bootstrap; \
-}
+    }
 
 RUN emcc --check
