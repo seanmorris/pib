@@ -28,8 +28,9 @@ third_party/php${PHP_VERSION}-phar/config.m4: third_party/php${PHP_VERSION}-src/
 packages/phar/php${PHP_VERSION}-phar.so: ${PHPIZE} third_party/php${PHP_VERSION}-phar/config.m4
 	@ echo -e "\e[33;4mBuilding php-phar\e[0m"
 	${DOCKER_RUN_IN_EXT_PHAR} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_PHAR} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
+	-@${DOCKER_RUN_IN_EXT_PHAR} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's#test -f "$$ac_f"#test -f "./$$ac_f"#' configure
+	${DOCKER_RUN_IN_EXT_PHAR} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's|#define PHAR_MAIN 1|#define PHAR_MAIN 1\n#include "config.h"|g' phar.c;
 	${DOCKER_RUN_IN_EXT_PHAR} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-openssl=/src/lib --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's#-shared#-static#g' Makefile;
