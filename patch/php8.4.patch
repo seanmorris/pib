@@ -29,24 +29,20 @@ index 3c2b4ef..818d913 100644
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
 diff --git a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
-index 29309ac..2174cb0 100644
+index 29309ac..728b862 100644
 --- a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
 +++ b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
-@@ -21,10 +21,10 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
 -#include "ext/pdo/php_pdo.h"
 -#include "ext/pdo/php_pdo_driver.h"
--#include "php_pdo_sqlite.h"
--#include "php_pdo_sqlite_int.h"
 +#include "../ext/pdo/php_pdo.h"
 +#include "../ext/pdo/php_pdo_driver.h"
-+#include "../php_pdo_sqlite.h"
-+#include "../php_pdo_sqlite_int.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
  
- 
- static int pdo_sqlite_stmt_dtor(pdo_stmt_t *stmt)
 diff --git a/third_party/php8.4-src/ext/standard/basic_functions.c b/third_party/php8.4-src/ext/standard/basic_functions.c
 index dbbf989..c947419 100644
 --- a/third_party/php8.4-src/ext/standard/basic_functions.c
