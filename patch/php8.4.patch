@@ -1,41 +1,33 @@
 diff --git a/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c
-index bc47c15..1a29524 100644
+index bc47c15..e39e120 100644
 --- a/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c
 +++ b/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c
-@@ -22,10 +22,10 @@
+@@ -22,8 +22,8 @@
  #include "php_ini.h"
  #include "ext/standard/info.h"
  #include "SAPI.h"
 -#include "ext/pdo/php_pdo.h"
 -#include "ext/pdo/php_pdo_driver.h"
--#include "php_pdo_sqlite.h"
--#include "php_pdo_sqlite_int.h"
 +#include "../ext/pdo/php_pdo.h"
 +#include "../ext/pdo/php_pdo_driver.h"
-+#include "../php_pdo_sqlite.h"
-+#include "../php_pdo_sqlite_int.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
- #include "pdo_sqlite_arginfo.h"
- 
 diff --git a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c
-index 3c2b4ef..a90db3f 100644
+index 3c2b4ef..818d913 100644
 --- a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c
 +++ b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c
-@@ -21,10 +21,10 @@
+@@ -21,8 +21,8 @@
  #include "php.h"
  #include "php_ini.h"
  #include "ext/standard/info.h"
 -#include "ext/pdo/php_pdo.h"
 -#include "ext/pdo/php_pdo_driver.h"
--#include "php_pdo_sqlite.h"
--#include "php_pdo_sqlite_int.h"
 +#include "../ext/pdo/php_pdo.h"
 +#include "../ext/pdo/php_pdo_driver.h"
-+#include "../php_pdo_sqlite.h"
-+#include "../php_pdo_sqlite_int.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
- #include "sqlite_driver_arginfo.h"
- 
 diff --git a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
 index 29309ac..2174cb0 100644
 --- a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
