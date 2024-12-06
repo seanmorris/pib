@@ -40,9 +40,11 @@ jq -r '.sources[] | select( match("^\\.\\./\\.\\./\\.\\./\\.\\./\\.\\./")) | sub
 	cp ${SOURCE_FILE} ${DEST_DIR}${BASENAME};
 }; done;
 
-
 jq -r '.sources[] | select( match("^(?:.+)")) | sub("../../"; "")' < ${SOURCE_MAP} \
 | while read SOURCE_FILE; do {
+	if [[ ${SOURCE_FILE} == ../../* ]]; then
+		continue;
+	fi;
 	DIRNAME=`dirname ${SOURCE_FILE}`;
 	BASENAME=`basename ${SOURCE_FILE}`;
 	DEST_DIR=${MAPPED}/php${PHP_VERSION}/${DIRNAME}/;
