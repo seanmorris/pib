@@ -3,7 +3,6 @@
 set -x;
 
 # SOURCE_MAP=packages/php-wasm/php-node.mjs.wasm.map
-
 # SOURCE_MAP=packages/php-cgi-wasm/php-cgi-worker.mjs.wasm.map
 # SOURCE_MAP=packages/php-wasm/php-web.mjs.wasm.map
 
@@ -13,7 +12,7 @@ SOURCE_MAP_DIR=`dirname ${SOURCE_MAP}`
 
 MAPPED=${SOURCE_MAP_DIR}/mapped;
 BACKUP=${SOURCE_MAP}.BAK
-PHP_VERSION=8.3
+PHP_VERSION=8.4
 
 if [ -e ${BACKUP} ]; then {
 	rm ${BACKUP};

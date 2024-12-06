@@ -1,3 +1,18 @@
+diff --git a/third_party/php8.4-src/ext/openssl/openssl.c b/third_party/php8.4-src/ext/openssl/openssl.c
+index be68216..a8ba810 100644
+--- a/third_party/php8.4-src/ext/openssl/openssl.c
++++ b/third_party/php8.4-src/ext/openssl/openssl.c
+@@ -1336,8 +1336,8 @@ PHP_MINIT_FUNCTION(openssl)
+ 	/* override the default tcp socket provider */
+ 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory);
+ 
+-	php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
+-	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
++	// php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
++	// php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
+ 
+ 	REGISTER_INI_ENTRIES();
+ 
 diff --git a/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c
 index bc47c15..e39e120 100644
 --- a/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c

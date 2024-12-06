@@ -835,3 +835,7 @@ all-versions:
 	${MAKE} PHP_VERSION=8.1 all cgi-all
 	${MAKE} PHP_VERSION=8.2 all cgi-all
 	${MAKE} PHP_VERSION=8.3 all cgi-all
+	${MAKE} PHP_VERSION=8.4 all cgi-all
+
+remap:
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-node.mjs.wasm.map
