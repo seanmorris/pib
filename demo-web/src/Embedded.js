@@ -23,10 +23,10 @@ const sharedLibs = [
 	`php${PhpWeb.phpVersion}-mbstring.so`,
 	`php${PhpWeb.phpVersion}-sqlite.so`,
 	`php${PhpWeb.phpVersion}-pdo-sqlite.so`,
-	`php${PhpWeb.phpVersion}-phar.so`,
+	// `php${PhpWeb.phpVersion}-phar.so`,
 	`php${PhpWeb.phpVersion}-xml.so`,
 	`php${PhpWeb.phpVersion}-simplexml.so`,
-	{url: `libs/libxml2.so`, ini:false},
+	{url: `libxml2.so`, ini:false},
 ];
 
 const files = [

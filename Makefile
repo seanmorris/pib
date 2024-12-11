@@ -185,7 +185,7 @@ PHP_AR=libphp
 endif
 
 ifeq (${PHP_VERSION},8.3)
-PHP_VERSION_FULL=8.3.7
+PHP_VERSION_FULL=8.3.11
 PHP_BRANCH=php-${PHP_VERSION_FULL}
 PHP_AR=libphp
 endif
@@ -437,12 +437,12 @@ DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS
 
 EXTENSIONS_JS=Object.fromEntries(Object.entries({"WITH_BCMATH":"${WITH_BCMATH}","WITH_CALENDAR":"${WITH_CALENDAR}","WITH_CTYPE":"${WITH_CTYPE}","WITH_FILTER":"${WITH_FILTER}","WITH_TOKENIZER":"${WITH_TOKENIZER}","WITH_VRZNO":"${WITH_VRZNO}","WITH_EXIF":"${WITH_EXIF}","WITH_PHAR":"${WITH_PHAR}","WITH_LIBXML":"${WITH_LIBXML}","WITH_DOM":"${WITH_DOM}","WITH_XML":"${WITH_XML}","WITH_SIMPLEXML":"${WITH_SIMPLEXML}","WITH_LIBZIP":"${WITH_LIBZIP}","WITH_ICONV":"${WITH_ICONV}","WITH_SQLITE":"${WITH_SQLITE}","WITH_GD":"${WITH_GD}","WITH_ZLIB":"${WITH_ZLIB}","WITH_LIBPNG":"${WITH_LIBPNG}","WITH_FREETYPE":"${WITH_FREETYPE}","WITH_LIBJPEG":"${WITH_LIBJPEG}","WITH_YAML":"${WITH_YAML}","WITH_TIDY":"${WITH_TIDY}","WITH_MBSTRING":"${WITH_MBSTRING}","WITH_ONIGURUMA":"${WITH_ONIGURUMA}","WITH_OPENSSL":"${WITH_OPENSSL}","WITH_INTL":"${WITH_INTL}"}).filter(([k,v]) => v !== "0"))
 
-${PHP_DIST_DIR}/config.mjs:
+${PHP_DIST_DIR}/config.mjs: .env
 	echo '' > $@
 	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
 
-${PHP_DIST_DIR}/config.js:
+${PHP_DIST_DIR}/config.js: .env
 	echo 'module.exports = {};' > $@
 	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
