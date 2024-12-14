@@ -9,9 +9,6 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
-console.log(PhpWeb.phpVersion);
-console.log(PhpWeb.phpVersionFull);
-
 const sharedLibs = [
 	`php${PhpWeb.phpVersion}-zlib.so`,
 	`php${PhpWeb.phpVersion}-zip.so`,
