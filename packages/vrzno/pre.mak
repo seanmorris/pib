@@ -9,6 +9,7 @@ CONFIGURE_FLAGS+= --enable-vrzno
 # PRE_JS_FILES+= third_party/vrzno/lib.js
 DEPENDENCIES+= third_party/vrzno/vrzno.c
 CGI_DEPENDENCIES+= third_party/vrzno/vrzno.c
+DBG_DEPENDENCIES+= third_party/vrzno/vrzno.c
 TEST_LIST+=$(shell ls packages/vrzno/test/*.mjs)
 endif
 

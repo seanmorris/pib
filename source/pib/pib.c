@@ -1,4 +1,5 @@
 #include "sapi/embed/php_embed.h"
+#include "sapi/phpdbg/phpdbg.h"
 #include "ext/session/php_session.h"
 #include "main/php_output.h"
 #include "SAPI.h"
@@ -34,14 +35,27 @@
 int main(void) { return 0; }
 
 bool started = false;
+char *_sapi_name = NULL;
 
 /**
  * Initialize Embdedded PHP
  */
-int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(void)
+int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(char *__sapi_name)
 {
+	_sapi_name = __sapi_name;
+	fprintf(stderr, "SAPI: %s...\n\n", _sapi_name);
 	putenv("USE_ZEND_ALLOC=0");
-	return php_embed_init(0, NULL);
+
+	if(0 == strcmp(_sapi_name, "embed"))
+	{
+		return php_embed_init(0, NULL);
+	}
+
+	// if(strcmp(_sapi_name, "phpdbg"))
+	// {
+	// }
+
+	return 0;
 }
 
 /**
@@ -101,7 +115,10 @@ void *EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
  */
 void pib_destroy(void)
 {
-	php_embed_shutdown();
+	if(0 == strcmp(_sapi_name, "embed"))
+	{
+		php_embed_shutdown();
+	}
 }
 
 /**
@@ -110,7 +127,7 @@ void pib_destroy(void)
 int EMSCRIPTEN_KEEPALIVE pib_refresh(void)
 {
 	pib_destroy();
-	return pib_init();
+	return pib_init(_sapi_name);
 }
 
 /**

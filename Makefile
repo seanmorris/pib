@@ -229,6 +229,7 @@ endif
 PRELOAD_NAME=php
 
 -include packages/php-cgi-wasm/pre.mak
+-include packages/php-dbg-wasm/pre.mak
 -include $(addsuffix /pre.mak,$(shell npm ls -p))
 
 ifneq (${PRELOAD_ASSETS},)
@@ -239,6 +240,7 @@ EXTRA_FLAGS+= --preload-name ${PRELOAD_NAME} ${PRELOAD_METHOD} /src/third_party/
 endif
 
 -include packages/php-cgi-wasm/static.mak
+-include packages/php-dbg-wasm/static.mak
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 
 ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
@@ -331,6 +333,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 		--with-layout=GNU  \
 		--with-valgrind=no \
 		--enable-cgi       \
+		--enable-phpdbg    \
 		--enable-cli       \
 		--enable-embed=static \
 		--enable-pib       \
@@ -338,7 +341,6 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 		--enable-pdo       \
 		--disable-all      \
 		--disable-fiber-asm \
-		--disable-phpdbg   \
 		--disable-rpath    \
 		--without-pear     \
 		--without-pcre-jit \
@@ -380,8 +382,9 @@ endif
 
 PRELOAD_METHOD=--preload-file
 
-SAPI_CLI_PATH=sapi/cgi/php-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
-SAPI_CGI_PATH=sapi/cli/php-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
+SAPI_CLI_PATH=sapi/cli/php-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
+SAPI_CGI_PATH=sapi/cgi/php-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
+SAPI_PHPDBG_PATH=sapi/phpdbg/php-dbg-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
 
 MAIN_MODULE?=1
 ASYNCIFY?=1
@@ -390,8 +393,9 @@ BUILD_FLAGS=-f ../../php.mk \
 	-j${CPU_COUNT} --max-load ${CPU_COUNT} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
-	SAPI_CGI_PATH='${SAPI_CLI_PATH}' \
-	SAPI_CLI_PATH='${SAPI_CGI_PATH}'\
+	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
+	SAPI_CLI_PATH='${SAPI_CLI_PATH}'\
+	BUILD_BINARY='${SAPI_PHPDBG_PATH}'\
 	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
 	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
@@ -736,8 +740,25 @@ patch/php8.0.patch:
 
 php-clean:
 	${DOCKER_RUN_IN_PHP} rm -f configured
-	${DOCKER_RUN_IN_PHP} bash -c 'rm -f sapi/cli/php-*.js sapi/cli/php-*.mjs sapi/cli/php-*.wasm* sapi/cgi/php-*.js sapi/cgi/php-*.mjs sapi/cgi/php-*.wasm* sapi/cli/php sapi/cgi/php-cgi'
-	${DOCKER_RUN} bash -c 'rm -f packages/php-wasm/php-*.mjs packages/php-cgi-wasm/php-*.mjs packages/php-wasm/php-*.wasm packages/php-cgi-wasm/php-*.wasm packages/php-wasm/Php*.mjs packages/php-cgi-wasm/Php*.mjs'
+	${DOCKER_RUN_IN_PHP} bash -c 'rm -f \
+		sapi/cli/php-*.js \
+		sapi/cli/php-*.mjs \
+		sapi/cli/php-*.wasm* \
+		sapi/cgi/php-*.js \
+		sapi/cgi/php-*.mjs \
+		sapi/cgi/php-*.wasm* \
+		sapi/phpdbg/php-*.js \
+		sapi/phpdbg/php-*.mjs \
+		sapi/phpdbg/php-*.wasm* \
+		sapi/cli/php \
+		sapi/cgi/php-cgi'
+	${DOCKER_RUN} bash -c 'rm -f \
+		packages/php-wasm/php-*.mjs \
+		packages/php-cgi-wasm/php-*.mjs \
+		packages/php-wasm/php-*.wasm \
+		packages/php-cgi-wasm/php-*.wasm \
+		packages/php-wasm/Php*.mjs \
+		packages/php-cgi-wasm/Php*.mjs'
 	- ${DOCKER_RUN_IN_PHP} make clean
 
 clean:

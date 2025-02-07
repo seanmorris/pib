@@ -408,3 +408,7 @@ body:not(.loading) .loader {
 #example-wrapper:has( #example:empty ) {
 	display: none;
 }
+
+.stdout input {
+	display: inline;
+}

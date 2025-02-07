@@ -1,5 +1,5 @@
 diff --git a/third_party/php8.3-src/ext/openssl/openssl.c b/third_party/php8.3-src/ext/openssl/openssl.c
-index 6f85e98..75d4090 100644
+index 6f85e985..75d40903 100644
 --- a/third_party/php8.3-src/ext/openssl/openssl.c
 +++ b/third_party/php8.3-src/ext/openssl/openssl.c
 @@ -99,7 +99,7 @@
@@ -46,7 +46,7 @@ index 6f85e98..75d4090 100644
  		*is_private = d != NULL;
  		EVP_PKEY_up_ref(param_key);
 diff --git a/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c
-index 6da7708..0d53a33 100644
+index 6da77085..0d53a331 100644
 --- a/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c
 +++ b/third_party/php8.3-src/ext/pdo_sqlite/pdo_sqlite.c
 @@ -21,8 +21,8 @@
@@ -61,7 +61,7 @@ index 6da7708..0d53a33 100644
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
 diff --git a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c
-index c933c34..fbd0ba7 100644
+index c933c34e..fbd0ba72 100644
 --- a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c
 +++ b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_driver.c
 @@ -21,8 +21,8 @@
@@ -76,7 +76,7 @@ index c933c34..fbd0ba7 100644
  #include "php_pdo_sqlite_int.h"
  #include "zend_exceptions.h"
 diff --git a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c
-index c6b907f..c0804c8 100644
+index c6b907f6..c0804c8c 100644
 --- a/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c
 +++ b/third_party/php8.3-src/ext/pdo_sqlite/sqlite_statement.c
 @@ -21,8 +21,8 @@
@@ -91,7 +91,7 @@ index c6b907f..c0804c8 100644
  #include "php_pdo_sqlite_int.h"
  
 diff --git a/third_party/php8.3-src/ext/standard/basic_functions.c b/third_party/php8.3-src/ext/standard/basic_functions.c
-index 746465d..c293515 100644
+index 97001bca..dd1139c8 100644
 --- a/third_party/php8.3-src/ext/standard/basic_functions.c
 +++ b/third_party/php8.3-src/ext/standard/basic_functions.c
 @@ -351,8 +351,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
@@ -106,7 +106,7 @@ index 746465d..c293515 100644
  	return SUCCESS;
  }
 diff --git a/third_party/php8.3-src/ext/standard/credits.c b/third_party/php8.3-src/ext/standard/credits.c
-index 4e8722d..1343330 100644
+index 4e8722db..13433301 100644
 --- a/third_party/php8.3-src/ext/standard/credits.c
 +++ b/third_party/php8.3-src/ext/standard/credits.c
 @@ -33,6 +33,11 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
@@ -122,7 +122,7 @@ index 4e8722d..1343330 100644
  		/* Group */
  
 diff --git a/third_party/php8.3-src/ext/standard/credits_ext.h b/third_party/php8.3-src/ext/standard/credits_ext.h
-index 093e56f..2b83e52 100644
+index 093e56f2..2b83e525 100644
 --- a/third_party/php8.3-src/ext/standard/credits_ext.h
 +++ b/third_party/php8.3-src/ext/standard/credits_ext.h
 @@ -47,10 +47,12 @@ CREDIT_LINE("Opcache", "Andi Gutmans, Zeev Suraski, Stanislav Malyshev, Dmitry S
@@ -147,7 +147,7 @@ index 093e56f..2b83e52 100644
  CREDIT_LINE("XMLReader", "Rob Richards");
  CREDIT_LINE("XMLWriter", "Rob Richards, Pierre-Alain Joye");
 diff --git a/third_party/php8.3-src/ext/tokenizer/tokenizer.c b/third_party/php8.3-src/ext/tokenizer/tokenizer.c
-index 75cc99d..872164e 100644
+index 75cc99d7..872164ec 100644
 --- a/third_party/php8.3-src/ext/tokenizer/tokenizer.c
 +++ b/third_party/php8.3-src/ext/tokenizer/tokenizer.c
 @@ -319,7 +319,7 @@ static void add_token(
@@ -160,7 +160,7 @@ index 75cc99d..872164e 100644
  	zval source_zval;
  	zend_lex_state original_lex_state;
 diff --git a/third_party/php8.3-src/main/fastcgi.c b/third_party/php8.3-src/main/fastcgi.c
-index 88cfbc2..ec20428 100644
+index 60a30a5b..6389696b 100644
 --- a/third_party/php8.3-src/main/fastcgi.c
 +++ b/third_party/php8.3-src/main/fastcgi.c
 @@ -553,6 +553,7 @@ void fcgi_shutdown(void)
@@ -172,7 +172,7 @@ index 88cfbc2..ec20428 100644
  	is_fastcgi = 0;
  	if (allowed_clients) {
 diff --git a/third_party/php8.3-src/sapi/cgi/Makefile.frag b/third_party/php8.3-src/sapi/cgi/Makefile.frag
-index 79e2afe..0956f43 100644
+index 79e2afec..0956f436 100644
 --- a/third_party/php8.3-src/sapi/cgi/Makefile.frag
 +++ b/third_party/php8.3-src/sapi/cgi/Makefile.frag
 @@ -1,7 +1,7 @@
@@ -185,7 +185,7 @@ index 79e2afe..0956f43 100644
  install-cgi: $(SAPI_CGI_PATH)
  	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
 diff --git a/third_party/php8.3-src/sapi/cgi/cgi_main.c b/third_party/php8.3-src/sapi/cgi/cgi_main.c
-index 156599f..1404fea 100644
+index 364758cb..a969bc89 100644
 --- a/third_party/php8.3-src/sapi/cgi/cgi_main.c
 +++ b/third_party/php8.3-src/sapi/cgi/cgi_main.c
 @@ -18,7 +18,7 @@
@@ -197,7 +197,7 @@ index 156599f..1404fea 100644
  #include "php.h"
  #include "php_globals.h"
  #include "php_variables.h"
-@@ -1858,7 +1858,8 @@ int main(int argc, char *argv[])
+@@ -1879,7 +1879,8 @@ int main(int argc, char *argv[])
  	SG(request_info).path_translated = NULL;
  #endif
  
@@ -207,7 +207,7 @@ index 156599f..1404fea 100644
  	if (!cgi && !fastcgi && !bindpath) {
  		cgi_sapi_module.additional_functions = additional_functions;
  	}
-@@ -1934,8 +1935,10 @@ consult the installation file that came with this distribution, or visit \n\
+@@ -1955,8 +1956,10 @@ consult the installation file that came with this distribution, or visit \n\
  	}
  
  	/* make php call us to get _ENV vars */
@@ -220,7 +220,7 @@ index 156599f..1404fea 100644
  
  	if (fastcgi) {
  		/* How many times to run PHP scripts before dying */
-@@ -2655,3 +2658,18 @@ consult the installation file that came with this distribution, or visit \n\
+@@ -2676,3 +2679,18 @@ consult the installation file that came with this distribution, or visit \n\
  	return exit_status;
  }
  /* }}} */
@@ -240,7 +240,7 @@ index 156599f..1404fea 100644
 +	return _sapi_cgi_putenv(name, strlen(name), value);
 +}
 diff --git a/third_party/php8.3-src/sapi/cli/Makefile.frag b/third_party/php8.3-src/sapi/cli/Makefile.frag
-index aa1d642..649533d 100644
+index aa1d642b..649533db 100644
 --- a/third_party/php8.3-src/sapi/cli/Makefile.frag
 +++ b/third_party/php8.3-src/sapi/cli/Makefile.frag
 @@ -1,7 +1,7 @@
@@ -253,7 +253,7 @@ index aa1d642..649533d 100644
  install-cli: $(SAPI_CLI_PATH)
  	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
 diff --git a/third_party/php8.3-src/sapi/embed/php_embed.c b/third_party/php8.3-src/sapi/embed/php_embed.c
-index 4626451..ba21863 100644
+index 4626451f..ba21863e 100644
 --- a/third_party/php8.3-src/sapi/embed/php_embed.c
 +++ b/third_party/php8.3-src/sapi/embed/php_embed.c
 @@ -242,8 +242,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
@@ -267,3 +267,354 @@ index 4626451..ba21863 100644
  	php_register_variable("PHP_SELF", "-", NULL);
  
  	return SUCCESS;
+diff --git a/third_party/php8.3-src/sapi/phpdbg/Makefile.frag b/third_party/php8.3-src/sapi/phpdbg/Makefile.frag
+index 2e2faf80..9cbb0486 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/Makefile.frag
++++ b/third_party/php8.3-src/sapi/phpdbg/Makefile.frag
+@@ -6,7 +6,7 @@ $(BUILD_SHARED): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
+ 	$(BUILD_PHPDBG_SHARED)
+ 
+ $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
+-	$(BUILD_PHPDBG)
++	$(BUILD_PHPDBG) $(WASM_SHARED_LIBS)
+ 
+ %.c: %.y
+ %.c: %.l
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
+index a5838545..ba51b3ab 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
+@@ -15,7 +15,7 @@
+    | Authors: Bob Weinand <bwoebi@php.net>                                |
+    +----------------------------------------------------------------------+
+ */
+-
++#include <emscripten.h>
+ #include "phpdbg.h"
+ #include "phpdbg_prompt.h"
+ #include "phpdbg_bp.h"
+@@ -1115,36 +1115,67 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+ 		return stream;
+ 	}
+ 
++
+ 	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+ } /* }}} */
+ 
+-int main(int argc, char **argv) /* {{{ */
++struct php_ini_builder ini_builder;
++char *ini_override;
++char *exec = NULL;
++
++char *first_command = NULL;
++uint64_t flags;
++long cleaning = -1;
++
++zend_string *backup_phpdbg_compile = NULL;
++sapi_module_struct *phpdbg = &phpdbg_sapi_module;
++
++volatile bool quit_immediately = 0;
++char *bp_tmp = NULL;
++bool is_exit;
++int exit_status;
++
++zend_phpdbg_globals *settings = NULL;
++
++char *read_from_stdin = NULL;
++int php_optind, opt, show_banner = 1;
++char *sapi_name;
++
++int _argc;
++char **_argv;
++
++int phpdbg_free_and_return(void);
++int main_cleanup(void);
++
++int EMSCRIPTEN_KEEPALIVE main_init(int argc, char **argv) /* {{{ */
+ {
+-	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+-	char *sapi_name;
+-	struct php_ini_builder ini_builder;
++	_argv = argv;
++	_argc = argc;
++	// sapi_module_struct *phpdbg = &phpdbg_sapi_module;
++	// char *sapi_name;
++	// struct php_ini_builder ini_builder;
+ 	char **zend_extensions = NULL;
+ 	zend_ulong zend_extensions_len = 0L;
+ 	bool ini_ignore;
+-	char *ini_override;
+-	char *exec = NULL;
+-	char *first_command = NULL;
++	// char *ini_override;
++	// char *exec = NULL;
++	// char *first_command = NULL;
+ 	char *init_file;
+ 	size_t init_file_len;
+ 	bool init_file_default;
+-	uint64_t flags;
++	// uint64_t flags;
+ 	char *php_optarg;
+-	int php_optind, opt, show_banner = 1;
+-	long cleaning = -1;
+-	volatile bool quit_immediately = 0; /* somehow some gcc release builds will play a bit around with order in combination with setjmp..., hence volatile */
+-	zend_phpdbg_globals *settings = NULL;
+-	char *bp_tmp = NULL;
++	// int php_optind, opt, show_banner = 1;
++	// long cleaning = -1;
++	// volatile bool quit_immediately = 0; /* somehow some gcc release builds will play a bit around with order in combination with setjmp..., hence volatile */
++	// zend_phpdbg_globals *settings = NULL;
++	// char *bp_tmp = NULL;
+ 	char *print_opline_func;
+ 	bool ext_stmt = 0;
+-	bool is_exit;
+-	int exit_status;
+-	char *read_from_stdin = NULL;
+-	zend_string *backup_phpdbg_compile = NULL;
++	// bool is_exit;
++	// int exit_status;
++	// char *read_from_stdin = NULL;
++	// zend_string *backup_phpdbg_compile = NULL;
+ 	bool show_help = 0, show_version = 0;
+ 	void* (*_malloc)(size_t);
+ 	void (*_free)(void*);
+@@ -1152,6 +1183,11 @@ int main(int argc, char **argv) /* {{{ */
+ 	php_stream_wrapper wrapper;
+ 	php_stream_wrapper_ops wops;
+ 
++	sapi_name = NULL;
++
++	cleaning = -1;
++	backup_phpdbg_compile = NULL;
++
+ #ifdef PHP_WIN32
+ 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
+ 	setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
+@@ -1163,7 +1199,7 @@ int main(int argc, char **argv) /* {{{ */
+ 	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
+ #endif
+ 
+-phpdbg_main:
++// phpdbg_main:
+ #ifdef ZTS
+ 	php_tsrm_startup();
+ # ifdef PHP_WIN32
+@@ -1186,7 +1222,7 @@ int main(int argc, char **argv) /* {{{ */
+ 	php_optarg = NULL;
+ 	php_optind = 1;
+ 	opt = 0;
+-	sapi_name = NULL;
++	// sapi_name = NULL;
+ 	exit_status = 0;
+ 	if (settings) {
+ 		exec = settings->exec;
+@@ -1392,7 +1428,8 @@ int main(int argc, char **argv) /* {{{ */
+ 			if (init_file) {
+ 				free(init_file);
+ 			}
+-			goto free_and_return;
++			return phpdbg_free_and_return();
++			// goto free_and_return;
+ 		}
+ 
+ 		zend_try {
+@@ -1519,7 +1556,8 @@ int main(int argc, char **argv) /* {{{ */
+ 
+ 		/* quit if init says so */
+ 		if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+-			goto phpdbg_out;
++			// goto phpdbg_out;
++			return main_cleanup();
+ 		}
+ 
+ 		/* auto compile */
+@@ -1528,7 +1566,8 @@ int main(int argc, char **argv) /* {{{ */
+ 				if (!quit_immediately) {
+ 					phpdbg_error("Impossible to not specify a stdin delimiter without -rr");
+ 					PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+-					goto phpdbg_out;
++					// goto phpdbg_out;
++					return main_cleanup();
+ 				}
+ 			}
+ 			if (show_banner || read_from_stdin[0]) {
+@@ -1578,64 +1617,75 @@ int main(int argc, char **argv) /* {{{ */
+ 			} else {
+ 				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
+ 			}
+-			goto phpdbg_out;
++			// goto phpdbg_out;
++			return main_cleanup();
+ 		}
+ 
+ 		PG(during_request_startup) = 0;
+ 
+ 		phpdbg_fully_started = 1;
++	}
+ 
+-		/* phpdbg main() */
+-		do {
+-			zend_try {
+-				if (phpdbg_startup_run) {
+-					phpdbg_startup_run = 0;
+-					if (quit_immediately) {
+-						PHPDBG_G(flags) = (PHPDBG_G(flags) & ~PHPDBG_HAS_PAGINATION) | PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
+-					} else {
+-						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
+-					}
+-					zend_try {
+-						if (first_command) {
+-							phpdbg_interactive(1, estrdup(first_command));
+-						} else {
+-							PHPDBG_COMMAND_HANDLER(run)(NULL);
+-						}
+-					} zend_end_try();
+-					if (quit_immediately) {
+-						/* if -r is on the command line more than once just quit */
+-						EG(bailout) = __orig_bailout; /* reset zend_try */
+-						exit_status = EG(exit_status);
+-						break;
+-					}
+-				}
+-
+-				CG(unclean_shutdown) = 0;
+-				phpdbg_interactive(1, NULL);
+-			} zend_catch {
+-				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
+-					char *bp_tmp_str;
+-					PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
+-					phpdbg_export_breakpoints_to_string(&bp_tmp_str);
+-					PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
+-					if (bp_tmp_str) {
+-						bp_tmp = strdup(bp_tmp_str);
+-						free(bp_tmp_str);
+-					}
+-					cleaning = 1;
+-				} else {
+-					cleaning = 0;
+-				}
+-			} zend_end_try();
+-		} while (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING));
+ 
+ #ifdef _WIN32
+ 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
+ 		phpdbg_error("Access violation (Segmentation fault) encountered\ntrying to abort cleanly...");
+ 	}
+ #endif
+-phpdbg_out:
++} /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE phpdbg_main()
++{
++	/* phpdbg main() */
++	do {
++		zend_try {
++			if (phpdbg_startup_run) {
++				phpdbg_startup_run = 0;
++				if (quit_immediately) {
++					PHPDBG_G(flags) = (PHPDBG_G(flags) & ~PHPDBG_HAS_PAGINATION) | PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
++				} else {
++					PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
++				}
++				zend_try {
++					if (first_command) {
++						// fprintf(stderr, "0: %s\n", input);
++						phpdbg_interactive(1, estrdup(first_command));
++					} else {
++						PHPDBG_COMMAND_HANDLER(run)(NULL);
++					}
++				} zend_end_try();
++				if (quit_immediately) {
++					/* if -r is on the command line more than once just quit */
++					EG(bailout) = __orig_bailout; /* reset zend_try */
++					exit_status = EG(exit_status);
++					break;
++				}
++			}
++
++			CG(unclean_shutdown) = 0;
++			// fprintf(stderr, "1: %s\n", input);
++			phpdbg_interactive(1, NULL);
++		} zend_catch {
++			if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
++				char *bp_tmp_str;
++				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
++				phpdbg_export_breakpoints_to_string(&bp_tmp_str);
++				PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
++				if (bp_tmp_str) {
++					bp_tmp = strdup(bp_tmp_str);
++					free(bp_tmp_str);
++				}
++				cleaning = 1;
++			} else {
++				cleaning = 0;
++			}
++		} zend_end_try();
++	} while (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING));
++}
+ 
++int EMSCRIPTEN_KEEPALIVE main_cleanup(void)
++{
++	if (phpdbg->startup(phpdbg) == SUCCESS) {
+ 		phpdbg_purge_watchpoint_tree();
+ 
+ 		if (first_command) {
+@@ -1753,7 +1803,11 @@ int main(int argc, char **argv) /* {{{ */
+ 		free(sapi_name);
+ 	}
+ 
+-free_and_return:
++	return phpdbg_free_and_return();
++}
++
++int phpdbg_free_and_return()
++{
+ 	if (read_from_stdin) {
+ 		free(read_from_stdin);
+ 		read_from_stdin = NULL;
+@@ -1770,12 +1824,12 @@ int main(int argc, char **argv) /* {{{ */
+ 	tsrm_shutdown();
+ #endif
+ 
+-	if ((cleaning > 0) && !quit_immediately) {
+-		/* reset internal php_getopt state */
+-		php_getopt(-1, argv, OPTIONS, NULL, &php_optind, 0, 0);
++	// if ((cleaning > 0) && !quit_immediately) {
++	// 	/* reset internal php_getopt state */
++	// 	php_getopt(-1, _argv, OPTIONS, NULL, &php_optind, 0, 0);
+ 
+-		goto phpdbg_main;
+-	}
++	// 	goto phpdbg_main;
++	// }
+ 
+ 	if (backup_phpdbg_compile) {
+ 		zend_string_free(backup_phpdbg_compile);
+@@ -1783,4 +1837,4 @@ int main(int argc, char **argv) /* {{{ */
+ 
+ 	/* usually 0; just for -rr */
+ 	return exit_status;
+-} /* }}} */
++}
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c
+index c0543260..efd29e16 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c
+@@ -15,7 +15,7 @@
+    | Authors: Bob Weinand <bwoebi@php.net>                                |
+    +----------------------------------------------------------------------+
+ */
+-
++#include <emscripten.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include "zend.h"
+@@ -1523,7 +1523,7 @@ PHPDBG_COMMAND(watch) /* {{{ */
+ 	return SUCCESS;
+ } /* }}} */
+ 
+-int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
++EMSCRIPTEN_KEEPALIVE int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
+ {
+ 	int ret = SUCCESS;
+ 	phpdbg_param_t stack;

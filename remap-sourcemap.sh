@@ -12,7 +12,7 @@ SOURCE_MAP_DIR=`dirname ${SOURCE_MAP}`
 
 MAPPED=${SOURCE_MAP_DIR}/mapped;
 BACKUP=${SOURCE_MAP}.BAK
-PHP_VERSION=8.4
+PHP_VERSION=8.3
 
 if [ -e ${BACKUP} ]; then {
 	rm ${BACKUP};

@@ -10,7 +10,7 @@ const NUM = 'number';
 
 export class PhpBase extends EventTarget
 {
-	constructor(PhpBinary, args = {})
+	constructor(PhpBinary, args = {}, sapi = 'embed')
 	{
 		super();
 
@@ -112,8 +112,8 @@ export class PhpBase extends EventTarget
 			await php.ccall(
 				'pib_init'
 				, NUM
-				, []
-				, []
+				, [STR]
+				, [sapi]
 				, {async: true}
 			);
 
@@ -123,6 +123,7 @@ export class PhpBase extends EventTarget
 
 	inputString(byteString)
 	{
+		console.trace(byteString);
 		this.input(this.encoder.encode(byteString));
 	}
 
